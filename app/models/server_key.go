@@ -27,7 +27,7 @@ func (ServerKey) TableName() string {
 	return "server_keys"
 }
 
-func (d KeyData) DecryptKey(user *User, server *Server) *Credentials {
+func (d KeyData) DecryptData(user *User, server *Server) *Credentials {
 	key := os.Getenv("APP_KEY") + user.ID + server.ID
 
 	return &Credentials{

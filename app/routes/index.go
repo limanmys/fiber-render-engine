@@ -2,9 +2,10 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/limanmys/render-engine/app/controllers"
+	"github.com/limanmys/render-engine/app/handlers"
 )
 
 func Install(app *fiber.App) {
-	app.Get("/credentials/:user/:server", controllers.CredentialTest)
+	app.Get("/credentials/:server", handlers.CredentialTest)
+	app.Post("/extensionRunner", handlers.ExtensionRunner)
 }

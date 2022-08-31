@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -21,7 +22,15 @@ func initializePostgres() *gorm.DB {
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		return nil
+		log.Fatalln("Cannot connect to Liman database!")
 	}
+
+	db, err := connection.DB()
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatalln("Cannot connect to Liman database!")
+	}
+
 	return connection
 }

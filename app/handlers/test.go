@@ -1,16 +1,16 @@
-package controllers
+package handlers
 
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
-	"github.com/limanmys/render-engine/internal/bridge"
+	"github.com/limanmys/render-engine/internal/liman"
 )
 
 func CredentialTest(c *fiber.Ctx) error {
 
-	credentials, err := bridge.GetCredentials(
+	credentials, err := liman.GetCredentials(
 		&models.User{
-			ID: c.Params("user"),
+			ID: c.Locals("user_id").(string),
 		},
 		&models.Server{
 			ID: c.Params("server"),

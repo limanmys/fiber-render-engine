@@ -21,7 +21,7 @@ func CreateServer(port int) {
 
 	app.Use(recover.New())
 	app.Use(compress.New())
-	app.Use(middleware.RequestHandler)
+	app.Use(middleware.NewAuthorization())
 
 	// Mount routes
 	routes.Install(app)
