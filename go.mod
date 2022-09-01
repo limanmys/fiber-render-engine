@@ -1,8 +1,9 @@
 module github.com/limanmys/render-engine
 
-go 1.18
+go 1.19
 
 require (
+	github.com/bytedance/sonic v1.4.0
 	github.com/gofiber/fiber/v2 v2.37.0
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/bytedance/sonic v1.4.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20220526154910-8bf9453eb81a // indirect
 	github.com/klauspost/cpuid/v2 v2.1.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
