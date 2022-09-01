@@ -8,4 +8,5 @@ type CommandParams struct {
 	RequestData    map[string]string
 	Token          string
 	BaseURL        string
+	Locale         string
 }

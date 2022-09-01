@@ -1,12 +1,18 @@
 package handlers
 
 import (
+	"os"
+
 	"github.com/gofiber/fiber/v2"
+	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/liman"
+	"github.com/limanmys/render-engine/internal/sandbox"
+	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/linux"
 )
 
 func ExtensionRunner(c *fiber.Ctx) error {
-	/*if len(c.FormValue("extension_id")) < 1 {
+	if len(c.FormValue("extension_id")) < 1 {
 		return fiber.NewError(fiber.StatusNotFound, "Extension not found")
 	}
 
@@ -22,8 +28,9 @@ func ExtensionRunner(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusServiceUnavailable, "Extension is unavailable right now, please try again later.")
 	}
 
+	credentials := &models.Credentials{}
 	if extension.RequireKey == "true" {
-		credentials, err := liman.GetCredentials(
+		credentials, err = liman.GetCredentials(
 			&models.User{
 				ID: c.Locals("user_id").(string),
 			},
@@ -35,9 +42,35 @@ func ExtensionRunner(c *fiber.Ctx) error {
 		if err != nil || len(credentials.Username) < 1 {
 			return fiber.NewError(fiber.StatusForbidden, "You need a key to use this extension, please add it through the case.")
 		}
-	} */
+	}
 
-	settings := liman.GetSettings(c.Locals("user_id").(string), c.FormValue("server_id"), c.FormValue("extension_id"))
+	formValues := helpers.GetFormData(c)
 
-	return c.JSON(settings)
+	token := c.FormValue("token")
+	if len(c.FormValue("liman-token")) > 0 {
+		token = c.FormValue("liman-token")
+	}
+
+	command, err := sandbox.GenerateCommand(
+		extension,
+		credentials,
+		&models.CommandParams{
+			TargetFunction: c.FormValue("lmntargetFunction"),
+			User:           c.Locals("user_id").(string),
+			Extension:      c.FormValue("extension_id"),
+			Server:         c.FormValue("server_id"),
+			RequestData:    formValues,
+			Token:          token,
+			BaseURL:        c.FormValue("lmnbaseurl", c.BaseURL()),
+			Locale:         c.FormValue("locale", os.Getenv("APP_LANG")),
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	output := linux.Execute(command)
+
+	return c.SendString(output)
 }

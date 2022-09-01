@@ -5,11 +5,11 @@ type User struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
 	Email         string `json:"email"`
-	Password      string `json:"password"`
+	Password      string `json:"password" gorm:"-"`
 	Status        int    `json:"status"`
-	LastLoginAt   string `json:"last_login_at"`
-	RememberToken string `json:"remember_token"`
-	LastLoginIP   string `json:"last_login_ip"`
+	LastLoginAt   string `json:"last_login_at" gorm:"-"`
+	RememberToken string `json:"remember_token" gorm:"-"`
+	LastLoginIP   string `json:"last_login_ip" gorm:"-"`
 	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
 	ForceChange   bool   `json:"forcechange" pg:"forceChange"`
