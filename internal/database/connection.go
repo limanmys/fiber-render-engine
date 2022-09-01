@@ -16,7 +16,7 @@ func Connection() *gorm.DB {
 		connection = initialize()
 	})
 
-	return connection.Debug()
+	return connection
 }
 
 func initialize() *gorm.DB {

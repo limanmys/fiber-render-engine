@@ -8,11 +8,11 @@ import (
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
-func GetSettings(userID string, serverID string, extensionID string) map[string]string {
-	extJson, err := GetExtensionJSON(&models.Extension{ID: extensionID})
+func GetSettings(user *models.User, server *models.Server, extension *models.Extension) (map[string]string, error) {
+	extJson, err := GetExtensionJSON(extension)
 
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	// Determine which global variables exists
@@ -30,15 +30,15 @@ func GetSettings(userID string, serverID string, extensionID string) map[string]
 	settings := []models.Settings{}
 	results := make(map[string]string)
 
-	decryptionKey := os.Getenv("APP_KEY") + userID + serverID
+	decryptionKey := os.Getenv("APP_KEY") + user.ID + server.ID
 
 	// Get user_settings for user and decrypt it
 	database.Connection().Find(
 		&settings,
 		"name IN ? AND user_id = ? AND server_id = ?",
 		extensionKeys,
-		userID,
-		serverID,
+		user.ID,
+		server.ID,
 	)
 	for _, setting := range settings {
 		results[setting.Name] = aes256.Decrypt(setting.Value, decryptionKey)
@@ -49,7 +49,7 @@ func GetSettings(userID string, serverID string, extensionID string) map[string]
 		&settings,
 		"name IN ? AND server_id = ?",
 		globalVars,
-		serverID,
+		server.ID,
 	)
 	for _, setting := range settings {
 		if _, ok := results[setting.Name]; ok {
@@ -59,5 +59,5 @@ func GetSettings(userID string, serverID string, extensionID string) map[string]
 		results[setting.Name] = aes256.Decrypt(setting.Value, decryptionKey)
 	}
 
-	return results
+	return results, nil
 }

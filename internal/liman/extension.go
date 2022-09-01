@@ -1,11 +1,11 @@
 package liman
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
+	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
@@ -45,7 +45,19 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 	}
 
 	extJson := make(map[string]any)
-	json.Unmarshal(jsonFile, &extJson)
+	sonic.Unmarshal(jsonFile, &extJson)
 
 	return extJson, nil
+}
+
+func GetLicence(extension *models.Extension) (*models.Licence, error) {
+	licence := &models.Licence{}
+
+	rows := database.Connection().Where(&licence, "extension_id = ?", extension.ID).RowsAffected
+
+	if rows > 0 {
+		return licence, nil
+	}
+
+	return nil, fiber.NewError(fiber.StatusNotFound, "Licence not found")
 }
