@@ -9,15 +9,17 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	if e, ok := err.(*fiber.Error); ok {
 		code = e.Code
 	}
-	var message interface{}
+
+	message := &fiber.Map{}
 	if code == fiber.StatusOK {
-		message = struct {
-			Message string `json:"message"`
-		}{err.Error()}
+		message = &fiber.Map{
+			"message": err.Error(),
+		}
 	} else {
-		message = struct {
-			Error string `json:"error"`
-		}{err.Error()}
+		message = &fiber.Map{
+			"error": err.Error(),
+		}
 	}
+
 	return c.Status(code).JSON(message)
 }
