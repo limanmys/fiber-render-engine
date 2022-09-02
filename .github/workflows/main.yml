@@ -1,8 +1,8 @@
 # .github/workflows/main.yml
-name: Build
+name: Liman Render Engine Build
 on:
   push:
-    braches: [main]
+    braches: [master]
 
 jobs:
   build:
@@ -12,20 +12,20 @@ jobs:
     - name: Getting Go Binaries
       uses: actions/setup-go@v2
       with:
-          go-version: '1.18'
+          go-version: '1.19'
     - name: Build Application
       run: |
           go get -u && go mod tidy
-          go build -o rest-server
+          go build -o liman_render
     - name: Create Zip
       run: |
-        zip -r /tmp/rest-server-${{ github.run_number }}.zip rest-server
+        zip -r /tmp/liman_render-${{ github.run_number }}.zip liman_render
     - name: Release
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
-          files: /tmp/rest-server-${{ github.run_number }}.zip
+          files: /tmp/liman_render-${{ github.run_number }}.zip
           name: "Release ${{ github.run_number }}"
           tag_name: "release.${{ github.run_number }}"
