@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"os"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/liman"
@@ -13,7 +11,7 @@ import (
 
 func ExtensionRunner(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
-		return fiber.NewError(fiber.StatusNotFound, "Extension not found")
+		return fiber.NewError(fiber.StatusNotFound, "extension not found")
 	}
 
 	extension, err := liman.GetExtension(&models.Extension{
@@ -25,7 +23,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 	}
 
 	if extension.Status == "0" {
-		return fiber.NewError(fiber.StatusServiceUnavailable, "Extension is unavailable right now, please try again later.")
+		return fiber.NewError(fiber.StatusServiceUnavailable, "extension is unavailable")
 	}
 
 	credentials := &models.Credentials{}
@@ -40,7 +38,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 		)
 
 		if err != nil || len(credentials.Username) < 1 {
-			return fiber.NewError(fiber.StatusForbidden, "You need a key to use this extension, please add it through the case.")
+			return fiber.NewError(fiber.StatusForbidden, "you need a key to use this extension")
 		}
 	}
 
@@ -62,7 +60,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 			RequestData:    formValues,
 			Token:          token,
 			BaseURL:        c.FormValue("lmnbaseurl", c.BaseURL()),
-			Locale:         c.FormValue("locale", os.Getenv("APP_LANG")),
+			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
 		},
 	)
 

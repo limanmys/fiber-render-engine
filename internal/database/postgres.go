@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
-	"log"
-	"os"
 
+	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -12,24 +12,24 @@ import (
 func initializePostgres() *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=Europe/Istanbul",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USERNAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_DATABASE"),
+		helpers.Env("DB_HOST", "127.0.0.1"),
+		helpers.Env("DB_PORT", "5432"),
+		helpers.Env("DB_USERNAME", ""),
+		helpers.Env("DB_PASSWORD", ""),
+		helpers.Env("DB_DATABASE", ""),
 	)
 
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		log.Fatalln("Cannot connect to Liman database!")
+		logger.Sugar().Fatalln("Cannot connect to Liman database!")
 	}
 
-	db, err := connection.DB()
+	db, _ := connection.DB()
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatalln("Cannot connect to Liman database!")
+		logger.Sugar().Fatalln("Cannot connect to Liman database!")
 	}
 
 	return connection

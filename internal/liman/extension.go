@@ -8,6 +8,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
+	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/database"
 )
 
@@ -15,14 +16,14 @@ func GetExtension(extension *models.Extension) (*models.Extension, error) {
 	result := database.Connection().First(&extension)
 
 	if result.Error != nil {
-		return nil, fiber.NewError(fiber.StatusNotFound, "Cannot found extension with this id")
+		return nil, fiber.NewError(fiber.StatusNotFound, "cannot found extension with this id")
 	}
 
 	if result.RowsAffected > 0 {
 		return extension, nil
 	}
 
-	return nil, fiber.NewError(fiber.StatusNotFound, "Cannot found extension with this id")
+	return nil, fiber.NewError(fiber.StatusNotFound, "cannot found extension with this id")
 }
 
 func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
@@ -38,7 +39,7 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 		}
 	}
 
-	jsonFile, err := ioutil.ReadFile(fmt.Sprintf("/liman/extensions/%s/db.json", fileName))
+	jsonFile, err := ioutil.ReadFile(fmt.Sprintf("%s/%s/db.json", constants.EXTENSIONS_PATH, fileName))
 
 	if err != nil {
 		return nil, err
@@ -59,5 +60,5 @@ func GetLicence(extension *models.Extension) (*models.Licence, error) {
 		return licence, nil
 	}
 
-	return nil, fiber.NewError(fiber.StatusNotFound, "Licence not found")
+	return nil, fiber.NewError(fiber.StatusNotFound, "licence not found")
 }

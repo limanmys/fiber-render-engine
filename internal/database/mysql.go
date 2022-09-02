@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"os"
 
+	"github.com/limanmys/render-engine/pkg/helpers"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -11,11 +11,11 @@ import (
 func initializeMysql() *gorm.DB {
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		os.Getenv("DB_USERNAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_DATABASE"),
+		helpers.Env("DB_USERNAME", ""),
+		helpers.Env("DB_PASSWORD", ""),
+		helpers.Env("DB_HOST", "127.0.0.1"),
+		helpers.Env("DB_PORT", "3306"),
+		helpers.Env("DB_DATABASE", ""),
 	)
 
 	connection, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})

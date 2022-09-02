@@ -33,7 +33,7 @@ func GetCredentials(user *models.User, server *models.Server) (*models.Credentia
 	credentials.Type = serverKey.Type
 
 	if len(credentials.Username) < 1 {
-		return nil, fiber.NewError(fiber.StatusNotFound, "Server not found")
+		return nil, fiber.NewError(fiber.StatusNotFound, "server not found")
 	}
 
 	return credentials, nil

@@ -1,8 +1,7 @@
 package models
 
 import (
-	"os"
-
+	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
@@ -28,7 +27,7 @@ func (ServerKey) TableName() string {
 }
 
 func (d KeyData) DecryptData(user *User, server *Server) *Credentials {
-	key := os.Getenv("APP_KEY") + user.ID + server.ID
+	key := helpers.Env("APP_KEY", "") + user.ID + server.ID
 
 	return &Credentials{
 		Username: aes256.Decrypt(d.ClientUsername, key),

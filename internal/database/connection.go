@@ -1,10 +1,10 @@
 package database
 
 import (
-	"log"
-	"os"
 	"sync"
 
+	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
 	"gorm.io/gorm"
 )
 
@@ -20,13 +20,13 @@ func Connection() *gorm.DB {
 }
 
 func initialize() *gorm.DB {
-	switch os.Getenv("DB_CONNECTION") {
+	switch helpers.Env("DB_CONNECTION", "pgsql") {
 	case "pgsql":
 		return initializePostgres()
 	case "mysql":
 		return initializeMysql()
 	default:
-		log.Fatalln("You must specify a database driver. Choices are 'postgres' or 'mysql'")
+		logger.Sugar().Fatalln("You must specify a database driver. Choices are 'postgres' or 'mysql'")
 		return nil
 	}
 }

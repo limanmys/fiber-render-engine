@@ -12,7 +12,7 @@ func AuthWithToken(token string) (string, error) {
 	err := database.Connection().First(&tokenObj, "token = ?", token).Error
 
 	if err != nil || len(tokenObj.UserID) < 1 {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "Authorization token is not valid.")
+		return "", fiber.NewError(fiber.StatusUnauthorized, "authorization token is not valid")
 	}
 
 	return tokenObj.UserID, nil
@@ -24,7 +24,7 @@ func AuthWithAccessToken(token string) (string, error) {
 	err := database.Connection().First(&tokenObj, "token = ?", token).Error
 
 	if err != nil || len(tokenObj.UserID) < 1 {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "Authorization token is not valid.")
+		return "", fiber.NewError(fiber.StatusUnauthorized, "authorization token is not valid")
 	}
 
 	return tokenObj.UserID, nil

@@ -1,10 +1,9 @@
 package liman
 
 import (
-	"os"
-
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
+	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
@@ -27,10 +26,10 @@ func GetSettings(user *models.User, server *models.Server, extension *models.Ext
 		extensionKeys = append(extensionKeys, setting.(map[string]interface{})["variable"].(string))
 	}
 
-	settings := []models.Settings{}
+	settings := []*models.Settings{}
 	results := make(map[string]string)
 
-	decryptionKey := os.Getenv("APP_KEY") + user.ID + server.ID
+	decryptionKey := helpers.Env("APP_KEY", "") + user.ID + server.ID
 
 	// Get user_settings for user and decrypt it
 	database.Connection().Find(
