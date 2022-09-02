@@ -6,11 +6,11 @@ type Server struct {
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 	IPAddress   string `json:"ip_address"`
-	City        string `json:"city"`
+	City        string `json:"-"`
 	ControlPort string `json:"control_port"`
-	UserID      string `json:"user_id"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	UserID      string `json:"-"`
+	CreatedAt   string `json:"-"`
+	UpdatedAt   string `json:"-"`
 	Os          string `json:"os"`
 	Enabled     string `json:"enabled"`
 	KeyPort     int    `json:"key_port"`

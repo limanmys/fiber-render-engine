@@ -3,13 +3,13 @@ package sandbox
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/alessio/shellescape"
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
+	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/mervick/aes-everywhere/go/aes256"
@@ -19,20 +19,15 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	extension.Name = shellescape.StripUnsafe(extension.Name)
 
 	if !helpers.IsLetter(extension.Name) {
-		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "Extension names can only contains letters")
+		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "extension names can only contains letters")
 	}
 
-	server, err := liman.GetServer(&models.Server{ID: params.Server})
+	server, user, settings, err := getParams(extension, credentials, params)
 	if err != nil {
 		return "", err
 	}
 
-	user, err := liman.GetUser(&models.User{ID: params.User})
-	if err != nil {
-		return "", err
-	}
-
-	settings, err := liman.GetSettings(user, server, extension)
+	permissions, variables, err := liman.GetPermissions(user, extension.Name)
 	if err != nil {
 		return "", err
 	}
@@ -53,52 +48,76 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	settingsJson, _ := sonic.Marshal(settings)
 	userJson, _ := sonic.Marshal(user)
 	requestData, _ := sonic.Marshal(params.RequestData)
+	permissionsJson, _ := sonic.Marshal(permissions)
+	variablesJson, _ := sonic.Marshal(variables)
 
 	extensionData := map[string]string{
 		"server":          string(serverJson),
 		"extension":       string(extensionJson),
 		"settings":        string(settingsJson),
 		"user":            string(userJson),
-		"key_type":        credentials.Type,
-		"functionsPath":   fmt.Sprintf("/liman/extensions/%s/views/functions.php", strings.ToLower(extension.Name)),
-		"function":        params.TargetFunction,
+		"permissions":     string(permissionsJson),
+		"variables":       string(variablesJson),
 		"requestData":     string(requestData),
+		"publicPath":      fmt.Sprintf(constants.EXTENSION_PUBLIC_PATH, params.BaseURL, extension.ID),
+		"functionsPath":   fmt.Sprintf("%s/%s%s", constants.EXTENSIONS_PATH, strings.ToLower(extension.Name), constants.FUNCTIONS_FILE_PATH),
+		"navigationRoute": fmt.Sprintf(constants.NAVIGATION_ROUTE, extension.ID, server.City, server.ID),
+		"key_type":        credentials.Type,
+		"function":        params.TargetFunction,
 		"license":         licenceData,
-		"apiRoute":        "/extensionRun",
-		"navigationRoute": fmt.Sprintf("/l/%s/%s/%s", extension.ID, server.City, server.ID),
 		"token":           params.Token,
 		"locale":          params.Locale,
 		"log_id":          "0000000", // TODO: add log handlers
 		"ajax":            "true",
-		"publicPath":      fmt.Sprintf("%s/eklenti/%s/public/", params.BaseURL, extension.ID),
-		"permissions":     "[]",
-		"variables":       "[]",
-		// TODO: Add role system
+		"apiRoute":        "/extensionRun",
 	}
 
-	secureKey, err := ioutil.ReadFile("/liman/keys/" + extension.ID)
+	secureKey, err := ioutil.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
 	if err != nil {
-		return "", fiber.NewError(fiber.StatusNotFound, "Cannot found extension key file")
+		return "", fiber.NewError(fiber.StatusNotFound, "cannot found extension key file")
 	}
 
 	extensionDataJson, _ := sonic.Marshal(extensionData)
 	encryptedData := aes256.Encrypt(string(extensionDataJson), string(secureKey))
 
-	timeout := "30"
-	if len(os.Getenv("EXTENSION_TIMEOUT")) > 0 {
-		timeout = os.Getenv("EXTENSION_TIMEOUT")
-	}
+	// TODO: extJsonfile
+	// TODO: required param tester
+	// TODO: targetFunction and permission match check
+	// TODO: so file handler
 
 	command := fmt.Sprintf(
 		"runuser %s -c 'timeout %s /usr/bin/php -d display_errors=on %s %s %s'",
 		strings.Replace(extension.ID, "-", "", -1),
-		timeout,
-		"/liman/sandbox/php/index.php",
-		"/liman/keys/"+extension.ID,
+		helpers.Env("EXTENSION_TIMEOUT", "30"),
+		constants.SANDBOX_PATH,
+		constants.KEYS_PATH+"/"+extension.ID,
 		encryptedData,
 	)
 
 	// TODO: complete the command generator
 
 	return command, nil
+}
+
+func getParams(
+	extension *models.Extension,
+	credentials *models.Credentials,
+	params *models.CommandParams,
+) (*models.Server, *models.User, map[string]string, error) {
+	server, err := liman.GetServer(&models.Server{ID: params.Server})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	user, err := liman.GetUser(&models.User{ID: params.User})
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	settings, err := liman.GetSettings(user, server, extension)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	return server, user, settings, nil
 }
