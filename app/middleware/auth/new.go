@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/internal/liman"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func New() fiber.Handler {
@@ -18,7 +19,7 @@ func authorization(c *fiber.Ctx) error {
 		)
 
 		if err != nil {
-			return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+			return logger.FiberError(fiber.StatusUnauthorized, err.Error())
 		}
 
 		c.Locals("user_id", user)
@@ -31,7 +32,7 @@ func authorization(c *fiber.Ctx) error {
 		)
 
 		if err != nil {
-			return fiber.NewError(fiber.StatusUnauthorized, err.Error())
+			return logger.FiberError(fiber.StatusUnauthorized, err.Error())
 		}
 
 		c.Locals("user_id", user)
@@ -40,5 +41,5 @@ func authorization(c *fiber.Ctx) error {
 
 	// TODO: Log handlers
 
-	return fiber.NewError(fiber.StatusUnauthorized, "authorization token is missing")
+	return logger.FiberError(fiber.StatusUnauthorized, "authorization token is missing")
 }

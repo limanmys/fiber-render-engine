@@ -12,6 +12,7 @@ import (
 	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
@@ -19,7 +20,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	extension.Name = shellescape.StripUnsafe(extension.Name)
 
 	if !helpers.IsLetter(extension.Name) {
-		return "", fiber.NewError(fiber.StatusUnprocessableEntity, "extension names can only contains letters")
+		return "", logger.FiberError(fiber.StatusUnprocessableEntity, "extension names can only contains letters")
 	}
 
 	server, user, settings, err := getParams(extension, credentials, params)
@@ -74,7 +75,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 
 	secureKey, err := ioutil.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
 	if err != nil {
-		return "", fiber.NewError(fiber.StatusNotFound, "cannot found extension key file")
+		return "", logger.FiberError(fiber.StatusNotFound, "cannot found extension key file")
 	}
 
 	extensionDataJson, _ := sonic.Marshal(extensionData)

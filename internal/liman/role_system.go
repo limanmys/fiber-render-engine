@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
 	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func GetPermissions(user *models.User, extFilter string) ([]string, map[string]string, error) {
@@ -55,7 +56,7 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 
 	err := database.Connection().Find(&permission, "morph_id = ?", morphID).Error
 	if err != nil {
-		return nil, nil, fiber.NewError(fiber.StatusInternalServerError, "error while fetching the permissions")
+		return nil, nil, logger.FiberError(fiber.StatusInternalServerError, "error while fetching the permissions")
 	}
 
 	funcPerms := []string{}
@@ -101,7 +102,7 @@ func getRoleMaps(user *models.User) ([]string, error) {
 
 	err := database.Connection().Find(&roles, "user_id = ?", user.ID).Error
 	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "error while fetching the roles")
+		return nil, logger.FiberError(fiber.StatusInternalServerError, "error while fetching the roles")
 	}
 
 	roleID := []string{user.ID}

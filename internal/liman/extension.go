@@ -1,6 +1,7 @@
 package liman
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -10,20 +11,21 @@ import (
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/database"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func GetExtension(extension *models.Extension) (*models.Extension, error) {
 	result := database.Connection().First(&extension)
 
 	if result.Error != nil {
-		return nil, fiber.NewError(fiber.StatusNotFound, "cannot found extension with this id")
+		return nil, logger.FiberError(fiber.StatusNotFound, "cannot found extension with this id")
 	}
 
 	if result.RowsAffected > 0 {
 		return extension, nil
 	}
 
-	return nil, fiber.NewError(fiber.StatusNotFound, "cannot found extension with this id")
+	return nil, logger.FiberError(fiber.StatusNotFound, "cannot found extension with this id")
 }
 
 func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
@@ -60,5 +62,5 @@ func GetLicence(extension *models.Extension) (*models.Licence, error) {
 		return licence, nil
 	}
 
-	return nil, fiber.NewError(fiber.StatusNotFound, "licence not found")
+	return nil, errors.New("Licence not found")
 }

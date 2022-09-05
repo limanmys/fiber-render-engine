@@ -7,11 +7,12 @@ import (
 	"github.com/limanmys/render-engine/internal/sandbox"
 	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/limanmys/render-engine/pkg/linux"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func ExtensionRunner(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
-		return fiber.NewError(fiber.StatusNotFound, "extension not found")
+		return logger.FiberError(fiber.StatusNotFound, "extension not found")
 	}
 
 	extension, err := liman.GetExtension(&models.Extension{
@@ -23,7 +24,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 	}
 
 	if extension.Status == "0" {
-		return fiber.NewError(fiber.StatusServiceUnavailable, "extension is unavailable")
+		return logger.FiberError(fiber.StatusServiceUnavailable, "extension is unavailable")
 	}
 
 	credentials := &models.Credentials{}
@@ -38,7 +39,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 		)
 
 		if err != nil || len(credentials.Username) < 1 {
-			return fiber.NewError(fiber.StatusForbidden, "you need a key to use this extension")
+			return logger.FiberError(fiber.StatusForbidden, "you need a key to use this extension")
 		}
 	}
 

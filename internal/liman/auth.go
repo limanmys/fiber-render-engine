@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func AuthWithToken(token string) (string, error) {
@@ -12,7 +13,7 @@ func AuthWithToken(token string) (string, error) {
 	err := database.Connection().First(&tokenObj, "token = ?", token).Error
 
 	if err != nil || len(tokenObj.UserID) < 1 {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "authorization token is not valid")
+		return "", logger.FiberError(fiber.StatusUnauthorized, "authorization token is not valid")
 	}
 
 	return tokenObj.UserID, nil
@@ -24,7 +25,7 @@ func AuthWithAccessToken(token string) (string, error) {
 	err := database.Connection().First(&tokenObj, "token = ?", token).Error
 
 	if err != nil || len(tokenObj.UserID) < 1 {
-		return "", fiber.NewError(fiber.StatusUnauthorized, "authorization token is not valid")
+		return "", logger.FiberError(fiber.StatusUnauthorized, "authorization token is not valid")
 	}
 
 	return tokenObj.UserID, nil

@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func GetCredentials(user *models.User, server *models.Server) (*models.Credentials, error) {
@@ -33,7 +34,7 @@ func GetCredentials(user *models.User, server *models.Server) (*models.Credentia
 	credentials.Type = serverKey.Type
 
 	if len(credentials.Username) < 1 {
-		return nil, fiber.NewError(fiber.StatusNotFound, "server not found")
+		return nil, logger.FiberError(fiber.StatusNotFound, "server not found")
 	}
 
 	return credentials, nil
