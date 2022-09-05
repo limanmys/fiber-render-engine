@@ -19,7 +19,9 @@ func initializePostgres() *gorm.DB {
 		helpers.Env("DB_DATABASE", ""),
 	)
 
-	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		PrepareStmt: true,
+	})
 
 	if err != nil {
 		logger.Sugar().Fatalln("Cannot connect to Liman database!")

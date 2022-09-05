@@ -6,6 +6,6 @@ import (
 )
 
 func Install(app *fiber.App) {
-	app.Get("/credentials/:server", handlers.CredentialTest)
 	app.Post("/extensionRunner", handlers.ExtensionRunner)
+	app.Post("/commandRunner", handlers.CommandRunner)
 }
