@@ -15,7 +15,12 @@ func OpenTunnel(c *fiber.Ctx) error {
 		}
 	}
 
-	port := bridge.CreateTunnel(c.FormValue("remote_host"), c.FormValue("remote_port"), c.FormValue("username"), c.FormValue("password"))
+	port := bridge.CreateTunnel(
+		c.FormValue("remote_host"),
+		c.FormValue("remote_port"),
+		c.FormValue("username"),
+		c.FormValue("password"),
+	)
 
 	return c.JSON(port)
 }

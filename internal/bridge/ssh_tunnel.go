@@ -24,7 +24,7 @@ type Tunnel struct {
 	dialAddr string
 	dialType string
 
-	retryInterval time.Duration
+	SshClient *ssh.Client
 
 	log logger.Zapper
 
@@ -40,9 +40,10 @@ type Tunnel struct {
 
 var mut sync.Mutex = sync.Mutex{}
 
-func CreateTunnel(remoteHost string, remotePort string, username string, password string) int {
+func CreateTunnel(remoteHost, remotePort, username, password string) int {
 	t, err := Tunnels.Get(remoteHost, remotePort, username)
 	if err == nil {
+		t.LastConnection = time.Now()
 		return t.Port
 	}
 
@@ -64,26 +65,29 @@ func CreateTunnel(remoteHost string, remotePort string, username string, passwor
 	}
 
 	sshTunnel := &Tunnel{
-		auth:          []ssh.AuthMethod{ssh.Password(password)},
-		hostKeys:      ssh.InsecureIgnoreHostKey(),
-		user:          username,
-		mode:          '>',
-		hostAddr:      net.JoinHostPort(remoteHost, "22"),
-		dialAddr:      dial,
-		dialType:      dialType,
-		bindAddr:      net.JoinHostPort("127.0.0.1", fmt.Sprintf("%d", port)),
-		retryInterval: 30 * time.Second,
-		log:           logger.Sugar(),
+		auth:     []ssh.AuthMethod{ssh.Password(password)},
+		hostKeys: ssh.InsecureIgnoreHostKey(),
+		user:     username,
+		mode:     '>',
+		hostAddr: net.JoinHostPort(remoteHost, "22"),
+		dialAddr: dial,
+		dialType: dialType,
+		bindAddr: net.JoinHostPort("127.0.0.1", fmt.Sprintf("%d", port)),
+		log:      logger.Sugar(),
 		errHandler: func() {
 			Tunnels.Delete(remoteHost + ":" + remotePort + ":" + username)
 		},
 		Port:           port,
 		LastConnection: time.Now(),
 	}
-	sshTunnel.Start()
-	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
 
-	return port
+	hasError := sshTunnel.Start()
+	if !hasError {
+		Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
+		return port
+	}
+
+	return 0
 }
 
 func (t *Tunnel) String() string {
@@ -98,21 +102,25 @@ func (t *Tunnel) String() string {
 	return fmt.Sprintf("%s@%s | %s %s %s", t.user, t.hostAddr, left, mode, right)
 }
 
-func (t *Tunnel) Start() {
+func (t *Tunnel) Start() bool {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.ctx = ctx
 	t.cancel = cancel
+	hasError := false
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	go t.bindTunnel(ctx, &wg)
+	go t.bindTunnel(ctx, &wg, &hasError)
 	wg.Wait()
+
+	return hasError
 }
 
 func (t *Tunnel) Stop() {
+	t.log.Infow("collapsed tunnel", "details", t)
 	t.cancel()
 }
 
-func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
+func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *bool) {
 	wgt := sync.WaitGroup{}
 	wgt.Add(1)
 	defer wgt.Done()
@@ -129,11 +137,16 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 			if err != nil {
 				once.Do(func() {
 					t.errHandler()
+					t.Stop()
+					*hasError = true
 					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
+					wg.Done()
 				})
 				return
 			}
 			wgt.Add(1)
+			t.SshClient = cl
+
 			defer cl.Close()
 
 			// Attempt to bind to the inbound socket.
@@ -148,6 +161,9 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 				once.Do(func() {
 					t.errHandler()
 					t.log.Errorw("bind error", "details", fmt.Sprintf("%v, %v", t, err))
+					t.Stop()
+					*hasError = true
+					wg.Done()
 				})
 				return
 			}
@@ -155,10 +171,6 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 			// The socket is binded. Make sure we close it eventually.
 			bindCtx, cancel := context.WithCancel(ctx)
 			defer cancel()
-			go func() {
-				cl.Wait()
-				cancel()
-			}()
 			go func() {
 				<-bindCtx.Done()
 				once.Do(func() {}) // Suppress future errors
@@ -174,26 +186,28 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 				cn1, err := ln.Accept()
 				if err != nil {
 					once.Do(func() {
+						t.Stop()
+						*hasError = true
 						t.errHandler()
 						t.log.Errorw("accept error", "details", fmt.Sprintf("%v, %v", t, err))
+						wg.Done()
 					})
 					return
 				}
 				wgt.Add(1)
-				go t.dialTunnel(bindCtx, &wgt, cl, cn1)
+
+				go t.dialTunnel(bindCtx, &wgt, cl, cn1, hasError)
 			}
 		}()
 
 		select {
 		case <-ctx.Done():
 			return
-		case <-time.After(t.retryInterval):
-			t.log.Infow("retrying...", "details", t)
 		}
 	}
 }
 
-func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh.Client, cn1 net.Conn) {
+func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh.Client, cn1 net.Conn, hasError *bool) {
 	defer wg.Done()
 
 	// The inbound connection is established. Make sure we close it eventually.
@@ -214,8 +228,12 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 		cn2, err = net.Dial(t.dialType, t.dialAddr)
 	}
 	if err != nil {
+		t.Stop()
 		t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
 		t.errHandler()
+		*hasError = true
+
+		wg.Done()
 		return
 	}
 

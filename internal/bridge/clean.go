@@ -60,11 +60,42 @@ func Clean() {
 
 	for key, tunnel := range Tunnels {
 		if now.Sub(tunnel.LastConnection).Seconds() > 266 {
-			tunnel.Mutex.Lock()
-			tunnel.Stop()
-			tunnel.Mutex.Unlock()
+			closeTunnel(tunnel, key)
+			continue
+		}
 
-			Tunnels.Delete(key)
+		if tunnel.SshClient == nil {
+			continue
+		}
+
+		_, err := net.DialTimeout(
+			"tcp",
+			tunnel.hostAddr,
+			10*time.Second,
+		)
+		if err != nil {
+			closeTunnel(tunnel, key)
+			continue
+		}
+
+		ch := make(chan int, 1)
+		go func() {
+			select {
+			case <-time.After(10 * time.Second):
+			case <-ch:
+				return
+			default:
+				tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
+				ch <- 1
+			}
+		}()
+
+		select {
+		case <-ch:
+			continue
+		case <-time.After(10 * time.Second):
+			closeTunnel(tunnel, key)
+			continue
 		}
 	}
 
@@ -78,4 +109,12 @@ func closeSession(s *Session, key string) {
 	s.Mutex.Unlock()
 
 	Connections.Delete(key)
+}
+
+func closeTunnel(t *Tunnel, key string) {
+	t.Mutex.Lock()
+	t.Stop()
+	t.Mutex.Unlock()
+
+	Tunnels.Delete(key)
 }
