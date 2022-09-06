@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"strings"
+	"time"
+
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -41,8 +44,12 @@ func CreateServer() {
 	// Start server
 	err := app.ListenTLS(":2806", constants.CERT_PATH+"/liman.crt", constants.CERT_PATH+"/liman.key")
 	if err != nil {
-		linux.Execute("fuser -k 2806/tcp")
 		logger.Sugar().Errorw("app initialization error", "details", err)
-		helpers.RestartSelf()
+		if strings.Contains(err.Error(), "listen tcp4 :2806: bind: address already in use") {
+			logger.Sugar().Infow("restarting app to freeup port")
+			linux.Execute("fuser -k 2806/tcp")
+			time.Sleep(time.Second)
+			helpers.RestartSelf()
+		}
 	}
 }
