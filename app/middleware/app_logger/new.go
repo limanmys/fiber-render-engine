@@ -20,7 +20,7 @@ func New() fiber.Handler {
 		logger.Sugar().WithOptions(
 			zap.WithCaller(false),
 		).Infow(
-			"Render engine request",
+			"render engine request",
 			"latency", time.Since(start).String(),
 			"log_id", uuid.NewString(),
 			"user_id", c.Locals("user_id").(string),

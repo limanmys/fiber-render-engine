@@ -26,6 +26,12 @@ func InitLogger() {
 	}
 }
 
+type Zapper interface {
+	Infow(msg string, keysAndValues ...interface{})
+	Errorw(msg string, keysAndValues ...interface{})
+	Warnw(msg string, keysAndValues ...interface{})
+}
+
 func Logger() *zap.Logger {
 	return logger
 }

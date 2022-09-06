@@ -1,11 +1,10 @@
 package utils
 
 import (
-	"log"
-
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/helmet/v2"
 	"github.com/limanmys/render-engine/app/middleware/app_logger"
 	"github.com/limanmys/render-engine/app/middleware/auth"
@@ -13,6 +12,9 @@ import (
 	"github.com/limanmys/render-engine/app/routes"
 	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/server"
+	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/linux"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func CreateServer() {
@@ -26,7 +28,7 @@ func CreateServer() {
 		JSONDecoder:  sonic.Unmarshal,
 	})
 
-	// app.Use(recover.New())
+	app.Use(recover.New())
 	app.Use(app_logger.New())
 	app.Use(helmet.New())
 	app.Use(compress.New())
@@ -37,5 +39,10 @@ func CreateServer() {
 	routes.Install(app)
 
 	// Start server
-	log.Fatal(app.ListenTLS(":2806", constants.CERT_PATH+"/liman.crt", constants.CERT_PATH+"/liman.key"))
+	err := app.ListenTLS(":2806", constants.CERT_PATH+"/liman.crt", constants.CERT_PATH+"/liman.key")
+	if err != nil {
+		linux.Execute("fuser -k 2806/tcp")
+		logger.Sugar().Errorw("app initialization error", "details", err)
+		helpers.RestartSelf()
+	}
 }

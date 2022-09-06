@@ -57,6 +57,17 @@ func Clean() {
 			continue
 		}
 	}
+
+	for key, tunnel := range Tunnels {
+		if now.Sub(tunnel.LastConnection).Seconds() > 266 {
+			tunnel.Mutex.Lock()
+			tunnel.Stop()
+			tunnel.Mutex.Unlock()
+
+			Tunnels.Delete(key)
+		}
+	}
+
 	time.Sleep(5 * time.Second)
 	go Clean()
 }

@@ -8,4 +8,5 @@ import (
 func Install(app *fiber.App) {
 	app.Post("/extensionRunner", handlers.ExtensionRunner)
 	app.Post("/commandRunner", handlers.CommandRunner)
+	app.Post("/openTunnel", handlers.OpenTunnel)
 }
