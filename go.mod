@@ -17,6 +17,7 @@ require (
 	github.com/ChrisTrenkamp/goxpath v0.0.0-20210404020558-97928f7e12b6 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20220526154910-8bf9453eb81a // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
+	github.com/gofiber/helmet/v2 v2.2.16 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
@@ -41,6 +42,7 @@ require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/gofiber/contrib/fiberzap v0.0.0-20220831055825-ade20cdf8378
 	github.com/gofiber/storage/memory v0.0.0-20220901081010-6c53e5e46eee
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
@@ -58,7 +60,7 @@ require (
 	github.com/mervick/aes-everywhere/go/aes256 v0.0.0-20220722115308-bf92805fe805
 	github.com/pkg/sftp v1.13.5
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.39.0 // indirect
+	github.com/valyala/fasthttp v1.40.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect

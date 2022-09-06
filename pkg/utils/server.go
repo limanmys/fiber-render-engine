@@ -6,6 +6,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/helmet/v2"
 	"github.com/limanmys/render-engine/app/middleware/app_logger"
 	"github.com/limanmys/render-engine/app/middleware/auth"
 	"github.com/limanmys/render-engine/app/middleware/permission"
@@ -26,10 +27,11 @@ func CreateServer() {
 	})
 
 	// app.Use(recover.New())
+	app.Use(app_logger.New())
+	app.Use(helmet.New())
 	app.Use(compress.New())
 	app.Use(auth.New())
 	app.Use(permission.New())
-	app.Use(app_logger.New())
 
 	// Mount routes
 	routes.Install(app)

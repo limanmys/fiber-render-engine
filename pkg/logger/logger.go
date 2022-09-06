@@ -39,10 +39,23 @@ func Sugar() *zap.SugaredLogger {
 }
 
 func FiberError(code int, message string) *fiber.Error {
-	Sugar().Errorw(
-		message,
-		"error_code", code,
-	)
+	switch {
+	case code >= 500:
+		Sugar().Errorw(
+			message,
+			"code", code,
+		)
+	case code >= 400:
+		Sugar().Warnw(
+			message,
+			"code", code,
+		)
+	default:
+		Sugar().Infow(
+			message,
+			"code", code,
+		)
+	}
 
 	return fiber.NewError(code, message)
 }
