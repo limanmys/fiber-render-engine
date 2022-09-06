@@ -18,7 +18,7 @@ func CommandRunner(c *fiber.Ctx) error {
 		return err
 	}
 
-	shell, err := bridge.GetConnection(c.Locals("user_id").(string), c.FormValue("server_id"), server.IPAddress)
+	shell, err := bridge.GetSession(c.Locals("user_id").(string), c.FormValue("server_id"), server.IPAddress)
 	if err != nil {
 		return err
 	}

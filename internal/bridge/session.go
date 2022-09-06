@@ -47,7 +47,7 @@ func (s *Session) CloseAllConnections() {
 	}
 }
 
-func checkOutput(in io.Writer, output *bytes.Buffer, val *Session) bool {
+func (val *Session) checkOutput(in io.Writer, output *bytes.Buffer) bool {
 	val.Mutex.Lock()
 	defer val.Mutex.Unlock()
 	if output != nil && output.Len() > 0 {
@@ -93,7 +93,7 @@ func (val *Session) Run(command string) (string, error) {
 					case <-endChan:
 						break For
 					default:
-						if checkOutput(in, output, val) {
+						if val.checkOutput(in, output) {
 							break For
 						}
 						time.Sleep(500)
