@@ -11,7 +11,7 @@ func OpenTunnel(c *fiber.Ctx) error {
 
 	for _, param := range params {
 		if len(c.FormValue(param)) < 1 {
-			return logger.FiberError(fiber.StatusUnprocessableEntity, param+" parameter is missing")
+			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
 		}
 	}
 
@@ -23,4 +23,28 @@ func OpenTunnel(c *fiber.Ctx) error {
 	)
 
 	return c.JSON(port)
+}
+
+func KeepTunnelAlive(c *fiber.Ctx) error {
+	params := []string{"remote_host", "remote_port", "username"}
+
+	for _, param := range params {
+		if len(c.FormValue(param)) < 1 {
+			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
+		}
+	}
+
+	_, err := bridge.Tunnels.Get(
+		c.FormValue("remote_host"),
+		c.FormValue("remote_port"),
+		c.FormValue("username"),
+	)
+	if err != nil {
+		return logger.FiberError(fiber.StatusNotFound, "tunnel not found")
+	}
+
+	return c.JSON(&fiber.Map{
+		"status":  "ok",
+		"message": "tunnel keep alive successfully",
+	})
 }
