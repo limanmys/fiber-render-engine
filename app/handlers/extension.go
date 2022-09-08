@@ -12,7 +12,7 @@ import (
 
 func ExtensionRunner(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
-		return logger.FiberError(fiber.StatusUnprocessableEntity, "extension not found")
+		return logger.FiberError(fiber.StatusBadRequest, "extension not found")
 	}
 
 	extension, err := liman.GetExtension(&models.Extension{

@@ -13,11 +13,13 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	message := &fiber.Map{}
 	if code == fiber.StatusOK {
 		message = &fiber.Map{
+			"status":  "ok",
 			"message": err.Error(),
 		}
 	} else {
 		message = &fiber.Map{
-			"error": err.Error(),
+			"status":  "fail",
+			"message": err.Error(),
 		}
 	}
 

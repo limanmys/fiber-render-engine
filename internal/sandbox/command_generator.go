@@ -20,7 +20,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	extension.Name = shellescape.StripUnsafe(extension.Name)
 
 	if !helpers.IsLetter(extension.Name) {
-		return "", logger.FiberError(fiber.StatusUnprocessableEntity, "extension names can only contains letters")
+		return "", logger.FiberError(fiber.StatusBadRequest, "extension names can only contains letters")
 	}
 
 	server, user, settings, err := getParams(extension, credentials, params)
