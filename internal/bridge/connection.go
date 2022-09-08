@@ -28,6 +28,19 @@ func (p *Pool) Set(userID, serverID string, session *Session) {
 	Connections[userID+serverID] = session
 }
 
+func (p *Pool) GetRaw(userID, remoteHost, username string) (*Session, error) {
+	if conn, ok := Connections[userID+remoteHost+username]; ok {
+		conn.LastConnection = time.Now()
+		return conn, nil
+	} else {
+		return nil, errors.New("connection does not exist")
+	}
+}
+
+func (p *Pool) SetRaw(userID, remoteHost, username string, session *Session) {
+	Connections[userID+remoteHost+username] = session
+}
+
 func (p *Pool) Delete(key string) {
 	mutex.Lock()
 	defer mutex.Unlock()
