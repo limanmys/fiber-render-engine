@@ -36,6 +36,7 @@ type Tunnel struct {
 	Port           int
 	LastConnection time.Time
 	Mutex          sync.Mutex
+	Started        bool
 }
 
 var mut sync.Mutex = sync.Mutex{}
@@ -43,6 +44,12 @@ var mut sync.Mutex = sync.Mutex{}
 func CreateTunnel(remoteHost, remotePort, username, password string) int {
 	t, err := Tunnels.Get(remoteHost, remotePort, username)
 	if err == nil {
+		for {
+			if t.Started {
+				break
+			}
+		}
+
 		t.LastConnection = time.Now()
 		return t.Port
 	}
@@ -79,14 +86,23 @@ func CreateTunnel(remoteHost, remotePort, username, password string) int {
 		},
 		Port:           port,
 		LastConnection: time.Now(),
+		Started:        false,
 	}
+
+	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
 
 	hasError := sshTunnel.Start()
 	if !hasError {
-		Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
+		for {
+			if sshTunnel.Started {
+				break
+			}
+		}
+
 		return port
 	}
 
+	Tunnels.Delete(remoteHost + ":" + remotePort + ":" + username)
 	return 0
 }
 
@@ -172,11 +188,16 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *b
 			bindCtx, cancel := context.WithCancel(ctx)
 			defer cancel()
 			go func() {
+				cl.Wait()
+				cancel()
+			}()
+			go func() {
 				<-bindCtx.Done()
 				once.Do(func() {}) // Suppress future errors
 				ln.Close()
 			}()
 
+			t.Started = true
 			t.log.Infow("binded tunnel", "details", t)
 			wg.Done()
 			defer t.log.Infow("collapsed tunnel", "details", t)
