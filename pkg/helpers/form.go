@@ -1,12 +1,19 @@
 package helpers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"net/url"
+	"strings"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 func GetFormData(c *fiber.Ctx) map[string]string {
 	multipart, err := c.MultipartForm()
 
 	if err != nil {
-		return make(map[string]string)
+		body := BodyParser(c.Body())
+
+		return body
 	}
 
 	formValues := make(map[string]string)
@@ -17,4 +24,24 @@ func GetFormData(c *fiber.Ctx) map[string]string {
 	}
 
 	return formValues
+}
+
+func BodyParser(body []byte) map[string]string {
+	values, err := url.ParseQuery(string(body))
+	if err != nil {
+		return make(map[string]string)
+	}
+
+	obj := map[string]string{}
+	for k, v := range values {
+		if strings.Contains(strings.ToLower(k), "password") || strings.Contains(strings.ToLower(k), "token") {
+			continue
+		}
+
+		if len(v) > 0 {
+			obj[k] = v[0]
+		}
+	}
+
+	return obj
 }

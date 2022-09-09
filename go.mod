@@ -27,7 +27,10 @@ require (
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/geoffgarside/ber v1.1.0 // indirect
 	github.com/gofiber/cli v0.0.9 // indirect
+	github.com/gofiber/fiber v1.13.3 // indirect
+	github.com/gofiber/utils v0.0.9 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
@@ -41,6 +44,7 @@ require (
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
+	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
@@ -68,6 +72,7 @@ require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
+	github.com/gofiber/helmet v0.1.2
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.13.0 // indirect
