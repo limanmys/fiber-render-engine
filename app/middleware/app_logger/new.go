@@ -1,8 +1,6 @@
 package app_logger
 
 import (
-	"time"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -12,19 +10,20 @@ import (
 
 func New() fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
-		start := time.Now()
-
 		formData := helpers.GetFormData(c)
-		c.Next()
+
+		user_id := ""
+		if c.Locals("user_id") != nil {
+			user_id = c.Locals("user_id").(string)
+		}
 
 		logger.Sugar().WithOptions(
 			zap.WithCaller(false),
 		).Infow(
 			"render engine request",
 			"lmn_level", "request",
-			"latency", time.Since(start).String(),
 			"log_id", uuid.NewString(),
-			"user_id", c.Locals("user_id").(string),
+			"user_id", user_id,
 			"server_id", formData["server_id"],
 			"extension_id", formData["extension_id"],
 			"route", c.Path(),
@@ -34,6 +33,6 @@ func New() fiber.Handler {
 			"request_details", formData,
 		)
 
-		return nil
+		return c.Next()
 	}
 }
