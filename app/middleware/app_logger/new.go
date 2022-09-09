@@ -21,6 +21,7 @@ func New() fiber.Handler {
 			zap.WithCaller(false),
 		).Infow(
 			"render engine request",
+			"lmn_level", "request",
 			"latency", time.Since(start).String(),
 			"log_id", uuid.NewString(),
 			"user_id", c.Locals("user_id").(string),

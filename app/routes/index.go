@@ -7,11 +7,11 @@ import (
 
 func Install(app *fiber.App) {
 	// extension
-	app.Post("/run", handlers.ExtensionRunner)
+	app.Post("/extension", handlers.ExtensionRunner)
 
 	// command
-	app.Post("/runCommand", handlers.CommandRunner)
-	app.Post("/runOutsideCommand", handlers.OutsideCommandRunner)
+	app.Post("/command", handlers.CommandRunner)
+	app.Post("/outsideCommand", handlers.OutsideCommandRunner)
 
 	// tunnel
 	app.Post("/openTunnel", handlers.OpenTunnel)
@@ -22,5 +22,11 @@ func Install(app *fiber.App) {
 	app.Post("/putFile", handlers.PutFile)
 
 	// script
-	app.Post("/runScript", handlers.ScriptRunner)
+	app.Post("/script", handlers.ScriptRunner)
+
+	// verify credentials
+	app.Post("/verify", handlers.Verify)
+
+	// extensionDb
+	app.Post("/setExtensionDb", handlers.SetExtensionDb)
 }

@@ -49,16 +49,19 @@ func FiberError(code int, message string) *fiber.Error {
 	case code >= 500:
 		Sugar().Errorw(
 			message,
+			"lmn_level", "error",
 			"code", code,
 		)
 	case code >= 400:
 		Sugar().Warnw(
 			message,
+			"lmn_level", "warn",
 			"code", code,
 		)
 	default:
 		Sugar().Infow(
 			message,
+			"lmn_level", "info",
 			"code", code,
 		)
 	}

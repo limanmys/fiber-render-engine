@@ -39,7 +39,5 @@ func authorization(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
-	// TODO: Log handlers
-
 	return logger.FiberError(fiber.StatusUnauthorized, "authorization token is missing")
 }
