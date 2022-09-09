@@ -44,7 +44,7 @@ func ScriptRunner(c *fiber.Ctx) error {
 
 	remotePath := ""
 	if server.Os == "linux" {
-		remotePath = "/tmp/" + filepath.Base(c.FormValue("remote_path"))
+		remotePath = "/tmp/" + filepath.Base(c.FormValue("local_path"))
 		session.Run("rm " + remotePath)
 	} else {
 		remotePath = session.WindowsPath + c.FormValue("remote_path") + ".ps1"
@@ -83,5 +83,5 @@ func ScriptRunner(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.JSON(output)
+	return c.SendString(output)
 }
