@@ -7,7 +7,7 @@ import (
 
 func Install(app *fiber.App) {
 	// extension
-	app.Post("/extension", handlers.ExtensionRunner)
+	app.Post("/", handlers.ExtensionRunner)
 
 	// command
 	app.Post("/command", handlers.CommandRunner)

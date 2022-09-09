@@ -21,7 +21,7 @@ func OpenSFTPConnection(conn *ssh.Client) *sftp.Client {
 }
 
 func (s *Session) SftpPutFile(localPath, remotePath string) error {
-	if s.SFTP == nil && s.SSH != nil {
+	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)
 	} else {
 		return errors.New("sftp connection is not alive")
@@ -57,7 +57,7 @@ func (s *Session) SftpPutFile(localPath, remotePath string) error {
 }
 
 func (s *Session) SftpGetFile(localPath, remotePath string) error {
-	if s.SFTP == nil && s.SSH != nil {
+	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)
 	} else {
 		return errors.New("sftp connection is not alive")
