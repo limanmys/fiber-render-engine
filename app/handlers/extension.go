@@ -60,7 +60,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 			Server:         c.FormValue("server_id"),
 			RequestData:    formValues,
 			Token:          token,
-			BaseURL:        c.FormValue("lmnbaseurl", c.BaseURL()),
+			BaseURL:        c.FormValue("lmnbaseurl", c.Get("origin")),
 			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
 		},
 	)
