@@ -24,10 +24,9 @@ func Verify(c *fiber.Ctx) error {
 	)
 
 	if flag {
-		return c.JSON("ok")
+		return c.SendString("ok")
 	}
 
 	// TODO: change the way request handles on core
-	c.SendString("nok")
-	return c.SendStatus(201)
+	return c.Status(201).SendString("nok")
 }

@@ -32,7 +32,7 @@ func CommandRunner(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusForbidden, "cannot run command")
 	}
 
-	return c.JSON(output)
+	return c.SendString(output)
 }
 
 func OutsideCommandRunner(c *fiber.Ctx) error {
@@ -84,5 +84,5 @@ func OutsideCommandRunner(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusForbidden, "cannot run command")
 	}
 
-	return c.JSON(output)
+	return c.SendString(output)
 }

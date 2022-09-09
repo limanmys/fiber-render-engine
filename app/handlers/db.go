@@ -39,7 +39,7 @@ func SetExtensionDb(c *fiber.Ctx) error {
 	}
 
 	if !isWritable {
-		return c.JSON(c.FormValue("new_param"))
+		return c.SendString(c.FormValue("new_param"))
 	}
 
 	output, err := liman.SetExtensionDb(
@@ -53,5 +53,5 @@ func SetExtensionDb(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(output)
+	return c.SendString(output)
 }
