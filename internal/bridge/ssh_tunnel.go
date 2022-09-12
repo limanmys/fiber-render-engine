@@ -263,8 +263,8 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 		cn2.Close()
 	}()
 
-	t.log.Infow("connection established", "details", t)
-	defer t.log.Infow("connection closed", "details", t)
+	//t.log.Infow("connection established", "details", t)
+	//defer t.log.Infow("connection closed", "details", t)
 
 	// Copy bytes from one connection to the other until one side closes.
 	var once sync.Once

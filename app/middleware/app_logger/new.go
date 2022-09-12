@@ -24,12 +24,8 @@ func New() fiber.Handler {
 			"lmn_level", "request",
 			"log_id", uuid.NewString(),
 			"user_id", user_id,
-			"server_id", formData["server_id"],
-			"extension_id", formData["extension_id"],
 			"route", c.Path(),
 			"ip_address", c.IP(),
-			"display", true,
-			"view", formData["lmntargetFunction"],
 			"request_details", formData,
 		)
 

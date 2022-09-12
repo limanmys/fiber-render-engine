@@ -10,17 +10,23 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
-func ExtensionRunner(c *fiber.Ctx) error {
-	if len(c.FormValue("extension_id")) < 1 {
+func ExternalAPI(c *fiber.Ctx) error {
+	extension := &models.Extension{}
+	var err error
+	if len(c.FormValue("extension_id")) > 0 {
+		if !helpers.CheckUUID(c.FormValue("extension_id")) {
+			extension, err = liman.GetExtension(&models.Extension{Name: c.FormValue("extension_id")})
+			if err != nil {
+				return err
+			}
+		} else {
+			extension, err = liman.GetExtension(&models.Extension{ID: c.FormValue("extension_id")})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
 		return logger.FiberError(fiber.StatusBadRequest, "extension not found")
-	}
-
-	extension, err := liman.GetExtension(&models.Extension{
-		ID: c.FormValue("extension_id"),
-	})
-
-	if err != nil {
-		return err
 	}
 
 	if extension.Status == "0" {
@@ -64,17 +70,15 @@ func ExtensionRunner(c *fiber.Ctx) error {
 			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
 		},
 	)
-
 	if err != nil {
 		return err
 	}
 
 	output := linux.Execute(command)
 
-	return c.SendString(output)
-}
-
-func ExtensionLogger(c *fiber.Ctx) error {
-	// deprecated, middleware logging everything
-	return c.SendString("")
+	if helpers.IsJSON(output) {
+		return c.JSON(output)
+	} else {
+		return c.SendString(output)
+	}
 }

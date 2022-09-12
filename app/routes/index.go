@@ -29,4 +29,13 @@ func Install(app *fiber.App) {
 
 	// extensionDb
 	app.Post("/setExtensionDb", handlers.SetExtensionDb)
+
+	// logger: deprecate on liman v2
+	app.Post("/sendLog", handlers.ExtensionLogger)
+
+	// background job
+	app.Post("/backgroundJob", handlers.BackgroundJob)
+
+	// external api proxy
+	app.Post("/externalAPI", handlers.ExternalAPI)
 }

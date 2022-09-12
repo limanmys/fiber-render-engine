@@ -10,7 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
-func ExtensionRunner(c *fiber.Ctx) error {
+func BackgroundJob(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
 		return logger.FiberError(fiber.StatusBadRequest, "extension not found")
 	}
@@ -18,7 +18,6 @@ func ExtensionRunner(c *fiber.Ctx) error {
 	extension, err := liman.GetExtension(&models.Extension{
 		ID: c.FormValue("extension_id"),
 	})
-
 	if err != nil {
 		return err
 	}
@@ -64,17 +63,14 @@ func ExtensionRunner(c *fiber.Ctx) error {
 			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
 		},
 	)
-
 	if err != nil {
 		return err
 	}
 
-	output := linux.Execute(command)
+	go linux.Execute(command)
 
-	return c.SendString(output)
-}
-
-func ExtensionLogger(c *fiber.Ctx) error {
-	// deprecated, middleware logging everything
-	return c.SendString("")
+	return c.JSON(&fiber.Map{
+		"status":  "ok",
+		"message": "job dispatched successfully",
+	})
 }
