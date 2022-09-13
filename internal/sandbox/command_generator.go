@@ -3,6 +3,7 @@ package sandbox
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/alessio/shellescape"
@@ -31,6 +32,23 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	permissions, variables, err := liman.GetPermissions(user, extension.Name)
 	if err != nil {
 		return "", err
+	}
+
+	extJson, err := liman.GetExtensionJSON(extension)
+	if err != nil {
+		return "", err
+	}
+
+	requiredList := []string{}
+	if extJson["functions"] != nil {
+		for _, function := range extJson["functions"].([]interface{}) {
+			fn := function.(map[string]any)
+			requiredList = append(requiredList, fn["name"].(string))
+		}
+	}
+
+	if user.Status != 1 && !helpers.Contains(permissions, params.TargetFunction) && helpers.Contains(requiredList, params.TargetFunction) {
+		return "", logger.FiberError(fiber.StatusForbidden, "you have no permission to do this")
 	}
 
 	if credentials.Username != "" && credentials.Key != "" {
@@ -68,7 +86,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		"license":         licenceData,
 		"token":           params.Token,
 		"locale":          params.Locale,
-		"log_id":          "0000000", // TODO: add log handlers
+		"log_id":          params.LogID,
 		"ajax":            "true",
 		"apiRoute":        "/extensionRun",
 	}
@@ -81,21 +99,21 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	extensionDataJson, _ := sonic.Marshal(extensionData)
 	encryptedData := aes256.Encrypt(string(extensionDataJson), string(secureKey))
 
-	// TODO: extJsonfile
-	// TODO: required param tester
-	// TODO: targetFunction and permission match check
-	// TODO: so file handler
+	soPath := "/liman/extensions/" + strings.ToLower(extension.Name) + "/liman.so"
+	soCommand := ""
+	if _, err := os.Stat(soPath); err == nil {
+		soCommand = "-dextension=" + shellescape.Quote(soPath) + " "
+	}
 
 	command := fmt.Sprintf(
-		"runuser %s -c 'timeout %s /usr/bin/php -d display_errors=on %s %s %s'",
+		"runuser %s -c 'timeout %s /usr/bin/php %s -d display_errors=on %s %s %s'",
 		strings.Replace(extension.ID, "-", "", -1),
 		helpers.Env("EXTENSION_TIMEOUT", "30"),
+		soCommand,
 		constants.SANDBOX_PATH,
 		constants.KEYS_PATH+"/"+extension.ID,
 		encryptedData,
 	)
-
-	// TODO: complete the command generator
 
 	return command, nil
 }

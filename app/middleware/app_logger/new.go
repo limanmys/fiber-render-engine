@@ -17,12 +17,14 @@ func New() fiber.Handler {
 			user_id = c.Locals("user_id").(string)
 		}
 
+		c.Locals("log_id", uuid.NewString())
+
 		logger.Sugar().WithOptions(
 			zap.WithCaller(false),
 		).Infow(
 			"render engine request",
 			"lmn_level", "request",
-			"log_id", uuid.NewString(),
+			"log_id", c.Locals("log_id").(string),
 			"user_id", user_id,
 			"route", c.Path(),
 			"ip_address", c.IP(),

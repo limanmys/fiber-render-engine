@@ -9,4 +9,5 @@ type CommandParams struct {
 	Token          string
 	BaseURL        string
 	Locale         string
+	LogID          string
 }
