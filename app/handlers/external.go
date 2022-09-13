@@ -77,7 +77,7 @@ func ExternalAPI(c *fiber.Ctx) error {
 	output := linux.Execute(command)
 
 	if helpers.IsJSON(output) {
-		return c.JSON(output)
+		return c.Type("json").SendString(output)
 	} else {
 		return c.SendString(output)
 	}

@@ -43,8 +43,8 @@ func KeepTunnelAlive(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusNotFound, "tunnel not found")
 	}
 
-	return c.JSON(&fiber.Map{
+	return c.Type("json").SendString(`{
 		"status":  "ok",
-		"message": "tunnel keep alive successfully",
-	})
+		"message": "tunnel keep alive successfully"
+	}`)
 }

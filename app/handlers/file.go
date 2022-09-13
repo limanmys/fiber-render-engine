@@ -54,10 +54,10 @@ func PutFile(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(&fiber.Map{
+	return c.Type("json").SendString(`{
 		"status":  "ok",
-		"message": "file transfer completed successfully",
-	})
+		"message": "file transfer completed successfully"
+	}`)
 }
 
 func GetFile(c *fiber.Ctx) error {
@@ -104,8 +104,8 @@ func GetFile(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(&fiber.Map{
+	return c.Type("json").SendString(`{
 		"status":  "ok",
-		"message": "file transfer completed successfully",
-	})
+		"message": "file transfer completed successfully"
+	}`)
 }

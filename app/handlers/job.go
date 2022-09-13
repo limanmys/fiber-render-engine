@@ -69,8 +69,8 @@ func BackgroundJob(c *fiber.Ctx) error {
 
 	go linux.Execute(command)
 
-	return c.JSON(&fiber.Map{
+	return c.Type("json").SendString(`{
 		"status":  "ok",
-		"message": "job dispatched successfully",
-	})
+		"message": "job dispatched successfully"
+	}`)
 }
