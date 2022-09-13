@@ -7,7 +7,7 @@ import (
 )
 
 func Verify(c *fiber.Ctx) error {
-	params := []string{"ip_address", "username", "password", "port", "keyType"}
+	params := []string{"ip_address", "username", "password", "port", "key_type"}
 
 	for _, param := range params {
 		if len(c.FormValue(param)) < 1 {
