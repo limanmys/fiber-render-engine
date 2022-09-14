@@ -59,7 +59,7 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 func GetLicence(extension *models.Extension) (*models.Licence, error) {
 	licence := &models.Licence{}
 
-	rows := database.Connection().Where(&licence, "extension_id = ?", extension.ID).RowsAffected
+	rows := database.Connection().Find(&licence, "extension_id = ?", extension.ID).RowsAffected
 
 	if rows > 0 {
 		return licence, nil
