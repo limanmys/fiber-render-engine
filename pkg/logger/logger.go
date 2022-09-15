@@ -12,6 +12,9 @@ var (
 )
 
 func InitLogger() {
+	// TODO: Implement lumberjack log roller
+	// https://gist.github.com/rnyrnyrny/a6dc926ae11951b753ecd66c00695397
+
 	cfg := zap.NewProductionConfig()
 	cfg.DisableStacktrace = true
 	cfg.OutputPaths = []string{
@@ -49,19 +52,16 @@ func FiberError(code int, message string) *fiber.Error {
 	case code >= 500:
 		Sugar().Errorw(
 			message,
-			"lmn_level", "error",
 			"code", code,
 		)
 	case code >= 400:
 		Sugar().Warnw(
 			message,
-			"lmn_level", "warn",
 			"code", code,
 		)
 	default:
 		Sugar().Infow(
 			message,
-			"lmn_level", "info",
 			"code", code,
 		)
 	}

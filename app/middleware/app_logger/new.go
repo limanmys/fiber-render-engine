@@ -10,14 +10,40 @@ import (
 
 func New() fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
+		c.Locals("log_id", uuid.NewString())
+
+		log_level := helpers.Env("NEW_LOG_LEVEL", "2")
+		switch log_level {
+		case "0":
+			if !helpers.Contains(logger.ALL, c.Path()) {
+				return c.Next()
+			}
+			break
+		case "1":
+			if !helpers.Contains(logger.MINIMAL, c.Path()) {
+				return c.Next()
+			}
+			break
+		case "2":
+			if !helpers.Contains(logger.EXT_LOG, c.Path()) {
+				return c.Next()
+			}
+			break
+		case "3":
+			if !helpers.Contains(logger.EXT_DETAIL, c.Path()) {
+				return c.Next()
+			}
+			break
+		default:
+			return c.Next()
+		}
+
 		formData := helpers.GetFormData(c)
 
 		user_id := ""
 		if c.Locals("user_id") != nil {
 			user_id = c.Locals("user_id").(string)
 		}
-
-		c.Locals("log_id", uuid.NewString())
 
 		logger.Sugar().WithOptions(
 			zap.WithCaller(false),
