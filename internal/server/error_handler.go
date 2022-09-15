@@ -2,6 +2,9 @@ package server
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
+	"go.uber.org/zap"
 )
 
 var ErrorHandler = func(c *fiber.Ctx, err error) error {
@@ -13,15 +16,28 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	message := &fiber.Map{}
 	if code == fiber.StatusOK {
 		message = &fiber.Map{
-			"status":  "ok",
+			"status":  code,
 			"message": err.Error(),
 		}
 	} else {
+		if code >= fiber.StatusInternalServerError {
+			request := helpers.GetFormData(c)
+
+			logger.Sugar().WithOptions(zap.WithCaller(false)).Errorw(
+				"recover middleware catch",
+				"status", code,
+				"message", err.Error(),
+				"request_details", request,
+			)
+		}
+
 		message = &fiber.Map{
-			"status":  "fail",
+			"status":  code,
 			"message": err.Error(),
 		}
 	}
 
-	return c.Status(code).JSON(message)
+	// TODO: fix that 201 issue on new versions for liman
+	// maalesef :(
+	return c.Status(201).JSON(message)
 }

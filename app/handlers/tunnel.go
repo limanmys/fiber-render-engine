@@ -44,7 +44,7 @@ func KeepTunnelAlive(c *fiber.Ctx) error {
 	}
 
 	return c.Type("json").SendString(`{
-		"status":  "ok",
+		"status":  200,
 		"message": "tunnel keep alive successfully"
 	}`)
 }

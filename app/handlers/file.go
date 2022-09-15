@@ -55,7 +55,7 @@ func PutFile(c *fiber.Ctx) error {
 	}
 
 	return c.Type("json").SendString(`{
-		"status":  "ok",
+		"status":  200,
 		"message": "file transfer completed successfully"
 	}`)
 }
@@ -105,7 +105,7 @@ func GetFile(c *fiber.Ctx) error {
 	}
 
 	return c.Type("json").SendString(`{
-		"status":  "ok",
+		"status":  200,
 		"message": "file transfer completed successfully"
 	}`)
 }
