@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 )
 
 func initializePostgres() *gorm.DB {
@@ -21,6 +22,7 @@ func initializePostgres() *gorm.DB {
 
 	connection, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		PrepareStmt: true,
+		Logger:      gormLogger.Default.LogMode(gormLogger.Silent),
 	})
 
 	if err != nil {
