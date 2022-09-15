@@ -55,7 +55,7 @@ func GetSettings(user *models.User, server *models.Server, extension *models.Ext
 			continue
 		}
 
-		results[setting.Name] = aes256.Decrypt(setting.Value, decryptionKey)
+		results[setting.Name] = aes256.Decrypt(setting.Value, helpers.Env("APP_KEY", "")+setting.UserID+setting.ServerID)
 	}
 
 	return results, nil

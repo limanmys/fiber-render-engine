@@ -18,6 +18,14 @@ func GetFormData(c *fiber.Ctx) map[string]string {
 
 	formValues := make(map[string]string)
 	for key, value := range multipart.Value {
+		if key == "" {
+			continue
+		}
+
+		if strings.Contains(strings.ToLower(key), "password") || strings.Contains(strings.ToLower(key), "token") {
+			continue
+		}
+
 		if len(value) > 0 {
 			formValues[key] = value[0]
 		}
