@@ -9,6 +9,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/limanmys/render-engine/pkg/linux"
 	"github.com/limanmys/render-engine/pkg/logger"
+	"go.uber.org/zap"
 )
 
 func ExtensionRunner(c *fiber.Ctx) error {
@@ -85,7 +86,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 			return c.Type("json").SendString(output)
 		}
 
-		if msg.Status > 200 {
+		if msg != nil && msg.Status > 200 {
 			return c.Status(201).Type("json").SendString(output)
 		}
 	}
@@ -94,6 +95,39 @@ func ExtensionRunner(c *fiber.Ctx) error {
 }
 
 func ExtensionLogger(c *fiber.Ctx) error {
-	// deprecated, middleware logging everything
-	return c.SendString("")
+	params := []string{
+		"title",
+		"message",
+	}
+
+	for _, param := range params {
+		if len(c.FormValue(param)) < 1 {
+			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
+		}
+	}
+
+	formData := helpers.GetFormData(c)
+
+	user_id := ""
+	if c.Locals("user_id") != nil {
+		user_id = c.Locals("user_id").(string)
+	}
+
+	logger.Sugar().WithOptions(
+		zap.WithCaller(false),
+	).Infow(
+		"send log handler",
+		"lmn_level", "high_level",
+		"log_id", c.Locals("log_id").(string),
+		"user_id", user_id,
+		"route", "/",
+		"ip_address", c.IP(),
+		"request_details", formData,
+	)
+
+	// TODO: complete and handle mail_tags at the end
+	return c.Type("json").SendString(`{
+		"status":  200,
+		"message": "log added successfully"
+	}`)
 }
