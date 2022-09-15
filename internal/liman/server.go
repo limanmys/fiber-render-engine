@@ -8,7 +8,7 @@ import (
 )
 
 func GetServer(server *models.Server) (*models.Server, error) {
-	result := database.Connection().First(&server)
+	result := database.Connection().Where(&server).First(&server)
 
 	if result.Error != nil {
 		return nil, logger.FiberError(fiber.StatusNotFound, "cannot found server with this id")

@@ -8,7 +8,7 @@ import (
 )
 
 func GetUser(user *models.User) (*models.User, error) {
-	result := database.Connection().First(&user)
+	result := database.Connection().Where(&user).First(&user)
 
 	if result.Error != nil {
 		return nil, logger.FiberError(fiber.StatusNotFound, "cannot found user with this id")

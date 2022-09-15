@@ -18,7 +18,7 @@ import (
 )
 
 func GetExtension(extension *models.Extension) (*models.Extension, error) {
-	result := database.Connection().First(&extension)
+	result := database.Connection().Where(&extension).First(&extension)
 
 	if result.Error != nil {
 		return nil, logger.FiberError(fiber.StatusNotFound, "cannot found extension with this id")
