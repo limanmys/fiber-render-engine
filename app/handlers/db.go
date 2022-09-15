@@ -45,7 +45,7 @@ func SetExtensionDb(c *fiber.Ctx) error {
 	output, err := liman.SetExtensionDb(
 		c.FormValue("new_param"),
 		c.FormValue("target"),
-		c.FormValue("user_id"),
+		c.Locals("user_id").(string),
 		c.FormValue("server_id"),
 		isGlobal,
 	)
