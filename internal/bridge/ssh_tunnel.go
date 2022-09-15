@@ -23,6 +23,7 @@ type Tunnel struct {
 	bindAddr string
 	dialAddr string
 	dialType string
+	password string
 
 	SshClient *ssh.Client
 
@@ -42,11 +43,27 @@ type Tunnel struct {
 var mut sync.Mutex = sync.Mutex{}
 
 func CreateTunnel(remoteHost, remotePort, username, password string) int {
+	ch := make(chan int)
+	time.AfterFunc(30*time.Second, func() {
+		ch <- 1
+	})
+
 	t, err := Tunnels.Get(remoteHost, remotePort, username)
 	if err == nil {
+		if t.password != password {
+			return 0
+		}
+
 		for {
 			if t.Started {
 				break
+			}
+
+			select {
+			case <-ch:
+				break
+			default:
+				continue
 			}
 		}
 
@@ -84,6 +101,7 @@ func CreateTunnel(remoteHost, remotePort, username, password string) int {
 		errHandler: func() {
 			Tunnels.Delete(remoteHost + ":" + remotePort + ":" + username)
 		},
+		password:       password,
 		Port:           port,
 		LastConnection: time.Now(),
 		Started:        false,
@@ -96,6 +114,13 @@ func CreateTunnel(remoteHost, remotePort, username, password string) int {
 		for {
 			if sshTunnel.Started {
 				break
+			}
+
+			select {
+			case <-ch:
+				break
+			default:
+				continue
 			}
 		}
 
