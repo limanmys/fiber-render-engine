@@ -84,5 +84,10 @@ func OutsideCommandRunner(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusForbidden, "cannot run command")
 	}
 
+	if c.FormValue("disconnect") == "1" {
+		session.CloseAllConnections()
+		bridge.Connections.Delete(c.Locals("user_id").(string) + c.FormValue("remote_host") + c.FormValue("username"))
+	}
+
 	return c.SendString(output)
 }
