@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/liman"
@@ -68,6 +69,7 @@ func ExternalAPI(c *fiber.Ctx) error {
 			Token:          token,
 			BaseURL:        c.FormValue("lmnbaseurl", c.Get("origin")),
 			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
+			LogID:          c.Locals("log_id").(string),
 		},
 	)
 	if err != nil {
@@ -75,10 +77,22 @@ func ExternalAPI(c *fiber.Ctx) error {
 	}
 
 	output := linux.Execute(command)
+	if helpers.LimanJSON(output) {
+		type LimanMessage struct {
+			Message string `json:"message"`
+			Status  int    `json:"status"`
+		}
+		msg := &LimanMessage{}
 
-	if helpers.IsJSON(output) {
-		return c.Type("json").SendString(output)
-	} else {
-		return c.SendString(output)
+		err := sonic.UnmarshalString(output, &msg)
+		if err != nil {
+			return c.Type("json").SendString(output)
+		}
+
+		if msg != nil && msg.Status > 200 {
+			return c.Status(201).Type("json").SendString(output)
+		}
 	}
+
+	return c.SendString(output)
 }
