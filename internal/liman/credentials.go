@@ -1,7 +1,8 @@
 package liman
 
 import (
-	"github.com/bytedance/sonic"
+	"encoding/json"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
@@ -25,7 +26,7 @@ func GetCredentials(user *models.User, server *models.Server) (*models.Credentia
 		}
 	}
 
-	sonic.Unmarshal(
+	json.Unmarshal(
 		[]byte(serverKey.Data),
 		encryptedKey,
 	)

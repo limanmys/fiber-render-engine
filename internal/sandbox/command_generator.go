@@ -1,13 +1,13 @@
 package sandbox
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/alessio/shellescape"
-	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/constants"
@@ -62,13 +62,13 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		licenceData = licence.Data
 	}
 
-	serverJson, _ := sonic.Marshal(server)
-	extensionJson, _ := sonic.Marshal(extension)
-	settingsJson, _ := sonic.Marshal(settings)
-	userJson, _ := sonic.Marshal(user)
-	requestData, _ := sonic.Marshal(params.RequestData)
-	permissionsJson, _ := sonic.Marshal(permissions)
-	variablesJson, _ := sonic.Marshal(variables)
+	serverJson, _ := json.Marshal(server)
+	extensionJson, _ := json.Marshal(extension)
+	settingsJson, _ := json.Marshal(settings)
+	userJson, _ := json.Marshal(user)
+	requestData, _ := json.Marshal(params.RequestData)
+	permissionsJson, _ := json.Marshal(permissions)
+	variablesJson, _ := json.Marshal(variables)
 
 	extensionData := map[string]string{
 		"server":          string(serverJson),
@@ -96,7 +96,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		return "", logger.FiberError(fiber.StatusNotFound, "cannot found extension key file")
 	}
 
-	extensionDataJson, _ := sonic.Marshal(extensionData)
+	extensionDataJson, _ := json.Marshal(extensionData)
 	encryptedData := aes256.Encrypt(string(extensionDataJson), string(secureKey))
 
 	soPath := "/liman/extensions/" + strings.ToLower(extension.Name) + "/liman.so"

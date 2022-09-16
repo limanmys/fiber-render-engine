@@ -1,7 +1,8 @@
 package handlers
 
 import (
-	"github.com/bytedance/sonic"
+	"encoding/json"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/liman"
@@ -81,7 +82,7 @@ func ExtensionRunner(c *fiber.Ctx) error {
 		}
 		msg := &LimanMessage{}
 
-		err := sonic.UnmarshalString(output, &msg)
+		err := json.Unmarshal([]byte(output), &msg)
 		if err != nil {
 			return c.Type("json").SendString(output)
 		}

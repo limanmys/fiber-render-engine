@@ -1,13 +1,13 @@
 package liman
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/constants"
@@ -51,7 +51,7 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 	}
 
 	extJson := make(map[string]any)
-	sonic.Unmarshal(jsonFile, &extJson)
+	json.Unmarshal(jsonFile, &extJson)
 
 	return extJson, nil
 }

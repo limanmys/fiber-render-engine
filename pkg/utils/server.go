@@ -1,10 +1,10 @@
 package utils
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -27,8 +27,8 @@ func CreateServer() {
 		ServerHeader: "divergent",
 		Prefork:      false,
 		ErrorHandler: server.ErrorHandler,
-		JSONEncoder:  sonic.Marshal,
-		JSONDecoder:  sonic.Unmarshal,
+		JSONEncoder:  json.Marshal,
+		JSONDecoder:  json.Unmarshal,
 	})
 
 	app.Use(recover.New())

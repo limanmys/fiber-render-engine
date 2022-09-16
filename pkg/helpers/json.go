@@ -2,13 +2,11 @@ package helpers
 
 import (
 	"encoding/json"
-
-	"github.com/bytedance/sonic"
 )
 
 func IsJSON(str string) bool {
 	var js json.RawMessage
-	return sonic.UnmarshalString(str, &js) == nil
+	return json.Unmarshal([]byte(str), &js) == nil
 }
 
 func LimanJSON(str string) bool {
@@ -18,5 +16,5 @@ func LimanJSON(str string) bool {
 	}
 
 	var out output
-	return sonic.UnmarshalString(str, &out) == nil
+	return json.Unmarshal([]byte(str), &out) == nil
 }
