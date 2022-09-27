@@ -1,6 +1,8 @@
 package app_logger
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -39,6 +41,12 @@ func New() fiber.Handler {
 		}
 
 		formData := helpers.GetFormData(c)
+
+		for k := range formData {
+			if strings.Contains(strings.ToLower(k), "password") || strings.Contains(strings.ToLower(k), "token") {
+				formData[k] = ""
+			}
+		}
 
 		user_id := ""
 		if c.Locals("user_id") != nil {

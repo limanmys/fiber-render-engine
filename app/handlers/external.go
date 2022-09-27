@@ -78,10 +78,10 @@ func ExternalAPI(c *fiber.Ctx) error {
 	}
 
 	output := linux.Execute(command)
-	if helpers.LimanJSON(output) {
+	if helpers.IsJSON(output) {
 		type LimanMessage struct {
-			Message string `json:"message"`
-			Status  int    `json:"status"`
+			Message any `json:"message"`
+			Status  int `json:"status"`
 		}
 		msg := &LimanMessage{}
 
@@ -90,9 +90,15 @@ func ExternalAPI(c *fiber.Ctx) error {
 			return c.Type("json").SendString(output)
 		}
 
-		if msg != nil && msg.Status > 200 {
+		if msg != nil && msg.Status > 399 {
 			return c.Status(201).Type("json").SendString(output)
 		}
+
+		if msg != nil {
+			return c.Status(msg.Status).Type("json").SendString(output)
+		}
+
+		return c.Type("json").SendString(output)
 	}
 
 	return c.SendString(output)

@@ -1,6 +1,8 @@
 package server
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/pkg/helpers"
 	"github.com/limanmys/render-engine/pkg/logger"
@@ -22,6 +24,12 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	} else {
 		if code >= fiber.StatusInternalServerError {
 			request := helpers.GetFormData(c)
+
+			for k := range request {
+				if strings.Contains(strings.ToLower(k), "password") || strings.Contains(strings.ToLower(k), "token") {
+					request[k] = ""
+				}
+			}
 
 			logger.Sugar().WithOptions(zap.WithCaller(false)).Errorw(
 				"recover middleware catch",
