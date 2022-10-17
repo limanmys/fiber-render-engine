@@ -15,11 +15,17 @@ func OpenTunnel(c *fiber.Ctx) error {
 		}
 	}
 
+	sshPort := c.FormValue("ssh_port")
+	if len(sshPort) < 1 {
+		sshPort = "22"
+	}
+
 	port := bridge.CreateTunnel(
 		c.FormValue("remote_host"),
 		c.FormValue("remote_port"),
 		c.FormValue("username"),
 		c.FormValue("password"),
+		sshPort,
 	)
 
 	return c.JSON(port)

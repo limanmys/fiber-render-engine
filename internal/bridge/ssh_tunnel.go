@@ -42,7 +42,7 @@ type Tunnel struct {
 
 var mut sync.Mutex = sync.Mutex{}
 
-func CreateTunnel(remoteHost, remotePort, username, password string) int {
+func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) int {
 	ch := make(chan int)
 	time.AfterFunc(30*time.Second, func() {
 		ch <- 1
@@ -93,7 +93,7 @@ func CreateTunnel(remoteHost, remotePort, username, password string) int {
 		hostKeys: ssh.InsecureIgnoreHostKey(),
 		user:     username,
 		mode:     '>',
-		hostAddr: net.JoinHostPort(remoteHost, "22"),
+		hostAddr: net.JoinHostPort(remoteHost, sshPort),
 		dialAddr: dial,
 		dialType: dialType,
 		bindAddr: net.JoinHostPort("127.0.0.1", fmt.Sprintf("%d", port)),
