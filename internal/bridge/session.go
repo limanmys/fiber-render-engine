@@ -50,13 +50,9 @@ func (s *Session) CloseAllConnections() {
 func (val *Session) checkOutput(in io.Writer, output *bytes.Buffer) bool {
 	val.Mutex.Lock()
 	defer val.Mutex.Unlock()
-	if output != nil && output.Len() > 0 {
-		if output.String() == "liman-pass-sudo" {
-			_, _ = in.Write([]byte(val.password + "\n"))
-			return true
-		} else {
-			return true
-		}
+	if output != nil && output.Len() > 0 && strings.Contains(output.String(), "liman-pass-sudo") {
+		in.Write([]byte(val.password + "\n"))
+		return true
 	}
 	return false
 }
@@ -90,19 +86,25 @@ func (val *Session) Run(command string) (string, error) {
 			For:
 				for {
 					select {
+					case <-time.After(20 * time.Second):
 					case <-endChan:
 						break For
 					default:
 						if val.checkOutput(in, output) {
 							break For
 						}
+
 						time.Sleep(500)
 					}
 				}
 			}(in, stdoutB, endChan)
 		}
 		sess.Run("(" + command + ") 2> /dev/null")
-		return stripansi.Strip(strings.TrimSpace(strings.Replace(stdoutB.String(), "liman-pass-sudo", "", 1))), nil
+
+		tmp := strings.Split(stdoutB.String(), "liman-pass-sudo")
+		output := tmp[len(tmp)-1]
+
+		return stripansi.Strip(strings.TrimSpace(output)), nil
 	} else if val.WinRM != nil {
 		command = "$ProgressPreference = 'SilentlyContinue';" + command
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
