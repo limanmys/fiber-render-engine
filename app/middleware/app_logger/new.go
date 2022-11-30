@@ -61,7 +61,7 @@ func New() fiber.Handler {
 			"log_id", c.Locals("log_id").(string),
 			"user_id", user_id,
 			"route", c.Path(),
-			"ip_address", c.IP(),
+			"ip_address", c.IPs(),
 			"request_details", formData,
 		)
 
