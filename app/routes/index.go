@@ -20,6 +20,7 @@ func Install(app *fiber.App) {
 	// file
 	app.Post("/getFile", handlers.GetFile)
 	app.Post("/putFile", handlers.PutFile)
+	app.Get("/download", handlers.DownloadFile)
 
 	// script
 	app.Post("/script", handlers.ScriptRunner)

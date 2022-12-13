@@ -24,7 +24,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		return "", logger.FiberError(fiber.StatusBadRequest, "extension names can only contains letters")
 	}
 
-	server, user, settings, err := getParams(extension, credentials, params)
+	server, user, settings, err := GetParams(extension, credentials, params)
 	if err != nil {
 		return "", err
 	}
@@ -118,7 +118,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	return command, nil
 }
 
-func getParams(
+func GetParams(
 	extension *models.Extension,
 	credentials *models.Credentials,
 	params *models.CommandParams,
