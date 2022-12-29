@@ -26,10 +26,13 @@ func GetCredentials(user *models.User, server *models.Server) (*models.Credentia
 		}
 	}
 
-	json.Unmarshal(
+	err := json.Unmarshal(
 		[]byte(serverKey.Data),
 		encryptedKey,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	credentials := encryptedKey.DecryptData(&models.User{ID: encrypterUser}, server)
 	credentials.Type = serverKey.Type

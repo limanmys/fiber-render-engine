@@ -15,7 +15,7 @@ var ErrorHandler = func(c *fiber.Ctx, err error) error {
 		code = e.Code
 	}
 
-	message := &fiber.Map{}
+	var message *fiber.Map
 	if code == fiber.StatusOK {
 		message = &fiber.Map{
 			"status":  code,

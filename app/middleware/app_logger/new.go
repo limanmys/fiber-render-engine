@@ -20,22 +20,18 @@ func New() fiber.Handler {
 			if !helpers.Contains(logger.ALL, c.Path()) {
 				return c.Next()
 			}
-			break
 		case "1":
 			if !helpers.Contains(logger.MINIMAL, c.Path()) {
 				return c.Next()
 			}
-			break
 		case "2":
 			if !helpers.Contains(logger.EXT_LOG, c.Path()) {
 				return c.Next()
 			}
-			break
 		case "3":
 			if !helpers.Contains(logger.EXT_DETAIL, c.Path()) {
 				return c.Next()
 			}
-			break
 		default:
 			return c.Next()
 		}

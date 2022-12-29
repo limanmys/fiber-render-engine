@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"time"
 
@@ -44,14 +44,17 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 		}
 	}
 
-	jsonFile, err := ioutil.ReadFile(fmt.Sprintf("%s/%s/db.json", constants.EXTENSIONS_PATH, fileName))
+	jsonFile, err := os.ReadFile(fmt.Sprintf("%s/%s/db.json", constants.EXTENSIONS_PATH, fileName))
 
 	if err != nil {
 		return nil, err
 	}
 
 	extJson := make(map[string]any)
-	json.Unmarshal(jsonFile, &extJson)
+	err = json.Unmarshal(jsonFile, &extJson)
+	if err != nil {
+		return nil, err
+	}
 
 	return extJson, nil
 }

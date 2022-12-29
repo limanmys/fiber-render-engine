@@ -13,7 +13,7 @@ import (
 )
 
 func ExternalAPI(c *fiber.Ctx) error {
-	extension := &models.Extension{}
+	var extension *models.Extension
 	var err error
 	if len(c.FormValue("extension_id")) > 0 {
 		if !helpers.CheckUUID(c.FormValue("extension_id")) {

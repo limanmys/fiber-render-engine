@@ -1,6 +1,7 @@
 package bridge
 
 import (
+	"context"
 	"strconv"
 	"strings"
 
@@ -38,6 +39,6 @@ func VerifyWinRm(username, password, host, port string, secure bool) bool {
 		return false
 	}
 
-	stdout, _, _, _ := client.RunWithString("hostname", "")
+	stdout, _, _, _ := client.RunWithContextWithString(context.TODO(), "hostname", "")
 	return strings.TrimSpace(stdout) != ""
 }

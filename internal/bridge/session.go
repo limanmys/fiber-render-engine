@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"errors"
 	"io"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/acarl005/stripansi"
 	"github.com/hirochachacha/go-smb2"
+	"github.com/limanmys/render-engine/pkg/logger"
 	"github.com/masterzen/winrm"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
@@ -35,15 +37,24 @@ type Session struct {
 
 func (s *Session) CloseAllConnections() {
 	if s.SSH != nil {
-		s.SSH.Close()
+		err := s.SSH.Close()
+		if err != nil {
+			logger.Sugar().Warnw("cannot close ssh session")
+		}
 	}
 
 	if s.SFTP != nil {
-		s.SFTP.Close()
+		err := s.SFTP.Close()
+		if err != nil {
+			logger.Sugar().Warnw("cannot close sftp session")
+		}
 	}
 
 	if s.SMB != nil {
-		s.SMB.Logoff()
+		err := s.SMB.Logoff()
+		if err != nil {
+			logger.Sugar().Warnw("cannot close smb session")
+		}
 	}
 }
 
@@ -51,7 +62,11 @@ func (val *Session) checkOutput(in io.Writer, output *bytes.Buffer) bool {
 	val.Mutex.Lock()
 	defer val.Mutex.Unlock()
 	if output != nil && output.Len() > 0 && strings.Contains(output.String(), "liman-pass-sudo") {
-		in.Write([]byte(val.password + "\n"))
+		_, err := in.Write([]byte(val.password + "\n"))
+		if err != nil {
+			logger.Sugar().Warnw("cannot write sudo password")
+			return false
+		}
 		return true
 	}
 	return false
@@ -99,7 +114,10 @@ func (val *Session) Run(command string) (string, error) {
 				}
 			}(in, stdoutB, endChan)
 		}
-		sess.Run("(" + command + ") 2> /dev/null")
+		err = sess.Run("(" + command + ") 2> /dev/null")
+		if err != nil {
+			return err.Error(), err
+		}
 
 		tmp := strings.Split(stdoutB.String(), "liman-pass-sudo")
 		output := tmp[len(tmp)-1]
@@ -110,7 +128,7 @@ func (val *Session) Run(command string) (string, error) {
 		encoder := unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM).NewEncoder()
 		encoded, _ := encoder.String(command)
 		command = base64.StdEncoding.EncodeToString([]byte(encoded))
-		stdout, stderr, _, err := val.WinRM.RunWithString("powershell.exe -encodedCommand "+command, "")
+		stdout, stderr, _, err := val.WinRM.RunWithContextWithString(context.TODO(), "powershell.exe -encodedCommand "+command, "")
 		if err != nil {
 			return "", err
 		}

@@ -3,7 +3,6 @@ package sandbox
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -91,7 +90,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		"apiRoute":        "/extensionRun",
 	}
 
-	secureKey, err := ioutil.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
+	secureKey, err := os.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
 	if err != nil {
 		return "", logger.FiberError(fiber.StatusNotFound, "cannot found extension key file")
 	}

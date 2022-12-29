@@ -81,7 +81,10 @@ func (s *Session) SmbGetFile(localPath, remotePath, remoteDisk string) error {
 
 	_, err = os.Stat(localPath)
 	if os.IsNotExist(err) {
-		os.Create(localPath)
+		_, err = os.Create(localPath)
+		if err != nil {
+			return err
+		}
 	}
 
 	srcFile, err := os.OpenFile(localPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)

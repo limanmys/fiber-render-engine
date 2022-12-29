@@ -45,11 +45,17 @@ func CreateServer() {
 	err := app.ListenTLS("127.0.0.1:2806", constants.CERT_PATH+"/liman.crt", constants.CERT_PATH+"/liman.key")
 	if err != nil {
 		logger.Sugar().Errorw("app initialization error", "details", err)
+
 		if strings.Contains(err.Error(), "listen tcp4 :2806: bind: address already in use") {
 			logger.Sugar().Infow("restarting app to freeup port")
+
 			linux.Execute("fuser -k 2806/tcp")
 			time.Sleep(time.Second)
-			helpers.RestartSelf()
+
+			err := helpers.RestartSelf()
+			if err != nil {
+				logger.Sugar().Infow("cannot restart application")
+			}
 		}
 	}
 }

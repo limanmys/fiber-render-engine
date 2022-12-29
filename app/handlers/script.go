@@ -45,7 +45,10 @@ func ScriptRunner(c *fiber.Ctx) error {
 	remotePath := ""
 	if server.Os == "linux" {
 		remotePath = "/tmp/" + filepath.Base(c.FormValue("local_path"))
-		session.Run("rm " + remotePath)
+		_, err := session.Run("rm " + remotePath)
+		if err != nil {
+			return err
+		}
 	} else {
 		remotePath = session.WindowsPath + c.FormValue("remote_path") + ".ps1"
 	}
@@ -57,7 +60,10 @@ func ScriptRunner(c *fiber.Ctx) error {
 
 	output := ""
 	if server.Os == "linux" {
-		session.Run("chmod +x " + remotePath)
+		_, err := session.Run("chmod +x " + remotePath)
+		if err != nil {
+			return err
+		}
 
 		if c.FormValue("root") == "yes" {
 			credentials, err := liman.GetCredentials(&models.User{ID: c.Locals("user_id").(string)}, server)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/limanmys/render-engine/pkg/helpers"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 func Clean() {
@@ -44,7 +45,11 @@ func Clean() {
 			case <-ch:
 				return
 			default:
-				session.SSH.SendRequest("keepalive@liman.dev", true, nil)
+				_, _, err := session.SSH.SendRequest("keepalive@liman.dev", true, nil)
+				if err != nil {
+					logger.Sugar().Warnw("error when sending request")
+				}
+
 				ch <- 1
 			}
 		}()
@@ -85,7 +90,11 @@ func Clean() {
 			case <-ch:
 				return
 			default:
-				tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
+				_, _, err := tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
+				if err != nil {
+					logger.Sugar().Warnw("error when sending request")
+				}
+
 				ch <- 1
 			}
 		}()
