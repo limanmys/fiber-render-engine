@@ -6,7 +6,6 @@ type Server struct {
 	Name        string `json:"name"`
 	Type        string `json:"type"`
 	IPAddress   string `json:"ip_address"`
-	City        string `json:"-"`
 	ControlPort string `json:"control_port"`
 	UserID      string `json:"-"`
 	CreatedAt   string `json:"-"`
