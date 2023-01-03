@@ -79,7 +79,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		"requestData":     string(requestData),
 		"publicPath":      fmt.Sprintf(constants.EXTENSION_PUBLIC_PATH, params.BaseURL, extension.ID),
 		"functionsPath":   fmt.Sprintf("%s/%s%s", constants.EXTENSIONS_PATH, strings.ToLower(extension.Name), constants.FUNCTIONS_FILE_PATH),
-		"navigationRoute": fmt.Sprintf(constants.NAVIGATION_ROUTE, extension.ID, server.City, server.ID),
+		"navigationRoute": fmt.Sprintf(constants.NAVIGATION_ROUTE, extension.ID, server.ID),
 		"key_type":        credentials.Type,
 		"function":        params.TargetFunction,
 		"license":         licenceData,
