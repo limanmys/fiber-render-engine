@@ -104,15 +104,27 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		soCommand = "-dextension=" + shellescape.Quote(soPath) + " "
 	}
 
-	command := fmt.Sprintf(
-		"runuser %s -c 'timeout %s /usr/bin/php %s -d display_errors=on %s %s %s'",
-		strings.Replace(extension.ID, "-", "", -1),
-		helpers.Env("EXTENSION_TIMEOUT", "30"),
-		soCommand,
-		constants.SANDBOX_PATH,
-		constants.KEYS_PATH+"/"+extension.ID,
-		encryptedData,
-	)
+	command := ""
+	if helpers.Env("CONTAINER_MODE", "false") != "true" {
+		command = fmt.Sprintf(
+			"runuser %s -c 'timeout %s /usr/bin/php %s -d display_errors=on %s %s %s'",
+			strings.Replace(extension.ID, "-", "", -1),
+			helpers.Env("EXTENSION_TIMEOUT", "30"),
+			soCommand,
+			constants.SANDBOX_PATH,
+			constants.KEYS_PATH+"/"+extension.ID,
+			encryptedData,
+		)
+	} else {
+		command = fmt.Sprintf(
+			"runuser extuser -c 'timeout %s /usr/bin/php %s -d display_errors=on %s %s %s'",
+			helpers.Env("EXTENSION_TIMEOUT", "30"),
+			soCommand,
+			constants.SANDBOX_PATH,
+			constants.KEYS_PATH+"/"+extension.ID,
+			encryptedData,
+		)
+	}
 
 	return command, nil
 }
