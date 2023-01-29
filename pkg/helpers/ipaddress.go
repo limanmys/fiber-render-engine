@@ -5,6 +5,7 @@ import (
 	"net"
 )
 
+// Resolve IP address from hostname
 func ResolveIP(hostname string) (string, error) {
 	for i := 0; i < 10; i++ {
 		addr, err := net.LookupIP(hostname)

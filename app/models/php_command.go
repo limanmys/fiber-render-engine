@@ -1,5 +1,6 @@
 package models
 
+// CommandParams structure of CommandParams object
 type CommandParams struct {
 	TargetFunction string
 	User           string

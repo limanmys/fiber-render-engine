@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// SetExtensionDb changes specified vault keys from extension
 func SetExtensionDb(c *fiber.Ctx) error {
 	params := []string{"target", "new_param", "server_id", "extension_id", "token"}
 

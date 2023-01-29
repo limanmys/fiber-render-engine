@@ -8,10 +8,12 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// Creates a new authorization instance
 func New() fiber.Handler {
 	return authorization
 }
 
+// authorization Middleware auths users before requests
 func authorization(c *fiber.Ctx) error {
 	if len(c.FormValue("token")) > 0 {
 		user, err := liman.AuthWithToken(

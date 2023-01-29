@@ -13,6 +13,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// PutFile puts file to remote end from local path
 func PutFile(c *fiber.Ctx) error {
 	params := []string{"server_id", "remote_path", "local_path"}
 
@@ -63,6 +64,7 @@ func PutFile(c *fiber.Ctx) error {
 	}`)
 }
 
+// GetFile downloads file from remote path to local path
 func GetFile(c *fiber.Ctx) error {
 	params := []string{"server_id", "remote_path", "local_path"}
 
@@ -113,6 +115,7 @@ func GetFile(c *fiber.Ctx) error {
 	}`)
 }
 
+// DownloadFile returns file pointer
 func DownloadFile(c *fiber.Ctx) error {
 	params := []string{"server_id", "path", "extension_id"}
 

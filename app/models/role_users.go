@@ -1,5 +1,6 @@
 package models
 
+// RoleUsers structure of Role Users pivot table object
 type RoleUsers struct {
 	ID        string `json:"id"`
 	UserID    string `json:"user_id"`

@@ -5,6 +5,7 @@ import (
 	"github.com/limanmys/render-engine/app/handlers"
 )
 
+// Install initializes all routes of application
 func Install(app *fiber.App) {
 	// extension
 	app.Post("/", handlers.ExtensionRunner)

@@ -8,6 +8,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// CommandRunner runs command on specified server
 func CommandRunner(c *fiber.Ctx) error {
 	if len(c.FormValue("server_id")) < 1 {
 		return logger.FiberError(fiber.StatusBadRequest, "server not found")
@@ -35,6 +36,7 @@ func CommandRunner(c *fiber.Ctx) error {
 	return c.SendString(output)
 }
 
+// OutsideCommandRunner runs command on external endpoints
 func OutsideCommandRunner(c *fiber.Ctx) error {
 	params := []string{
 		"command",

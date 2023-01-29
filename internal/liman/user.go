@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// GetUser searches db and returns matching user
 func GetUser(user *models.User) (*models.User, error) {
 	result := database.Connection().Where(&user).First(&user)
 

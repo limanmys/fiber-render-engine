@@ -35,6 +35,7 @@ type Session struct {
 	password       string
 }
 
+// CloseAllConnections closes all connections on session
 func (s *Session) CloseAllConnections() {
 	if s.SSH != nil {
 		err := s.SSH.Close()
@@ -58,6 +59,7 @@ func (s *Session) CloseAllConnections() {
 	}
 }
 
+// checkOutput watches for sudo output and inserts password if exists
 func (val *Session) checkOutput(in io.Writer, output *bytes.Buffer) bool {
 	val.Mutex.Lock()
 	defer val.Mutex.Unlock()
@@ -72,6 +74,7 @@ func (val *Session) checkOutput(in io.Writer, output *bytes.Buffer) bool {
 	return false
 }
 
+// Run runs command on sessions SSH and returns output
 func (val *Session) Run(command string) (string, error) {
 	if val.SSH != nil {
 		sess, err := val.SSH.NewSession()

@@ -1,5 +1,6 @@
 package models
 
+// Licence structure of Licence object
 type Licence struct {
 	ID          string `json:"id"`
 	Data        string `json:"data"`

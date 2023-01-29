@@ -6,6 +6,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// OpenTunnel opens ssh tunnel on unix sockets or ports
 func OpenTunnel(c *fiber.Ctx) error {
 	params := []string{"remote_host", "remote_port", "username", "password"}
 
@@ -31,6 +32,7 @@ func OpenTunnel(c *fiber.Ctx) error {
 	return c.JSON(port)
 }
 
+// KeepTunnelAlive keeps tunnel connection alive
 func KeepTunnelAlive(c *fiber.Ctx) error {
 	params := []string{"remote_host", "remote_port", "username"}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// Clean clears long standing sessions from memory
 func Clean() {
 	now := time.Now()
 	for key, session := range Connections {

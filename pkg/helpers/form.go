@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GetFormData extracts form data or body data and returns it
 func GetFormData(c *fiber.Ctx) map[string]string {
 	multipart, err := c.MultipartForm()
 
@@ -29,6 +30,7 @@ func GetFormData(c *fiber.Ctx) map[string]string {
 	return formValues
 }
 
+// BodyParser parses query and returns it
 func BodyParser(body []byte) map[string]string {
 	values, err := url.ParseQuery(string(body))
 	if err != nil {

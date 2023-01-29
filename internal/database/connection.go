@@ -11,6 +11,7 @@ import (
 var once sync.Once
 var connection *gorm.DB
 
+// Connection creates singleton pattern to connect to database only once and keep it in memory
 func Connection() *gorm.DB {
 	once.Do(func() {
 		connection = initialize()
@@ -19,6 +20,7 @@ func Connection() *gorm.DB {
 	return connection
 }
 
+// initialize Initializes database connection
 func initialize() *gorm.DB {
 	switch helpers.Env("DB_CONNECTION", "pgsql") {
 	case "pgsql":

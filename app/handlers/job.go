@@ -10,6 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// BackgroundJob creates a background shell command
 func BackgroundJob(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
 		return logger.FiberError(fiber.StatusBadRequest, "extension not found")

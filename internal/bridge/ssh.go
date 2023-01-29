@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// InitShellWithPassword creates a SSH shell with password
 func InitShellWithPassword(username, password, host, port string) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: username,
@@ -31,6 +32,7 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 	return conn, nil
 }
 
+// InitShellWithCert creates a SSH shell with certificate
 func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, error) {
 	key, err := ssh.ParsePrivateKey([]byte(certificate))
 	if err != nil {
@@ -59,6 +61,7 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 	return conn, nil
 }
 
+// VerifySSH checks if remote end is active or not
 func VerifySSH(username, password, host, port string) bool {
 	config := &ssh.ClientConfig{
 		User: username,
@@ -83,6 +86,7 @@ func VerifySSH(username, password, host, port string) bool {
 	return true
 }
 
+// VerifySSHCertificate checks if remote end is active or not
 func VerifySSHCertificate(username, certificate, host, port string) bool {
 	key, err := ssh.ParsePrivateKey([]byte(certificate))
 	if err != nil {

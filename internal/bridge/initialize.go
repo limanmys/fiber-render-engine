@@ -10,6 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// GetSession gets session from memory and if does not exists creates a new one
 func GetSession(userID, serverID, host string) (*Session, error) {
 	session, err := Connections.Get(userID, serverID)
 	if err != nil {
@@ -25,6 +26,7 @@ func GetSession(userID, serverID, host string) (*Session, error) {
 	return session, nil
 }
 
+// CreateShell creates a new shell with credential type and sets it on session
 func (s *Session) CreateShell(userID, serverID, host string) bool {
 	credentials, err := liman.GetCredentials(&models.User{ID: userID}, &models.Server{ID: serverID})
 	if err != nil {
@@ -76,6 +78,7 @@ func (s *Session) CreateShell(userID, serverID, host string) bool {
 	return true
 }
 
+// CreateRaw creates a new raw shell with credential type and sets it on session
 func (s *Session) CreateRaw(connectionType, username, password, host, port string) bool {
 	s.Username = username
 	s.password = password
@@ -122,6 +125,7 @@ func (s *Session) CreateRaw(connectionType, username, password, host, port strin
 	return true
 }
 
+// CreateFileSesssion creates a new file session with credential type and sets it on session
 func (s *Session) CreateFileConnection(userID, serverID, host string) bool {
 	credentials, err := liman.GetCredentials(&models.User{ID: userID}, &models.Server{ID: serverID})
 	if err != nil {

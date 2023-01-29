@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// GetServer searches db and returns matching server
 func GetServer(server *models.Server) (*models.Server, error) {
 	result := database.Connection().Where(&server).First(&server)
 

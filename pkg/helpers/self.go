@@ -7,6 +7,7 @@ import (
 	"syscall"
 )
 
+// Restart application
 func RestartSelf() error {
 	self, err := os.Executable()
 	if err != nil {

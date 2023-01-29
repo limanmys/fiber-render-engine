@@ -7,6 +7,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// AuthWithToken Auth user with proprietary Liman token
 func AuthWithToken(token string) (string, error) {
 	tokenObj := &models.Token{}
 
@@ -19,6 +20,7 @@ func AuthWithToken(token string) (string, error) {
 	return tokenObj.UserID, nil
 }
 
+// AuthWithAccessToken Auth user with generated access token
 func AuthWithAccessToken(token string) (string, error) {
 	tokenObj := &models.AccessToken{}
 

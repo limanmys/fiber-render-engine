@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+// Creates a new app logger instance
+// This logger logs requests and removes safe information like password etc.
 func New() fiber.Handler {
 	return func(c *fiber.Ctx) (err error) {
 		c.Locals("log_id", uuid.NewString())

@@ -6,6 +6,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// Verify verifies credentials
 func Verify(c *fiber.Ctx) error {
 	params := []string{"ip_address", "username", "password", "port", "key_type"}
 

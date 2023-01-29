@@ -16,6 +16,7 @@ var (
 	mutex       sync.Mutex
 )
 
+// Get connection from pool
 func (p *Pool) Get(userID, serverID string) (*Session, error) {
 	if conn, ok := Connections[userID+serverID]; ok {
 		return conn, nil
@@ -24,10 +25,12 @@ func (p *Pool) Get(userID, serverID string) (*Session, error) {
 	}
 }
 
+// Set connection on pool
 func (p *Pool) Set(userID, serverID string, session *Session) {
 	Connections[userID+serverID] = session
 }
 
+// GetRaw connection object from pool
 func (p *Pool) GetRaw(userID, remoteHost, username string) (*Session, error) {
 	if conn, ok := Connections[userID+remoteHost+username]; ok {
 		conn.LastConnection = time.Now()
@@ -37,16 +40,19 @@ func (p *Pool) GetRaw(userID, remoteHost, username string) (*Session, error) {
 	}
 }
 
+// SetRaw connection object on pool
 func (p *Pool) SetRaw(userID, remoteHost, username string, session *Session) {
 	Connections[userID+remoteHost+username] = session
 }
 
+// Delete connection object from pool
 func (p *Pool) Delete(key string) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	delete(Connections, key)
 }
 
+// Get Tunnel connection from pool
 func (t *TunnelPool) Get(remoteHost, remotePort, username string) (*Tunnel, error) {
 	if tunnel, ok := Tunnels[remoteHost+":"+remotePort+":"+username]; ok {
 		tunnel.LastConnection = time.Now()
@@ -56,16 +62,19 @@ func (t *TunnelPool) Get(remoteHost, remotePort, username string) (*Tunnel, erro
 	}
 }
 
+// Set Tunnel connection to pool
 func (t *TunnelPool) Set(remoteHost, remotePort, username string, tunnel *Tunnel) {
 	Tunnels[remoteHost+":"+remotePort+":"+username] = tunnel
 }
 
+// Delete Tunnel connection from pool
 func (t *TunnelPool) Delete(key string) {
 	mutex.Lock()
 	defer mutex.Unlock()
 	delete(Tunnels, key)
 }
 
+// VerifyAuth verifies key when connecting
 func VerifyAuth(username, password, ipAddress, port, keyType string) bool {
 	if keyType == "ssh" {
 		return VerifySSH(username, password, ipAddress, port)

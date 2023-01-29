@@ -10,6 +10,7 @@ import (
 	gormLogger "gorm.io/gorm/logger"
 )
 
+// initializePostgres Creates connection and returns it
 func initializePostgres() *gorm.DB {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable timezone=Europe/Istanbul",

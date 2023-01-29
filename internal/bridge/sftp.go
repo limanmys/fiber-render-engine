@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// OpenSFTPConnection creates a new SFTP connection
 func OpenSFTPConnection(conn *ssh.Client) *sftp.Client {
 	client, err := sftp.NewClient(conn)
 	if err != nil {
@@ -20,6 +21,7 @@ func OpenSFTPConnection(conn *ssh.Client) *sftp.Client {
 	return client
 }
 
+// SftpPutFile uploads file on remote path
 func (s *Session) SftpPutFile(localPath, remotePath string) error {
 	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)
@@ -56,6 +58,7 @@ func (s *Session) SftpPutFile(localPath, remotePath string) error {
 	return nil
 }
 
+// SftpGetFile downloads file from remote path
 func (s *Session) SftpGetFile(localPath, remotePath string) error {
 	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)

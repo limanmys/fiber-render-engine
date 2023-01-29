@@ -8,6 +8,7 @@ import (
 	"github.com/masterzen/winrm"
 )
 
+// InitWinRm creates a new WinRM client and returns it
 func InitWinRm(username, password, host, port string, secure bool) (*winrm.Client, error) {
 	winrmPort, _ := strconv.Atoi(port)
 	endpoint := winrm.NewEndpoint(host, winrmPort, secure, true, nil, nil, nil, 0)
@@ -25,6 +26,7 @@ func InitWinRm(username, password, host, port string, secure bool) (*winrm.Clien
 	return client, nil
 }
 
+// VerifyWinRm checks if WinRM authentication is valid to remote end
 func VerifyWinRm(username, password, host, port string, secure bool) bool {
 	winrmPort, _ := strconv.Atoi(port)
 	endpoint := winrm.NewEndpoint(host, winrmPort, secure, true, nil, nil, nil, 0)

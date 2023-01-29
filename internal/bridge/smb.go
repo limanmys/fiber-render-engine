@@ -10,6 +10,7 @@ import (
 	"github.com/hirochachacha/go-smb2"
 )
 
+// OpenSmbConnection creates a new smb connection session
 func OpenSmbConnection(host, username, password string) (*smb2.Session, error) {
 	dialer := net.Dialer{Timeout: time.Second * 5}
 	conn, err := dialer.Dial("tcp", host+":445")
@@ -31,6 +32,7 @@ func OpenSmbConnection(host, username, password string) (*smb2.Session, error) {
 	return s, nil
 }
 
+// SmbPutFile uploads file from local path to remote path
 func (s *Session) SmbPutFile(localPath, remotePath, remoteDisk string) error {
 	if s.SMB == nil {
 		return errors.New("smb connection does not exist")
@@ -62,6 +64,7 @@ func (s *Session) SmbPutFile(localPath, remotePath, remoteDisk string) error {
 	return nil
 }
 
+// SmbGetFile downloads file from remote path to local path
 func (s *Session) SmbGetFile(localPath, remotePath, remoteDisk string) error {
 	if s.SMB == nil {
 		return errors.New("smb connection does not exist")

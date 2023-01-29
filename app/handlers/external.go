@@ -12,6 +12,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// ExternalAPI used for running other extension functions from a different extension
 func ExternalAPI(c *fiber.Ctx) error {
 	var extension *models.Extension
 	var err error

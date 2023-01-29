@@ -17,6 +17,7 @@ import (
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
+// GetExtension searches db and returns matching extension
 func GetExtension(extension *models.Extension) (*models.Extension, error) {
 	result := database.Connection().Where(&extension).First(&extension)
 
@@ -31,6 +32,7 @@ func GetExtension(extension *models.Extension) (*models.Extension, error) {
 	return nil, logger.FiberError(fiber.StatusNotFound, "cannot found extension with this id")
 }
 
+// GetExtensionJSON Retrieves extension's JSON file from filesystem and returns it as object
 func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 	fileName := ""
 	if len(extension.Name) > 0 {
@@ -59,6 +61,7 @@ func GetExtensionJSON(extension *models.Extension) (map[string]any, error) {
 	return extJson, nil
 }
 
+// GetLicence searches db and returns matching licence
 func GetLicence(extension *models.Extension) (*models.Licence, error) {
 	licence := &models.Licence{}
 
@@ -68,9 +71,10 @@ func GetLicence(extension *models.Extension) (*models.Licence, error) {
 		return licence, nil
 	}
 
-	return nil, errors.New("Licence not found")
+	return nil, errors.New("licence not found")
 }
 
+// SetExtensionDb sets the value of vault key
 func SetExtensionDb(value, target, userID, serverID string, isGlobal bool) (string, error) {
 	found := false
 	settings := []*models.Settings{}

@@ -1,5 +1,6 @@
 package models
 
+// Credentials type of credentials object
 type Credentials struct {
 	// Type
 	Type string `json:"type"`

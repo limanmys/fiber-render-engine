@@ -1,5 +1,6 @@
 package models
 
+// Permission structure of Permission object
 type Permission struct {
 	ID        string `json:"id"`
 	CreatedAt string `json:"created_at"`

@@ -10,6 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// ScriptRunner runs scripts on remote server
 func ScriptRunner(c *fiber.Ctx) error {
 	params := []string{"local_path", "root", "parameters", "server_id"}
 

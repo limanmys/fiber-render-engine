@@ -42,6 +42,7 @@ type Tunnel struct {
 
 var mut sync.Mutex = sync.Mutex{}
 
+// CreateTunnel starts a new tunnel instance and sets it into TunnelPool
 func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) int {
 	ch := make(chan int)
 	time.AfterFunc(30*time.Second, func() {
@@ -131,6 +132,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 	return 0
 }
 
+// String returns readable format of tunnel struct
 func (t *Tunnel) String() string {
 	var left, right string
 	mode := "<?>"
@@ -143,6 +145,7 @@ func (t *Tunnel) String() string {
 	return fmt.Sprintf("%s@%s | %s %s %s", t.user, t.hostAddr, left, mode, right)
 }
 
+// Start starts binding to remote end and return error if exists any
 func (t *Tunnel) Start() bool {
 	ctx, cancel := context.WithCancel(context.Background())
 	t.ctx = ctx
@@ -156,11 +159,13 @@ func (t *Tunnel) Start() bool {
 	return hasError
 }
 
+// Stop collapses tunnel
 func (t *Tunnel) Stop() {
 	t.log.Infow("collapsed tunnel", "details", t)
 	t.cancel()
 }
 
+// bindTunnel Binds tunnel with our tunnel object
 func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *bool) {
 	wgt := sync.WaitGroup{}
 	wgt.Add(1)
@@ -251,6 +256,7 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *b
 	}
 }
 
+// dialTunnel dials connection and waits until context get cancelled
 func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh.Client, cn1 net.Conn, hasError *bool) {
 	defer wg.Done()
 

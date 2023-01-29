@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// ExtensionRunner runs extensions and returns rendered HTML/JSON views
 func ExtensionRunner(c *fiber.Ctx) error {
 	if len(c.FormValue("extension_id")) < 1 {
 		return logger.FiberError(fiber.StatusBadRequest, "extension not found")

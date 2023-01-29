@@ -8,10 +8,12 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// Creates a new permission middleware instance
 func New() fiber.Handler {
 	return permission
 }
 
+// permission Middleware checks for if users permission is enough
 func permission(c *fiber.Ctx) error {
 	user, err := liman.GetUser(&models.User{
 		ID: c.Locals("user_id").(string),

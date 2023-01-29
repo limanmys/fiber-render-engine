@@ -10,6 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// GetPermissions Gets user and extensions permissons and variables
 func GetPermissions(user *models.User, extFilter string) ([]string, map[string]string, error) {
 	roles, err := getRoleMaps(user)
 	if err != nil {
@@ -32,6 +33,7 @@ func GetPermissions(user *models.User, extFilter string) ([]string, map[string]s
 	return permissions, variables, nil
 }
 
+// GetObjectPermissions Returns object permissions of user
 func GetObjectPermissions(user *models.User) ([]string, error) {
 	roles, err := getRoleMaps(user)
 	if err != nil {
@@ -51,6 +53,7 @@ func GetObjectPermissions(user *models.User) ([]string, error) {
 	return permissions, nil
 }
 
+// getPermissionsFromMorph Searches db for morph relationships and returns permissions
 func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[string]string, error) {
 	permission := []*models.Permission{}
 
@@ -81,6 +84,7 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 	return funcPerms, varPerms, nil
 }
 
+// getObjectPermissionsFromMorph Searches db for morph relationships and returns object permissions
 func getObjectPermissionsFromMorph(morphID string) ([]string, error) {
 	permissions := []*models.Permission{}
 
@@ -97,6 +101,7 @@ func getObjectPermissionsFromMorph(morphID string) ([]string, error) {
 	return results, nil
 }
 
+// getRoleMaps Retrieves role mapping for users
 func getRoleMaps(user *models.User) ([]string, error) {
 	roles := []*models.RoleUsers{}
 

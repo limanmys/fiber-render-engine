@@ -20,6 +20,11 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+/*
+Create Server
+
+Starts fiber web server and listens for requests
+*/
 func CreateServer() {
 	// Create Fiber App
 	app := fiber.New(fiber.Config{

@@ -9,6 +9,11 @@ import (
 	"go.uber.org/zap"
 )
 
+/*
+ErrorHandler utilizes a global GoFiber error handler and returns a Liman type error output
+
+https://docs.gofiber.io/guide/error-handling/#custom-error-handler
+*/
 var ErrorHandler = func(c *fiber.Ctx, err error) error {
 	code := fiber.StatusInternalServerError
 	if e, ok := err.(*fiber.Error); ok {

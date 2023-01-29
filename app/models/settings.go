@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Settings structure of Settings object
 type Settings struct {
 	ID        string `json:"id"`
 	ServerID  string `json:"server_id"`

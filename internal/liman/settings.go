@@ -7,6 +7,7 @@ import (
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
+// GetSettings takes needed parameters, decodes them and returns the settings that belongs to parameters
 func GetSettings(user *models.User, server *models.Server, extension *models.Extension) (map[string]string, error) {
 	extJson, err := GetExtensionJSON(extension)
 

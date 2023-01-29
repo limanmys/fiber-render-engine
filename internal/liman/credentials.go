@@ -9,6 +9,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
+// GetCredentials Searches db and returns credentials of server
 func GetCredentials(user *models.User, server *models.Server) (*models.Credentials, error) {
 	serverKey := &models.ServerKey{}
 

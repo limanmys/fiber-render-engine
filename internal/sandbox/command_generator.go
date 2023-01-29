@@ -16,7 +16,9 @@ import (
 	"github.com/mervick/aes-everywhere/go/aes256"
 )
 
+// GenerateCommand creates a command for running Sandbox PHP instance with required parameters
 func GenerateCommand(extension *models.Extension, credentials *models.Credentials, params *models.CommandParams) (string, error) {
+	// Get needed datas
 	extension.Name = shellescape.StripUnsafe(extension.Name)
 
 	if !helpers.IsLetter(extension.Name) {
@@ -61,6 +63,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		licenceData = licence.Data
 	}
 
+	// Convert required datas to JSON
 	serverJson, _ := json.Marshal(server)
 	extensionJson, _ := json.Marshal(extension)
 	settingsJson, _ := json.Marshal(settings)
@@ -69,6 +72,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	permissionsJson, _ := json.Marshal(permissions)
 	variablesJson, _ := json.Marshal(variables)
 
+	// Construct data that needed to be used on PHP Sandbox
 	extensionData := map[string]string{
 		"server":          string(serverJson),
 		"extension":       string(extensionJson),
@@ -98,12 +102,14 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	extensionDataJson, _ := json.Marshal(extensionData)
 	encryptedData := aes256.Encrypt(string(extensionDataJson), string(secureKey))
 
+	// If exist, use Liman licence system on extension runner
 	soPath := "/liman/extensions/" + strings.ToLower(extension.Name) + "/liman.so"
 	soCommand := ""
 	if _, err := os.Stat(soPath); err == nil {
 		soCommand = "-dextension=" + shellescape.Quote(soPath) + " "
 	}
 
+	// Create command
 	command := ""
 	if helpers.Env("CONTAINER_MODE", "false") != "true" {
 		command = fmt.Sprintf(
@@ -129,6 +135,7 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 	return command, nil
 }
 
+// Get needed parameters and return them
 func GetParams(
 	extension *models.Extension,
 	credentials *models.Credentials,
