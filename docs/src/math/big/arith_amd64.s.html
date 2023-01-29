@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: arith_amd64.s in package math/big</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	arith_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/math/big.html">math/big</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2009 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>//go:build !math_big_pure_go</code></span>
+<span class="codeline" id="line-6"><code>// +build !math_big_pure_go</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code>// This file provides fast assembly versions for the elementary</code></span>
+<span class="codeline" id="line-11"><code>// arithmetic operations on vectors implemented in arith.go.</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code>// The carry bit is saved with SBBQ Rx, Rx: if the carry was set, Rx is -1, otherwise it is 0.</code></span>
+<span class="codeline" id="line-14"><code>// It is restored with ADDQ Rx, Rx: if Rx was -1 the carry is set, otherwise it is cleared.</code></span>
+<span class="codeline" id="line-15"><code>// This is faster than using rotate instructions.</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code>// func addVV(z, x, y []Word) (c Word)</code></span>
+<span class="codeline" id="line-18"><code>TEXT ·addVV(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-19"><code>	MOVQ z_len+8(FP), DI</code></span>
+<span class="codeline" id="line-20"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-21"><code>	MOVQ y+48(FP), R9</code></span>
+<span class="codeline" id="line-22"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code>	MOVQ $0, CX		// c = 0</code></span>
+<span class="codeline" id="line-25"><code>	MOVQ $0, SI		// i = 0</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code>	// s/JL/JMP/ below to disable the unrolled loop</code></span>
+<span class="codeline" id="line-28"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-29"><code>	JL V1			// if n &lt; 0 goto V1</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code>U1:	// n &gt;= 0</code></span>
+<span class="codeline" id="line-32"><code>	// regular loop body unrolled 4x</code></span>
+<span class="codeline" id="line-33"><code>	ADDQ CX, CX		// restore CF</code></span>
+<span class="codeline" id="line-34"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-35"><code>	MOVQ 8(R8)(SI*8), R12</code></span>
+<span class="codeline" id="line-36"><code>	MOVQ 16(R8)(SI*8), R13</code></span>
+<span class="codeline" id="line-37"><code>	MOVQ 24(R8)(SI*8), R14</code></span>
+<span class="codeline" id="line-38"><code>	ADCQ 0(R9)(SI*8), R11</code></span>
+<span class="codeline" id="line-39"><code>	ADCQ 8(R9)(SI*8), R12</code></span>
+<span class="codeline" id="line-40"><code>	ADCQ 16(R9)(SI*8), R13</code></span>
+<span class="codeline" id="line-41"><code>	ADCQ 24(R9)(SI*8), R14</code></span>
+<span class="codeline" id="line-42"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-43"><code>	MOVQ R12, 8(R10)(SI*8)</code></span>
+<span class="codeline" id="line-44"><code>	MOVQ R13, 16(R10)(SI*8)</code></span>
+<span class="codeline" id="line-45"><code>	MOVQ R14, 24(R10)(SI*8)</code></span>
+<span class="codeline" id="line-46"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>	ADDQ $4, SI		// i += 4</code></span>
+<span class="codeline" id="line-49"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-50"><code>	JGE U1			// if n &gt;= 0 goto U1</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code>V1:	ADDQ $4, DI		// n += 4</code></span>
+<span class="codeline" id="line-53"><code>	JLE E1			// if n &lt;= 0 goto E1</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code>L1:	// n &gt; 0</code></span>
+<span class="codeline" id="line-56"><code>	ADDQ CX, CX		// restore CF</code></span>
+<span class="codeline" id="line-57"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-58"><code>	ADCQ 0(R9)(SI*8), R11</code></span>
+<span class="codeline" id="line-59"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-60"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code>	ADDQ $1, SI		// i++</code></span>
+<span class="codeline" id="line-63"><code>	SUBQ $1, DI		// n--</code></span>
+<span class="codeline" id="line-64"><code>	JG L1			// if n &gt; 0 goto L1</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>E1:	NEGQ CX</code></span>
+<span class="codeline" id="line-67"><code>	MOVQ CX, c+72(FP)	// return c</code></span>
+<span class="codeline" id="line-68"><code>	RET</code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code>// func subVV(z, x, y []Word) (c Word)</code></span>
+<span class="codeline" id="line-72"><code>// (same as addVV except for SBBQ instead of ADCQ and label names)</code></span>
+<span class="codeline" id="line-73"><code>TEXT ·subVV(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-74"><code>	MOVQ z_len+8(FP), DI</code></span>
+<span class="codeline" id="line-75"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-76"><code>	MOVQ y+48(FP), R9</code></span>
+<span class="codeline" id="line-77"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code>	MOVQ $0, CX		// c = 0</code></span>
+<span class="codeline" id="line-80"><code>	MOVQ $0, SI		// i = 0</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	// s/JL/JMP/ below to disable the unrolled loop</code></span>
+<span class="codeline" id="line-83"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-84"><code>	JL V2			// if n &lt; 0 goto V2</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code>U2:	// n &gt;= 0</code></span>
+<span class="codeline" id="line-87"><code>	// regular loop body unrolled 4x</code></span>
+<span class="codeline" id="line-88"><code>	ADDQ CX, CX		// restore CF</code></span>
+<span class="codeline" id="line-89"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-90"><code>	MOVQ 8(R8)(SI*8), R12</code></span>
+<span class="codeline" id="line-91"><code>	MOVQ 16(R8)(SI*8), R13</code></span>
+<span class="codeline" id="line-92"><code>	MOVQ 24(R8)(SI*8), R14</code></span>
+<span class="codeline" id="line-93"><code>	SBBQ 0(R9)(SI*8), R11</code></span>
+<span class="codeline" id="line-94"><code>	SBBQ 8(R9)(SI*8), R12</code></span>
+<span class="codeline" id="line-95"><code>	SBBQ 16(R9)(SI*8), R13</code></span>
+<span class="codeline" id="line-96"><code>	SBBQ 24(R9)(SI*8), R14</code></span>
+<span class="codeline" id="line-97"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-98"><code>	MOVQ R12, 8(R10)(SI*8)</code></span>
+<span class="codeline" id="line-99"><code>	MOVQ R13, 16(R10)(SI*8)</code></span>
+<span class="codeline" id="line-100"><code>	MOVQ R14, 24(R10)(SI*8)</code></span>
+<span class="codeline" id="line-101"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code>	ADDQ $4, SI		// i += 4</code></span>
+<span class="codeline" id="line-104"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-105"><code>	JGE U2			// if n &gt;= 0 goto U2</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>V2:	ADDQ $4, DI		// n += 4</code></span>
+<span class="codeline" id="line-108"><code>	JLE E2			// if n &lt;= 0 goto E2</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code>L2:	// n &gt; 0</code></span>
+<span class="codeline" id="line-111"><code>	ADDQ CX, CX		// restore CF</code></span>
+<span class="codeline" id="line-112"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-113"><code>	SBBQ 0(R9)(SI*8), R11</code></span>
+<span class="codeline" id="line-114"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-115"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code>	ADDQ $1, SI		// i++</code></span>
+<span class="codeline" id="line-118"><code>	SUBQ $1, DI		// n--</code></span>
+<span class="codeline" id="line-119"><code>	JG L2			// if n &gt; 0 goto L2</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>E2:	NEGQ CX</code></span>
+<span class="codeline" id="line-122"><code>	MOVQ CX, c+72(FP)	// return c</code></span>
+<span class="codeline" id="line-123"><code>	RET</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code>// func addVW(z, x []Word, y Word) (c Word)</code></span>
+<span class="codeline" id="line-127"><code>TEXT ·addVW(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-128"><code>	MOVQ z_len+8(FP), DI</code></span>
+<span class="codeline" id="line-129"><code>	CMPQ DI, $32</code></span>
+<span class="codeline" id="line-130"><code>	JG large</code></span>
+<span class="codeline" id="line-131"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-132"><code>	MOVQ y+48(FP), CX	// c = y</code></span>
+<span class="codeline" id="line-133"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code>	MOVQ $0, SI		// i = 0</code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code>	// s/JL/JMP/ below to disable the unrolled loop</code></span>
+<span class="codeline" id="line-138"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-139"><code>	JL V3			// if n &lt; 4 goto V3</code></span>
+<span class="codeline" id="line-140"><code></code></span>
+<span class="codeline" id="line-141"><code>U3:	// n &gt;= 0</code></span>
+<span class="codeline" id="line-142"><code>	// regular loop body unrolled 4x</code></span>
+<span class="codeline" id="line-143"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-144"><code>	MOVQ 8(R8)(SI*8), R12</code></span>
+<span class="codeline" id="line-145"><code>	MOVQ 16(R8)(SI*8), R13</code></span>
+<span class="codeline" id="line-146"><code>	MOVQ 24(R8)(SI*8), R14</code></span>
+<span class="codeline" id="line-147"><code>	ADDQ CX, R11</code></span>
+<span class="codeline" id="line-148"><code>	ADCQ $0, R12</code></span>
+<span class="codeline" id="line-149"><code>	ADCQ $0, R13</code></span>
+<span class="codeline" id="line-150"><code>	ADCQ $0, R14</code></span>
+<span class="codeline" id="line-151"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-152"><code>	NEGQ CX</code></span>
+<span class="codeline" id="line-153"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-154"><code>	MOVQ R12, 8(R10)(SI*8)</code></span>
+<span class="codeline" id="line-155"><code>	MOVQ R13, 16(R10)(SI*8)</code></span>
+<span class="codeline" id="line-156"><code>	MOVQ R14, 24(R10)(SI*8)</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code>	ADDQ $4, SI		// i += 4</code></span>
+<span class="codeline" id="line-159"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-160"><code>	JGE U3			// if n &gt;= 0 goto U3</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code>V3:	ADDQ $4, DI		// n += 4</code></span>
+<span class="codeline" id="line-163"><code>	JLE E3			// if n &lt;= 0 goto E3</code></span>
+<span class="codeline" id="line-164"><code></code></span>
+<span class="codeline" id="line-165"><code>L3:	// n &gt; 0</code></span>
+<span class="codeline" id="line-166"><code>	ADDQ 0(R8)(SI*8), CX</code></span>
+<span class="codeline" id="line-167"><code>	MOVQ CX, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-168"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-169"><code>	NEGQ CX</code></span>
+<span class="codeline" id="line-170"><code></code></span>
+<span class="codeline" id="line-171"><code>	ADDQ $1, SI		// i++</code></span>
+<span class="codeline" id="line-172"><code>	SUBQ $1, DI		// n--</code></span>
+<span class="codeline" id="line-173"><code>	JG L3			// if n &gt; 0 goto L3</code></span>
+<span class="codeline" id="line-174"><code></code></span>
+<span class="codeline" id="line-175"><code>E3:	MOVQ CX, c+56(FP)	// return c</code></span>
+<span class="codeline" id="line-176"><code>	RET</code></span>
+<span class="codeline" id="line-177"><code>large:</code></span>
+<span class="codeline" id="line-178"><code>	JMP ·addVWlarge(SB)</code></span>
+<span class="codeline" id="line-179"><code></code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code>// func subVW(z, x []Word, y Word) (c Word)</code></span>
+<span class="codeline" id="line-182"><code>// (same as addVW except for SUBQ/SBBQ instead of ADDQ/ADCQ and label names)</code></span>
+<span class="codeline" id="line-183"><code>TEXT ·subVW(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-184"><code>	MOVQ z_len+8(FP), DI</code></span>
+<span class="codeline" id="line-185"><code>	CMPQ DI, $32</code></span>
+<span class="codeline" id="line-186"><code>	JG large</code></span>
+<span class="codeline" id="line-187"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-188"><code>	MOVQ y+48(FP), CX	// c = y</code></span>
+<span class="codeline" id="line-189"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-190"><code></code></span>
+<span class="codeline" id="line-191"><code>	MOVQ $0, SI		// i = 0</code></span>
+<span class="codeline" id="line-192"><code></code></span>
+<span class="codeline" id="line-193"><code>	// s/JL/JMP/ below to disable the unrolled loop</code></span>
+<span class="codeline" id="line-194"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-195"><code>	JL V4			// if n &lt; 4 goto V4</code></span>
+<span class="codeline" id="line-196"><code></code></span>
+<span class="codeline" id="line-197"><code>U4:	// n &gt;= 0</code></span>
+<span class="codeline" id="line-198"><code>	// regular loop body unrolled 4x</code></span>
+<span class="codeline" id="line-199"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-200"><code>	MOVQ 8(R8)(SI*8), R12</code></span>
+<span class="codeline" id="line-201"><code>	MOVQ 16(R8)(SI*8), R13</code></span>
+<span class="codeline" id="line-202"><code>	MOVQ 24(R8)(SI*8), R14</code></span>
+<span class="codeline" id="line-203"><code>	SUBQ CX, R11</code></span>
+<span class="codeline" id="line-204"><code>	SBBQ $0, R12</code></span>
+<span class="codeline" id="line-205"><code>	SBBQ $0, R13</code></span>
+<span class="codeline" id="line-206"><code>	SBBQ $0, R14</code></span>
+<span class="codeline" id="line-207"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-208"><code>	NEGQ CX</code></span>
+<span class="codeline" id="line-209"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-210"><code>	MOVQ R12, 8(R10)(SI*8)</code></span>
+<span class="codeline" id="line-211"><code>	MOVQ R13, 16(R10)(SI*8)</code></span>
+<span class="codeline" id="line-212"><code>	MOVQ R14, 24(R10)(SI*8)</code></span>
+<span class="codeline" id="line-213"><code></code></span>
+<span class="codeline" id="line-214"><code>	ADDQ $4, SI		// i += 4</code></span>
+<span class="codeline" id="line-215"><code>	SUBQ $4, DI		// n -= 4</code></span>
+<span class="codeline" id="line-216"><code>	JGE U4			// if n &gt;= 0 goto U4</code></span>
+<span class="codeline" id="line-217"><code></code></span>
+<span class="codeline" id="line-218"><code>V4:	ADDQ $4, DI		// n += 4</code></span>
+<span class="codeline" id="line-219"><code>	JLE E4			// if n &lt;= 0 goto E4</code></span>
+<span class="codeline" id="line-220"><code></code></span>
+<span class="codeline" id="line-221"><code>L4:	// n &gt; 0</code></span>
+<span class="codeline" id="line-222"><code>	MOVQ 0(R8)(SI*8), R11</code></span>
+<span class="codeline" id="line-223"><code>	SUBQ CX, R11</code></span>
+<span class="codeline" id="line-224"><code>	MOVQ R11, 0(R10)(SI*8)</code></span>
+<span class="codeline" id="line-225"><code>	SBBQ CX, CX		// save CF</code></span>
+<span class="codeline" id="line-226"><code>	NEGQ CX</code></span>
+<span class="codeline" id="line-227"><code></code></span>
+<span class="codeline" id="line-228"><code>	ADDQ $1, SI		// i++</code></span>
+<span class="codeline" id="line-229"><code>	SUBQ $1, DI		// n--</code></span>
+<span class="codeline" id="line-230"><code>	JG L4			// if n &gt; 0 goto L4</code></span>
+<span class="codeline" id="line-231"><code></code></span>
+<span class="codeline" id="line-232"><code>E4:	MOVQ CX, c+56(FP)	// return c</code></span>
+<span class="codeline" id="line-233"><code>	RET</code></span>
+<span class="codeline" id="line-234"><code>large:</code></span>
+<span class="codeline" id="line-235"><code>	JMP ·subVWlarge(SB)</code></span>
+<span class="codeline" id="line-236"><code></code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code>// func shlVU(z, x []Word, s uint) (c Word)</code></span>
+<span class="codeline" id="line-239"><code>TEXT ·shlVU(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-240"><code>	MOVQ z_len+8(FP), BX	// i = z</code></span>
+<span class="codeline" id="line-241"><code>	SUBQ $1, BX		// i--</code></span>
+<span class="codeline" id="line-242"><code>	JL X8b			// i &lt; 0	(n &lt;= 0)</code></span>
+<span class="codeline" id="line-243"><code></code></span>
+<span class="codeline" id="line-244"><code>	// n &gt; 0</code></span>
+<span class="codeline" id="line-245"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-246"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-247"><code>	MOVQ s+48(FP), CX</code></span>
+<span class="codeline" id="line-248"><code>	MOVQ (R8)(BX*8), AX	// w1 = x[n-1]</code></span>
+<span class="codeline" id="line-249"><code>	MOVQ $0, DX</code></span>
+<span class="codeline" id="line-250"><code>	SHLQ CX, AX, DX		// w1&gt;&gt;ŝ</code></span>
+<span class="codeline" id="line-251"><code>	MOVQ DX, c+56(FP)</code></span>
+<span class="codeline" id="line-252"><code></code></span>
+<span class="codeline" id="line-253"><code>	CMPQ BX, $0</code></span>
+<span class="codeline" id="line-254"><code>	JLE X8a			// i &lt;= 0</code></span>
+<span class="codeline" id="line-255"><code></code></span>
+<span class="codeline" id="line-256"><code>	// i &gt; 0</code></span>
+<span class="codeline" id="line-257"><code>L8:	MOVQ AX, DX		// w = w1</code></span>
+<span class="codeline" id="line-258"><code>	MOVQ -8(R8)(BX*8), AX	// w1 = x[i-1]</code></span>
+<span class="codeline" id="line-259"><code>	SHLQ CX, AX, DX		// w&lt;&lt;s | w1&gt;&gt;ŝ</code></span>
+<span class="codeline" id="line-260"><code>	MOVQ DX, (R10)(BX*8)	// z[i] = w&lt;&lt;s | w1&gt;&gt;ŝ</code></span>
+<span class="codeline" id="line-261"><code>	SUBQ $1, BX		// i--</code></span>
+<span class="codeline" id="line-262"><code>	JG L8			// i &gt; 0</code></span>
+<span class="codeline" id="line-263"><code></code></span>
+<span class="codeline" id="line-264"><code>	// i &lt;= 0</code></span>
+<span class="codeline" id="line-265"><code>X8a:	SHLQ CX, AX		// w1&lt;&lt;s</code></span>
+<span class="codeline" id="line-266"><code>	MOVQ AX, (R10)		// z[0] = w1&lt;&lt;s</code></span>
+<span class="codeline" id="line-267"><code>	RET</code></span>
+<span class="codeline" id="line-268"><code></code></span>
+<span class="codeline" id="line-269"><code>X8b:	MOVQ $0, c+56(FP)</code></span>
+<span class="codeline" id="line-270"><code>	RET</code></span>
+<span class="codeline" id="line-271"><code></code></span>
+<span class="codeline" id="line-272"><code></code></span>
+<span class="codeline" id="line-273"><code>// func shrVU(z, x []Word, s uint) (c Word)</code></span>
+<span class="codeline" id="line-274"><code>TEXT ·shrVU(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-275"><code>	MOVQ z_len+8(FP), R11</code></span>
+<span class="codeline" id="line-276"><code>	SUBQ $1, R11		// n--</code></span>
+<span class="codeline" id="line-277"><code>	JL X9b			// n &lt; 0	(n &lt;= 0)</code></span>
+<span class="codeline" id="line-278"><code></code></span>
+<span class="codeline" id="line-279"><code>	// n &gt; 0</code></span>
+<span class="codeline" id="line-280"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-281"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-282"><code>	MOVQ s+48(FP), CX</code></span>
+<span class="codeline" id="line-283"><code>	MOVQ (R8), AX		// w1 = x[0]</code></span>
+<span class="codeline" id="line-284"><code>	MOVQ $0, DX</code></span>
+<span class="codeline" id="line-285"><code>	SHRQ CX, AX, DX		// w1&lt;&lt;ŝ</code></span>
+<span class="codeline" id="line-286"><code>	MOVQ DX, c+56(FP)</code></span>
+<span class="codeline" id="line-287"><code></code></span>
+<span class="codeline" id="line-288"><code>	MOVQ $0, BX		// i = 0</code></span>
+<span class="codeline" id="line-289"><code>	JMP E9</code></span>
+<span class="codeline" id="line-290"><code></code></span>
+<span class="codeline" id="line-291"><code>	// i &lt; n-1</code></span>
+<span class="codeline" id="line-292"><code>L9:	MOVQ AX, DX		// w = w1</code></span>
+<span class="codeline" id="line-293"><code>	MOVQ 8(R8)(BX*8), AX	// w1 = x[i+1]</code></span>
+<span class="codeline" id="line-294"><code>	SHRQ CX, AX, DX		// w&gt;&gt;s | w1&lt;&lt;ŝ</code></span>
+<span class="codeline" id="line-295"><code>	MOVQ DX, (R10)(BX*8)	// z[i] = w&gt;&gt;s | w1&lt;&lt;ŝ</code></span>
+<span class="codeline" id="line-296"><code>	ADDQ $1, BX		// i++</code></span>
+<span class="codeline" id="line-297"><code></code></span>
+<span class="codeline" id="line-298"><code>E9:	CMPQ BX, R11</code></span>
+<span class="codeline" id="line-299"><code>	JL L9			// i &lt; n-1</code></span>
+<span class="codeline" id="line-300"><code></code></span>
+<span class="codeline" id="line-301"><code>	// i &gt;= n-1</code></span>
+<span class="codeline" id="line-302"><code>X9a:	SHRQ CX, AX		// w1&gt;&gt;s</code></span>
+<span class="codeline" id="line-303"><code>	MOVQ AX, (R10)(R11*8)	// z[n-1] = w1&gt;&gt;s</code></span>
+<span class="codeline" id="line-304"><code>	RET</code></span>
+<span class="codeline" id="line-305"><code></code></span>
+<span class="codeline" id="line-306"><code>X9b:	MOVQ $0, c+56(FP)</code></span>
+<span class="codeline" id="line-307"><code>	RET</code></span>
+<span class="codeline" id="line-308"><code></code></span>
+<span class="codeline" id="line-309"><code></code></span>
+<span class="codeline" id="line-310"><code>// func mulAddVWW(z, x []Word, y, r Word) (c Word)</code></span>
+<span class="codeline" id="line-311"><code>TEXT ·mulAddVWW(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-312"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-313"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-314"><code>	MOVQ y+48(FP), R9</code></span>
+<span class="codeline" id="line-315"><code>	MOVQ r+56(FP), CX	// c = r</code></span>
+<span class="codeline" id="line-316"><code>	MOVQ z_len+8(FP), R11</code></span>
+<span class="codeline" id="line-317"><code>	MOVQ $0, BX		// i = 0</code></span>
+<span class="codeline" id="line-318"><code></code></span>
+<span class="codeline" id="line-319"><code>	CMPQ R11, $4</code></span>
+<span class="codeline" id="line-320"><code>	JL E5</code></span>
+<span class="codeline" id="line-321"><code></code></span>
+<span class="codeline" id="line-322"><code>U5:	// i+4 &lt;= n</code></span>
+<span class="codeline" id="line-323"><code>	// regular loop body unrolled 4x</code></span>
+<span class="codeline" id="line-324"><code>	MOVQ (0*8)(R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-325"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-326"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-327"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-328"><code>	MOVQ AX, (0*8)(R10)(BX*8)</code></span>
+<span class="codeline" id="line-329"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-330"><code>	MOVQ (1*8)(R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-331"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-332"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-333"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-334"><code>	MOVQ AX, (1*8)(R10)(BX*8)</code></span>
+<span class="codeline" id="line-335"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-336"><code>	MOVQ (2*8)(R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-337"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-338"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-339"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-340"><code>	MOVQ AX, (2*8)(R10)(BX*8)</code></span>
+<span class="codeline" id="line-341"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-342"><code>	MOVQ (3*8)(R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-343"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-344"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-345"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-346"><code>	MOVQ AX, (3*8)(R10)(BX*8)</code></span>
+<span class="codeline" id="line-347"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-348"><code>	ADDQ $4, BX		// i += 4</code></span>
+<span class="codeline" id="line-349"><code></code></span>
+<span class="codeline" id="line-350"><code>	LEAQ 4(BX), DX</code></span>
+<span class="codeline" id="line-351"><code>	CMPQ DX, R11</code></span>
+<span class="codeline" id="line-352"><code>	JLE U5</code></span>
+<span class="codeline" id="line-353"><code>	JMP E5</code></span>
+<span class="codeline" id="line-354"><code></code></span>
+<span class="codeline" id="line-355"><code>L5:	MOVQ (R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-356"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-357"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-358"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-359"><code>	MOVQ AX, (R10)(BX*8)</code></span>
+<span class="codeline" id="line-360"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-361"><code>	ADDQ $1, BX		// i++</code></span>
+<span class="codeline" id="line-362"><code></code></span>
+<span class="codeline" id="line-363"><code>E5:	CMPQ BX, R11		// i &lt; n</code></span>
+<span class="codeline" id="line-364"><code>	JL L5</code></span>
+<span class="codeline" id="line-365"><code></code></span>
+<span class="codeline" id="line-366"><code>	MOVQ CX, c+64(FP)</code></span>
+<span class="codeline" id="line-367"><code>	RET</code></span>
+<span class="codeline" id="line-368"><code></code></span>
+<span class="codeline" id="line-369"><code></code></span>
+<span class="codeline" id="line-370"><code>// func addMulVVW(z, x []Word, y Word) (c Word)</code></span>
+<span class="codeline" id="line-371"><code>TEXT ·addMulVVW(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-372"><code>	CMPB ·support_adx(SB), $1</code></span>
+<span class="codeline" id="line-373"><code>	JEQ adx</code></span>
+<span class="codeline" id="line-374"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-375"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-376"><code>	MOVQ y+48(FP), R9</code></span>
+<span class="codeline" id="line-377"><code>	MOVQ z_len+8(FP), R11</code></span>
+<span class="codeline" id="line-378"><code>	MOVQ $0, BX		// i = 0</code></span>
+<span class="codeline" id="line-379"><code>	MOVQ $0, CX		// c = 0</code></span>
+<span class="codeline" id="line-380"><code>	MOVQ R11, R12</code></span>
+<span class="codeline" id="line-381"><code>	ANDQ $-2, R12</code></span>
+<span class="codeline" id="line-382"><code>	CMPQ R11, $2</code></span>
+<span class="codeline" id="line-383"><code>	JAE A6</code></span>
+<span class="codeline" id="line-384"><code>	JMP E6</code></span>
+<span class="codeline" id="line-385"><code></code></span>
+<span class="codeline" id="line-386"><code>A6:</code></span>
+<span class="codeline" id="line-387"><code>	MOVQ (R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-388"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-389"><code>	ADDQ (R10)(BX*8), AX</code></span>
+<span class="codeline" id="line-390"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-391"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-392"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-393"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-394"><code>	MOVQ AX, (R10)(BX*8)</code></span>
+<span class="codeline" id="line-395"><code></code></span>
+<span class="codeline" id="line-396"><code>	MOVQ (8)(R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-397"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-398"><code>	ADDQ (8)(R10)(BX*8), AX</code></span>
+<span class="codeline" id="line-399"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-400"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-401"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-402"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-403"><code>	MOVQ AX, (8)(R10)(BX*8)</code></span>
+<span class="codeline" id="line-404"><code></code></span>
+<span class="codeline" id="line-405"><code>	ADDQ $2, BX</code></span>
+<span class="codeline" id="line-406"><code>	CMPQ BX, R12</code></span>
+<span class="codeline" id="line-407"><code>	JL A6</code></span>
+<span class="codeline" id="line-408"><code>	JMP E6</code></span>
+<span class="codeline" id="line-409"><code></code></span>
+<span class="codeline" id="line-410"><code>L6:	MOVQ (R8)(BX*8), AX</code></span>
+<span class="codeline" id="line-411"><code>	MULQ R9</code></span>
+<span class="codeline" id="line-412"><code>	ADDQ CX, AX</code></span>
+<span class="codeline" id="line-413"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-414"><code>	ADDQ AX, (R10)(BX*8)</code></span>
+<span class="codeline" id="line-415"><code>	ADCQ $0, DX</code></span>
+<span class="codeline" id="line-416"><code>	MOVQ DX, CX</code></span>
+<span class="codeline" id="line-417"><code>	ADDQ $1, BX		// i++</code></span>
+<span class="codeline" id="line-418"><code></code></span>
+<span class="codeline" id="line-419"><code>E6:	CMPQ BX, R11		// i &lt; n</code></span>
+<span class="codeline" id="line-420"><code>	JL L6</code></span>
+<span class="codeline" id="line-421"><code></code></span>
+<span class="codeline" id="line-422"><code>	MOVQ CX, c+56(FP)</code></span>
+<span class="codeline" id="line-423"><code>	RET</code></span>
+<span class="codeline" id="line-424"><code></code></span>
+<span class="codeline" id="line-425"><code>adx:</code></span>
+<span class="codeline" id="line-426"><code>	MOVQ z_len+8(FP), R11</code></span>
+<span class="codeline" id="line-427"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-428"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-429"><code>	MOVQ y+48(FP), DX</code></span>
+<span class="codeline" id="line-430"><code>	MOVQ $0, BX   // i = 0</code></span>
+<span class="codeline" id="line-431"><code>	MOVQ $0, CX   // carry</code></span>
+<span class="codeline" id="line-432"><code>	CMPQ R11, $8</code></span>
+<span class="codeline" id="line-433"><code>	JAE  adx_loop_header</code></span>
+<span class="codeline" id="line-434"><code>	CMPQ BX, R11</code></span>
+<span class="codeline" id="line-435"><code>	JL adx_short</code></span>
+<span class="codeline" id="line-436"><code>	MOVQ CX, c+56(FP)</code></span>
+<span class="codeline" id="line-437"><code>	RET</code></span>
+<span class="codeline" id="line-438"><code></code></span>
+<span class="codeline" id="line-439"><code>adx_loop_header:</code></span>
+<span class="codeline" id="line-440"><code>	MOVQ  R11, R13</code></span>
+<span class="codeline" id="line-441"><code>	ANDQ  $-8, R13</code></span>
+<span class="codeline" id="line-442"><code>adx_loop:</code></span>
+<span class="codeline" id="line-443"><code>	XORQ  R9, R9  // unset flags</code></span>
+<span class="codeline" id="line-444"><code>	MULXQ (R8), SI, DI</code></span>
+<span class="codeline" id="line-445"><code>	ADCXQ CX,SI</code></span>
+<span class="codeline" id="line-446"><code>	ADOXQ (R10), SI</code></span>
+<span class="codeline" id="line-447"><code>	MOVQ  SI,(R10)</code></span>
+<span class="codeline" id="line-448"><code></code></span>
+<span class="codeline" id="line-449"><code>	MULXQ 8(R8), AX, CX</code></span>
+<span class="codeline" id="line-450"><code>	ADCXQ DI, AX</code></span>
+<span class="codeline" id="line-451"><code>	ADOXQ 8(R10), AX</code></span>
+<span class="codeline" id="line-452"><code>	MOVQ  AX, 8(R10)</code></span>
+<span class="codeline" id="line-453"><code></code></span>
+<span class="codeline" id="line-454"><code>	MULXQ 16(R8), SI, DI</code></span>
+<span class="codeline" id="line-455"><code>	ADCXQ CX, SI</code></span>
+<span class="codeline" id="line-456"><code>	ADOXQ 16(R10), SI</code></span>
+<span class="codeline" id="line-457"><code>	MOVQ  SI, 16(R10)</code></span>
+<span class="codeline" id="line-458"><code></code></span>
+<span class="codeline" id="line-459"><code>	MULXQ 24(R8), AX, CX</code></span>
+<span class="codeline" id="line-460"><code>	ADCXQ DI, AX</code></span>
+<span class="codeline" id="line-461"><code>	ADOXQ 24(R10), AX</code></span>
+<span class="codeline" id="line-462"><code>	MOVQ  AX, 24(R10)</code></span>
+<span class="codeline" id="line-463"><code></code></span>
+<span class="codeline" id="line-464"><code>	MULXQ 32(R8), SI, DI</code></span>
+<span class="codeline" id="line-465"><code>	ADCXQ CX, SI</code></span>
+<span class="codeline" id="line-466"><code>	ADOXQ 32(R10), SI</code></span>
+<span class="codeline" id="line-467"><code>	MOVQ  SI, 32(R10)</code></span>
+<span class="codeline" id="line-468"><code></code></span>
+<span class="codeline" id="line-469"><code>	MULXQ 40(R8), AX, CX</code></span>
+<span class="codeline" id="line-470"><code>	ADCXQ DI, AX</code></span>
+<span class="codeline" id="line-471"><code>	ADOXQ 40(R10), AX</code></span>
+<span class="codeline" id="line-472"><code>	MOVQ  AX, 40(R10)</code></span>
+<span class="codeline" id="line-473"><code></code></span>
+<span class="codeline" id="line-474"><code>	MULXQ 48(R8), SI, DI</code></span>
+<span class="codeline" id="line-475"><code>	ADCXQ CX, SI</code></span>
+<span class="codeline" id="line-476"><code>	ADOXQ 48(R10), SI</code></span>
+<span class="codeline" id="line-477"><code>	MOVQ  SI, 48(R10)</code></span>
+<span class="codeline" id="line-478"><code></code></span>
+<span class="codeline" id="line-479"><code>	MULXQ 56(R8), AX, CX</code></span>
+<span class="codeline" id="line-480"><code>	ADCXQ DI, AX</code></span>
+<span class="codeline" id="line-481"><code>	ADOXQ 56(R10), AX</code></span>
+<span class="codeline" id="line-482"><code>	MOVQ  AX, 56(R10)</code></span>
+<span class="codeline" id="line-483"><code></code></span>
+<span class="codeline" id="line-484"><code>	ADCXQ R9, CX</code></span>
+<span class="codeline" id="line-485"><code>	ADOXQ R9, CX</code></span>
+<span class="codeline" id="line-486"><code></code></span>
+<span class="codeline" id="line-487"><code>	ADDQ $64, R8</code></span>
+<span class="codeline" id="line-488"><code>	ADDQ $64, R10</code></span>
+<span class="codeline" id="line-489"><code>	ADDQ $8, BX</code></span>
+<span class="codeline" id="line-490"><code></code></span>
+<span class="codeline" id="line-491"><code>	CMPQ BX, R13</code></span>
+<span class="codeline" id="line-492"><code>	JL adx_loop</code></span>
+<span class="codeline" id="line-493"><code>	MOVQ z+0(FP), R10</code></span>
+<span class="codeline" id="line-494"><code>	MOVQ x+24(FP), R8</code></span>
+<span class="codeline" id="line-495"><code>	CMPQ BX, R11</code></span>
+<span class="codeline" id="line-496"><code>	JL adx_short</code></span>
+<span class="codeline" id="line-497"><code>	MOVQ CX, c+56(FP)</code></span>
+<span class="codeline" id="line-498"><code>	RET</code></span>
+<span class="codeline" id="line-499"><code></code></span>
+<span class="codeline" id="line-500"><code>adx_short:</code></span>
+<span class="codeline" id="line-501"><code>	MULXQ (R8)(BX*8), SI, DI</code></span>
+<span class="codeline" id="line-502"><code>	ADDQ CX, SI</code></span>
+<span class="codeline" id="line-503"><code>	ADCQ $0, DI</code></span>
+<span class="codeline" id="line-504"><code>	ADDQ SI, (R10)(BX*8)</code></span>
+<span class="codeline" id="line-505"><code>	ADCQ $0, DI</code></span>
+<span class="codeline" id="line-506"><code>	MOVQ DI, CX</code></span>
+<span class="codeline" id="line-507"><code>	ADDQ $1, BX		// i++</code></span>
+<span class="codeline" id="line-508"><code></code></span>
+<span class="codeline" id="line-509"><code>	CMPQ BX, R11</code></span>
+<span class="codeline" id="line-510"><code>	JL adx_short</code></span>
+<span class="codeline" id="line-511"><code></code></span>
+<span class="codeline" id="line-512"><code>	MOVQ CX, c+56(FP)</code></span>
+<span class="codeline" id="line-513"><code>	RET</code></span>
+<span class="codeline" id="line-514"><code></code></span>
+<span class="codeline" id="line-515"><code></code></span>
+<span class="codeline" id="line-516"><code></code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

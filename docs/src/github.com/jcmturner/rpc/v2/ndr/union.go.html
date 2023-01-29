@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: union.go in package github.com/jcmturner/rpc/v2/ndr</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	union.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html">github.com/jcmturner/rpc/v2/ndr</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> ndr</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"reflect"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// Union interface must be implemented by structs that will be unmarshaled into from the NDR byte stream union representation.</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// The union's discriminating tag will be passed to the SwitchFunc method.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// The discriminating tag field must have the struct tag: `ndr:"unionTag"`</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// If the union is encapsulated the discriminating tag field must have the struct tag: `ndr:"encapsulated"`</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// The possible value fields that can be selected from must have the struct tag: `ndr:"unionField"`</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-Union" class="ident">Union</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-15"><code>	<a href="../../../../../../imp/github.com/jcmturner/rpc/v2/ndr.Union.html#name-SwitchFunc" class="ident">SwitchFunc</a>(t <span class="keyword">interface</span>{}) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-16"><code>}</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// Union related constants such as struct tag values</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-20"><code>	unionSelectionFuncName = <span class="lit-string">"SwitchFunc"</span></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-TagEncapsulated" class="ident">TagEncapsulated</a>        = <span class="lit-string">"encapsulated"</span></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-TagUnionTag" class="ident">TagUnionTag</a>            = <span class="lit-string">"unionTag"</span></code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-TagUnionField" class="ident">TagUnionField</a>          = <span class="lit-string">"unionField"</span></code></span>
+<span class="codeline" id="line-24"><code>)</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">func</span> (<label for="r0" class="ident">dec</label> *<a href="decoder.go.html#line-21" class="ident">Decoder</a>) <label for="r1" class="ident">isUnion</label>(<label for="r2" class="ident">field</label> <a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/value.go.html#line-39" class="ident">Value</a>, <label for="r3" class="ident">tag</label> <a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/type.go.html#line-1176" class="ident">StructTag</a>) (<label for="r4" class="ident">r</label> <a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/value.go.html#line-39" class="ident">Value</a>) {</code></span>
+<span class="codeline" id="line-27"><code>	<label for="r5" class="ident">ndrTag</label> := <a href="tags.go.html#line-18" class="ident">parseTags</a>(<label for="r3" class="ident">tag</label>)</code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> !<label for="r5" class="ident">ndrTag</label>.<a href="tags.go.html#line-62" class="ident">HasValue</a>(<a href="#line-22" class="ident">TagUnionTag</a>) {</code></span>
+<span class="codeline" id="line-29"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-30"><code>	}</code></span>
+<span class="codeline" id="line-31"><code>	<label for="r4" class="ident">r</label> = <label for="r2" class="ident">field</label></code></span>
+<span class="codeline" id="line-32"><code>	<span class="comment">// For a non-encapsulated union, the discriminant is marshalled into the transmitted data stream twice: once as the</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">	// field or parameter, which is referenced by the switch_is construct, in the procedure argument list; and once as</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">	// the first part of the union representation.</span></code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">if</span> !<label for="r5" class="ident">ndrTag</label>.<a href="tags.go.html#line-62" class="ident">HasValue</a>(<a href="#line-21" class="ident">TagEncapsulated</a>) {</code></span>
+<span class="codeline" id="line-36"><code>		<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-22" class="ident">r</a>.<a href="../../../../../bufio/bufio.go.html#line-169" class="ident">Discard</a>(<a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r4" class="ident">r</label>.<a href="../../../../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../../../../reflect/type.go.html#line-93" class="ident">Size</a>()))</code></span>
+<span class="codeline" id="line-37"><code>	}</code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-39"><code>}</code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// unionSelectedField returns the field name of which of the union values to fill</span></code></span>
+<span class="codeline" id="line-42"><code><span class="keyword">func</span> unionSelectedField(<label for="r7" class="ident">union</label>, <label for="r8" class="ident">discriminant</label> <a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/value.go.html#line-39" class="ident">Value</a>) (<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">if</span> !<label for="r7" class="ident">union</label>.<a href="../../../../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../../../../reflect/type.go.html#line-106" class="ident">Implements</a>(<a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/type.go.html#line-1431" class="ident">TypeOf</a>(<a href="../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-14" class="ident">Union</a>)).<a href="../../../../../reflect/type.go.html#line-160" class="ident">Elem</a>()) {</code></span>
+<span class="codeline" id="line-44"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"struct does not implement union interface"</span>)</code></span>
+<span class="codeline" id="line-45"><code>	}</code></span>
+<span class="codeline" id="line-46"><code>	<label for="r9" class="ident">args</label> := []<a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/value.go.html#line-39" class="ident">Value</a>{<label for="r8" class="ident">discriminant</label>}</code></span>
+<span class="codeline" id="line-47"><code>	<span class="comment">// Call the SelectFunc of the union struct to find the name of the field to fill with the value selected.</span></code></span>
+<span class="codeline" id="line-48"><code>	<label for="r10" class="ident">sf</label> := <label for="r7" class="ident">union</label>.<a href="../../../../../reflect/value.go.html#line-1946" class="ident">MethodByName</a>(<a href="#line-20" class="ident">unionSelectionFuncName</a>)</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">if</span> !<label for="r10" class="ident">sf</label>.<a href="../../../../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() {</code></span>
+<span class="codeline" id="line-50"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not find a selection function called %s in the unions struct representation"</span>, <a href="#line-20" class="ident">unionSelectionFuncName</a>)</code></span>
+<span class="codeline" id="line-51"><code>	}</code></span>
+<span class="codeline" id="line-52"><code>	<label for="r11" class="ident">f</label> := <label for="r10" class="ident">sf</label>.<a href="../../../../../reflect/value.go.html#line-365" class="ident">Call</a>(<label for="r9" class="ident">args</label>)</code></span>
+<span class="codeline" id="line-53"><code>	<span class="keyword">if</span> <label for="r11" class="ident">f</label>[<span class="lit-number">0</span>].<a href="../../../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() != <a href="../../../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../../../reflect/type.go.html#line-268" class="ident">String</a> || <label for="r11" class="ident">f</label>[<span class="lit-number">0</span>].<a href="../../../../../reflect/value.go.html#line-2486" class="ident">String</a>() == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"the union select function did not return a string for the name of the field to fill"</span>)</code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">return</span> <label for="r11" class="ident">f</label>[<span class="lit-number">0</span>].<a href="../../../../../reflect/value.go.html#line-2486" class="ident">String</a>(), <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-57"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

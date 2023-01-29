@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: rand_getrandom.go in package crypto/rand</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	rand_getrandom.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/crypto/rand.html">crypto/rand</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2014 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//go:build linux || freebsd || dragonfly || solaris</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">package</span> rand</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-10"><code>	<label for="i0"><span class="lit-string i0">"internal/syscall/unix"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i1"><span class="lit-string i1">"runtime"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i2"><span class="lit-string i2">"syscall"</span></label></code></span>
+<span class="codeline" id="line-13"><code>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-16"><code>	<span class="keyword">var</span> <label for="r1" class="ident">maxGetRandomRead</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-17"><code>	<span class="keyword">switch</span> <a href="../../../pkg/runtime.html" class="ident i1">runtime</a>.<a href="../../runtime/extern.go.html#line-283" class="ident">GOOS</a> {</code></span>
+<span class="codeline" id="line-18"><code>	<span class="keyword">case</span> <span class="lit-string">"linux"</span>, <span class="lit-string">"android"</span>:</code></span>
+<span class="codeline" id="line-19"><code>		<span class="comment">// Per the manpage:</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">		//     When reading from the urandom source, a maximum of 33554431 bytes</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">		//     is returned by a single call to getrandom() on systems where int</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">		//     has a size of 32 bits.</span></code></span>
+<span class="codeline" id="line-23"><code>		<label for="r1" class="ident">maxGetRandomRead</label> = (<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">25</span>) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-24"><code>	<span class="keyword">case</span> <span class="lit-string">"freebsd"</span>, <span class="lit-string">"dragonfly"</span>, <span class="lit-string">"solaris"</span>, <span class="lit-string">"illumos"</span>:</code></span>
+<span class="codeline" id="line-25"><code>		<label for="r1" class="ident">maxGetRandomRead</label> = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-27"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"no maximum specified for GetRandom"</span>)</code></span>
+<span class="codeline" id="line-28"><code>	}</code></span>
+<span class="codeline" id="line-29"><code>	<a href="rand_unix.go.html#line-42" class="ident">altGetRandom</a> = <a href="rand.go.html#line-30" class="ident">batched</a>(<a href="#line-39" class="ident">getRandom</a>, <label for="r1" class="ident">maxGetRandomRead</label>)</code></span>
+<span class="codeline" id="line-30"><code>}</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// If the kernel is too old to support the getrandom syscall(),</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// unix.GetRandom will immediately return ENOSYS and we will then fall back to</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// reading from /dev/urandom in rand_unix.go. unix.GetRandom caches the ENOSYS</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// result so we only suffer the syscall overhead once in this case.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// If the kernel supports the getrandom() syscall, unix.GetRandom will block</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// until the kernel has sufficient randomness (as we don't use GRND_NONBLOCK).</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// In this case, unix.GetRandom will not return an error.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">func</span> getRandom(<label for="r3" class="ident">p</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-40"><code>	<label for="r4" class="ident">n</label>, <label for="r5" class="ident">err</label> := <a href="../../../pkg/internal/syscall/unix.html" class="ident i0">unix</a>.<a href="../../internal/syscall/unix/getrandom.go.html#line-21" class="ident">GetRandom</a>(<label for="r3" class="ident">p</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">if</span> <label for="r5" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-42"><code>		<span class="keyword">return</span> <label for="r5" class="ident">err</label></code></span>
+<span class="codeline" id="line-43"><code>	}</code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">if</span> <label for="r4" class="ident">n</label> != <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) {</code></span>
+<span class="codeline" id="line-45"><code>		<span class="keyword">return</span> <a href="../../../pkg/syscall.html" class="ident i2">syscall</a>.<a href="../../syscall/zerrors_linux_amd64.go.html#line-1246" class="ident">EIO</a></code></span>
+<span class="codeline" id="line-46"><code>	}</code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

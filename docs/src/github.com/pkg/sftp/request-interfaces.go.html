@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: request-interfaces.go in package github.com/pkg/sftp</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	request-interfaces.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/pkg/sftp.html">github.com/pkg/sftp</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> sftp</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"io"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"os"</span></label></code></span>
+<span class="codeline" id="line-6"><code>)</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// WriterAtReaderAt defines the interface to return when a file is to</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// be opened for reading and writing</span></code></span>
+<span class="codeline" id="line-10"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-WriterAtReaderAt" class="ident">WriterAtReaderAt</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-11"><code>	<a href="../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../io/io.go.html#line-246" class="ident">WriterAt</a></code></span>
+<span class="codeline" id="line-12"><code>	<a href="../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../io/io.go.html#line-227" class="ident">ReaderAt</a></code></span>
+<span class="codeline" id="line-13"><code>}</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Interfaces are differentiated based on required returned values.</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// All input arguments are to be pulled from Request (the only arg).</span></code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// The Handler interfaces all take the Request object as its only argument.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// All the data you should need to handle the call are in the Request object.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// The request.Method attribute is initially the most important one as it</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// determines which Handler gets called.</span></code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// FileReader should return an io.ReaderAt for the filepath</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// Note in cases of an error, the error text will be sent to the client.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// Called for Methods: Get</span></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-FileReader" class="ident">FileReader</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-27"><code>	<a href="../../../../imp/github.com/pkg/sftp.FileReader.html#name-Fileread" class="ident">Fileread</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (<a href="../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../io/io.go.html#line-227" class="ident">ReaderAt</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-28"><code>}</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// FileWriter should return an io.WriterAt for the filepath.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// The request server code will call Close() on the returned io.WriterAt</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// ojbect if an io.Closer type assertion succeeds.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// Note in cases of an error, the error text will be sent to the client.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// Note when receiving an Append flag it is important to not open files using</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// O_APPEND if you plan to use WriteAt, as they conflict.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Called for Methods: Put, Open</span></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-FileWriter" class="ident">FileWriter</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-39"><code>	<a href="../../../../imp/github.com/pkg/sftp.FileWriter.html#name-Filewrite" class="ident">Filewrite</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (<a href="../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../io/io.go.html#line-246" class="ident">WriterAt</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// OpenFileWriter is a FileWriter that implements the generic OpenFile method.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// You need to implement this optional interface if you want to be able</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// to read and write from/to the same handle.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// Called for Methods: Open</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-OpenFileWriter" class="ident">OpenFileWriter</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-47"><code>	<a href="#line-38" class="ident">FileWriter</a></code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../../imp/github.com/pkg/sftp.OpenFileWriter.html#name-OpenFile" class="ident">OpenFile</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (<a href="#line-10" class="ident">WriterAtReaderAt</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// FileCmder should return an error</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// Note in cases of an error, the error text will be sent to the client.</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// Called for Methods: Setstat, Rename, Rmdir, Mkdir, Link, Symlink, Remove</span></code></span>
+<span class="codeline" id="line-54"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-FileCmder" class="ident">FileCmder</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../../imp/github.com/pkg/sftp.FileCmder.html#name-Filecmd" class="ident">Filecmd</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-56"><code>}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">// PosixRenameFileCmder is a FileCmder that implements the PosixRename method.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">// If this interface is implemented PosixRename requests will call it</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">// otherwise they will be handled in the same way as Rename</span></code></span>
+<span class="codeline" id="line-61"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-PosixRenameFileCmder" class="ident">PosixRenameFileCmder</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-62"><code>	<a href="#line-54" class="ident">FileCmder</a></code></span>
+<span class="codeline" id="line-63"><code>	<a href="../../../../imp/github.com/pkg/sftp.PosixRenameFileCmder.html#name-PosixRename" class="ident">PosixRename</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-64"><code>}</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// StatVFSFileCmder is a FileCmder that implements the StatVFS method.</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// You need to implement this interface if you want to handle statvfs requests.</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// Please also be sure that the statvfs@openssh.com extension is enabled</span></code></span>
+<span class="codeline" id="line-69"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-StatVFSFileCmder" class="ident">StatVFSFileCmder</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-70"><code>	<a href="#line-54" class="ident">FileCmder</a></code></span>
+<span class="codeline" id="line-71"><code>	<a href="../../../../imp/github.com/pkg/sftp.StatVFSFileCmder.html#name-StatVFS" class="ident">StatVFS</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (*<a href="packet.go.html#line-1090" class="ident">StatVFS</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-72"><code>}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// FileLister should return an object that fulfils the ListerAt interface</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">// Note in cases of an error, the error text will be sent to the client.</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">// Called for Methods: List, Stat, Readlink</span></code></span>
+<span class="codeline" id="line-77"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-FileLister" class="ident">FileLister</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-78"><code>	<a href="../../../../imp/github.com/pkg/sftp.FileLister.html#name-Filelist" class="ident">Filelist</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (<a href="#line-114" class="ident">ListerAt</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-79"><code>}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// LstatFileLister is a FileLister that implements the Lstat method.</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// If this interface is implemented Lstat requests will call it</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">// otherwise they will be handled in the same way as Stat</span></code></span>
+<span class="codeline" id="line-84"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-LstatFileLister" class="ident">LstatFileLister</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-85"><code>	<a href="#line-77" class="ident">FileLister</a></code></span>
+<span class="codeline" id="line-86"><code>	<a href="../../../../imp/github.com/pkg/sftp.LstatFileLister.html#name-Lstat" class="ident">Lstat</a>(*<a href="request.go.html#line-125" class="ident">Request</a>) (<a href="#line-114" class="ident">ListerAt</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// RealPathFileLister is a FileLister that implements the Realpath method.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">// We use "/" as start directory for relative paths, implementing this</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// interface you can customize the start directory.</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// You have to return an absolute POSIX path.</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// Deprecated: if you want to set a start directory use WithStartDirectory RequestServerOption instead.</span></code></span>
+<span class="codeline" id="line-95"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-RealPathFileLister" class="ident">RealPathFileLister</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-96"><code>	<a href="#line-77" class="ident">FileLister</a></code></span>
+<span class="codeline" id="line-97"><code>	<a href="../../../../imp/github.com/pkg/sftp.RealPathFileLister.html#name-RealPath" class="ident">RealPath</a>(<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// NameLookupFileLister is a FileLister that implmeents the LookupUsername and LookupGroupName methods.</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// If this interface is implemented, then longname ls formatting will use these to convert usernames and groupnames.</span></code></span>
+<span class="codeline" id="line-102"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-NameLookupFileLister" class="ident">NameLookupFileLister</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-103"><code>	<a href="#line-77" class="ident">FileLister</a></code></span>
+<span class="codeline" id="line-104"><code>	<a href="../../../../imp/github.com/pkg/sftp.NameLookupFileLister.html#name-LookupUserName" class="ident">LookupUserName</a>(<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-105"><code>	<a href="../../../../imp/github.com/pkg/sftp.NameLookupFileLister.html#name-LookupGroupName" class="ident">LookupGroupName</a>(<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-106"><code>}</code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">// ListerAt does for file lists what io.ReaderAt does for files.</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">// ListAt should return the number of entries copied and an io.EOF</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// error if at end of list. This is testable by comparing how many you</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// copied to how many could be copied (eg. n &lt; len(ls) below).</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// The copy() builtin is best for the copying.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">// Note in cases of an error, the error text will be sent to the client.</span></code></span>
+<span class="codeline" id="line-114"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-ListerAt" class="ident">ListerAt</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-115"><code>	<a href="../../../../imp/github.com/pkg/sftp.ListerAt.html#name-ListAt" class="ident">ListAt</a>([]<a href="../../../../pkg/os.html" class="ident i1">os</a>.<a href="../../../os/types.go.html#line-21" class="ident">FileInfo</a>, <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>) (<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">// TransferError is an optional interface that readerAt and writerAt</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// can implement to be notified about the error causing Serve() to exit</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// with the request still open</span></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-TransferError" class="ident">TransferError</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-122"><code>	<a href="../../../../imp/github.com/pkg/sftp.TransferError.html#name-TransferError" class="ident">TransferError</a>(err <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

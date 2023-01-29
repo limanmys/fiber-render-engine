@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: time.go in package github.com/gofiber/fiber/v2/utils</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	time.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html">github.com/gofiber/fiber/v2/utils</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> utils</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"sync"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"time"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-10"><code>	timestampTimer <a href="../../../../../../pkg/sync.html" class="ident i0">sync</a>.<a href="../../../../../sync/once.go.html#line-18" class="ident">Once</a></code></span>
+<span class="codeline" id="line-11"><code>	<span class="comment">// Timestamp please start the timer function before you use this value</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">	// please load the value with atomic `atomic.LoadUint32(&amp;utils.Timestamp)`</span></code></span>
+<span class="codeline" id="line-13"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-Timestamp" class="ident">Timestamp</a> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-14"><code>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// StartTimeStampUpdater starts a concurrent function which stores the timestamp to an atomic value per second,</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// which is much better for performance than determining it at runtime each time</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-StartTimeStampUpdater" class="ident">StartTimeStampUpdater</a></label>() {</code></span>
+<span class="codeline" id="line-19"><code>	<a href="#line-10" class="ident">timestampTimer</a>.<a href="../../../../../sync/once.go.html#line-48" class="ident">Do</a>(<span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-20"><code>		<span class="comment">// set initial value</span></code></span>
+<span class="codeline" id="line-21"><code>		<a href="../../../../../../pkg/sync/atomic.html" class="ident i1">atomic</a>.<a href="../../../../../sync/atomic/doc.go.html#line-144" class="ident">StoreUint32</a>(&amp;<a href="#line-13" class="ident">Timestamp</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1168" class="ident">Unix</a>()))</code></span>
+<span class="codeline" id="line-22"><code>		<span class="keyword">go</span> <span class="keyword">func</span>(<label for="r1" class="ident">sleep</label> <a href="../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../time/time.go.html#line-591" class="ident">Duration</a>) {</code></span>
+<span class="codeline" id="line-23"><code>			<label for="r2" class="ident">ticker</label> := <a href="../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../time/tick.go.html#line-22" class="ident">NewTicker</a>(<label for="r1" class="ident">sleep</label>)</code></span>
+<span class="codeline" id="line-24"><code>			<span class="keyword">defer</span> <label for="r2" class="ident">ticker</label>.<a href="../../../../../time/tick.go.html#line-46" class="ident">Stop</a>()</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code>			<span class="keyword">for</span> <label for="r3" class="ident">t</label> := <span class="keyword">range</span> <label for="r2" class="ident">ticker</label>.<a href="../../../../../time/tick.go.html#line-12" class="ident">C</a> {</code></span>
+<span class="codeline" id="line-27"><code>				<span class="comment">// update timestamp</span></code></span>
+<span class="codeline" id="line-28"><code>				<a href="../../../../../../pkg/sync/atomic.html" class="ident i1">atomic</a>.<a href="../../../../../sync/atomic/doc.go.html#line-144" class="ident">StoreUint32</a>(&amp;<a href="#line-13" class="ident">Timestamp</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r3" class="ident">t</label>.<a href="../../../../../time/time.go.html#line-1168" class="ident">Unix</a>()))</code></span>
+<span class="codeline" id="line-29"><code>			}</code></span>
+<span class="codeline" id="line-30"><code>		}(<span class="lit-number">1</span> * <a href="../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../time/time.go.html#line-614" class="ident">Second</a>) <span class="comment">// duration</span></code></span>
+<span class="codeline" id="line-31"><code>	})</code></span>
+<span class="codeline" id="line-32"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

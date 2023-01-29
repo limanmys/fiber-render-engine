@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: doc.go in package github.com/gofiber/fiber/v2/internal/schema</title>
+<link href="../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	doc.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../pkg/github.com/gofiber/fiber/v2/internal/schema.html">github.com/gofiber/fiber/v2/internal/schema</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2012 The Gorilla Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">Package gorilla/schema fills a struct with form values.</span></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">The basic usage is really simple. Given this struct:</span></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">	type Person struct {</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">		Name  string</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">		Phone string</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">...we can fill it passing a map to the Decode() function:</span></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">	values := map[string][]string{</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">		"Name":  {"John"},</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">		"Phone": {"999-999-999"},</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">	person := new(Person)</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">	decoder := schema.NewDecoder()</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">	decoder.Decode(person, values)</span></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">This is just a simple example and it doesn't make a lot of sense to create</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">the map manually. Typically it will come from a http.Request object and</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">will be of type url.Values, http.Request.Form, or http.Request.MultipartForm:</span></code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">	func MyHandler(w http.ResponseWriter, r *http.Request) {</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">		err := r.ParseForm()</span></code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">		if err != nil {</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">			// Handle error</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">		}</span></code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">		decoder := schema.NewDecoder()</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">		// r.PostForm is a map of our POST form values</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">		err := decoder.Decode(person, r.PostForm)</span></code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">		if err != nil {</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">			// Handle error</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">		}</span></code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">		// Do something with person.Name or person.Phone</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">Note: it is a good idea to set a Decoder instance as a package global,</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">because it caches meta-data about structs, and an instance can be shared safely:</span></code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">	var decoder = schema.NewDecoder()</span></code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">To define custom names for fields, use a struct tag "schema". To not populate</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">certain fields, use a dash for the name and it will be ignored:</span></code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">	type Person struct {</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">		Name  string `schema:"name"`  // custom name</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">		Phone string `schema:"phone"` // custom name</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">		Admin bool   `schema:"-"`     // this field is never set</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">The supported field types in the destination struct are:</span></code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">  - bool</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">  - float variants (float32, float64)</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">  - int variants (int, int8, int16, int32, int64)</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">  - string</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">  - uint variants (uint, uint8, uint16, uint32, uint64)</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">  - struct</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">  - a pointer to one of the above types</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">  - a slice or a pointer to a slice of one of the above types</span></code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">Non-supported types are simply ignored, however custom types can be registered</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">to be converted.</span></code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">To fill nested structs, keys must use a dotted notation as the "path" for the</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">field. So for example, to fill the struct Person below:</span></code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">	type Phone struct {</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">		Label  string</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">		Number string</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">	type Person struct {</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">		Name  string</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">		Phone Phone</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">...the source map must have the keys "Name", "Phone.Label" and "Phone.Number".</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">This means that an HTML form to fill a Person struct must look like this:</span></code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">	&lt;form&gt;</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">		&lt;input type="text" name="Name"&gt;</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">		&lt;input type="text" name="Phone.Label"&gt;</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">		&lt;input type="text" name="Phone.Number"&gt;</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">	&lt;/form&gt;</span></code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">Single values are filled using the first value for a key from the source map.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">Slices are filled using all values for a key from the source map. So to fill</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">a Person with multiple Phone values, like:</span></code></span>
+<span class="codeline" id="line-100"><code></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">	type Person struct {</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">		Name   string</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">		Phones []Phone</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">...an HTML form that accepts three Phone values would look like this:</span></code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">	&lt;form&gt;</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">		&lt;input type="text" name="Name"&gt;</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">		&lt;input type="text" name="Phones.0.Label"&gt;</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">		&lt;input type="text" name="Phones.0.Number"&gt;</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">		&lt;input type="text" name="Phones.1.Label"&gt;</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">		&lt;input type="text" name="Phones.1.Number"&gt;</span></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">		&lt;input type="text" name="Phones.2.Label"&gt;</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">		&lt;input type="text" name="Phones.2.Number"&gt;</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">	&lt;/form&gt;</span></code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">Notice that only for slices of structs the slice index is required.</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">This is needed for disambiguation: if the nested struct also had a slice</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">field, we could not translate multiple values to it if we did not use an</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">index for the parent struct.</span></code></span>
+<span class="codeline" id="line-122"><code></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">There's also the possibility to create a custom type that implements the</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">TextUnmarshaler interface, and in this case there's no need to register</span></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">a converter, like:</span></code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">	type Person struct {</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">	  Emails []Email</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">	type Email struct {</span></code></span>
+<span class="codeline" id="line-132"><code><span class="comment">	  *mail.Address</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">	func (e *Email) UnmarshalText(text []byte) (err error) {</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">		e.Address, err = mail.ParseAddress(string(text))</span></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">		return</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">	}</span></code></span>
+<span class="codeline" id="line-139"><code></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">...an HTML form that accepts three Email values would look like this:</span></code></span>
+<span class="codeline" id="line-141"><code></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">	&lt;form&gt;</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">		&lt;input type="email" name="Emails.0"&gt;</span></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">		&lt;input type="email" name="Emails.1"&gt;</span></code></span>
+<span class="codeline" id="line-145"><code><span class="comment">		&lt;input type="email" name="Emails.2"&gt;</span></code></span>
+<span class="codeline" id="line-146"><code><span class="comment">	&lt;/form&gt;</span></code></span>
+<span class="codeline" id="line-147"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-148"><code><span class="keyword">package</span> schema</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

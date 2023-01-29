@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: token.go in package go/token</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	token.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/go/token.html">go/token</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package token defines constants representing the lexical tokens of the Go</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// programming language and basic operations on tokens (printing, predicates).</span></code></span></div><span class="codeline" id="line-7"><code><span class="keyword">package</span> token</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-10"><code>	<label for="i0"><span class="lit-string i0">"strconv"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i1"><span class="lit-string i1">"unicode"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i2"><span class="lit-string i2">"unicode/utf8"</span></label></code></span>
+<span class="codeline" id="line-13"><code>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Token is the set of lexical tokens of the Go programming language.</span></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">type</span> <a href="../../../pkg/go/token.html#name-Token" class="ident">Token</a> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// The list of tokens.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-20"><code>	<span class="comment">// Special tokens</span></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../pkg/go/token.html#name-ILLEGAL" class="ident">ILLEGAL</a> <a href="#line-16" class="ident">Token</a> = <a href="../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../pkg/go/token.html#name-EOF" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../pkg/go/token.html#name-COMMENT" class="ident">COMMENT</a></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code>	literal_beg</code></span>
+<span class="codeline" id="line-26"><code>	<span class="comment">// Identifiers and basic type literals</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">	// (these tokens stand for classes of literals)</span></code></span>
+<span class="codeline" id="line-28"><code>	<a href="../../../pkg/go/token.html#name-IDENT" class="ident">IDENT</a>  <span class="comment">// main</span></code></span>
+<span class="codeline" id="line-29"><code>	<a href="../../../pkg/go/token.html#name-INT" class="ident">INT</a>    <span class="comment">// 12345</span></code></span>
+<span class="codeline" id="line-30"><code>	<a href="../../../pkg/go/token.html#name-FLOAT" class="ident">FLOAT</a>  <span class="comment">// 123.45</span></code></span>
+<span class="codeline" id="line-31"><code>	<a href="../../../pkg/go/token.html#name-IMAG" class="ident">IMAG</a>   <span class="comment">// 123.45i</span></code></span>
+<span class="codeline" id="line-32"><code>	<a href="../../../pkg/go/token.html#name-CHAR" class="ident">CHAR</a>   <span class="comment">// 'a'</span></code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../pkg/go/token.html#name-STRING" class="ident">STRING</a> <span class="comment">// "abc"</span></code></span>
+<span class="codeline" id="line-34"><code>	literal_end</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code>	operator_beg</code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">// Operators and delimiters</span></code></span>
+<span class="codeline" id="line-38"><code>	<a href="../../../pkg/go/token.html#name-ADD" class="ident">ADD</a> <span class="comment">// +</span></code></span>
+<span class="codeline" id="line-39"><code>	<a href="../../../pkg/go/token.html#name-SUB" class="ident">SUB</a> <span class="comment">// -</span></code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../pkg/go/token.html#name-MUL" class="ident">MUL</a> <span class="comment">// *</span></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../pkg/go/token.html#name-QUO" class="ident">QUO</a> <span class="comment">// /</span></code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../pkg/go/token.html#name-REM" class="ident">REM</a> <span class="comment">// %</span></code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../pkg/go/token.html#name-AND" class="ident">AND</a>     <span class="comment">// &amp;</span></code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../pkg/go/token.html#name-OR" class="ident">OR</a>      <span class="comment">// |</span></code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../pkg/go/token.html#name-XOR" class="ident">XOR</a>     <span class="comment">// ^</span></code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../pkg/go/token.html#name-SHL" class="ident">SHL</a>     <span class="comment">// &lt;&lt;</span></code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../pkg/go/token.html#name-SHR" class="ident">SHR</a>     <span class="comment">// &gt;&gt;</span></code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../pkg/go/token.html#name-AND_NOT" class="ident">AND_NOT</a> <span class="comment">// &amp;^</span></code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../pkg/go/token.html#name-ADD_ASSIGN" class="ident">ADD_ASSIGN</a> <span class="comment">// +=</span></code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../pkg/go/token.html#name-SUB_ASSIGN" class="ident">SUB_ASSIGN</a> <span class="comment">// -=</span></code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../pkg/go/token.html#name-MUL_ASSIGN" class="ident">MUL_ASSIGN</a> <span class="comment">// *=</span></code></span>
+<span class="codeline" id="line-54"><code>	<a href="../../../pkg/go/token.html#name-QUO_ASSIGN" class="ident">QUO_ASSIGN</a> <span class="comment">// /=</span></code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../pkg/go/token.html#name-REM_ASSIGN" class="ident">REM_ASSIGN</a> <span class="comment">// %=</span></code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../pkg/go/token.html#name-AND_ASSIGN" class="ident">AND_ASSIGN</a>     <span class="comment">// &amp;=</span></code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../pkg/go/token.html#name-OR_ASSIGN" class="ident">OR_ASSIGN</a>      <span class="comment">// |=</span></code></span>
+<span class="codeline" id="line-59"><code>	<a href="../../../pkg/go/token.html#name-XOR_ASSIGN" class="ident">XOR_ASSIGN</a>     <span class="comment">// ^=</span></code></span>
+<span class="codeline" id="line-60"><code>	<a href="../../../pkg/go/token.html#name-SHL_ASSIGN" class="ident">SHL_ASSIGN</a>     <span class="comment">// &lt;&lt;=</span></code></span>
+<span class="codeline" id="line-61"><code>	<a href="../../../pkg/go/token.html#name-SHR_ASSIGN" class="ident">SHR_ASSIGN</a>     <span class="comment">// &gt;&gt;=</span></code></span>
+<span class="codeline" id="line-62"><code>	<a href="../../../pkg/go/token.html#name-AND_NOT_ASSIGN" class="ident">AND_NOT_ASSIGN</a> <span class="comment">// &amp;^=</span></code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code>	<a href="../../../pkg/go/token.html#name-LAND" class="ident">LAND</a>  <span class="comment">// &amp;&amp;</span></code></span>
+<span class="codeline" id="line-65"><code>	<a href="../../../pkg/go/token.html#name-LOR" class="ident">LOR</a>   <span class="comment">// ||</span></code></span>
+<span class="codeline" id="line-66"><code>	<a href="../../../pkg/go/token.html#name-ARROW" class="ident">ARROW</a> <span class="comment">// &lt;-</span></code></span>
+<span class="codeline" id="line-67"><code>	<a href="../../../pkg/go/token.html#name-INC" class="ident">INC</a>   <span class="comment">// ++</span></code></span>
+<span class="codeline" id="line-68"><code>	<a href="../../../pkg/go/token.html#name-DEC" class="ident">DEC</a>   <span class="comment">// --</span></code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code>	<a href="../../../pkg/go/token.html#name-EQL" class="ident">EQL</a>    <span class="comment">// ==</span></code></span>
+<span class="codeline" id="line-71"><code>	<a href="../../../pkg/go/token.html#name-LSS" class="ident">LSS</a>    <span class="comment">// &lt;</span></code></span>
+<span class="codeline" id="line-72"><code>	<a href="../../../pkg/go/token.html#name-GTR" class="ident">GTR</a>    <span class="comment">// &gt;</span></code></span>
+<span class="codeline" id="line-73"><code>	<a href="../../../pkg/go/token.html#name-ASSIGN" class="ident">ASSIGN</a> <span class="comment">// =</span></code></span>
+<span class="codeline" id="line-74"><code>	<a href="../../../pkg/go/token.html#name-NOT" class="ident">NOT</a>    <span class="comment">// !</span></code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code>	<a href="../../../pkg/go/token.html#name-NEQ" class="ident">NEQ</a>      <span class="comment">// !=</span></code></span>
+<span class="codeline" id="line-77"><code>	<a href="../../../pkg/go/token.html#name-LEQ" class="ident">LEQ</a>      <span class="comment">// &lt;=</span></code></span>
+<span class="codeline" id="line-78"><code>	<a href="../../../pkg/go/token.html#name-GEQ" class="ident">GEQ</a>      <span class="comment">// &gt;=</span></code></span>
+<span class="codeline" id="line-79"><code>	<a href="../../../pkg/go/token.html#name-DEFINE" class="ident">DEFINE</a>   <span class="comment">// :=</span></code></span>
+<span class="codeline" id="line-80"><code>	<a href="../../../pkg/go/token.html#name-ELLIPSIS" class="ident">ELLIPSIS</a> <span class="comment">// ...</span></code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	<a href="../../../pkg/go/token.html#name-LPAREN" class="ident">LPAREN</a> <span class="comment">// (</span></code></span>
+<span class="codeline" id="line-83"><code>	<a href="../../../pkg/go/token.html#name-LBRACK" class="ident">LBRACK</a> <span class="comment">// [</span></code></span>
+<span class="codeline" id="line-84"><code>	<a href="../../../pkg/go/token.html#name-LBRACE" class="ident">LBRACE</a> <span class="comment">// {</span></code></span>
+<span class="codeline" id="line-85"><code>	<a href="../../../pkg/go/token.html#name-COMMA" class="ident">COMMA</a>  <span class="comment">// ,</span></code></span>
+<span class="codeline" id="line-86"><code>	<a href="../../../pkg/go/token.html#name-PERIOD" class="ident">PERIOD</a> <span class="comment">// .</span></code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>	<a href="../../../pkg/go/token.html#name-RPAREN" class="ident">RPAREN</a>    <span class="comment">// )</span></code></span>
+<span class="codeline" id="line-89"><code>	<a href="../../../pkg/go/token.html#name-RBRACK" class="ident">RBRACK</a>    <span class="comment">// ]</span></code></span>
+<span class="codeline" id="line-90"><code>	<a href="../../../pkg/go/token.html#name-RBRACE" class="ident">RBRACE</a>    <span class="comment">// }</span></code></span>
+<span class="codeline" id="line-91"><code>	<a href="../../../pkg/go/token.html#name-SEMICOLON" class="ident">SEMICOLON</a> <span class="comment">// ;</span></code></span>
+<span class="codeline" id="line-92"><code>	<a href="../../../pkg/go/token.html#name-COLON" class="ident">COLON</a>     <span class="comment">// :</span></code></span>
+<span class="codeline" id="line-93"><code>	operator_end</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code>	keyword_beg</code></span>
+<span class="codeline" id="line-96"><code>	<span class="comment">// Keywords</span></code></span>
+<span class="codeline" id="line-97"><code>	<a href="../../../pkg/go/token.html#name-BREAK" class="ident">BREAK</a></code></span>
+<span class="codeline" id="line-98"><code>	<a href="../../../pkg/go/token.html#name-CASE" class="ident">CASE</a></code></span>
+<span class="codeline" id="line-99"><code>	<a href="../../../pkg/go/token.html#name-CHAN" class="ident">CHAN</a></code></span>
+<span class="codeline" id="line-100"><code>	<a href="../../../pkg/go/token.html#name-CONST" class="ident">CONST</a></code></span>
+<span class="codeline" id="line-101"><code>	<a href="../../../pkg/go/token.html#name-CONTINUE" class="ident">CONTINUE</a></code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code>	<a href="../../../pkg/go/token.html#name-DEFAULT" class="ident">DEFAULT</a></code></span>
+<span class="codeline" id="line-104"><code>	<a href="../../../pkg/go/token.html#name-DEFER" class="ident">DEFER</a></code></span>
+<span class="codeline" id="line-105"><code>	<a href="../../../pkg/go/token.html#name-ELSE" class="ident">ELSE</a></code></span>
+<span class="codeline" id="line-106"><code>	<a href="../../../pkg/go/token.html#name-FALLTHROUGH" class="ident">FALLTHROUGH</a></code></span>
+<span class="codeline" id="line-107"><code>	<a href="../../../pkg/go/token.html#name-FOR" class="ident">FOR</a></code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code>	<a href="../../../pkg/go/token.html#name-FUNC" class="ident">FUNC</a></code></span>
+<span class="codeline" id="line-110"><code>	<a href="../../../pkg/go/token.html#name-GO" class="ident">GO</a></code></span>
+<span class="codeline" id="line-111"><code>	<a href="../../../pkg/go/token.html#name-GOTO" class="ident">GOTO</a></code></span>
+<span class="codeline" id="line-112"><code>	<a href="../../../pkg/go/token.html#name-IF" class="ident">IF</a></code></span>
+<span class="codeline" id="line-113"><code>	<a href="../../../pkg/go/token.html#name-IMPORT" class="ident">IMPORT</a></code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code>	<a href="../../../pkg/go/token.html#name-INTERFACE" class="ident">INTERFACE</a></code></span>
+<span class="codeline" id="line-116"><code>	<a href="../../../pkg/go/token.html#name-MAP" class="ident">MAP</a></code></span>
+<span class="codeline" id="line-117"><code>	<a href="../../../pkg/go/token.html#name-PACKAGE" class="ident">PACKAGE</a></code></span>
+<span class="codeline" id="line-118"><code>	<a href="../../../pkg/go/token.html#name-RANGE" class="ident">RANGE</a></code></span>
+<span class="codeline" id="line-119"><code>	<a href="../../../pkg/go/token.html#name-RETURN" class="ident">RETURN</a></code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	<a href="../../../pkg/go/token.html#name-SELECT" class="ident">SELECT</a></code></span>
+<span class="codeline" id="line-122"><code>	<a href="../../../pkg/go/token.html#name-STRUCT" class="ident">STRUCT</a></code></span>
+<span class="codeline" id="line-123"><code>	<a href="../../../pkg/go/token.html#name-SWITCH" class="ident">SWITCH</a></code></span>
+<span class="codeline" id="line-124"><code>	<a href="../../../pkg/go/token.html#name-TYPE" class="ident">TYPE</a></code></span>
+<span class="codeline" id="line-125"><code>	<a href="../../../pkg/go/token.html#name-VAR" class="ident">VAR</a></code></span>
+<span class="codeline" id="line-126"><code>	keyword_end</code></span>
+<span class="codeline" id="line-127"><code></code></span>
+<span class="codeline" id="line-128"><code>	additional_beg</code></span>
+<span class="codeline" id="line-129"><code>	<span class="comment">// additional tokens, handled in an ad-hoc manner</span></code></span>
+<span class="codeline" id="line-130"><code>	<a href="../../../pkg/go/token.html#name-TILDE" class="ident">TILDE</a></code></span>
+<span class="codeline" id="line-131"><code>	additional_end</code></span>
+<span class="codeline" id="line-132"><code>)</code></span>
+<span class="codeline" id="line-133"><code></code></span>
+<span class="codeline" id="line-134"><code><span class="keyword">var</span> tokens = [...]<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
+<span class="codeline" id="line-135"><code>	<a href="#line-21" class="ident">ILLEGAL</a>: <span class="lit-string">"ILLEGAL"</span>,</code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code>	<a href="#line-22" class="ident">EOF</a>:     <span class="lit-string">"EOF"</span>,</code></span>
+<span class="codeline" id="line-138"><code>	<a href="#line-23" class="ident">COMMENT</a>: <span class="lit-string">"COMMENT"</span>,</code></span>
+<span class="codeline" id="line-139"><code></code></span>
+<span class="codeline" id="line-140"><code>	<a href="#line-28" class="ident">IDENT</a>:  <span class="lit-string">"IDENT"</span>,</code></span>
+<span class="codeline" id="line-141"><code>	<a href="#line-29" class="ident">INT</a>:    <span class="lit-string">"INT"</span>,</code></span>
+<span class="codeline" id="line-142"><code>	<a href="#line-30" class="ident">FLOAT</a>:  <span class="lit-string">"FLOAT"</span>,</code></span>
+<span class="codeline" id="line-143"><code>	<a href="#line-31" class="ident">IMAG</a>:   <span class="lit-string">"IMAG"</span>,</code></span>
+<span class="codeline" id="line-144"><code>	<a href="#line-32" class="ident">CHAR</a>:   <span class="lit-string">"CHAR"</span>,</code></span>
+<span class="codeline" id="line-145"><code>	<a href="#line-33" class="ident">STRING</a>: <span class="lit-string">"STRING"</span>,</code></span>
+<span class="codeline" id="line-146"><code></code></span>
+<span class="codeline" id="line-147"><code>	<a href="#line-38" class="ident">ADD</a>: <span class="lit-string">"+"</span>,</code></span>
+<span class="codeline" id="line-148"><code>	<a href="#line-39" class="ident">SUB</a>: <span class="lit-string">"-"</span>,</code></span>
+<span class="codeline" id="line-149"><code>	<a href="#line-40" class="ident">MUL</a>: <span class="lit-string">"*"</span>,</code></span>
+<span class="codeline" id="line-150"><code>	<a href="#line-41" class="ident">QUO</a>: <span class="lit-string">"/"</span>,</code></span>
+<span class="codeline" id="line-151"><code>	<a href="#line-42" class="ident">REM</a>: <span class="lit-string">"%"</span>,</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code>	<a href="#line-44" class="ident">AND</a>:     <span class="lit-string">"&amp;"</span>,</code></span>
+<span class="codeline" id="line-154"><code>	<a href="#line-45" class="ident">OR</a>:      <span class="lit-string">"|"</span>,</code></span>
+<span class="codeline" id="line-155"><code>	<a href="#line-46" class="ident">XOR</a>:     <span class="lit-string">"^"</span>,</code></span>
+<span class="codeline" id="line-156"><code>	<a href="#line-47" class="ident">SHL</a>:     <span class="lit-string">"&lt;&lt;"</span>,</code></span>
+<span class="codeline" id="line-157"><code>	<a href="#line-48" class="ident">SHR</a>:     <span class="lit-string">"&gt;&gt;"</span>,</code></span>
+<span class="codeline" id="line-158"><code>	<a href="#line-49" class="ident">AND_NOT</a>: <span class="lit-string">"&amp;^"</span>,</code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code>	<a href="#line-51" class="ident">ADD_ASSIGN</a>: <span class="lit-string">"+="</span>,</code></span>
+<span class="codeline" id="line-161"><code>	<a href="#line-52" class="ident">SUB_ASSIGN</a>: <span class="lit-string">"-="</span>,</code></span>
+<span class="codeline" id="line-162"><code>	<a href="#line-53" class="ident">MUL_ASSIGN</a>: <span class="lit-string">"*="</span>,</code></span>
+<span class="codeline" id="line-163"><code>	<a href="#line-54" class="ident">QUO_ASSIGN</a>: <span class="lit-string">"/="</span>,</code></span>
+<span class="codeline" id="line-164"><code>	<a href="#line-55" class="ident">REM_ASSIGN</a>: <span class="lit-string">"%="</span>,</code></span>
+<span class="codeline" id="line-165"><code></code></span>
+<span class="codeline" id="line-166"><code>	<a href="#line-57" class="ident">AND_ASSIGN</a>:     <span class="lit-string">"&amp;="</span>,</code></span>
+<span class="codeline" id="line-167"><code>	<a href="#line-58" class="ident">OR_ASSIGN</a>:      <span class="lit-string">"|="</span>,</code></span>
+<span class="codeline" id="line-168"><code>	<a href="#line-59" class="ident">XOR_ASSIGN</a>:     <span class="lit-string">"^="</span>,</code></span>
+<span class="codeline" id="line-169"><code>	<a href="#line-60" class="ident">SHL_ASSIGN</a>:     <span class="lit-string">"&lt;&lt;="</span>,</code></span>
+<span class="codeline" id="line-170"><code>	<a href="#line-61" class="ident">SHR_ASSIGN</a>:     <span class="lit-string">"&gt;&gt;="</span>,</code></span>
+<span class="codeline" id="line-171"><code>	<a href="#line-62" class="ident">AND_NOT_ASSIGN</a>: <span class="lit-string">"&amp;^="</span>,</code></span>
+<span class="codeline" id="line-172"><code></code></span>
+<span class="codeline" id="line-173"><code>	<a href="#line-64" class="ident">LAND</a>:  <span class="lit-string">"&amp;&amp;"</span>,</code></span>
+<span class="codeline" id="line-174"><code>	<a href="#line-65" class="ident">LOR</a>:   <span class="lit-string">"||"</span>,</code></span>
+<span class="codeline" id="line-175"><code>	<a href="#line-66" class="ident">ARROW</a>: <span class="lit-string">"&lt;-"</span>,</code></span>
+<span class="codeline" id="line-176"><code>	<a href="#line-67" class="ident">INC</a>:   <span class="lit-string">"++"</span>,</code></span>
+<span class="codeline" id="line-177"><code>	<a href="#line-68" class="ident">DEC</a>:   <span class="lit-string">"--"</span>,</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code>	<a href="#line-70" class="ident">EQL</a>:    <span class="lit-string">"=="</span>,</code></span>
+<span class="codeline" id="line-180"><code>	<a href="#line-71" class="ident">LSS</a>:    <span class="lit-string">"&lt;"</span>,</code></span>
+<span class="codeline" id="line-181"><code>	<a href="#line-72" class="ident">GTR</a>:    <span class="lit-string">"&gt;"</span>,</code></span>
+<span class="codeline" id="line-182"><code>	<a href="#line-73" class="ident">ASSIGN</a>: <span class="lit-string">"="</span>,</code></span>
+<span class="codeline" id="line-183"><code>	<a href="#line-74" class="ident">NOT</a>:    <span class="lit-string">"!"</span>,</code></span>
+<span class="codeline" id="line-184"><code></code></span>
+<span class="codeline" id="line-185"><code>	<a href="#line-76" class="ident">NEQ</a>:      <span class="lit-string">"!="</span>,</code></span>
+<span class="codeline" id="line-186"><code>	<a href="#line-77" class="ident">LEQ</a>:      <span class="lit-string">"&lt;="</span>,</code></span>
+<span class="codeline" id="line-187"><code>	<a href="#line-78" class="ident">GEQ</a>:      <span class="lit-string">"&gt;="</span>,</code></span>
+<span class="codeline" id="line-188"><code>	<a href="#line-79" class="ident">DEFINE</a>:   <span class="lit-string">":="</span>,</code></span>
+<span class="codeline" id="line-189"><code>	<a href="#line-80" class="ident">ELLIPSIS</a>: <span class="lit-string">"..."</span>,</code></span>
+<span class="codeline" id="line-190"><code></code></span>
+<span class="codeline" id="line-191"><code>	<a href="#line-82" class="ident">LPAREN</a>: <span class="lit-string">"("</span>,</code></span>
+<span class="codeline" id="line-192"><code>	<a href="#line-83" class="ident">LBRACK</a>: <span class="lit-string">"["</span>,</code></span>
+<span class="codeline" id="line-193"><code>	<a href="#line-84" class="ident">LBRACE</a>: <span class="lit-string">"{"</span>,</code></span>
+<span class="codeline" id="line-194"><code>	<a href="#line-85" class="ident">COMMA</a>:  <span class="lit-string">","</span>,</code></span>
+<span class="codeline" id="line-195"><code>	<a href="#line-86" class="ident">PERIOD</a>: <span class="lit-string">"."</span>,</code></span>
+<span class="codeline" id="line-196"><code></code></span>
+<span class="codeline" id="line-197"><code>	<a href="#line-88" class="ident">RPAREN</a>:    <span class="lit-string">")"</span>,</code></span>
+<span class="codeline" id="line-198"><code>	<a href="#line-89" class="ident">RBRACK</a>:    <span class="lit-string">"]"</span>,</code></span>
+<span class="codeline" id="line-199"><code>	<a href="#line-90" class="ident">RBRACE</a>:    <span class="lit-string">"}"</span>,</code></span>
+<span class="codeline" id="line-200"><code>	<a href="#line-91" class="ident">SEMICOLON</a>: <span class="lit-string">";"</span>,</code></span>
+<span class="codeline" id="line-201"><code>	<a href="#line-92" class="ident">COLON</a>:     <span class="lit-string">":"</span>,</code></span>
+<span class="codeline" id="line-202"><code></code></span>
+<span class="codeline" id="line-203"><code>	<a href="#line-97" class="ident">BREAK</a>:    <span class="lit-string">"break"</span>,</code></span>
+<span class="codeline" id="line-204"><code>	<a href="#line-98" class="ident">CASE</a>:     <span class="lit-string">"case"</span>,</code></span>
+<span class="codeline" id="line-205"><code>	<a href="#line-99" class="ident">CHAN</a>:     <span class="lit-string">"chan"</span>,</code></span>
+<span class="codeline" id="line-206"><code>	<a href="#line-100" class="ident">CONST</a>:    <span class="lit-string">"const"</span>,</code></span>
+<span class="codeline" id="line-207"><code>	<a href="#line-101" class="ident">CONTINUE</a>: <span class="lit-string">"continue"</span>,</code></span>
+<span class="codeline" id="line-208"><code></code></span>
+<span class="codeline" id="line-209"><code>	<a href="#line-103" class="ident">DEFAULT</a>:     <span class="lit-string">"default"</span>,</code></span>
+<span class="codeline" id="line-210"><code>	<a href="#line-104" class="ident">DEFER</a>:       <span class="lit-string">"defer"</span>,</code></span>
+<span class="codeline" id="line-211"><code>	<a href="#line-105" class="ident">ELSE</a>:        <span class="lit-string">"else"</span>,</code></span>
+<span class="codeline" id="line-212"><code>	<a href="#line-106" class="ident">FALLTHROUGH</a>: <span class="lit-string">"fallthrough"</span>,</code></span>
+<span class="codeline" id="line-213"><code>	<a href="#line-107" class="ident">FOR</a>:         <span class="lit-string">"for"</span>,</code></span>
+<span class="codeline" id="line-214"><code></code></span>
+<span class="codeline" id="line-215"><code>	<a href="#line-109" class="ident">FUNC</a>:   <span class="lit-string">"func"</span>,</code></span>
+<span class="codeline" id="line-216"><code>	<a href="#line-110" class="ident">GO</a>:     <span class="lit-string">"go"</span>,</code></span>
+<span class="codeline" id="line-217"><code>	<a href="#line-111" class="ident">GOTO</a>:   <span class="lit-string">"goto"</span>,</code></span>
+<span class="codeline" id="line-218"><code>	<a href="#line-112" class="ident">IF</a>:     <span class="lit-string">"if"</span>,</code></span>
+<span class="codeline" id="line-219"><code>	<a href="#line-113" class="ident">IMPORT</a>: <span class="lit-string">"import"</span>,</code></span>
+<span class="codeline" id="line-220"><code></code></span>
+<span class="codeline" id="line-221"><code>	<a href="#line-115" class="ident">INTERFACE</a>: <span class="lit-string">"interface"</span>,</code></span>
+<span class="codeline" id="line-222"><code>	<a href="#line-116" class="ident">MAP</a>:       <span class="lit-string">"map"</span>,</code></span>
+<span class="codeline" id="line-223"><code>	<a href="#line-117" class="ident">PACKAGE</a>:   <span class="lit-string">"package"</span>,</code></span>
+<span class="codeline" id="line-224"><code>	<a href="#line-118" class="ident">RANGE</a>:     <span class="lit-string">"range"</span>,</code></span>
+<span class="codeline" id="line-225"><code>	<a href="#line-119" class="ident">RETURN</a>:    <span class="lit-string">"return"</span>,</code></span>
+<span class="codeline" id="line-226"><code></code></span>
+<span class="codeline" id="line-227"><code>	<a href="#line-121" class="ident">SELECT</a>: <span class="lit-string">"select"</span>,</code></span>
+<span class="codeline" id="line-228"><code>	<a href="#line-122" class="ident">STRUCT</a>: <span class="lit-string">"struct"</span>,</code></span>
+<span class="codeline" id="line-229"><code>	<a href="#line-123" class="ident">SWITCH</a>: <span class="lit-string">"switch"</span>,</code></span>
+<span class="codeline" id="line-230"><code>	<a href="#line-124" class="ident">TYPE</a>:   <span class="lit-string">"type"</span>,</code></span>
+<span class="codeline" id="line-231"><code>	<a href="#line-125" class="ident">VAR</a>:    <span class="lit-string">"var"</span>,</code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code>	<a href="#line-130" class="ident">TILDE</a>: <span class="lit-string">"~"</span>,</code></span>
+<span class="codeline" id="line-234"><code>}</code></span>
+<span class="codeline" id="line-235"><code></code></span>
+<span class="codeline" id="line-236"><code><span class="comment">// String returns the string corresponding to the token tok.</span></code></span>
+<span class="codeline" id="line-237"><code><span class="comment">// For operators, delimiters, and keywords the string is the actual</span></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">// token character sequence (e.g., for the token ADD, the string is</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">// "+"). For all other tokens the string corresponds to the token</span></code></span>
+<span class="codeline" id="line-240"><code><span class="comment">// constant name (e.g. for the token IDENT, the string is "IDENT").</span></code></span>
+<span class="codeline" id="line-241"><code><span class="keyword">func</span> (<label for="r0" class="ident">tok</label> <a href="#line-16" class="ident">Token</a>) <label for="r1" class="ident">String</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-242"><code>	<label for="r2" class="ident">s</label> := <span class="lit-string">""</span></code></span>
+<span class="codeline" id="line-243"><code>	<span class="keyword">if</span> <span class="lit-number">0</span> &lt;= <label for="r0" class="ident">tok</label> &amp;&amp; <label for="r0" class="ident">tok</label> &lt; <a href="#line-16" class="ident">Token</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<a href="#line-134" class="ident">tokens</a>)) {</code></span>
+<span class="codeline" id="line-244"><code>		<label for="r2" class="ident">s</label> = <a href="#line-134" class="ident">tokens</a>[<label for="r0" class="ident">tok</label>]</code></span>
+<span class="codeline" id="line-245"><code>	}</code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">if</span> <label for="r2" class="ident">s</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-247"><code>		<label for="r2" class="ident">s</label> = <span class="lit-string">"token("</span> + <a href="../../../pkg/strconv.html" class="ident i0">strconv</a>.<a href="../../strconv/itoa.go.html#line-34" class="ident">Itoa</a>(<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r0" class="ident">tok</label>)) + <span class="lit-string">")"</span></code></span>
+<span class="codeline" id="line-248"><code>	}</code></span>
+<span class="codeline" id="line-249"><code>	<span class="keyword">return</span> <label for="r2" class="ident">s</label></code></span>
+<span class="codeline" id="line-250"><code>}</code></span>
+<span class="codeline" id="line-251"><code></code></span>
+<span class="codeline" id="line-252"><code><span class="comment">// A set of constants for precedence-based expression parsing.</span></code></span>
+<span class="codeline" id="line-253"><code><span class="comment">// Non-operators have lowest precedence, followed by operators</span></code></span>
+<span class="codeline" id="line-254"><code><span class="comment">// starting with precedence 1 up to unary operators. The highest</span></code></span>
+<span class="codeline" id="line-255"><code><span class="comment">// precedence serves as "catch-all" precedence for selector,</span></code></span>
+<span class="codeline" id="line-256"><code><span class="comment">// indexing, and other operator and delimiter tokens.</span></code></span>
+<span class="codeline" id="line-257"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-258"><code>	<a href="../../../pkg/go/token.html#name-LowestPrec" class="ident">LowestPrec</a>  = <span class="lit-number">0</span> <span class="comment">// non-operators</span></code></span>
+<span class="codeline" id="line-259"><code>	<a href="../../../pkg/go/token.html#name-UnaryPrec" class="ident">UnaryPrec</a>   = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-260"><code>	<a href="../../../pkg/go/token.html#name-HighestPrec" class="ident">HighestPrec</a> = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-261"><code>)</code></span>
+<span class="codeline" id="line-262"><code></code></span>
+<span class="codeline" id="line-263"><code><span class="comment">// Precedence returns the operator precedence of the binary</span></code></span>
+<span class="codeline" id="line-264"><code><span class="comment">// operator op. If op is not a binary operator, the result</span></code></span>
+<span class="codeline" id="line-265"><code><span class="comment">// is LowestPrecedence.</span></code></span>
+<span class="codeline" id="line-266"><code><span class="keyword">func</span> (<label for="r3" class="ident">op</label> <a href="#line-16" class="ident">Token</a>) <label for="r4" class="ident">Precedence</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-267"><code>	<span class="keyword">switch</span> <label for="r3" class="ident">op</label> {</code></span>
+<span class="codeline" id="line-268"><code>	<span class="keyword">case</span> <a href="#line-65" class="ident">LOR</a>:</code></span>
+<span class="codeline" id="line-269"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-270"><code>	<span class="keyword">case</span> <a href="#line-64" class="ident">LAND</a>:</code></span>
+<span class="codeline" id="line-271"><code>		<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-272"><code>	<span class="keyword">case</span> <a href="#line-70" class="ident">EQL</a>, <a href="#line-76" class="ident">NEQ</a>, <a href="#line-71" class="ident">LSS</a>, <a href="#line-77" class="ident">LEQ</a>, <a href="#line-72" class="ident">GTR</a>, <a href="#line-78" class="ident">GEQ</a>:</code></span>
+<span class="codeline" id="line-273"><code>		<span class="keyword">return</span> <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-274"><code>	<span class="keyword">case</span> <a href="#line-38" class="ident">ADD</a>, <a href="#line-39" class="ident">SUB</a>, <a href="#line-45" class="ident">OR</a>, <a href="#line-46" class="ident">XOR</a>:</code></span>
+<span class="codeline" id="line-275"><code>		<span class="keyword">return</span> <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-276"><code>	<span class="keyword">case</span> <a href="#line-40" class="ident">MUL</a>, <a href="#line-41" class="ident">QUO</a>, <a href="#line-42" class="ident">REM</a>, <a href="#line-47" class="ident">SHL</a>, <a href="#line-48" class="ident">SHR</a>, <a href="#line-44" class="ident">AND</a>, <a href="#line-49" class="ident">AND_NOT</a>:</code></span>
+<span class="codeline" id="line-277"><code>		<span class="keyword">return</span> <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-278"><code>	}</code></span>
+<span class="codeline" id="line-279"><code>	<span class="keyword">return</span> <a href="#line-258" class="ident">LowestPrec</a></code></span>
+<span class="codeline" id="line-280"><code>}</code></span>
+<span class="codeline" id="line-281"><code></code></span>
+<span class="codeline" id="line-282"><code><span class="keyword">var</span> keywords <span class="keyword">map</span>[<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-16" class="ident">Token</a></code></span>
+<span class="codeline" id="line-283"><code></code></span>
+<span class="codeline" id="line-284"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-285"><code>	<a href="#line-282" class="ident">keywords</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-16" class="ident">Token</a>, <a href="#line-126" class="ident">keyword_end</a>-(<a href="#line-95" class="ident">keyword_beg</a>+<span class="lit-number">1</span>))</code></span>
+<span class="codeline" id="line-286"><code>	<span class="keyword">for</span> <label for="r6" class="ident">i</label> := <a href="#line-95" class="ident">keyword_beg</a> + <span class="lit-number">1</span>; <label for="r6" class="ident">i</label> &lt; <a href="#line-126" class="ident">keyword_end</a>; <label for="r6" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-287"><code>		<a href="#line-282" class="ident">keywords</a>[<a href="#line-134" class="ident">tokens</a>[<label for="r6" class="ident">i</label>]] = <label for="r6" class="ident">i</label></code></span>
+<span class="codeline" id="line-288"><code>	}</code></span>
+<span class="codeline" id="line-289"><code>}</code></span>
+<span class="codeline" id="line-290"><code></code></span>
+<span class="codeline" id="line-291"><code><span class="comment">// Lookup maps an identifier to its keyword token or IDENT (if not a keyword).</span></code></span>
+<span class="codeline" id="line-292"><code><span class="keyword">func</span> <label for="r7" class="ident"><a href="../../../pkg/go/token.html#name-Lookup" class="ident">Lookup</a></label>(<label for="r8" class="ident">ident</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-16" class="ident">Token</a> {</code></span>
+<span class="codeline" id="line-293"><code>	<span class="keyword">if</span> <label for="r9" class="ident">tok</label>, <label for="r10" class="ident">is_keyword</label> := <a href="#line-282" class="ident">keywords</a>[<label for="r8" class="ident">ident</label>]; <label for="r10" class="ident">is_keyword</label> {</code></span>
+<span class="codeline" id="line-294"><code>		<span class="keyword">return</span> <label for="r9" class="ident">tok</label></code></span>
+<span class="codeline" id="line-295"><code>	}</code></span>
+<span class="codeline" id="line-296"><code>	<span class="keyword">return</span> <a href="#line-28" class="ident">IDENT</a></code></span>
+<span class="codeline" id="line-297"><code>}</code></span>
+<span class="codeline" id="line-298"><code></code></span>
+<span class="codeline" id="line-299"><code><span class="comment">// Predicates</span></code></span>
+<span class="codeline" id="line-300"><code></code></span>
+<span class="codeline" id="line-301"><code><span class="comment">// IsLiteral returns true for tokens corresponding to identifiers</span></code></span>
+<span class="codeline" id="line-302"><code><span class="comment">// and basic type literals; it returns false otherwise.</span></code></span>
+<span class="codeline" id="line-303"><code><span class="keyword">func</span> (<label for="r11" class="ident">tok</label> <a href="#line-16" class="ident">Token</a>) <label for="r12" class="ident">IsLiteral</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> { <span class="keyword">return</span> <a href="#line-25" class="ident">literal_beg</a> &lt; <label for="r11" class="ident">tok</label> &amp;&amp; <label for="r11" class="ident">tok</label> &lt; <a href="#line-34" class="ident">literal_end</a> }</code></span>
+<span class="codeline" id="line-304"><code></code></span>
+<span class="codeline" id="line-305"><code><span class="comment">// IsOperator returns true for tokens corresponding to operators and</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">// delimiters; it returns false otherwise.</span></code></span>
+<span class="codeline" id="line-307"><code><span class="keyword">func</span> (<label for="r13" class="ident">tok</label> <a href="#line-16" class="ident">Token</a>) <label for="r14" class="ident">IsOperator</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-308"><code>	<span class="keyword">return</span> (<a href="#line-36" class="ident">operator_beg</a> &lt; <label for="r13" class="ident">tok</label> &amp;&amp; <label for="r13" class="ident">tok</label> &lt; <a href="#line-93" class="ident">operator_end</a>) || <label for="r13" class="ident">tok</label> == <a href="#line-130" class="ident">TILDE</a></code></span>
+<span class="codeline" id="line-309"><code>}</code></span>
+<span class="codeline" id="line-310"><code></code></span>
+<span class="codeline" id="line-311"><code><span class="comment">// IsKeyword returns true for tokens corresponding to keywords;</span></code></span>
+<span class="codeline" id="line-312"><code><span class="comment">// it returns false otherwise.</span></code></span>
+<span class="codeline" id="line-313"><code><span class="keyword">func</span> (<label for="r15" class="ident">tok</label> <a href="#line-16" class="ident">Token</a>) <label for="r16" class="ident">IsKeyword</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> { <span class="keyword">return</span> <a href="#line-95" class="ident">keyword_beg</a> &lt; <label for="r15" class="ident">tok</label> &amp;&amp; <label for="r15" class="ident">tok</label> &lt; <a href="#line-126" class="ident">keyword_end</a> }</code></span>
+<span class="codeline" id="line-314"><code></code></span>
+<span class="codeline" id="line-315"><code><span class="comment">// IsExported reports whether name starts with an upper-case letter.</span></code></span>
+<span class="codeline" id="line-316"><code><span class="keyword">func</span> <label for="r17" class="ident"><a href="../../../pkg/go/token.html#name-IsExported" class="ident">IsExported</a></label>(<label for="r18" class="ident">name</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-317"><code>	<label for="r19" class="ident">ch</label>, <label for="r20" class="ident">_</label> := <a href="../../../pkg/unicode/utf8.html" class="ident i2">utf8</a>.<a href="../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r18" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-318"><code>	<span class="keyword">return</span> <a href="../../../pkg/unicode.html" class="ident i1">unicode</a>.<a href="../../unicode/letter.go.html#line-184" class="ident">IsUpper</a>(<label for="r19" class="ident">ch</label>)</code></span>
+<span class="codeline" id="line-319"><code>}</code></span>
+<span class="codeline" id="line-320"><code></code></span>
+<span class="codeline" id="line-321"><code><span class="comment">// IsKeyword reports whether name is a Go keyword, such as "func" or "return".</span></code></span>
+<span class="codeline" id="line-322"><code><span class="keyword">func</span> <label for="r21" class="ident"><a href="../../../pkg/go/token.html#name-IsKeyword" class="ident">IsKeyword</a></label>(<label for="r22" class="ident">name</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-323"><code>	<span class="comment">// TODO: opt: use a perfect hash function instead of a global map.</span></code></span>
+<span class="codeline" id="line-324"><code>	<label for="r23" class="ident">_</label>, <label for="r24" class="ident">ok</label> := <a href="#line-282" class="ident">keywords</a>[<label for="r22" class="ident">name</label>]</code></span>
+<span class="codeline" id="line-325"><code>	<span class="keyword">return</span> <label for="r24" class="ident">ok</label></code></span>
+<span class="codeline" id="line-326"><code>}</code></span>
+<span class="codeline" id="line-327"><code></code></span>
+<span class="codeline" id="line-328"><code><span class="comment">// IsIdentifier reports whether name is a Go identifier, that is, a non-empty</span></code></span>
+<span class="codeline" id="line-329"><code><span class="comment">// string made up of letters, digits, and underscores, where the first character</span></code></span>
+<span class="codeline" id="line-330"><code><span class="comment">// is not a digit. Keywords are not identifiers.</span></code></span>
+<span class="codeline" id="line-331"><code><span class="keyword">func</span> <label for="r25" class="ident"><a href="../../../pkg/go/token.html#name-IsIdentifier" class="ident">IsIdentifier</a></label>(<label for="r26" class="ident">name</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-332"><code>	<span class="keyword">if</span> <label for="r26" class="ident">name</label> == <span class="lit-string">""</span> || <a href="#line-322" class="ident">IsKeyword</a>(<label for="r26" class="ident">name</label>) {</code></span>
+<span class="codeline" id="line-333"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-334"><code>	}</code></span>
+<span class="codeline" id="line-335"><code>	<span class="keyword">for</span> <label for="r27" class="ident">i</label>, <label for="r28" class="ident">c</label> := <span class="keyword">range</span> <label for="r26" class="ident">name</label> {</code></span>
+<span class="codeline" id="line-336"><code>		<span class="keyword">if</span> !<a href="../../../pkg/unicode.html" class="ident i1">unicode</a>.<a href="../../unicode/graphic.go.html#line-90" class="ident">IsLetter</a>(<label for="r28" class="ident">c</label>) &amp;&amp; <label for="r28" class="ident">c</label> != <span class="lit-number">'_'</span> &amp;&amp; (<label for="r27" class="ident">i</label> == <span class="lit-number">0</span> || !<a href="../../../pkg/unicode.html" class="ident i1">unicode</a>.<a href="../../unicode/digit.go.html#line-8" class="ident">IsDigit</a>(<label for="r28" class="ident">c</label>)) {</code></span>
+<span class="codeline" id="line-337"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-338"><code>		}</code></span>
+<span class="codeline" id="line-339"><code>	}</code></span>
+<span class="codeline" id="line-340"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-341"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

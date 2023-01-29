@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: Authenticator.go in package github.com/jcmturner/gokrb5/v8/types</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	Authenticator.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html">github.com/jcmturner/gokrb5/v8/types</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package types provides Kerberos 5 data types.</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> types</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-5"><code>	<label for="i0"><span class="lit-string i0">"crypto/rand"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i2"><span class="lit-string i2">"math"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i3"><span class="lit-string i3">"math/big"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i4"><span class="lit-string i4">"time"</span></label></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i5"><span class="lit-string i5">"github.com/jcmturner/gofork/encoding/asn1"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i6"><span class="lit-string i6">"github.com/jcmturner/gokrb5/v8/asn1tools"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i7"><span class="lit-string i7">"github.com/jcmturner/gokrb5/v8/iana"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i8"><span class="lit-string i8">"github.com/jcmturner/gokrb5/v8/iana/asnAppTag"</span></label></code></span>
+<span class="codeline" id="line-15"><code>)</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// Authenticator - A record containing information that can be shown to have been recently generated using the session</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// key known only by the client and server.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// https://tools.ietf.org/html/rfc4120#section-5.5.1</span></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html#name-Authenticator" class="ident">Authenticator</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-21"><code>	AVNO              <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>               <span class="lit-string">`asn1:"explicit,tag:0"`</span></code></span>
+<span class="codeline" id="line-22"><code>	CRealm            <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>            <span class="lit-string">`asn1:"generalstring,explicit,tag:1"`</span></code></span>
+<span class="codeline" id="line-23"><code>	CName             <a href="PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a>     <span class="lit-string">`asn1:"explicit,tag:2"`</span></code></span>
+<span class="codeline" id="line-24"><code>	Cksum             <a href="Cryptosystem.go^b5b5f.html#line-28" class="ident">Checksum</a>          <span class="lit-string">`asn1:"explicit,optional,tag:3"`</span></code></span>
+<span class="codeline" id="line-25"><code>	Cusec             <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>               <span class="lit-string">`asn1:"explicit,tag:4"`</span></code></span>
+<span class="codeline" id="line-26"><code>	CTime             <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a>         <span class="lit-string">`asn1:"generalized,explicit,tag:5"`</span></code></span>
+<span class="codeline" id="line-27"><code>	SubKey            <a href="Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>     <span class="lit-string">`asn1:"explicit,optional,tag:6"`</span></code></span>
+<span class="codeline" id="line-28"><code>	SeqNumber         <a href="../../../../../../pkg/builtin.html#name-int64" class="ident">int64</a>             <span class="lit-string">`asn1:"explicit,optional,tag:7"`</span></code></span>
+<span class="codeline" id="line-29"><code>	AuthorizationData <a href="AuthorizationData.go^81ef4.html#line-11" class="ident">AuthorizationData</a> <span class="lit-string">`asn1:"explicit,optional,tag:8"`</span></code></span>
+<span class="codeline" id="line-30"><code>}</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// NewAuthenticator creates a new Authenticator.</span></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html#name-NewAuthenticator" class="ident">NewAuthenticator</a></label>(<label for="r1" class="ident">realm</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r2" class="ident">cname</label> <a href="PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a>) (<a href="#line-20" class="ident">Authenticator</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-34"><code>	<label for="r3" class="ident">seq</label>, <label for="r4" class="ident">err</label> := <a href="../../../../../../pkg/crypto/rand.html" class="ident i0">rand</a>.<a href="../../../../../crypto/rand/util.go.html#line-62" class="ident">Int</a>(<a href="../../../../../../pkg/crypto/rand.html" class="ident i0">rand</a>.<a href="../../../../../crypto/rand/rand.go.html#line-20" class="ident">Reader</a>, <a href="../../../../../../pkg/math/big.html" class="ident i3">big</a>.<a href="../../../../../math/big/int.go.html#line-67" class="ident">NewInt</a>(<a href="../../../../../../pkg/math.html" class="ident i2">math</a>.<a href="../../../../../math/const.go.html#line-55" class="ident">MaxUint32</a>))</code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-36"><code>		<span class="keyword">return</span> <a href="#line-20" class="ident">Authenticator</a>{}, <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-37"><code>	}</code></span>
+<span class="codeline" id="line-38"><code>	<label for="r5" class="ident">t</label> := <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>()</code></span>
+<span class="codeline" id="line-39"><code>	<span class="keyword">return</span> <a href="#line-20" class="ident">Authenticator</a>{</code></span>
+<span class="codeline" id="line-40"><code>		<a href="#line-21" class="ident">AVNO</a>:      <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana.html" class="ident i7">iana</a>.<a href="../iana/constants.go.html#line-5" class="ident">PVNO</a>,</code></span>
+<span class="codeline" id="line-41"><code>		<a href="#line-22" class="ident">CRealm</a>:    <label for="r1" class="ident">realm</label>,</code></span>
+<span class="codeline" id="line-42"><code>		<a href="#line-23" class="ident">CName</a>:     <label for="r2" class="ident">cname</label>,</code></span>
+<span class="codeline" id="line-43"><code>		<a href="#line-24" class="ident">Cksum</a>:     <a href="Cryptosystem.go^b5b5f.html#line-28" class="ident">Checksum</a>{},</code></span>
+<span class="codeline" id="line-44"><code>		<a href="#line-25" class="ident">Cusec</a>:     <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>((<label for="r5" class="ident">t</label>.<a href="../../../../../time/time.go.html#line-1196" class="ident">UnixNano</a>() / <a href="../../../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-612" class="ident">Microsecond</a>)) - (<label for="r5" class="ident">t</label>.<a href="../../../../../time/time.go.html#line-1168" class="ident">Unix</a>() * <span class="lit-number">1e6</span>)),</code></span>
+<span class="codeline" id="line-45"><code>		<a href="#line-26" class="ident">CTime</a>:     <label for="r5" class="ident">t</label>,</code></span>
+<span class="codeline" id="line-46"><code>		<a href="#line-28" class="ident">SeqNumber</a>: <label for="r3" class="ident">seq</label>.<a href="../../../../../math/big/int.go.html#line-368" class="ident">Int64</a>() &amp; <span class="lit-number">0x3fffffff</span>,</code></span>
+<span class="codeline" id="line-47"><code>	}, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// GenerateSeqNumberAndSubKey sets the Authenticator's sequence number and subkey.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> (<label for="r6" class="ident">a</label> *<a href="#line-20" class="ident">Authenticator</a>) <label for="r7" class="ident">GenerateSeqNumberAndSubKey</label>(<label for="r8" class="ident">keyType</label> <a href="../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>, <label for="r9" class="ident">keySize</label> <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-52"><code>	<label for="r10" class="ident">seq</label>, <label for="r11" class="ident">err</label> := <a href="../../../../../../pkg/crypto/rand.html" class="ident i0">rand</a>.<a href="../../../../../crypto/rand/util.go.html#line-62" class="ident">Int</a>(<a href="../../../../../../pkg/crypto/rand.html" class="ident i0">rand</a>.<a href="../../../../../crypto/rand/rand.go.html#line-20" class="ident">Reader</a>, <a href="../../../../../../pkg/math/big.html" class="ident i3">big</a>.<a href="../../../../../math/big/int.go.html#line-67" class="ident">NewInt</a>(<a href="../../../../../../pkg/math.html" class="ident i2">math</a>.<a href="../../../../../math/const.go.html#line-55" class="ident">MaxUint32</a>))</code></span>
+<span class="codeline" id="line-53"><code>	<span class="keyword">if</span> <label for="r11" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">return</span> <label for="r11" class="ident">err</label></code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>	<label for="r6" class="ident">a</label>.<a href="#line-28" class="ident">SeqNumber</a> = <label for="r10" class="ident">seq</label>.<a href="../../../../../math/big/int.go.html#line-368" class="ident">Int64</a>() &amp; <span class="lit-number">0x3fffffff</span></code></span>
+<span class="codeline" id="line-57"><code>	<span class="comment">//Generate subkey value</span></code></span>
+<span class="codeline" id="line-58"><code>	<label for="r12" class="ident">sk</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r9" class="ident">keySize</label>, <label for="r9" class="ident">keySize</label>)</code></span>
+<span class="codeline" id="line-59"><code>	<a href="../../../../../../pkg/crypto/rand.html" class="ident i0">rand</a>.<a href="../../../../../crypto/rand/rand.go.html#line-24" class="ident">Read</a>(<label for="r12" class="ident">sk</label>)</code></span>
+<span class="codeline" id="line-60"><code>	<label for="r6" class="ident">a</label>.<a href="#line-27" class="ident">SubKey</a> = <a href="Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>{</code></span>
+<span class="codeline" id="line-61"><code>		<a href="Cryptosystem.go^b5b5f.html#line-23" class="ident">KeyType</a>:  <label for="r8" class="ident">keyType</label>,</code></span>
+<span class="codeline" id="line-62"><code>		<a href="Cryptosystem.go^b5b5f.html#line-24" class="ident">KeyValue</a>: <label for="r12" class="ident">sk</label>,</code></span>
+<span class="codeline" id="line-63"><code>	}</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// Unmarshal bytes into the Authenticator.</span></code></span>
+<span class="codeline" id="line-68"><code><span class="keyword">func</span> (<label for="r13" class="ident">a</label> *<a href="#line-20" class="ident">Authenticator</a>) <label for="r14" class="ident">Unmarshal</label>(<label for="r15" class="ident">b</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r16" class="ident">_</label>, <label for="r17" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i5">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-996" class="ident">UnmarshalWithParams</a>(<label for="r15" class="ident">b</label>, <label for="r13" class="ident">a</label>, <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"application,explicit,tag:%v"</span>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/asnAppTag^84a0e.html" class="ident i8">asnAppTag</a>.<a href="../iana/asnAppTag^84a0e/constants.go.html#line-7" class="ident">Authenticator</a>))</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">return</span> <label for="r17" class="ident">err</label></code></span>
+<span class="codeline" id="line-71"><code>}</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">// Marshal the Authenticator.</span></code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r18" class="ident">a</label> *<a href="#line-20" class="ident">Authenticator</a>) <label for="r19" class="ident">Marshal</label>() ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-75"><code>	<label for="r20" class="ident">b</label>, <label for="r21" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i5">asn1</a>.<a href="../../../gofork/encoding/asn1/marshal.go.html#line-649" class="ident">Marshal</a>(*<label for="r18" class="ident">a</label>)</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r21" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r21" class="ident">err</label></code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<label for="r20" class="ident">b</label> = <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/asn1tools.html" class="ident i6">asn1tools</a>.<a href="../asn1tools/tools.go.html#line-58" class="ident">AddASNAppTag</a>(<label for="r20" class="ident">b</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/asnAppTag^84a0e.html" class="ident i8">asnAppTag</a>.<a href="../iana/asnAppTag^84a0e/constants.go.html#line-7" class="ident">Authenticator</a>)</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">return</span> <label for="r20" class="ident">b</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-81"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

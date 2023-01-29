@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: intern.go in package internal/intern</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	intern.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/intern.html">internal/intern</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2020 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package intern lets you make smaller comparable values by boxing</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// a larger comparable value (such as a 16 byte string header) down</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// into a globally unique 8 byte pointer.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// The globally unique pointers are garbage collected with weak</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// references and finalizers. This package hides that.</span></code></span></div><span class="codeline" id="line-11"><code><span class="keyword">package</span> intern</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-14"><code>	<label for="i0"><span class="lit-string i0">"internal/godebug"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i1"><span class="lit-string i1">"runtime"</span></label></code></span>
+<span class="codeline" id="line-16"><code>	<label for="i2"><span class="lit-string i2">"sync"</span></label></code></span>
+<span class="codeline" id="line-17"><code>	<label for="i3"><span class="lit-string i3">"unsafe"</span></label></code></span>
+<span class="codeline" id="line-18"><code>)</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// A Value pointer is the handle to an underlying comparable value.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// See func Get for how Value pointers may be used.</span></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">type</span> <a href="../../../pkg/internal/intern.html#name-Value" class="ident">Value</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-23"><code>	_      [<span class="lit-number">0</span>]<span class="keyword">func</span>() <span class="comment">// prevent people from accidentally using value type as comparable</span></code></span>
+<span class="codeline" id="line-24"><code>	cmpVal <a href="../../../pkg/builtin.html#name-any" class="ident">any</a></code></span>
+<span class="codeline" id="line-25"><code>	<span class="comment">// resurrected is guarded by mu (for all instances of Value).</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">	// It is set true whenever v is synthesized from a uintptr.</span></code></span>
+<span class="codeline" id="line-27"><code>	resurrected <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-28"><code>}</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// Get returns the comparable value passed to the Get func</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// that returned v.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> (<label for="r0" class="ident">v</label> *<a href="#line-22" class="ident">Value</a>) <label for="r1" class="ident">Get</label>() <a href="../../../pkg/builtin.html#name-any" class="ident">any</a> { <span class="keyword">return</span> <label for="r0" class="ident">v</label>.<a href="#line-24" class="ident">cmpVal</a> }</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// key is a key in our global value map.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// It contains type-specialized fields to avoid allocations</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// when converting common types to empty interfaces.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="keyword">type</span> key <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-38"><code>	s      <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-39"><code>	cmpVal <a href="../../../pkg/builtin.html#name-any" class="ident">any</a></code></span>
+<span class="codeline" id="line-40"><code>	<span class="comment">// isString reports whether key contains a string.</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">	// Without it, the zero value of key is ambiguous.</span></code></span>
+<span class="codeline" id="line-42"><code>	isString <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// keyFor returns a key to use with cmpVal.</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> keyFor(<label for="r3" class="ident">cmpVal</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="#line-37" class="ident">key</a> {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">if</span> <label for="r4" class="ident">s</label>, <label for="r5" class="ident">ok</label> := <label for="r3" class="ident">cmpVal</label>.(<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>); <label for="r5" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-48"><code>		<span class="keyword">return</span> <a href="#line-37" class="ident">key</a>{<a href="#line-38" class="ident">s</a>: <label for="r4" class="ident">s</label>, <a href="#line-42" class="ident">isString</a>: <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>}</code></span>
+<span class="codeline" id="line-49"><code>	}</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">return</span> <a href="#line-37" class="ident">key</a>{<a href="#line-39" class="ident">cmpVal</a>: <label for="r3" class="ident">cmpVal</label>}</code></span>
+<span class="codeline" id="line-51"><code>}</code></span>
+<span class="codeline" id="line-52"><code></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// Value returns a *Value built from k.</span></code></span>
+<span class="codeline" id="line-54"><code><span class="keyword">func</span> (<label for="r6" class="ident">k</label> <a href="#line-37" class="ident">key</a>) <label for="r7" class="ident">Value</label>() *<a href="#line-22" class="ident">Value</a> {</code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">if</span> <label for="r6" class="ident">k</label>.<a href="#line-42" class="ident">isString</a> {</code></span>
+<span class="codeline" id="line-56"><code>		<span class="keyword">return</span> &amp;<a href="#line-22" class="ident">Value</a>{<a href="#line-24" class="ident">cmpVal</a>: <label for="r6" class="ident">k</label>.<a href="#line-38" class="ident">s</a>}</code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">return</span> &amp;<a href="#line-22" class="ident">Value</a>{<a href="#line-24" class="ident">cmpVal</a>: <label for="r6" class="ident">k</label>.<a href="#line-39" class="ident">cmpVal</a>}</code></span>
+<span class="codeline" id="line-59"><code>}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-62"><code>	<span class="comment">// mu guards valMap, a weakref map of *Value by underlying value.</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">	// It also guards the resurrected field of all *Values.</span></code></span>
+<span class="codeline" id="line-64"><code>	mu      <a href="../../../pkg/sync.html" class="ident i2">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-65"><code>	valMap  = <span class="keyword">map</span>[<a href="#line-37" class="ident">key</a>]<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>{} <span class="comment">// to uintptr(*Value)</span></code></span>
+<span class="codeline" id="line-66"><code>	valSafe = <a href="#line-71" class="ident">safeMap</a>()         <span class="comment">// non-nil in safe+leaky mode</span></code></span>
+<span class="codeline" id="line-67"><code>)</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// safeMap returns a non-nil map if we're in safe-but-leaky mode,</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// as controlled by GODEBUG=intern=leaky</span></code></span>
+<span class="codeline" id="line-71"><code><span class="keyword">func</span> safeMap() <span class="keyword">map</span>[<a href="#line-37" class="ident">key</a>]*<a href="#line-22" class="ident">Value</a> {</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">if</span> <a href="../../../pkg/internal/godebug.html" class="ident i0">godebug</a>.<a href="../godebug/godebug.go.html#line-11" class="ident">Get</a>(<span class="lit-string">"intern"</span>) == <span class="lit-string">"leaky"</span> {</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">return</span> <span class="keyword">map</span>[<a href="#line-37" class="ident">key</a>]*<a href="#line-22" class="ident">Value</a>{}</code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-76"><code>}</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">// Get returns a pointer representing the comparable value cmpVal.</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// The returned pointer will be the same for Get(v) and Get(v2)</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// if and only if v == v2, and can be used as a map key.</span></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> <label for="r9" class="ident"><a href="../../../pkg/internal/intern.html#name-Get" class="ident">Get</a></label>(<label for="r10" class="ident">cmpVal</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) *<a href="#line-22" class="ident">Value</a> {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">return</span> <a href="#line-98" class="ident">get</a>(<a href="#line-46" class="ident">keyFor</a>(<label for="r10" class="ident">cmpVal</label>))</code></span>
+<span class="codeline" id="line-84"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// GetByString is identical to Get, except that it is specialized for strings.</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// This avoids an allocation from putting a string into an interface{}</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">// to pass as an argument to Get.</span></code></span>
+<span class="codeline" id="line-89"><code><span class="keyword">func</span> <label for="r11" class="ident"><a href="../../../pkg/internal/intern.html#name-GetByString" class="ident">GetByString</a></label>(<label for="r12" class="ident">s</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) *<a href="#line-22" class="ident">Value</a> {</code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">return</span> <a href="#line-98" class="ident">get</a>(<a href="#line-37" class="ident">key</a>{<a href="#line-38" class="ident">s</a>: <label for="r12" class="ident">s</label>, <a href="#line-42" class="ident">isString</a>: <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>})</code></span>
+<span class="codeline" id="line-91"><code>}</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">// We play unsafe games that violate Go's rules (and assume a non-moving</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// collector). So we quiet Go here.</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// See the comment below Get for more implementation details.</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">//go:nocheckptr</span></code></span>
+<span class="codeline" id="line-98"><code><span class="keyword">func</span> get(<label for="r14" class="ident">k</label> <a href="#line-37" class="ident">key</a>) *<a href="#line-22" class="ident">Value</a> {</code></span>
+<span class="codeline" id="line-99"><code>	<a href="#line-64" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">defer</span> <a href="#line-64" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">var</span> <label for="r15" class="ident">v</label> *<a href="#line-22" class="ident">Value</a></code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">if</span> <a href="#line-66" class="ident">valSafe</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-104"><code>		<label for="r15" class="ident">v</label> = <a href="#line-66" class="ident">valSafe</a>[<label for="r14" class="ident">k</label>]</code></span>
+<span class="codeline" id="line-105"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r16" class="ident">addr</label>, <label for="r17" class="ident">ok</label> := <a href="#line-65" class="ident">valMap</a>[<label for="r14" class="ident">k</label>]; <label for="r17" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-106"><code>		<label for="r15" class="ident">v</label> = (*<a href="#line-22" class="ident">Value</a>)(<a href="../../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r16" class="ident">addr</label>))</code></span>
+<span class="codeline" id="line-107"><code>		<label for="r15" class="ident">v</label>.<a href="#line-27" class="ident">resurrected</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-108"><code>	}</code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">if</span> <label for="r15" class="ident">v</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-110"><code>		<span class="keyword">return</span> <label for="r15" class="ident">v</label></code></span>
+<span class="codeline" id="line-111"><code>	}</code></span>
+<span class="codeline" id="line-112"><code>	<label for="r15" class="ident">v</label> = <label for="r14" class="ident">k</label>.<a href="#line-54" class="ident">Value</a>()</code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">if</span> <a href="#line-66" class="ident">valSafe</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-114"><code>		<a href="#line-66" class="ident">valSafe</a>[<label for="r14" class="ident">k</label>] = <label for="r15" class="ident">v</label></code></span>
+<span class="codeline" id="line-115"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-116"><code>		<span class="comment">// SetFinalizer before uintptr conversion (theoretical concern;</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">		// see https://github.com/go4org/intern/issues/13)</span></code></span>
+<span class="codeline" id="line-118"><code>		<a href="../../../pkg/runtime.html" class="ident i1">runtime</a>.<a href="../../runtime/mfinal.go.html#line-341" class="ident">SetFinalizer</a>(<label for="r15" class="ident">v</label>, <a href="#line-124" class="ident">finalize</a>)</code></span>
+<span class="codeline" id="line-119"><code>		<a href="#line-65" class="ident">valMap</a>[<label for="r14" class="ident">k</label>] = <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r15" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-120"><code>	}</code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">return</span> <label for="r15" class="ident">v</label></code></span>
+<span class="codeline" id="line-122"><code>}</code></span>
+<span class="codeline" id="line-123"><code></code></span>
+<span class="codeline" id="line-124"><code><span class="keyword">func</span> finalize(<label for="r19" class="ident">v</label> *<a href="#line-22" class="ident">Value</a>) {</code></span>
+<span class="codeline" id="line-125"><code>	<a href="#line-64" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">defer</span> <a href="#line-64" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">if</span> <label for="r19" class="ident">v</label>.<a href="#line-27" class="ident">resurrected</a> {</code></span>
+<span class="codeline" id="line-128"><code>		<span class="comment">// We lost the race. Somebody resurrected it while we</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">		// were about to finalize it. Try again next round.</span></code></span>
+<span class="codeline" id="line-130"><code>		<label for="r19" class="ident">v</label>.<a href="#line-27" class="ident">resurrected</a> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-131"><code>		<a href="../../../pkg/runtime.html" class="ident i1">runtime</a>.<a href="../../runtime/mfinal.go.html#line-341" class="ident">SetFinalizer</a>(<label for="r19" class="ident">v</label>, <label for="r18" class="ident">finalize</label>)</code></span>
+<span class="codeline" id="line-132"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-133"><code>	}</code></span>
+<span class="codeline" id="line-134"><code>	<a href="../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<a href="#line-65" class="ident">valMap</a>, <a href="#line-46" class="ident">keyFor</a>(<label for="r19" class="ident">v</label>.<a href="#line-24" class="ident">cmpVal</a>))</code></span>
+<span class="codeline" id="line-135"><code>}</code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">// Interning is simple if you don't require that unused values be</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">// garbage collectable. But we do require that; we don't want to be</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">// DOS vector. We do this by using a uintptr to hide the pointer from</span></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">// the garbage collector, and using a finalizer to eliminate the</span></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// pointer when no other code is using it.</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">// The obvious implementation of this is to use a</span></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">// map[interface{}]uintptr-of-*interface{}, and set up a finalizer to</span></code></span>
+<span class="codeline" id="line-145"><code><span class="comment">// delete from the map. Unfortunately, this is racy. Because pointers</span></code></span>
+<span class="codeline" id="line-146"><code><span class="comment">// are being created in violation of Go's unsafety rules, it's</span></code></span>
+<span class="codeline" id="line-147"><code><span class="comment">// possible to create a pointer to a value concurrently with the GC</span></code></span>
+<span class="codeline" id="line-148"><code><span class="comment">// concluding that the value can be collected. There are other races</span></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">// that break the equality invariant as well, but the use-after-free</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">// will cause a runtime crash.</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">// To make this work, the finalizer needs to know that no references</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">// have been unsafely created since the finalizer was set up. To do</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">// this, values carry a "resurrected" sentinel, which gets set</span></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">// whenever a pointer is unsafely created. If the finalizer encounters</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">// the sentinel, it clears the sentinel and delays collection for one</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">// additional GC cycle, by re-installing itself as finalizer. This</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// ensures that the unsafely created pointer is visible to the GC, and</span></code></span>
+<span class="codeline" id="line-159"><code><span class="comment">// will correctly prevent collection.</span></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">// This technique does mean that interned values that get reused take</span></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">// at least 3 GC cycles to fully collect (1 to clear the sentinel, 1</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">// to clean up the unsafe map, 1 to be actually deleted).</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">// @ianlancetaylor commented in</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">// https://github.com/golang/go/issues/41303#issuecomment-717401656</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">// that it is possible to implement weak references in terms of</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">// finalizers without unsafe. Unfortunately, the approach he outlined</span></code></span>
+<span class="codeline" id="line-169"><code><span class="comment">// does not work here, for two reasons. First, there is no way to</span></code></span>
+<span class="codeline" id="line-170"><code><span class="comment">// construct a strong pointer out of a weak pointer; our map stores</span></code></span>
+<span class="codeline" id="line-171"><code><span class="comment">// weak pointers, but we must return strong pointers to callers.</span></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">// Second, and more fundamentally, we must return not just _a_ strong</span></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">// pointer to callers, but _the same_ strong pointer to callers. In</span></code></span>
+<span class="codeline" id="line-174"><code><span class="comment">// order to return _the same_ strong pointer to callers, we must track</span></code></span>
+<span class="codeline" id="line-175"><code><span class="comment">// it, which is exactly what we cannot do with strong pointers.</span></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-177"><code><span class="comment">// See https://github.com/inetaf/netaddr/issues/53 for more</span></code></span>
+<span class="codeline" id="line-178"><code><span class="comment">// discussion, and https://github.com/go4org/intern/issues/2 for an</span></code></span>
+<span class="codeline" id="line-179"><code><span class="comment">// illustration of the subtleties at play.</span></code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

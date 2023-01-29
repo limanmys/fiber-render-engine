@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: authenticator.go in package github.com/jcmturner/gokrb5/v8/service</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	authenticator.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html">github.com/jcmturner/gokrb5/v8/service</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> service</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding/base64"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"strings"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"time"</span></label></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code>	<a href="../../../../../../pkg/github.com/jcmturner/goidentity/v6.html" class="ident i4">goidentity</a> <label for="i4"><span class="lit-string i4">"github.com/jcmturner/goidentity/v6"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i5"><span class="lit-string i5">"github.com/jcmturner/gokrb5/v8/client"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i6"><span class="lit-string i6">"github.com/jcmturner/gokrb5/v8/config"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i7"><span class="lit-string i7">"github.com/jcmturner/gokrb5/v8/credentials"</span></label></code></span>
+<span class="codeline" id="line-13"><code>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// NewKRB5BasicAuthenticator creates a new NewKRB5BasicAuthenticator</span></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html#name-NewKRB5BasicAuthenticator" class="ident">NewKRB5BasicAuthenticator</a></label>(<label for="r1" class="ident">headerVal</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r2" class="ident">krb5conf</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/config.html" class="ident i6">config</a>.<a href="../config/krb5conf.go.html#line-24" class="ident">Config</a>, <label for="r3" class="ident">serviceSettings</label> *<a href="settings.go.html#line-13" class="ident">Settings</a>, <label for="r4" class="ident">clientSettings</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i5">client</a>.<a href="../client/settings.go.html#line-10" class="ident">Settings</a>) <a href="#line-27" class="ident">KRB5BasicAuthenticator</a> {</code></span>
+<span class="codeline" id="line-17"><code>	<span class="keyword">return</span> <a href="#line-27" class="ident">KRB5BasicAuthenticator</a>{</code></span>
+<span class="codeline" id="line-18"><code>		<a href="#line-28" class="ident">BasicHeaderValue</a>: <label for="r1" class="ident">headerVal</label>,</code></span>
+<span class="codeline" id="line-19"><code>		<a href="#line-31" class="ident">clientConfig</a>:     <label for="r2" class="ident">krb5conf</label>,</code></span>
+<span class="codeline" id="line-20"><code>		<a href="#line-29" class="ident">serviceSettings</a>:  <label for="r3" class="ident">serviceSettings</label>,</code></span>
+<span class="codeline" id="line-21"><code>		<a href="#line-30" class="ident">clientSettings</a>:   <label for="r4" class="ident">clientSettings</label>,</code></span>
+<span class="codeline" id="line-22"><code>	}</code></span>
+<span class="codeline" id="line-23"><code>}</code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// KRB5BasicAuthenticator implements gokrb5.com/jcmturner/goidentity.Authenticator interface.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// It takes username and password so can be used for basic authentication.</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html#name-KRB5BasicAuthenticator" class="ident">KRB5BasicAuthenticator</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-28"><code>	BasicHeaderValue <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-29"><code>	serviceSettings  *<a href="settings.go.html#line-13" class="ident">Settings</a></code></span>
+<span class="codeline" id="line-30"><code>	clientSettings   *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i5">client</a>.<a href="../client/settings.go.html#line-10" class="ident">Settings</a></code></span>
+<span class="codeline" id="line-31"><code>	clientConfig     *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/config.html" class="ident i6">config</a>.<a href="../config/krb5conf.go.html#line-24" class="ident">Config</a></code></span>
+<span class="codeline" id="line-32"><code>	realm            <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-33"><code>	username         <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-34"><code>	password         <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Authenticate and return the identity. The boolean indicates if the authentication was successful.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">func</span> (<label for="r5" class="ident">a</label> <a href="#line-27" class="ident">KRB5BasicAuthenticator</a>) <label for="r6" class="ident">Authenticate</label>() (<label for="r7" class="ident">i</label> <a href="../../../../../../pkg/github.com/jcmturner/goidentity/v6.html" class="ident i4">goidentity</a>.<a href="../../../goidentity/v6/identity.go.html#line-13" class="ident">Identity</a>, <label for="r8" class="ident">ok</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r9" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-39"><code>	<label for="r5" class="ident">a</label>.<a href="#line-32" class="ident">realm</a>, <label for="r5" class="ident">a</label>.<a href="#line-33" class="ident">username</a>, <label for="r5" class="ident">a</label>.<a href="#line-34" class="ident">password</a>, <label for="r9" class="ident">err</label> = <a href="#line-94" class="ident">parseBasicHeaderValue</a>(<label for="r5" class="ident">a</label>.<a href="#line-28" class="ident">BasicHeaderValue</a>)</code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-41"><code>		<label for="r9" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not parse basic authentication header: %v"</span>, <label for="r9" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-42"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-43"><code>	}</code></span>
+<span class="codeline" id="line-44"><code>	<label for="r10" class="ident">cl</label> := <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i5">client</a>.<a href="../client/client.go.html#line-35" class="ident">NewWithPassword</a>(<label for="r5" class="ident">a</label>.<a href="#line-33" class="ident">username</a>, <label for="r5" class="ident">a</label>.<a href="#line-32" class="ident">realm</a>, <label for="r5" class="ident">a</label>.<a href="#line-34" class="ident">password</a>, <label for="r5" class="ident">a</label>.<a href="#line-31" class="ident">clientConfig</a>)</code></span>
+<span class="codeline" id="line-45"><code>	<label for="r9" class="ident">err</label> = <label for="r10" class="ident">cl</label>.<a href="../client/client.go.html#line-167" class="ident">Login</a>()</code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-47"><code>		<span class="comment">// Username and/or password could be wrong</span></code></span>
+<span class="codeline" id="line-48"><code>		<label for="r9" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error with user credentials during login: %v"</span>, <label for="r9" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-49"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-50"><code>	}</code></span>
+<span class="codeline" id="line-51"><code>	<label for="r11" class="ident">tkt</label>, <label for="r12" class="ident">_</label>, <label for="r9" class="ident">err</label> := <label for="r10" class="ident">cl</label>.<a href="../client/TGSExchange.go^dfc7b.html#line-84" class="ident">GetServiceTicket</a>(<label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-136" class="ident">SName</a>())</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-53"><code>		<label for="r9" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not get service ticket: %v"</span>, <label for="r9" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>	<label for="r9" class="ident">err</label> = <label for="r11" class="ident">tkt</label>.<a href="../messages/Ticket.go^90029.html#line-189" class="ident">DecryptEncPart</a>(<label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-14" class="ident">Keytab</a>, <label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-103" class="ident">KeytabPrincipal</a>())</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-58"><code>		<label for="r9" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not decrypt service ticket: %v"</span>, <label for="r9" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r10" class="ident">cl</label>.<a href="../client/client.go.html#line-26" class="ident">Credentials</a>.<a href="../credentials/credentials.go.html#line-234" class="ident">SetAuthTime</a>(<a href="../../../../../../pkg/time.html" class="ident i3">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>())</code></span>
+<span class="codeline" id="line-62"><code>	<label for="r10" class="ident">cl</label>.<a href="../client/client.go.html#line-26" class="ident">Credentials</a>.<a href="../credentials/credentials.go.html#line-255" class="ident">SetAuthenticated</a>(<a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>)</code></span>
+<span class="codeline" id="line-63"><code>	<label for="r13" class="ident">isPAC</label>, <label for="r14" class="ident">pac</label>, <label for="r9" class="ident">err</label> := <label for="r11" class="ident">tkt</label>.<a href="../messages/Ticket.go^90029.html#line-216" class="ident">GetPACType</a>(<label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-14" class="ident">Keytab</a>, <label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-103" class="ident">KeytabPrincipal</a>(), <label for="r5" class="ident">a</label>.<a href="#line-29" class="ident">serviceSettings</a>.<a href="settings.go.html#line-88" class="ident">Logger</a>())</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">if</span> <label for="r13" class="ident">isPAC</label> &amp;&amp; <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r9" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error processing PAC: %v"</span>, <label for="r9" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">if</span> <label for="r13" class="ident">isPAC</label> {</code></span>
+<span class="codeline" id="line-69"><code>		<span class="comment">// There is a valid PAC. Adding attributes to creds</span></code></span>
+<span class="codeline" id="line-70"><code>		<label for="r10" class="ident">cl</label>.<a href="../client/client.go.html#line-26" class="ident">Credentials</a>.<a href="../credentials/credentials.go.html#line-145" class="ident">SetADCredentials</a>(<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/credentials.html" class="ident i7">credentials</a>.<a href="../credentials/credentials.go.html#line-59" class="ident">ADCredentials</a>{</code></span>
+<span class="codeline" id="line-71"><code>			<a href="../credentials/credentials.go.html#line-67" class="ident">GroupMembershipSIDs</a>: <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-78" class="ident">GetGroupMembershipSIDs</a>(),</code></span>
+<span class="codeline" id="line-72"><code>			<a href="../credentials/credentials.go.html#line-64" class="ident">LogOnTime</a>:           <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-30" class="ident">LogOnTime</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-27" class="ident">Time</a>(),</code></span>
+<span class="codeline" id="line-73"><code>			<a href="../credentials/credentials.go.html#line-65" class="ident">LogOffTime</a>:          <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-31" class="ident">LogOffTime</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-27" class="ident">Time</a>(),</code></span>
+<span class="codeline" id="line-74"><code>			<a href="../credentials/credentials.go.html#line-66" class="ident">PasswordLastSet</a>:     <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-33" class="ident">PasswordLastSet</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-27" class="ident">Time</a>(),</code></span>
+<span class="codeline" id="line-75"><code>			<a href="../credentials/credentials.go.html#line-60" class="ident">EffectiveName</a>:       <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-36" class="ident">EffectiveName</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-7" class="ident">Value</a>,</code></span>
+<span class="codeline" id="line-76"><code>			<a href="../credentials/credentials.go.html#line-61" class="ident">FullName</a>:            <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-37" class="ident">FullName</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-7" class="ident">Value</a>,</code></span>
+<span class="codeline" id="line-77"><code>			<a href="../credentials/credentials.go.html#line-62" class="ident">UserID</a>:              <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-44" class="ident">UserID</a>),</code></span>
+<span class="codeline" id="line-78"><code>			<a href="../credentials/credentials.go.html#line-63" class="ident">PrimaryGroupID</a>:      <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-45" class="ident">PrimaryGroupID</a>),</code></span>
+<span class="codeline" id="line-79"><code>			<a href="../credentials/credentials.go.html#line-70" class="ident">LogonServer</a>:         <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-50" class="ident">LogonServer</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-7" class="ident">Value</a>,</code></span>
+<span class="codeline" id="line-80"><code>			<a href="../credentials/credentials.go.html#line-68" class="ident">LogonDomainName</a>:     <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-51" class="ident">LogonDomainName</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-7" class="ident">Value</a>,</code></span>
+<span class="codeline" id="line-81"><code>			<a href="../credentials/credentials.go.html#line-69" class="ident">LogonDomainID</a>:       <label for="r14" class="ident">pac</label>.<a href="../pac/pac_type.go.html#line-34" class="ident">KerbValidationInfo</a>.<a href="../pac/kerb_validation_info.go.html#line-52" class="ident">LogonDomainID</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-20" class="ident">String</a>(),</code></span>
+<span class="codeline" id="line-82"><code>		})</code></span>
+<span class="codeline" id="line-83"><code>	}</code></span>
+<span class="codeline" id="line-84"><code>	<label for="r8" class="ident">ok</label> = <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-85"><code>	<label for="r7" class="ident">i</label> = <label for="r10" class="ident">cl</label>.<a href="../client/client.go.html#line-26" class="ident">Credentials</a></code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// Mechanism returns the authentication mechanism.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="keyword">func</span> (<label for="r15" class="ident">a</label> <a href="#line-27" class="ident">KRB5BasicAuthenticator</a>) <label for="r16" class="ident">Mechanism</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">return</span> <span class="lit-string">"Kerberos Basic"</span></code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="keyword">func</span> parseBasicHeaderValue(<label for="r18" class="ident">s</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r19" class="ident">domain</label>, <label for="r20" class="ident">username</label>, <label for="r21" class="ident">password</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r22" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-95"><code>	<label for="r23" class="ident">b</label>, <label for="r22" class="ident">err</label> := <a href="../../../../../../pkg/encoding/base64.html" class="ident i0">base64</a>.<a href="../../../../../encoding/base64/base64.go.html#line-99" class="ident">StdEncoding</a>.<a href="../../../../../encoding/base64/base64.go.html#line-381" class="ident">DecodeString</a>(<label for="r18" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-98"><code>	}</code></span>
+<span class="codeline" id="line-99"><code>	<label for="r24" class="ident">v</label> := <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r23" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-100"><code>	<label for="r25" class="ident">vc</label> := <a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-279" class="ident">SplitN</a>(<label for="r24" class="ident">v</label>, <span class="lit-string">":"</span>, <span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-101"><code>	<label for="r21" class="ident">password</label> = <label for="r25" class="ident">vc</label>[<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-102"><code>	<span class="comment">// Domain and username can be specified in 2 formats:</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">	// &lt;Username&gt; - no domain specified</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">	// &lt;Domain&gt;\&lt;Username&gt;</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">	// &lt;Username&gt;@&lt;Domain&gt;</span></code></span>
+<span class="codeline" id="line-106"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-61" class="ident">Contains</a>(<label for="r25" class="ident">vc</label>[<span class="lit-number">0</span>], <span class="lit-string">`\`</span>) {</code></span>
+<span class="codeline" id="line-107"><code>		<label for="r26" class="ident">u</label> := <a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-279" class="ident">SplitN</a>(<label for="r25" class="ident">vc</label>[<span class="lit-number">0</span>], <span class="lit-string">`\`</span>, <span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-108"><code>		<label for="r19" class="ident">domain</label> = <label for="r26" class="ident">u</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-109"><code>		<label for="r20" class="ident">username</label> = <label for="r26" class="ident">u</label>[<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-110"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-61" class="ident">Contains</a>(<label for="r25" class="ident">vc</label>[<span class="lit-number">0</span>], <span class="lit-string">`@`</span>) {</code></span>
+<span class="codeline" id="line-111"><code>		<label for="r27" class="ident">u</label> := <a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-279" class="ident">SplitN</a>(<label for="r25" class="ident">vc</label>[<span class="lit-number">0</span>], <span class="lit-string">`@`</span>, <span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-112"><code>		<label for="r19" class="ident">domain</label> = <label for="r27" class="ident">u</label>[<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-113"><code>		<label for="r20" class="ident">username</label> = <label for="r27" class="ident">u</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-114"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-115"><code>		<label for="r20" class="ident">username</label> = <label for="r25" class="ident">vc</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-116"><code>	}</code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-118"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

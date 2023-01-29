@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: go/scanner</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>scanner</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../index.html#pkg-go/scanner">go/scanner</a><i> (on <a href="https://pkg.go.dev/go/scanner" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../dep/go/scanner.html">9 packages</a>, and imported by <a href="../../dep/go/scanner.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../src/go/scanner/errors.go.html">errors.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-1-fold-content"><label for="file-1-fold-content">   <a href="../../src/go/scanner/scanner.go.html#doc">#d</a> <a href="../../src/go/scanner/scanner.go.html">scanner.go</a></label><span id='file-1-fold-content-items' class="fold-items">
+<span class="md-text">		Package scanner implements a scanner for Go source text.
+		It takes a []byte as source which can then be tokenized
+		through repeated calls to the Scan method.</span></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Scanner_Scan</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"go/scanner"
+			"go/token"
+		)
+		
+		func main() {
+			// src is the input that we want to tokenize.
+			src := []byte("cos(x) + 1i*sin(x) // Euler")
+		
+			// Initialize the scanner.
+			var s scanner.Scanner
+			fset := token.NewFileSet()                      // positions are relative to fset
+			file := fset.AddFile("", fset.Base(), len(src)) // register input "file"
+			s.Init(file, src, nil /* no error handler */, scanner.ScanComments)
+		
+			// Repeated calls to Scan yield the token sequence found in the input.
+			for {
+				pos, tok, lit := s.Scan()
+				if tok == token.EOF {
+					break
+				}
+				fmt.Printf("%s\t%s\t%q\n", fset.Position(pos), tok, lit)
+			}
+		
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 5)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Error" data-popularity="100">	<input type='checkbox' class="fold" id="Error-fold-content"><label for="Error-fold-content"> type <a href="../../src/go/scanner/errors.go.html#line-18">Error</a> <i>(struct)</i></label><span id='Error-fold-content-docs' class="fold-docs">
+<span class="md-text">		In an ErrorList, an error is represented by an *Error.
+		The position Pos, if valid, points to the beginning of
+		the offending token, and the error condition is described
+		by Msg.</span>
+
+		<input type='checkbox' class="fold" id="Error-fold-fields"><label for="Error-fold-fields">Fields (<i>total 2</i>)</label><span id='Error-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../src/go/scanner/errors.go.html#line-20">Msg</a> <i><a href="../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../src/go/scanner/errors.go.html#line-19">Pos</a> <i><a href="token.html">token</a>.<a href="token.html#name-Position">Position</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="Error-fold-methods"><label for="Error-fold-methods">Methods (<i>only one</i>)</label><span id='Error-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Error-fold-method-Error"><label for="Error-fold-method-Error">( Error) <a href="../../src/go/scanner/errors.go.html#line-24">Error</a>() <a href="../builtin.html#name-string">string</a></label><span id='Error-fold-method-Error-docs' class="fold-docs">
+<span class="md-text">				Error implements the error interface.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Error-fold-impls"><label for="Error-fold-impls">Implements (<i>at least one exported</i>)</label><span id='Error-fold-impls-items' class="fold-items"><span>
+			 Error : <a href="../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-ErrorHandler" data-popularity="35">	<input type='checkbox' class="fold" id="ErrorHandler-fold-content"><label for="ErrorHandler-fold-content"> type <a href="../../src/go/scanner/scanner.go.html#line-24">ErrorHandler</a> <i>(func)</i></label><span id='ErrorHandler-fold-content-docs' class="fold-docs">
+<span class="md-text">		An ErrorHandler may be provided to Scanner.Init. If a syntax error is
+		encountered and a handler was installed, the handler is called with a
+		position and an error message. The position points to the beginning of
+		the offending token.</span>
+
+		<input type='checkbox' class="fold" id="ErrorHandler-fold-params"><label for="ErrorHandler-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='ErrorHandler-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scanner">Scanner</a>).<a href="../../src/go/scanner/scanner.go.html#line-122">Init</a>(file *<a href="token.html">token</a>.<a href="token.html#name-File">File</a>, src []<a href="../builtin.html#name-byte">byte</a>, err <b>ErrorHandler</b>, mode <a href="#name-Mode">Mode</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-ErrorList" data-popularity="550">	<input type='checkbox' class="fold" id="ErrorList-fold-content"><label for="ErrorList-fold-content"> type <a href="../../src/go/scanner/errors.go.html#line-35">ErrorList</a> <i>([])</i></label><span id='ErrorList-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrorList is a list of *Errors.
+		The zero value for an ErrorList is an empty ErrorList ready to use.</span>
+
+		<input type='checkbox' class="fold" id="ErrorList-fold-methods"><label for="ErrorList-fold-methods">Methods (<i>total 9</i>)</label><span id='ErrorList-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Add"><label for="ErrorList-fold-method-Add">(*ErrorList) <a href="../../src/go/scanner/errors.go.html#line-38">Add</a>(pos <a href="token.html">token</a>.<a href="token.html#name-Position">Position</a>, msg <a href="../builtin.html#name-string">string</a>)</label><span id='ErrorList-fold-method-Add-docs' class="fold-docs">
+<span class="md-text">				Add adds an Error with given position and error message to an ErrorList.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Err"><label for="ErrorList-fold-method-Err">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-102">Err</a>() <a href="../builtin.html#name-error">error</a></label><span id='ErrorList-fold-method-Err-docs' class="fold-docs">
+<span class="md-text">				Err returns an error equivalent to this error list.
+				If the list is empty, Err returns nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Error"><label for="ErrorList-fold-method-Error">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-90">Error</a>() <a href="../builtin.html#name-string">string</a></label><span id='ErrorList-fold-method-Error-docs' class="fold-docs">
+<span class="md-text">				An ErrorList implements the error interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Len"><label for="ErrorList-fold-method-Len">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-46">Len</a>() <a href="../builtin.html#name-int">int</a></label><span id='ErrorList-fold-method-Len-docs' class="fold-docs">
+<span class="md-text">				ErrorList implements the sort Interface.</span>
+</span></span><span>
+			<span class="nodocs">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-49">Less</a>(i, j <a href="../builtin.html#name-int">int</a>) <a href="../builtin.html#name-bool">bool</a></span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-RemoveMultiples"><label for="ErrorList-fold-method-RemoveMultiples">(*ErrorList) <a href="../../src/go/scanner/errors.go.html#line-75">RemoveMultiples</a>()</label><span id='ErrorList-fold-method-RemoveMultiples-docs' class="fold-docs">
+<span class="md-text">				RemoveMultiples sorts an ErrorList and removes all but the first error per line.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Reset"><label for="ErrorList-fold-method-Reset">(*ErrorList) <a href="../../src/go/scanner/errors.go.html#line-43">Reset</a>()</label><span id='ErrorList-fold-method-Reset-docs' class="fold-docs">
+<span class="md-text">				Reset resets an ErrorList to no errors.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ErrorList-fold-method-Sort"><label for="ErrorList-fold-method-Sort">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-70">Sort</a>()</label><span id='ErrorList-fold-method-Sort-docs' class="fold-docs">
+<span class="md-text">				Sort sorts an ErrorList. *Error entries are sorted by position,
+				other errors are sorted by error message, and before any *Error
+				entry.</span>
+</span></span><span>
+			<span class="nodocs">( ErrorList) <a href="../../src/go/scanner/errors.go.html#line-47">Swap</a>(i, j <a href="../builtin.html#name-int">int</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="ErrorList-fold-impls"><label for="ErrorList-fold-impls">Implements (<i>at least 2</i>)</label><span id='ErrorList-fold-impls-items' class="fold-items"><span>
+			 ErrorList : <a href="../builtin.html#name-error">error</a></span><span>
+			 ErrorList : sort.<a href="../sort.html#name-Interface">Interface</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Mode" data-popularity="40">	<input type='checkbox' class="fold" id="Mode-fold-content"><label for="Mode-fold-content"> type <a href="../../src/go/scanner/scanner.go.html#line-101">Mode</a> <a href="../builtin.html#name-uint">uint</a> <i>(basic type)</i></label><span id='Mode-fold-content-docs' class="fold-docs">
+<span class="md-text">		A mode value is a set of flags (or 0).
+		They control scanner behavior.</span>
+
+		<input type='checkbox' class="fold" id="Mode-fold-params"><label for="Mode-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Mode-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scanner">Scanner</a>).<a href="../../src/go/scanner/scanner.go.html#line-122">Init</a>(file *<a href="token.html">token</a>.<a href="token.html#name-File">File</a>, src []<a href="../builtin.html#name-byte">byte</a>, err <a href="#name-ErrorHandler">ErrorHandler</a>, mode <b>Mode</b>)</span></span>
+		<input type='checkbox' class="fold" id="Mode-fold-values"><label for="Mode-fold-values">As Types Of (<i>only one</i>)</label><span id='Mode-fold-values-items' class="fold-items"><span>
+			const <a href="#name-ScanComments">ScanComments</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Scanner" data-popularity="100">	<input type='checkbox' class="fold" id="Scanner-fold-content"><label for="Scanner-fold-content"> type <a href="../../src/go/scanner/scanner.go.html#line-29">Scanner</a> <i>(struct)</i></label><span id='Scanner-fold-content-docs' class="fold-docs">
+<span class="md-text">		A Scanner holds the scanner's internal state while processing
+		a given text. It can be allocated as part of another data
+		structure but must be initialized via Init before use.</span>
+
+		<input type='checkbox' class="fold" id="Scanner-fold-fields"><label for="Scanner-fold-fields">Fields (<i>only one</i>)</label><span id='Scanner-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Scanner-fold-field-ErrorCount"><label for="Scanner-fold-field-ErrorCount"><a href="../../src/go/scanner/scanner.go.html#line-45">ErrorCount</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='Scanner-fold-field-ErrorCount-docs' class="fold-docs">
+<span class="md-text">				public state - ok to modify</span>
+<span class="md-text">				// number of errors encountered</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Scanner-fold-methods"><label for="Scanner-fold-methods">Methods (<i>total 2</i>)</label><span id='Scanner-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Scanner-fold-method-Init"><label for="Scanner-fold-method-Init">(*Scanner) <a href="../../src/go/scanner/scanner.go.html#line-122">Init</a>(file *<a href="token.html">token</a>.<a href="token.html#name-File">File</a>, src []<a href="../builtin.html#name-byte">byte</a>, err <a href="#name-ErrorHandler">ErrorHandler</a>, mode <a href="#name-Mode">Mode</a>)</label><span id='Scanner-fold-method-Init-docs' class="fold-docs">
+<span class="md-text">				Init prepares the scanner s to tokenize the text src by setting the
+				scanner at the beginning of src. The scanner uses the file set file
+				for position information and it adds line information for each line.
+				It is ok to re-use the same file when re-scanning the same file as
+				line information which is already present is ignored. Init causes a
+				panic if the file size does not match the src size.
+				
+				Calls to Scan will invoke the error handler err if they encounter a
+				syntax error and err is not nil. Also, for each error encountered,
+				the Scanner field ErrorCount is incremented by one. The mode parameter
+				determines how comments are handled.
+				
+				Note that Init may call err if there is an error in the first character
+				of the file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scanner-fold-method-Scan"><label for="Scanner-fold-method-Scan">(*Scanner) <a href="../../src/go/scanner/scanner.go.html#line-823">Scan</a>() (pos <a href="token.html">token</a>.<a href="token.html#name-Pos">Pos</a>, tok <a href="token.html">token</a>.<a href="token.html#name-Token">Token</a>, lit <a href="../builtin.html#name-string">string</a>)</label><span id='Scanner-fold-method-Scan-docs' class="fold-docs">
+<span class="md-text">				Scan scans the next token and returns the token position, the token,
+				and its literal string if applicable. The source end is indicated by
+				token.EOF.
+				
+				If the returned token is a literal (token.IDENT, token.INT, token.FLOAT,
+				token.IMAG, token.CHAR, token.STRING) or token.COMMENT, the literal string
+				has the corresponding value.
+				
+				If the returned token is a keyword, the literal string is the keyword.
+				
+				If the returned token is token.SEMICOLON, the corresponding
+				literal string is ";" if the semicolon was present in the source,
+				and "\n" if the semicolon was inserted because of a newline or
+				at EOF.
+				
+				If the returned token is token.ILLEGAL, the literal string is the
+				offending character.
+				
+				In all other cases, Scan returns an empty literal string.
+				
+				For more tolerant parsing, Scan will return a valid token if
+				possible even if a syntax error was encountered. Thus, even
+				if the resulting token sequence contains no illegal tokens,
+				a client may not assume that no error occurred. Instead it
+				must check the scanner's ErrorCount or the number of calls
+				of the error handler, if there was one installed.
+				
+				Scan adds line information to the file added to the file
+				set with Init. Token positions are relative to that file
+				and thus relative to the file set.</span>
+</span></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (only one)</i></span></span>
+
+<div class="anchor value-res" id="name-PrintError">	<input type='checkbox' class="fold" id="PrintError-fold-content"><label for="PrintError-fold-content"> func <a href="../../src/go/scanner/errors.go.html#line-112">PrintError</a>(w <a href="../io.html">io</a>.<a href="../io.html#name-Writer">Writer</a>, err <a href="../builtin.html#name-error">error</a>)</label><span id='PrintError-fold-content-docs' class="fold-docs">
+<span class="md-text">		PrintError is a utility function that prints a list of errors to w,
+		one error per line, if the err parameter is an ErrorList. Otherwise
+		it prints the err string.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (only one)</i></span></span>
+
+<div class="anchor value-res" id="name-ScanComments">	<span class="nodocs">const <a href="../../src/go/scanner/scanner.go.html#line-104">ScanComments</a> <a href="#name-Mode">Mode</a> = 1 // <span class="md-text">return comments as COMMENT tokens</span></span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: error.go in package go.uber.org/zap/zapcore</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	error.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/go.uber.org/zap/zapcore.html">go.uber.org/zap/zapcore</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright (c) 2017 Uber Technologies, Inc.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a copy</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// of this software and associated documentation files (the "Software"), to deal</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// in the Software without restriction, including without limitation the rights</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// copies of the Software, and to permit persons to whom the Software is</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// furnished to do so, subject to the following conditions:</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// The above copyright notice and this permission notice shall be included in</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// all copies or substantial portions of the Software.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// THE SOFTWARE.</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">package</span> zapcore</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-24"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-25"><code>	<label for="i1"><span class="lit-string i1">"reflect"</span></label></code></span>
+<span class="codeline" id="line-26"><code>	<label for="i2"><span class="lit-string i2">"sync"</span></label></code></span>
+<span class="codeline" id="line-27"><code>)</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// Encodes the given error into fields of an object. A field with the given</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// name is added for the error message.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// If the error implements fmt.Formatter, a field with the name ${key}Verbose</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// is also added with the full verbose error message.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// Finally, if the error implements errorGroup (from go.uber.org/multierr) or</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// causer (from github.com/pkg/errors), a ${key}Causes field is added with an</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// array of objects containing the errors this error was comprised of.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">//	{</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">//	  "error": err.Error(),</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">//	  "errorVerbose": fmt.Sprintf("%+v", err),</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//	  "errorCauses": [</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">//	    ...</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">//	  ],</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> encodeError(<label for="r1" class="ident">key</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r2" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r3" class="ident">enc</label> <a href="encoder.go.html#line-349" class="ident">ObjectEncoder</a>) (<label for="r4" class="ident">retErr</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="comment">// Try to capture panics (from nil references or otherwise) when calling</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">	// the Error() method</span></code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-50"><code>		<span class="keyword">if</span> <label for="r5" class="ident">rerr</label> := <a href="../../../../pkg/builtin.html#name-recover" class="ident">recover</a>(); <label for="r5" class="ident">rerr</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-51"><code>			<span class="comment">// If it's a nil pointer, just say "&lt;nil&gt;". The likeliest causes are a</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">			// error that fails to guard against nil or a nil pointer for a</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">			// value receiver, and in either case, "&lt;nil&gt;" is a nice result.</span></code></span>
+<span class="codeline" id="line-54"><code>			<span class="keyword">if</span> <label for="r6" class="ident">v</label> := <a href="../../../../pkg/reflect.html" class="ident i1">reflect</a>.<a href="../../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r2" class="ident">err</label>); <label for="r6" class="ident">v</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i1">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a> &amp;&amp; <label for="r6" class="ident">v</label>.<a href="../../../reflect/value.go.html#line-1537" class="ident">IsNil</a>() {</code></span>
+<span class="codeline" id="line-55"><code>				<label for="r3" class="ident">enc</label>.<a href="encoder.go.html#line-368" class="ident">AddString</a>(<label for="r1" class="ident">key</label>, <span class="lit-string">"&lt;nil&gt;"</span>)</code></span>
+<span class="codeline" id="line-56"><code>				<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-57"><code>			}</code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code>			<label for="r4" class="ident">retErr</label> = <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"PANIC=%v"</span>, <label for="r5" class="ident">rerr</label>)</code></span>
+<span class="codeline" id="line-60"><code>		}</code></span>
+<span class="codeline" id="line-61"><code>	}()</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	<label for="r7" class="ident">basic</label> := <label for="r2" class="ident">err</label>.Error()</code></span>
+<span class="codeline" id="line-64"><code>	<label for="r3" class="ident">enc</label>.<a href="encoder.go.html#line-368" class="ident">AddString</a>(<label for="r1" class="ident">key</label>, <label for="r7" class="ident">basic</label>)</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">switch</span> e := <label for="r2" class="ident">err</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">case</span> <a href="#line-80" class="ident">errorGroup</a>:</code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">return</span> <label for="r3" class="ident">enc</label>.<a href="encoder.go.html#line-351" class="ident">AddArray</a>(<label for="r1" class="ident">key</label>+<span class="lit-string">"Causes"</span>, <a href="#line-91" class="ident">errArray</a>(<label for="r8" class="ident">e</label>.<a href="#line-83" class="ident">Errors</a>()))</code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">case</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-53" class="ident">Formatter</a>:</code></span>
+<span class="codeline" id="line-70"><code>		<label for="r9" class="ident">verbose</label> := <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%+v"</span>, <label for="r10" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-71"><code>		<span class="keyword">if</span> <label for="r9" class="ident">verbose</label> != <label for="r7" class="ident">basic</label> {</code></span>
+<span class="codeline" id="line-72"><code>			<span class="comment">// This is a rich error type, like those produced by</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">			// github.com/pkg/errors.</span></code></span>
+<span class="codeline" id="line-74"><code>			<label for="r3" class="ident">enc</label>.<a href="encoder.go.html#line-368" class="ident">AddString</a>(<label for="r1" class="ident">key</label>+<span class="lit-string">"Verbose"</span>, <label for="r9" class="ident">verbose</label>)</code></span>
+<span class="codeline" id="line-75"><code>		}</code></span>
+<span class="codeline" id="line-76"><code>	}</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-78"><code>}</code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code><span class="keyword">type</span> errorGroup <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-81"><code>	<span class="comment">// Provides read-only access to the underlying list of errors, preferably</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">	// without causing any allocs.</span></code></span>
+<span class="codeline" id="line-83"><code>	Errors() []<a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-84"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// Note that errArray and errArrayElem are very similar to the version</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// implemented in the top-level error.go file. We can't re-use this because</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">// that would require exporting errArray as part of the zapcore API.</span></code></span>
+<span class="codeline" id="line-89"><code></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">// Encodes a list of errors using the standard error encoding logic.</span></code></span>
+<span class="codeline" id="line-91"><code><span class="keyword">type</span> errArray []<a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> (<label for="r11" class="ident">errs</label> <a href="#line-91" class="ident">errArray</a>) <label for="r12" class="ident">MarshalLogArray</label>(<label for="r13" class="ident">arr</label> <a href="encoder.go.html#line-390" class="ident">ArrayEncoder</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">for</span> <label for="r14" class="ident">i</label> := <span class="keyword">range</span> <label for="r11" class="ident">errs</label> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">if</span> <label for="r11" class="ident">errs</label>[<label for="r14" class="ident">i</label>] == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-96"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-97"><code>		}</code></span>
+<span class="codeline" id="line-98"><code></code></span>
+<span class="codeline" id="line-99"><code>		<label for="r15" class="ident">el</label> := <a href="#line-115" class="ident">newErrArrayElem</a>(<label for="r11" class="ident">errs</label>[<label for="r14" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-100"><code>		<label for="r13" class="ident">arr</label>.<a href="encoder.go.html#line-400" class="ident">AppendObject</a>(<label for="r15" class="ident">el</label>)</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r15" class="ident">el</label>.<a href="#line-129" class="ident">Free</a>()</code></span>
+<span class="codeline" id="line-102"><code>	}</code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-104"><code>}</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code><span class="keyword">var</span> _errArrayElemPool = <a href="../../../../pkg/sync.html" class="ident i2">sync</a>.<a href="../../../sync/pool.go.html#line-49" class="ident">Pool</a>{<a href="../../../sync/pool.go.html#line-61" class="ident">New</a>: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> &amp;<a href="#line-113" class="ident">errArrayElem</a>{}</code></span>
+<span class="codeline" id="line-108"><code>}}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// Encodes any error into a {"error": ...} re-using the same errors logic.</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// May be passed in place of an array to build a single-element array.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="keyword">type</span> errArrayElem <span class="keyword">struct</span>{ err <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> }</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code><span class="keyword">func</span> newErrArrayElem(<label for="r17" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) *<a href="#line-113" class="ident">errArrayElem</a> {</code></span>
+<span class="codeline" id="line-116"><code>	<label for="r18" class="ident">e</label> := <a href="#line-106" class="ident">_errArrayElemPool</a>.<a href="../../../sync/pool.go.html#line-127" class="ident">Get</a>().(*<a href="#line-113" class="ident">errArrayElem</a>)</code></span>
+<span class="codeline" id="line-117"><code>	<label for="r18" class="ident">e</label>.<a href="#line-113" class="ident">err</a> = <label for="r17" class="ident">err</label></code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">return</span> <label for="r18" class="ident">e</label></code></span>
+<span class="codeline" id="line-119"><code>}</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">func</span> (<label for="r19" class="ident">e</label> *<a href="#line-113" class="ident">errArrayElem</a>) <label for="r20" class="ident">MarshalLogArray</label>(<label for="r21" class="ident">arr</label> <a href="encoder.go.html#line-390" class="ident">ArrayEncoder</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <label for="r21" class="ident">arr</label>.<a href="encoder.go.html#line-400" class="ident">AppendObject</a>(<label for="r19" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="keyword">func</span> (<label for="r22" class="ident">e</label> *<a href="#line-113" class="ident">errArrayElem</a>) <label for="r23" class="ident">MarshalLogObject</label>(<label for="r24" class="ident">enc</label> <a href="encoder.go.html#line-349" class="ident">ObjectEncoder</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">return</span> <a href="#line-46" class="ident">encodeError</a>(<span class="lit-string">"error"</span>, <label for="r22" class="ident">e</label>.<a href="#line-113" class="ident">err</a>, <label for="r24" class="ident">enc</label>)</code></span>
+<span class="codeline" id="line-127"><code>}</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code><span class="keyword">func</span> (<label for="r25" class="ident">e</label> *<a href="#line-113" class="ident">errArrayElem</a>) <label for="r26" class="ident">Free</label>() {</code></span>
+<span class="codeline" id="line-130"><code>	<label for="r25" class="ident">e</label>.<a href="#line-113" class="ident">err</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-131"><code>	<a href="#line-106" class="ident">_errArrayElemPool</a>.<a href="../../../sync/pool.go.html#line-95" class="ident">Put</a>(<label for="r25" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-132"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: context.go in package golang.org/x/text/secure/precis</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	context.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/golang.org/x/text/secure/precis.html">golang.org/x/text/secure/precis</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2016 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> precis</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// This file contains tables and code related to context rules.</span></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> catBitmap <a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-14"><code>	<span class="comment">// These bits, once set depending on the current value, are never unset.</span></code></span>
+<span class="codeline" id="line-15"><code>	bJapanese <a href="#line-11" class="ident">catBitmap</a> = <span class="lit-number">1</span> &lt;&lt; <a href="../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-16"><code>	bArabicIndicDigit</code></span>
+<span class="codeline" id="line-17"><code>	bExtendedArabicIndicDigit</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>	<span class="comment">// These bits are set on each iteration depending on the current value.</span></code></span>
+<span class="codeline" id="line-20"><code>	bJoinStart</code></span>
+<span class="codeline" id="line-21"><code>	bJoinMid</code></span>
+<span class="codeline" id="line-22"><code>	bJoinEnd</code></span>
+<span class="codeline" id="line-23"><code>	bVirama</code></span>
+<span class="codeline" id="line-24"><code>	bLatinSmallL</code></span>
+<span class="codeline" id="line-25"><code>	bGreek</code></span>
+<span class="codeline" id="line-26"><code>	bHebrew</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<span class="comment">// These bits indicated which of the permanent bits need to be set at the</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">	// end of the checks.</span></code></span>
+<span class="codeline" id="line-30"><code>	bMustHaveJapn</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code>	permanent = <a href="#line-15" class="ident">bJapanese</a> | <a href="#line-16" class="ident">bArabicIndicDigit</a> | <a href="#line-17" class="ident">bExtendedArabicIndicDigit</a> | <a href="#line-30" class="ident">bMustHaveJapn</a></code></span>
+<span class="codeline" id="line-33"><code>)</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">const</span> finalShift = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="keyword">var</span> errContext = <a href="../../../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"precis: contextual rule violated"</span>)</code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-40"><code>	<span class="comment">// Programmatically set these required bits as, manually setting them seems</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">	// too error prone.</span></code></span>
+<span class="codeline" id="line-42"><code>	<span class="keyword">for</span> <label for="r1" class="ident">i</label>, <label for="r2" class="ident">ct</label> := <span class="keyword">range</span> <a href="#line-48" class="ident">categoryTransitions</a> {</code></span>
+<span class="codeline" id="line-43"><code>		<a href="#line-48" class="ident">categoryTransitions</a>[<label for="r1" class="ident">i</label>].<a href="#line-49" class="ident">keep</a> |= <a href="#line-32" class="ident">permanent</a></code></span>
+<span class="codeline" id="line-44"><code>		<a href="#line-48" class="ident">categoryTransitions</a>[<label for="r1" class="ident">i</label>].<a href="#line-55" class="ident">accept</a> |= <label for="r2" class="ident">ct</label>.<a href="#line-54" class="ident">term</a></code></span>
+<span class="codeline" id="line-45"><code>	}</code></span>
+<span class="codeline" id="line-46"><code>}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">var</span> categoryTransitions = []<span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-49"><code>	keep <a href="#line-11" class="ident">catBitmap</a> <span class="comment">// mask selecting which bits to keep from the previous state</span></code></span>
+<span class="codeline" id="line-50"><code>	set  <a href="#line-11" class="ident">catBitmap</a> <span class="comment">// mask for which bits to set for this transition</span></code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code>	<span class="comment">// These bitmaps are used for rules that require lookahead.</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">	// term&amp;accept == term must be true, which is enforced programmatically.</span></code></span>
+<span class="codeline" id="line-54"><code>	term   <a href="#line-11" class="ident">catBitmap</a> <span class="comment">// bits accepted as termination condition</span></code></span>
+<span class="codeline" id="line-55"><code>	accept <a href="#line-11" class="ident">catBitmap</a> <span class="comment">// bits that pass, but not sufficient as termination</span></code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>	<span class="comment">// The rule function cannot take a *context as an argument, as it would</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">	// cause the context to escape, adding significant overhead.</span></code></span>
+<span class="codeline" id="line-59"><code>	rule <span class="keyword">func</span>(beforeBits <a href="#line-11" class="ident">catBitmap</a>) (doLookahead <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, err <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-60"><code>}{</code></span>
+<span class="codeline" id="line-61"><code>	<a href="trieval.go.html#line-37" class="ident">joiningL</a>:          {<a href="#line-50" class="ident">set</a>: <a href="#line-20" class="ident">bJoinStart</a>},</code></span>
+<span class="codeline" id="line-62"><code>	<a href="trieval.go.html#line-38" class="ident">joiningD</a>:          {<a href="#line-50" class="ident">set</a>: <a href="#line-20" class="ident">bJoinStart</a> | <a href="#line-22" class="ident">bJoinEnd</a>},</code></span>
+<span class="codeline" id="line-63"><code>	<a href="trieval.go.html#line-39" class="ident">joiningT</a>:          {<a href="#line-49" class="ident">keep</a>: <a href="#line-20" class="ident">bJoinStart</a>, <a href="#line-50" class="ident">set</a>: <a href="#line-21" class="ident">bJoinMid</a>},</code></span>
+<span class="codeline" id="line-64"><code>	<a href="trieval.go.html#line-40" class="ident">joiningR</a>:          {<a href="#line-50" class="ident">set</a>: <a href="#line-22" class="ident">bJoinEnd</a>},</code></span>
+<span class="codeline" id="line-65"><code>	<a href="trieval.go.html#line-41" class="ident">viramaModifier</a>:    {<a href="#line-50" class="ident">set</a>: <a href="#line-23" class="ident">bVirama</a>},</code></span>
+<span class="codeline" id="line-66"><code>	<a href="trieval.go.html#line-42" class="ident">viramaJoinT</a>:       {<a href="#line-50" class="ident">set</a>: <a href="#line-23" class="ident">bVirama</a> | <a href="#line-21" class="ident">bJoinMid</a>},</code></span>
+<span class="codeline" id="line-67"><code>	<a href="trieval.go.html#line-43" class="ident">latinSmallL</a>:       {<a href="#line-50" class="ident">set</a>: <a href="#line-24" class="ident">bLatinSmallL</a>},</code></span>
+<span class="codeline" id="line-68"><code>	<a href="trieval.go.html#line-44" class="ident">greek</a>:             {<a href="#line-50" class="ident">set</a>: <a href="#line-25" class="ident">bGreek</a>},</code></span>
+<span class="codeline" id="line-69"><code>	<a href="trieval.go.html#line-45" class="ident">greekJoinT</a>:        {<a href="#line-50" class="ident">set</a>: <a href="#line-25" class="ident">bGreek</a> | <a href="#line-21" class="ident">bJoinMid</a>},</code></span>
+<span class="codeline" id="line-70"><code>	<a href="trieval.go.html#line-46" class="ident">hebrew</a>:            {<a href="#line-50" class="ident">set</a>: <a href="#line-26" class="ident">bHebrew</a>},</code></span>
+<span class="codeline" id="line-71"><code>	<a href="trieval.go.html#line-47" class="ident">hebrewJoinT</a>:       {<a href="#line-50" class="ident">set</a>: <a href="#line-26" class="ident">bHebrew</a> | <a href="#line-21" class="ident">bJoinMid</a>},</code></span>
+<span class="codeline" id="line-72"><code>	<a href="trieval.go.html#line-48" class="ident">japanese</a>:          {<a href="#line-50" class="ident">set</a>: <a href="#line-15" class="ident">bJapanese</a>},</code></span>
+<span class="codeline" id="line-73"><code>	<a href="trieval.go.html#line-59" class="ident">katakanaMiddleDot</a>: {<a href="#line-50" class="ident">set</a>: <a href="#line-30" class="ident">bMustHaveJapn</a>},</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<a href="trieval.go.html#line-53" class="ident">zeroWidthNonJoiner</a>: {</code></span>
+<span class="codeline" id="line-76"><code>		<a href="#line-54" class="ident">term</a>:   <a href="#line-22" class="ident">bJoinEnd</a>,</code></span>
+<span class="codeline" id="line-77"><code>		<a href="#line-55" class="ident">accept</a>: <a href="#line-21" class="ident">bJoinMid</a>,</code></span>
+<span class="codeline" id="line-78"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r3" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r4" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r5" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-79"><code>			<span class="keyword">if</span> <label for="r3" class="ident">before</label>&amp;<a href="#line-23" class="ident">bVirama</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-80"><code>				<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-81"><code>			}</code></span>
+<span class="codeline" id="line-82"><code>			<span class="keyword">if</span> <label for="r3" class="ident">before</label>&amp;<a href="#line-20" class="ident">bJoinStart</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-83"><code>				<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-84"><code>			}</code></span>
+<span class="codeline" id="line-85"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-86"><code>		},</code></span>
+<span class="codeline" id="line-87"><code>	},</code></span>
+<span class="codeline" id="line-88"><code>	<a href="trieval.go.html#line-54" class="ident">zeroWidthJoiner</a>: {</code></span>
+<span class="codeline" id="line-89"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r6" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r7" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r8" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-90"><code>			<span class="keyword">if</span> <label for="r6" class="ident">before</label>&amp;<a href="#line-23" class="ident">bVirama</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-91"><code>				<label for="r8" class="ident">err</label> = <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-92"><code>			}</code></span>
+<span class="codeline" id="line-93"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-94"><code>		},</code></span>
+<span class="codeline" id="line-95"><code>	},</code></span>
+<span class="codeline" id="line-96"><code>	<a href="trieval.go.html#line-56" class="ident">middleDot</a>: {</code></span>
+<span class="codeline" id="line-97"><code>		<a href="#line-54" class="ident">term</a>: <a href="#line-24" class="ident">bLatinSmallL</a>,</code></span>
+<span class="codeline" id="line-98"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r9" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r10" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r11" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-99"><code>			<span class="keyword">if</span> <label for="r9" class="ident">before</label>&amp;<a href="#line-24" class="ident">bLatinSmallL</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-100"><code>				<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-101"><code>			}</code></span>
+<span class="codeline" id="line-102"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-103"><code>		},</code></span>
+<span class="codeline" id="line-104"><code>	},</code></span>
+<span class="codeline" id="line-105"><code>	<a href="trieval.go.html#line-57" class="ident">greekLowerNumeralSign</a>: {</code></span>
+<span class="codeline" id="line-106"><code>		<a href="#line-50" class="ident">set</a>:  <a href="#line-25" class="ident">bGreek</a>,</code></span>
+<span class="codeline" id="line-107"><code>		<a href="#line-54" class="ident">term</a>: <a href="#line-25" class="ident">bGreek</a>,</code></span>
+<span class="codeline" id="line-108"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r12" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r13" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r14" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-109"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-110"><code>		},</code></span>
+<span class="codeline" id="line-111"><code>	},</code></span>
+<span class="codeline" id="line-112"><code>	<a href="trieval.go.html#line-58" class="ident">hebrewPreceding</a>: {</code></span>
+<span class="codeline" id="line-113"><code>		<a href="#line-50" class="ident">set</a>: <a href="#line-26" class="ident">bHebrew</a>,</code></span>
+<span class="codeline" id="line-114"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r15" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r16" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r17" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-115"><code>			<span class="keyword">if</span> <label for="r15" class="ident">before</label>&amp;<a href="#line-26" class="ident">bHebrew</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-116"><code>				<label for="r17" class="ident">err</label> = <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-117"><code>			}</code></span>
+<span class="codeline" id="line-118"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r17" class="ident">err</label></code></span>
+<span class="codeline" id="line-119"><code>		},</code></span>
+<span class="codeline" id="line-120"><code>	},</code></span>
+<span class="codeline" id="line-121"><code>	<a href="trieval.go.html#line-60" class="ident">arabicIndicDigit</a>: {</code></span>
+<span class="codeline" id="line-122"><code>		<a href="#line-50" class="ident">set</a>: <a href="#line-16" class="ident">bArabicIndicDigit</a>,</code></span>
+<span class="codeline" id="line-123"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r18" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r19" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r20" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-124"><code>			<span class="keyword">if</span> <label for="r18" class="ident">before</label>&amp;<a href="#line-17" class="ident">bExtendedArabicIndicDigit</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-125"><code>				<label for="r20" class="ident">err</label> = <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-126"><code>			}</code></span>
+<span class="codeline" id="line-127"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r20" class="ident">err</label></code></span>
+<span class="codeline" id="line-128"><code>		},</code></span>
+<span class="codeline" id="line-129"><code>	},</code></span>
+<span class="codeline" id="line-130"><code>	<a href="trieval.go.html#line-61" class="ident">extendedArabicIndicDigit</a>: {</code></span>
+<span class="codeline" id="line-131"><code>		<a href="#line-50" class="ident">set</a>: <a href="#line-17" class="ident">bExtendedArabicIndicDigit</a>,</code></span>
+<span class="codeline" id="line-132"><code>		<a href="#line-59" class="ident">rule</a>: <span class="keyword">func</span>(<label for="r21" class="ident">before</label> <a href="#line-11" class="ident">catBitmap</a>) (<label for="r22" class="ident">doLookAhead</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r23" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-133"><code>			<span class="keyword">if</span> <label for="r21" class="ident">before</label>&amp;<a href="#line-16" class="ident">bArabicIndicDigit</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-134"><code>				<label for="r23" class="ident">err</label> = <a href="#line-37" class="ident">errContext</a></code></span>
+<span class="codeline" id="line-135"><code>			}</code></span>
+<span class="codeline" id="line-136"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r23" class="ident">err</label></code></span>
+<span class="codeline" id="line-137"><code>		},</code></span>
+<span class="codeline" id="line-138"><code>	},</code></span>
+<span class="codeline" id="line-139"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

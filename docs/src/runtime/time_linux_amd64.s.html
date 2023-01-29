@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: time_linux_amd64.s in package runtime</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	time_linux_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/runtime.html">runtime</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2021 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>//go:build !faketime</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code>#include "go_asm.h"</code></span>
+<span class="codeline" id="line-8"><code>#include "go_tls.h"</code></span>
+<span class="codeline" id="line-9"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code>#define SYS_clock_gettime	228</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code>// func time.now() (sec int64, nsec int32, mono int64)</code></span>
+<span class="codeline" id="line-14"><code>TEXT time·now&lt;ABIInternal&gt;(SB),NOSPLIT,$16-24</code></span>
+<span class="codeline" id="line-15"><code>	MOVQ	SP, R12 // Save old SP; R12 unchanged by C code.</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code>	MOVQ	g_m(R14), BX // BX unchanged by C code.</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>	// Set vdsoPC and vdsoSP for SIGPROF traceback.</code></span>
+<span class="codeline" id="line-20"><code>	// Save the old values on stack and restore them on exit,</code></span>
+<span class="codeline" id="line-21"><code>	// so this function is reentrant.</code></span>
+<span class="codeline" id="line-22"><code>	MOVQ	m_vdsoPC(BX), CX</code></span>
+<span class="codeline" id="line-23"><code>	MOVQ	m_vdsoSP(BX), DX</code></span>
+<span class="codeline" id="line-24"><code>	MOVQ	CX, 0(SP)</code></span>
+<span class="codeline" id="line-25"><code>	MOVQ	DX, 8(SP)</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code>	LEAQ	sec+0(FP), DX</code></span>
+<span class="codeline" id="line-28"><code>	MOVQ	-8(DX), CX	// Sets CX to function return address.</code></span>
+<span class="codeline" id="line-29"><code>	MOVQ	CX, m_vdsoPC(BX)</code></span>
+<span class="codeline" id="line-30"><code>	MOVQ	DX, m_vdsoSP(BX)</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code>	CMPQ	R14, m_curg(BX)	// Only switch if on curg.</code></span>
+<span class="codeline" id="line-33"><code>	JNE	noswitch</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code>	MOVQ	m_g0(BX), DX</code></span>
+<span class="codeline" id="line-36"><code>	MOVQ	(g_sched+gobuf_sp)(DX), SP	// Set SP to g0 stack</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code>noswitch:</code></span>
+<span class="codeline" id="line-39"><code>	SUBQ	$32, SP		// Space for two time results</code></span>
+<span class="codeline" id="line-40"><code>	ANDQ	$~15, SP	// Align for C code</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>	MOVL	$0, DI // CLOCK_REALTIME</code></span>
+<span class="codeline" id="line-43"><code>	LEAQ	16(SP), SI</code></span>
+<span class="codeline" id="line-44"><code>	MOVQ	runtime·vdsoClockgettimeSym(SB), AX</code></span>
+<span class="codeline" id="line-45"><code>	CMPQ	AX, $0</code></span>
+<span class="codeline" id="line-46"><code>	JEQ	fallback</code></span>
+<span class="codeline" id="line-47"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code>	MOVL	$1, DI // CLOCK_MONOTONIC</code></span>
+<span class="codeline" id="line-50"><code>	LEAQ	0(SP), SI</code></span>
+<span class="codeline" id="line-51"><code>	MOVQ	runtime·vdsoClockgettimeSym(SB), AX</code></span>
+<span class="codeline" id="line-52"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code>ret:</code></span>
+<span class="codeline" id="line-55"><code>	MOVQ	16(SP), AX	// realtime sec</code></span>
+<span class="codeline" id="line-56"><code>	MOVQ	24(SP), DI	// realtime nsec (moved to BX below)</code></span>
+<span class="codeline" id="line-57"><code>	MOVQ	0(SP), CX	// monotonic sec</code></span>
+<span class="codeline" id="line-58"><code>	IMULQ	$1000000000, CX</code></span>
+<span class="codeline" id="line-59"><code>	MOVQ	8(SP), DX	// monotonic nsec</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code>	MOVQ	R12, SP		// Restore real SP</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	// Restore vdsoPC, vdsoSP</code></span>
+<span class="codeline" id="line-64"><code>	// We don't worry about being signaled between the two stores.</code></span>
+<span class="codeline" id="line-65"><code>	// If we are not in a signal handler, we'll restore vdsoSP to 0,</code></span>
+<span class="codeline" id="line-66"><code>	// and no one will care about vdsoPC. If we are in a signal handler,</code></span>
+<span class="codeline" id="line-67"><code>	// we cannot receive another signal.</code></span>
+<span class="codeline" id="line-68"><code>	MOVQ	8(SP), SI</code></span>
+<span class="codeline" id="line-69"><code>	MOVQ	SI, m_vdsoSP(BX)</code></span>
+<span class="codeline" id="line-70"><code>	MOVQ	0(SP), SI</code></span>
+<span class="codeline" id="line-71"><code>	MOVQ	SI, m_vdsoPC(BX)</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>	// set result registers; AX is already correct</code></span>
+<span class="codeline" id="line-74"><code>	MOVQ	DI, BX</code></span>
+<span class="codeline" id="line-75"><code>	ADDQ	DX, CX</code></span>
+<span class="codeline" id="line-76"><code>	RET</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code>fallback:</code></span>
+<span class="codeline" id="line-79"><code>	MOVQ	$SYS_clock_gettime, AX</code></span>
+<span class="codeline" id="line-80"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	MOVL	$1, DI // CLOCK_MONOTONIC</code></span>
+<span class="codeline" id="line-83"><code>	LEAQ	0(SP), SI</code></span>
+<span class="codeline" id="line-84"><code>	MOVQ	$SYS_clock_gettime, AX</code></span>
+<span class="codeline" id="line-85"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code>	JMP	ret</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

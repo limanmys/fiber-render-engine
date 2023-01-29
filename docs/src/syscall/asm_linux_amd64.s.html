@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: asm_linux_amd64.s in package syscall</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	asm_linux_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/syscall.html">syscall</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2009 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-6"><code>#include "funcdata.h"</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>//</code></span>
+<span class="codeline" id="line-9"><code>// System calls for AMD64, Linux</code></span>
+<span class="codeline" id="line-10"><code>//</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code>#define SYS_gettimeofday 96</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code>// func rawVforkSyscall(trap, a1 uintptr) (r1, err uintptr)</code></span>
+<span class="codeline" id="line-15"><code>TEXT ·rawVforkSyscall(SB),NOSPLIT|NOFRAME,$0-32</code></span>
+<span class="codeline" id="line-16"><code>	MOVQ	a1+8(FP), DI</code></span>
+<span class="codeline" id="line-17"><code>	MOVQ	$0, SI</code></span>
+<span class="codeline" id="line-18"><code>	MOVQ	$0, DX</code></span>
+<span class="codeline" id="line-19"><code>	MOVQ	$0, R10</code></span>
+<span class="codeline" id="line-20"><code>	MOVQ	$0, R8</code></span>
+<span class="codeline" id="line-21"><code>	MOVQ	$0, R9</code></span>
+<span class="codeline" id="line-22"><code>	MOVQ	trap+0(FP), AX	// syscall entry</code></span>
+<span class="codeline" id="line-23"><code>	POPQ	R12 // preserve return address</code></span>
+<span class="codeline" id="line-24"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-25"><code>	PUSHQ	R12</code></span>
+<span class="codeline" id="line-26"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-27"><code>	JLS	ok2</code></span>
+<span class="codeline" id="line-28"><code>	MOVQ	$-1, r1+16(FP)</code></span>
+<span class="codeline" id="line-29"><code>	NEGQ	AX</code></span>
+<span class="codeline" id="line-30"><code>	MOVQ	AX, err+24(FP)</code></span>
+<span class="codeline" id="line-31"><code>	RET</code></span>
+<span class="codeline" id="line-32"><code>ok2:</code></span>
+<span class="codeline" id="line-33"><code>	MOVQ	AX, r1+16(FP)</code></span>
+<span class="codeline" id="line-34"><code>	MOVQ	$0, err+24(FP)</code></span>
+<span class="codeline" id="line-35"><code>	RET</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code>// func rawSyscallNoError(trap, a1, a2, a3 uintptr) (r1, r2 uintptr)</code></span>
+<span class="codeline" id="line-38"><code>TEXT ·rawSyscallNoError(SB),NOSPLIT,$0-48</code></span>
+<span class="codeline" id="line-39"><code>	MOVQ	a1+8(FP), DI</code></span>
+<span class="codeline" id="line-40"><code>	MOVQ	a2+16(FP), SI</code></span>
+<span class="codeline" id="line-41"><code>	MOVQ	a3+24(FP), DX</code></span>
+<span class="codeline" id="line-42"><code>	MOVQ	trap+0(FP), AX	// syscall entry</code></span>
+<span class="codeline" id="line-43"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-44"><code>	MOVQ	AX, r1+32(FP)</code></span>
+<span class="codeline" id="line-45"><code>	MOVQ	DX, r2+40(FP)</code></span>
+<span class="codeline" id="line-46"><code>	RET</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>// func gettimeofday(tv *Timeval) (err uintptr)</code></span>
+<span class="codeline" id="line-49"><code>TEXT ·gettimeofday(SB),NOSPLIT,$0-16</code></span>
+<span class="codeline" id="line-50"><code>	MOVQ	tv+0(FP), DI</code></span>
+<span class="codeline" id="line-51"><code>	MOVQ	$0, SI</code></span>
+<span class="codeline" id="line-52"><code>	MOVQ	runtime·vdsoGettimeofdaySym(SB), AX</code></span>
+<span class="codeline" id="line-53"><code>	TESTQ   AX, AX</code></span>
+<span class="codeline" id="line-54"><code>	JZ fallback</code></span>
+<span class="codeline" id="line-55"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-56"><code>ret:</code></span>
+<span class="codeline" id="line-57"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-58"><code>	JLS	ok7</code></span>
+<span class="codeline" id="line-59"><code>	NEGQ	AX</code></span>
+<span class="codeline" id="line-60"><code>	MOVQ	AX, err+8(FP)</code></span>
+<span class="codeline" id="line-61"><code>	RET</code></span>
+<span class="codeline" id="line-62"><code>fallback:</code></span>
+<span class="codeline" id="line-63"><code>	MOVL	$SYS_gettimeofday, AX</code></span>
+<span class="codeline" id="line-64"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-65"><code>	JMP ret</code></span>
+<span class="codeline" id="line-66"><code>ok7:</code></span>
+<span class="codeline" id="line-67"><code>	MOVQ	$0, err+8(FP)</code></span>
+<span class="codeline" id="line-68"><code>	RET</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

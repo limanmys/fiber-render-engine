@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: sig_amd64.s in package crypto/internal/boring/sig</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	sig_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/crypto/internal/boring/sig.html">crypto/internal/boring/sig</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2017 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code>// These functions are no-ops, but you can search for their implementations</code></span>
+<span class="codeline" id="line-8"><code>// to find out whether they are linked into a particular binary.</code></span>
+<span class="codeline" id="line-9"><code>//</code></span>
+<span class="codeline" id="line-10"><code>// Each function consists of a two-byte jump over the next 29-bytes,</code></span>
+<span class="codeline" id="line-11"><code>// then a 5-byte indicator sequence unlikely to occur in real x86 instructions,</code></span>
+<span class="codeline" id="line-12"><code>// then a randomly-chosen 24-byte sequence, and finally a return instruction</code></span>
+<span class="codeline" id="line-13"><code>// (the target of the jump).</code></span>
+<span class="codeline" id="line-14"><code>//</code></span>
+<span class="codeline" id="line-15"><code>// These sequences are known to rsc.io/goversion.</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code>#define START \</code></span>
+<span class="codeline" id="line-18"><code>	BYTE $0xEB; BYTE $0x1D; BYTE $0xF4; BYTE $0x48; BYTE $0xF4; BYTE $0x4B; BYTE $0xF4</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code>#define END \</code></span>
+<span class="codeline" id="line-21"><code>	BYTE $0xC3</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code>// BoringCrypto indicates that BoringCrypto (in particular, its func init) is present.</code></span>
+<span class="codeline" id="line-24"><code>TEXT ·BoringCrypto(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-25"><code>	START</code></span>
+<span class="codeline" id="line-26"><code>	BYTE $0xB3; BYTE $0x32; BYTE $0xF5; BYTE $0x28;</code></span>
+<span class="codeline" id="line-27"><code>	BYTE $0x13; BYTE $0xA3; BYTE $0xB4; BYTE $0x50;</code></span>
+<span class="codeline" id="line-28"><code>	BYTE $0xD4; BYTE $0x41; BYTE $0xCC; BYTE $0x24;</code></span>
+<span class="codeline" id="line-29"><code>	BYTE $0x85; BYTE $0xF0; BYTE $0x01; BYTE $0x45;</code></span>
+<span class="codeline" id="line-30"><code>	BYTE $0x4E; BYTE $0x92; BYTE $0x10; BYTE $0x1B;</code></span>
+<span class="codeline" id="line-31"><code>	BYTE $0x1D; BYTE $0x2F; BYTE $0x19; BYTE $0x50;</code></span>
+<span class="codeline" id="line-32"><code>	END</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code>// StandardCrypto indicates that standard Go crypto is present.</code></span>
+<span class="codeline" id="line-35"><code>TEXT ·StandardCrypto(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-36"><code>	START</code></span>
+<span class="codeline" id="line-37"><code>	BYTE $0xba; BYTE $0xee; BYTE $0x4d; BYTE $0xfa;</code></span>
+<span class="codeline" id="line-38"><code>	BYTE $0x98; BYTE $0x51; BYTE $0xca; BYTE $0x56;</code></span>
+<span class="codeline" id="line-39"><code>	BYTE $0xa9; BYTE $0x11; BYTE $0x45; BYTE $0xe8;</code></span>
+<span class="codeline" id="line-40"><code>	BYTE $0x3e; BYTE $0x99; BYTE $0xc5; BYTE $0x9c;</code></span>
+<span class="codeline" id="line-41"><code>	BYTE $0xf9; BYTE $0x11; BYTE $0xcb; BYTE $0x8e;</code></span>
+<span class="codeline" id="line-42"><code>	BYTE $0x80; BYTE $0xda;  BYTE $0xf1; BYTE $0x2f;</code></span>
+<span class="codeline" id="line-43"><code>	END</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code>// FIPSOnly indicates that crypto/tls/fipsonly is present.</code></span>
+<span class="codeline" id="line-46"><code>TEXT ·FIPSOnly(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-47"><code>	START</code></span>
+<span class="codeline" id="line-48"><code>	BYTE $0x36; BYTE $0x3C; BYTE $0xB9; BYTE $0xCE;</code></span>
+<span class="codeline" id="line-49"><code>	BYTE $0x9D; BYTE $0x68; BYTE $0x04; BYTE $0x7D;</code></span>
+<span class="codeline" id="line-50"><code>	BYTE $0x31; BYTE $0xF2; BYTE $0x8D; BYTE $0x32;</code></span>
+<span class="codeline" id="line-51"><code>	BYTE $0x5D; BYTE $0x5C; BYTE $0xA5; BYTE $0x87;</code></span>
+<span class="codeline" id="line-52"><code>	BYTE $0x3F; BYTE $0x5D; BYTE $0x80; BYTE $0xCA;</code></span>
+<span class="codeline" id="line-53"><code>	BYTE $0xF6; BYTE $0xD6; BYTE $0x15; BYTE $0x1B;</code></span>
+<span class="codeline" id="line-54"><code>	END</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

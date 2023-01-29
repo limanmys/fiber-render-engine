@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/pkg/sftp</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>sftp</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/pkg/sftp">github.com/pkg/sftp</a><i> (on <a href="https://pkg.go.dev/github.com/pkg/sftp" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/pkg/sftp.html">24 packages</a>, and imported by <a href="../../../dep/github.com/pkg/sftp.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/allocator.go.html">allocator.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/attrs.go.html">attrs.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/attrs_unix.go.html">attrs_unix.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/client.go.html">client.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/conn.go.html">conn.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/ls_formatting.go.html">ls_formatting.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/ls_unix.go.html">ls_unix.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/match.go.html">match.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/packet-manager.go.html">packet-manager.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/packet-typing.go.html">packet-typing.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/packet.go.html">packet.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/pool.go.html">pool.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/release.go.html">release.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html">request-attrs.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-errors.go.html">request-errors.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-example.go.html">request-example.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html">request-interfaces.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-server.go.html">request-server.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request-unix.go.html">request-unix.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/request.go.html">request.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/server.go.html">server.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/server_statvfs_impl.go.html">server_statvfs_impl.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/server_statvfs_linux.go.html">server_statvfs_linux.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-23-fold-content"><label for="file-23-fold-content">   <a href="../../../src/github.com/pkg/sftp/sftp.go.html#doc">#d</a> <a href="../../../src/github.com/pkg/sftp/sftp.go.html">sftp.go</a></label><span id='file-23-fold-content-items' class="fold-items">
+<span class="md-text">		Package sftp implements the SSH File Transfer Protocol as described in
+		https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02</span>
+</span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/stat_posix.go.html">stat_posix.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/pkg/sftp/syscall_good.go.html">syscall_good.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content"></label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"log"
+		
+			"github.com/pkg/sftp"
+			"golang.org/x/crypto/ssh"
+		)
+		
+		func main() {
+			var conn *ssh.Client
+		
+			// open an SFTP session over an existing ssh connection.
+			client, err := sftp.NewClient(conn)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer client.Close()
+		
+			// walk a directory
+			w := client.Walk("/home/user")
+			for w.Step() {
+				if w.Err() != nil {
+					continue
+				}
+				log.Println(w.Path())
+			}
+		
+			// leave your mark
+			f, err := client.Create("hello.txt")
+			if err != nil {
+				log.Fatal(err)
+			}
+			if _, err := f.Write([]byte("Hello world!")); err != nil {
+				log.Fatal(err)
+			}
+			f.Close()
+		
+			// check it's there
+			fi, err := client.Lstat("hello.txt")
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Println(fi)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">Client_Mkdir_parents</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os"
+			"path"
+			"strings"
+		
+			"github.com/pkg/sftp"
+			"golang.org/x/crypto/ssh"
+		)
+		
+		func main() {
+			// Example of mimicing 'mkdir --parents'; I.E. recursively create
+			// directoryies and don't error if any directories already exists.
+			var conn *ssh.Client
+		
+			client, err := sftp.NewClient(conn)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer client.Close()
+		
+			sshFxFailure := uint32(4)
+			mkdirParents := func(client *sftp.Client, dir string) (err error) {
+				var parents string
+		
+				if path.IsAbs(dir) {
+					// Otherwise, an absolute path given below would be turned in to a relative one
+					// by splitting on "/"
+					parents = "/"
+				}
+		
+				for _, name := range strings.Split(dir, "/") {
+					if name == "" {
+						// Paths with double-/ in them should just move along
+						// this will also catch the case of the first character being a "/", i.e. an absolute path
+						continue
+					}
+					parents = path.Join(parents, name)
+					err = client.Mkdir(parents)
+					if status, ok := err.(*sftp.StatusError); ok {
+						if status.Code == sshFxFailure {
+							var fi os.FileInfo
+							fi, err = client.Stat(parents)
+							if err == nil {
+								if !fi.IsDir() {
+									return fmt.Errorf("file exists: %s", parents)
+								}
+							}
+						}
+					}
+					if err != nil {
+						break
+					}
+				}
+				return err
+			}
+		
+			err = mkdirParents(client, "/tmp/foo/bar")
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">File_ReadFrom_bufio</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"bufio"
+			"io"
+		
+			"github.com/pkg/sftp"
+		)
+		
+		func main() {
+			// Using Bufio to buffer writes going to an sftp.File won't buffer as it
+			// skips buffering if the underlying writer support ReadFrom. The
+			// workaround is to wrap your writer in a struct that only implements
+			// io.Writer.
+			//
+			// For background see github.com/pkg/sftp/issues/125
+		
+			var data_source io.Reader
+			var f *sftp.File
+			type writerOnly struct{ io.Writer }
+			bw := bufio.NewWriter(writerOnly{f}) // no ReadFrom()
+			bw.ReadFrom(data_source)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">NewClientPipe</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os"
+			"os/exec"
+		
+			"github.com/pkg/sftp"
+		)
+		
+		func main() {
+			// Connect to a remote host and request the sftp subsystem via the 'ssh'
+			// command.  This assumes that passwordless login is correctly configured.
+			cmd := exec.Command("ssh", "example.com", "-s", "sftp")
+		
+			// send errors from ssh to stderr
+			cmd.Stderr = os.Stderr
+		
+			// get stdin and stdout
+			wr, err := cmd.StdinPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+			rd, err := cmd.StdoutPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			// start the process
+			if err := cmd.Start(); err != nil {
+				log.Fatal(err)
+			}
+			defer cmd.Wait()
+		
+			// open the SFTP session
+			client, err := sftp.NewClientPipe(rd, wr)
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			// read a directory
+			list, err := client.ReadDir("/")
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			// print contents
+			for _, item := range list {
+				fmt.Println(item.Name())
+			}
+		
+			// close the connection
+			client.Close()
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 28)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Client" data-popularity="2325">	<input type='checkbox' class="fold" id="Client-fold-content"><label for="Client-fold-content"> type <a href="../../../src/github.com/pkg/sftp/client.go.html#line-162">Client</a> <i>(struct)</i></label><span id='Client-fold-content-docs' class="fold-docs">
+<span class="md-text">		Client represents an SFTP session on a *ssh.ClientConn SSH connection.
+		Multiple Clients can be active on a single SSH connection, and a Client
+		may be called concurrently from multiple Goroutines.
+		
+		Client implements the github.com/kr/fs.FileSystem interface.</span>
+
+		<input type='checkbox' class="fold" id="Client-fold-fields"><label for="Client-fold-fields">Fields (<i>total 3</i>)</label><span id='Client-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/client.go.html#line-163">clientConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-40">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-13">Reader</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/client.go.html#line-163" class="path-duplicate">clientConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-40" class="path-duplicate">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-14">WriteCloser</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-field-Mutex"><label for="Client-fold-field-Mutex"><a href="../../../src/github.com/pkg/sftp/client.go.html#line-163" class="path-duplicate">clientConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-43">Mutex</a> <i><a href="../../sync.html">sync</a>.<a href="../../sync.html#name-Mutex">Mutex</a></i></label><span id='Client-fold-field-Mutex-docs' class="fold-docs">
+<span class="md-text">				// protects inflight</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Client-fold-methods"><label for="Client-fold-methods">Methods (<i>total 33</i>)</label><span id='Client-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Chmod"><label for="Client-fold-method-Chmod">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-554">Chmod</a>(path <a href="../../builtin.html#name-string">string</a>, mode <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Chmod-docs' class="fold-docs">
+<span class="md-text">				Chmod changes the permissions of the named file.
+				
+				Chmod does not apply a umask, because even retrieving the umask is not
+				possible in a portable way without causing a race condition. Callers
+				should mask off umask bits, if desired.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Chown"><label for="Client-fold-method-Chown">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-540">Chown</a>(path <a href="../../builtin.html#name-string">string</a>, uid, gid <a href="../../builtin.html#name-int">int</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Chown-docs' class="fold-docs">
+<span class="md-text">				Chown changes the user and group owners of the named file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Chtimes"><label for="Client-fold-method-Chtimes">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-530">Chtimes</a>(path <a href="../../builtin.html#name-string">string</a>, atime <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>, mtime <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Chtimes-docs' class="fold-docs">
+<span class="md-text">				Chtimes changes the access and modification times of the named file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Close"><label for="Client-fold-method-Close">(*Client) <a href="../../../src/github.com/pkg/sftp/conn.go.html#line-59">Close</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Close-docs' class="fold-docs">
+<span class="md-text">				Close closes the SFTP session.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Create"><label for="Client-fold-method-Create">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-250">Create</a>(path <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Create-docs' class="fold-docs">
+<span class="md-text">				Create creates the named file mode 0666 (before umask), truncating it if it
+				already exists. If successful, methods on the returned File can be used for
+				I/O; the associated file descriptor has mode O_RDWR. If you need more
+				control over the flags/mode used to open the file see client.OpenFile.
+				
+				Note that some SFTP servers (eg. AWS Transfer) do not support opening files
+				read/write at the same time. For those services you will need to use
+				`client.OpenFile(os.O_WRONLY|os.O_CREATE|os.O_TRUNC)`.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Getwd"><label for="Client-fold-method-Getwd">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-841">Getwd</a>() (<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Getwd-docs' class="fold-docs">
+<span class="md-text">				Getwd returns the current working directory of the server. Operations
+				involving relative paths will be based at this location.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Glob"><label for="Client-fold-method-Glob">(*Client) <a href="../../../src/github.com/pkg/sftp/match.go.html#line-43">Glob</a>(pattern <a href="../../builtin.html#name-string">string</a>) (matches []<a href="../../builtin.html#name-string">string</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Glob-docs' class="fold-docs">
+<span class="md-text">				Glob returns the names of all files matching pattern or nil
+				if there is no matching file. The syntax of patterns is the same
+				as in Match. The pattern may describe hierarchical names such as
+				/usr/*/bin/ed.
+				
+				Glob ignores file system errors such as I/O errors reading directories.
+				The only possible returned error is ErrBadPattern, when pattern
+				is malformed.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-HasExtension"><label for="Client-fold-method-HasExtension">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-300">HasExtension</a>(name <a href="../../builtin.html#name-string">string</a>) (<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-bool">bool</a>)</label><span id='Client-fold-method-HasExtension-docs' class="fold-docs">
+<span class="md-text">				HasExtension checks whether the server supports a named extension.
+				
+				The first return value is the extension data reported by the server
+				(typically a version number).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Join"><label for="Client-fold-method-Join">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-711">Join</a>(elem ...<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='Client-fold-method-Join-docs' class="fold-docs">
+<span class="md-text">				Join joins any number of path elements into a single path, adding a
+				separating slash if necessary. The result is Cleaned; in particular, all
+				empty strings are ignored.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Link"><label for="Client-fold-method-Link">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-453">Link</a>(oldname, newname <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Link-docs' class="fold-docs">
+<span class="md-text">				Link creates a hard link at 'newname', pointing at the same inode as 'oldname'</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Lock"><label for="Client-fold-method-Lock">(*Client) <a href="../../../src/sync/mutex.go.html#line-81">Lock</a>()</label><span id='Client-fold-method-Lock-docs' class="fold-docs">
+<span class="md-text">				Lock locks m.
+				If the lock is already in use, the calling goroutine
+				blocks until the mutex is available.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Lstat"><label for="Client-fold-method-Lstat">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-399">Lstat</a>(p <a href="../../builtin.html#name-string">string</a>) (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Lstat-docs' class="fold-docs">
+<span class="md-text">				Lstat returns a FileInfo structure describing the file specified by path 'p'.
+				If 'p' is a symbolic link, the returned FileInfo structure describes the symbolic link.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Mkdir"><label for="Client-fold-method-Mkdir">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-848">Mkdir</a>(path <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Mkdir-docs' class="fold-docs">
+<span class="md-text">				Mkdir creates the specified directory. An error will be returned if a file or
+				directory with the specified path already exists, or if the directory's
+				parent folder does not exist (the method cannot create complete paths).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-MkdirAll"><label for="Client-fold-method-MkdirAll">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-869">MkdirAll</a>(path <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-MkdirAll-docs' class="fold-docs">
+<span class="md-text">				MkdirAll creates a directory named path, along with any necessary parents,
+				and returns nil, or else returns an error.
+				If path is already a directory, MkdirAll does nothing and returns nil.
+				If path contains a regular file, an error is returned</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Open"><label for="Client-fold-method-Open">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-569">Open</a>(path <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Open-docs' class="fold-docs">
+<span class="md-text">				Open opens the named file for reading. If successful, methods on the
+				returned file can be used for reading; the associated file descriptor
+				has mode O_RDONLY.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-OpenFile"><label for="Client-fold-method-OpenFile">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-576">OpenFile</a>(path <a href="../../builtin.html#name-string">string</a>, f <a href="../../builtin.html#name-int">int</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-OpenFile-docs' class="fold-docs">
+<span class="md-text">				OpenFile is the generalized open call; most users will use Open or
+				Create instead. It opens the named file with specified flag (O_RDONLY
+				etc.). If successful, methods on the returned File can be used for I/O.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-PosixRename"><label for="Client-fold-method-PosixRename">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-789">PosixRename</a>(oldname, newname <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-PosixRename-docs' class="fold-docs">
+<span class="md-text">				PosixRename renames a file using the posix-rename@openssh.com extension
+				which will replace newname if it already exists.</span>
+</span></span><span>
+			<span class="nodocs">( Client) <a href="../../../src/io/io.go.html#line-84">Read</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-ReadDir"><label for="Client-fold-method-ReadDir">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-312">ReadDir</a>(p <a href="../../builtin.html#name-string">string</a>) ([]<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-ReadDir-docs' class="fold-docs">
+<span class="md-text">				ReadDir reads the directory named by dirname and returns a list of
+				directory entries.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-ReadLink"><label for="Client-fold-method-ReadLink">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-424">ReadLink</a>(p <a href="../../builtin.html#name-string">string</a>) (<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-ReadLink-docs' class="fold-docs">
+<span class="md-text">				ReadLink reads the target of a symbolic link.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-RealPath"><label for="Client-fold-method-RealPath">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-811">RealPath</a>(path <a href="../../builtin.html#name-string">string</a>) (<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-RealPath-docs' class="fold-docs">
+<span class="md-text">				RealPath can be used to have the server canonicalize any given path name to an absolute path.
+				
+				This is useful for converting path names containing ".." components,
+				or relative pathnames without a leading slash into absolute paths.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Remove"><label for="Client-fold-method-Remove">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-716">Remove</a>(path <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Remove-docs' class="fold-docs">
+<span class="md-text">				Remove removes the specified file or directory. An error will be returned if no
+				file or directory with the specified path exists, or if the specified directory
+				is not empty.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-RemoveDirectory"><label for="Client-fold-method-RemoveDirectory">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-751">RemoveDirectory</a>(path <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-RemoveDirectory-docs' class="fold-docs">
+<span class="md-text">				RemoveDirectory removes a directory path.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Rename"><label for="Client-fold-method-Rename">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-769">Rename</a>(oldname, newname <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Rename-docs' class="fold-docs">
+<span class="md-text">				Rename renames a file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Stat"><label for="Client-fold-method-Stat">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-389">Stat</a>(p <a href="../../builtin.html#name-string">string</a>) (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-Stat-docs' class="fold-docs">
+<span class="md-text">				Stat returns a FileInfo structure describing the file specified by path 'p'.
+				If 'p' is a symbolic link, the returned FileInfo structure describes the referent file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-StatVFS"><label for="Client-fold-method-StatVFS">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-677">StatVFS</a>(path <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-StatVFS">StatVFS</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Client-fold-method-StatVFS-docs' class="fold-docs">
+<span class="md-text">				StatVFS retrieves VFS statistics from a remote host.
+				
+				It implements the statvfs@openssh.com SSH_FXP_EXTENDED feature
+				from http://www.opensource.apple.com/source/OpenSSH/OpenSSH-175/openssh/PROTOCOL?txt.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Symlink"><label for="Client-fold-method-Symlink">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-472">Symlink</a>(oldname, newname <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Symlink-docs' class="fold-docs">
+<span class="md-text">				Symlink creates a symbolic link at 'newname', pointing at target 'oldname'</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Truncate"><label for="Client-fold-method-Truncate">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-562">Truncate</a>(path <a href="../../builtin.html#name-string">string</a>, size <a href="../../builtin.html#name-int64">int64</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Truncate-docs' class="fold-docs">
+<span class="md-text">				Truncate sets the size of the named file. Although it may be safely assumed
+				that if the size is less than its current size it will be truncated to fit,
+				the SFTP protocol does not specify what behavior the server should do when setting
+				size greater than the current size.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-TryLock"><label for="Client-fold-method-TryLock">(*Client) <a href="../../../src/sync/mutex.go.html#line-98">TryLock</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Client-fold-method-TryLock-docs' class="fold-docs">
+<span class="md-text">				TryLock tries to lock m and reports whether it succeeded.
+				
+				Note that while correct uses of TryLock do exist, they are rare,
+				and use of TryLock is often a sign of a deeper problem
+				in a particular use of mutexes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Unlock"><label for="Client-fold-method-Unlock">(*Client) <a href="../../../src/sync/mutex.go.html#line-212">Unlock</a>()</label><span id='Client-fold-method-Unlock-docs' class="fold-docs">
+<span class="md-text">				Unlock unlocks m.
+				It is a run-time error if m is not locked on entry to Unlock.
+				
+				A locked Mutex is not associated with a particular goroutine.
+				It is allowed for one goroutine to lock a Mutex and then
+				arrange for another goroutine to unlock it.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Wait"><label for="Client-fold-method-Wait">(*Client) <a href="../../../src/github.com/pkg/sftp/conn.go.html#line-53">Wait</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Client-fold-method-Wait-docs' class="fold-docs">
+<span class="md-text">				Wait blocks until the conn has shut down, and return the error
+				causing the shutdown. It can be called concurrently from multiple
+				goroutines.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Client-fold-method-Walk"><label for="Client-fold-method-Walk">(*Client) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-306">Walk</a>(root <a href="../../builtin.html#name-string">string</a>) *<a href="../kr/fs.html">fs</a>.<a href="../kr/fs.html#name-Walker">Walker</a></label><span id='Client-fold-method-Walk-docs' class="fold-docs">
+<span class="md-text">				Walk returns a new Walker rooted at root.</span>
+</span></span><span>
+			<span class="nodocs">( Client) <a href="../../../src/io/io.go.html#line-97">Write</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="Client-fold-impls"><label for="Client-fold-impls">Implements (<i>at least 9</i>)</label><span id='Client-fold-impls-items' class="fold-items"><span>
+			*Client : github.com/kr/fs.<a href="../kr/fs.html#name-FileSystem">FileSystem</a></span><span>
+			*Client : io.<a href="../../io.html#name-Closer">Closer</a></span><span>
+			*Client : io.<a href="../../io.html#name-ReadCloser">ReadCloser</a></span><span>
+			 Client : io.<a href="../../io.html#name-Reader">Reader</a></span><span>
+			*Client : io.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a></span><span>
+			 Client : io.<a href="../../io.html#name-ReadWriter">ReadWriter</a></span><span>
+			*Client : io.<a href="../../io.html#name-WriteCloser">WriteCloser</a></span><span>
+			 Client : io.<a href="../../io.html#name-Writer">Writer</a></span><span>
+			*Client : sync.<a href="../../sync.html#name-Locker">Locker</a></span></span>
+		<input type='checkbox' class="fold" id="Client-fold-results"><label for="Client-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='Client-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewClient">NewClient</a>(conn *<a href="../../golang.org/x/crypto/ssh.html">ssh</a>.<a href="../../golang.org/x/crypto/ssh.html#name-Client">Client</a>, opts ...<a href="#name-ClientOption">ClientOption</a>) (*<b>Client</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-NewClientPipe">NewClientPipe</a>(rd <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>, wr <a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a>, opts ...<a href="#name-ClientOption">ClientOption</a>) (*<b>Client</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/limanmys/render-engine/internal/bridge.<a href="../limanmys/render-engine/internal/bridge.html#name-OpenSFTPConnection">OpenSFTPConnection</a>(conn *<a href="../../golang.org/x/crypto/ssh.html">ssh</a>.<a href="../../golang.org/x/crypto/ssh.html#name-Client">Client</a>) *<b>Client</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-ClientOption" data-popularity="595">	<input type='checkbox' class="fold" id="ClientOption-fold-content"><label for="ClientOption-fold-content"> type <a href="../../../src/github.com/pkg/sftp/client.go.html#line-34">ClientOption</a> <i>(func)</i></label><span id='ClientOption-fold-content-docs' class="fold-docs">
+<span class="md-text">		A ClientOption is a function which applies configuration to a Client.</span>
+
+		<input type='checkbox' class="fold" id="ClientOption-fold-results"><label for="ClientOption-fold-results">As Outputs Of (<i>at least 7</i>)</label><span id='ClientOption-fold-results-items' class="fold-items"><span>
+			func <a href="#name-MaxConcurrentRequestsPerFile">MaxConcurrentRequestsPerFile</a>(n <a href="../../builtin.html#name-int">int</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-MaxPacket">MaxPacket</a>(size <a href="../../builtin.html#name-int">int</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-MaxPacketChecked">MaxPacketChecked</a>(size <a href="../../builtin.html#name-int">int</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-MaxPacketUnchecked">MaxPacketUnchecked</a>(size <a href="../../builtin.html#name-int">int</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-UseConcurrentReads">UseConcurrentReads</a>(value <a href="../../builtin.html#name-bool">bool</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-UseConcurrentWrites">UseConcurrentWrites</a>(value <a href="../../builtin.html#name-bool">bool</a>) <b>ClientOption</b></span><span>
+			func <a href="#name-UseFstat">UseFstat</a>(value <a href="../../builtin.html#name-bool">bool</a>) <b>ClientOption</b></span></span>
+		<input type='checkbox' class="fold" id="ClientOption-fold-params"><label for="ClientOption-fold-params">As Inputs Of (<i>at least 2</i>)</label><span id='ClientOption-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewClient">NewClient</a>(conn *<a href="../../golang.org/x/crypto/ssh.html">ssh</a>.<a href="../../golang.org/x/crypto/ssh.html#name-Client">Client</a>, opts ...<b>ClientOption</b>) (*<a href="#name-Client">Client</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-NewClientPipe">NewClientPipe</a>(rd <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>, wr <a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a>, opts ...<b>ClientOption</b>) (*<a href="#name-Client">Client</a>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-File" data-popularity="2025">	<input type='checkbox' class="fold" id="File-fold-content"><label for="File-fold-content"> type <a href="../../../src/github.com/pkg/sftp/client.go.html#line-914">File</a> <i>(struct)</i></label><span id='File-fold-content-docs' class="fold-docs">
+<span class="md-text">		File represents a remote file.</span>
+
+		<input type='checkbox' class="fold" id="File-fold-methods"><label for="File-fold-methods">Methods (<i>total 15</i>)</label><span id='File-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Chmod"><label for="File-fold-method-Chmod">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1874">Chmod</a>(mode <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></label><span id='File-fold-method-Chmod-docs' class="fold-docs">
+<span class="md-text">				Chmod changes the permissions of the current file.
+				
+				See Client.Chmod for details.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Chown"><label for="File-fold-method-Chown">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1867">Chown</a>(uid, gid <a href="../../builtin.html#name-int">int</a>) <a href="../../builtin.html#name-error">error</a></label><span id='File-fold-method-Chown-docs' class="fold-docs">
+<span class="md-text">				Chown changes the uid/gid of the current file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Close"><label for="File-fold-method-Close">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-925">Close</a>() <a href="../../builtin.html#name-error">error</a></label><span id='File-fold-method-Close-docs' class="fold-docs">
+<span class="md-text">				Close closes the File, rendering it unusable for I/O. It returns an
+				error, if any.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Name"><label for="File-fold-method-Name">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-930">Name</a>() <a href="../../builtin.html#name-string">string</a></label><span id='File-fold-method-Name-docs' class="fold-docs">
+<span class="md-text">				Name returns the name of the file as presented to Open or Create.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Read"><label for="File-fold-method-Read">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-943">Read</a>(b []<a href="../../builtin.html#name-byte">byte</a>) (<a href="../../builtin.html#name-int">int</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-Read-docs' class="fold-docs">
+<span class="md-text">				Read reads up to len(b) bytes from the File. It returns the number of bytes
+				read and an error, if any. Read follows io.Reader semantics, so when Read
+				encounters an error or EOF condition after successfully reading n &gt; 0 bytes,
+				it returns the number of bytes read.
+				
+				To maximise throughput for transferring the entire file (especially
+				over high latency links) it is recommended to use WriteTo rather
+				than calling Read multiple times. io.Copy will do this
+				automatically.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-ReadAt"><label for="File-fold-method-ReadAt">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1011">ReadAt</a>(b []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (<a href="../../builtin.html#name-int">int</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-ReadAt-docs' class="fold-docs">
+<span class="md-text">				ReadAt reads up to len(b) byte from the File at a given offset `off`. It returns
+				the number of bytes read and an error, if any. ReadAt follows io.ReaderAt semantics,
+				so the file offset is not altered during the read.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-ReadFrom"><label for="File-fold-method-ReadFrom">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1761">ReadFrom</a>(r <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>) (<a href="../../builtin.html#name-int64">int64</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-ReadFrom-docs' class="fold-docs">
+<span class="md-text">				ReadFrom reads data from r until EOF and writes it to the file. The return
+				value is the number of bytes read. Any error except io.EOF encountered
+				during the read is also returned.
+				
+				This method is preferred over calling Write multiple times
+				to maximise throughput for transferring the entire file,
+				especially over high-latency links.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-ReadFromWithConcurrency"><label for="File-fold-method-ReadFromWithConcurrency">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1615">ReadFromWithConcurrency</a>(r <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>, concurrency <a href="../../builtin.html#name-int">int</a>) (read <a href="../../builtin.html#name-int64">int64</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-ReadFromWithConcurrency-docs' class="fold-docs">
+<span class="md-text">				ReadFromWithConcurrency implements ReaderFrom,
+				but uses the given concurrency to issue multiple requests at the same time.
+				
+				Giving a concurrency of less than one will default to the Client’s max concurrency.
+				
+				Otherwise, the given concurrency will be capped by the Client's max concurrency.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Seek"><label for="File-fold-method-Seek">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1840">Seek</a>(offset <a href="../../builtin.html#name-int64">int64</a>, whence <a href="../../builtin.html#name-int">int</a>) (<a href="../../builtin.html#name-int64">int64</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-Seek-docs' class="fold-docs">
+<span class="md-text">				Seek implements io.Seeker by setting the client offset for the next Read or
+				Write. It returns the next offset read. Seeking before or after the end of
+				the file is undefined. Seeking relative to the end calls Stat.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Stat"><label for="File-fold-method-Stat">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1399">Stat</a>() (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-Stat-docs' class="fold-docs">
+<span class="md-text">				Stat returns the FileInfo structure describing file. If there is an
+				error.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Sync"><label for="File-fold-method-Sync">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1881">Sync</a>() <a href="../../builtin.html#name-error">error</a></label><span id='File-fold-method-Sync-docs' class="fold-docs">
+<span class="md-text">				Sync requests a flush of the contents of a File to stable storage.
+				
+				Sync requires the server to support the fsync@openssh.com extension.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Truncate"><label for="File-fold-method-Truncate">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1903">Truncate</a>(size <a href="../../builtin.html#name-int64">int64</a>) <a href="../../builtin.html#name-error">error</a></label><span id='File-fold-method-Truncate-docs' class="fold-docs">
+<span class="md-text">				Truncate sets the size of the current file. Although it may be safely assumed
+				that if the size is less than its current size it will be truncated to fit,
+				the SFTP protocol does not specify what behavior the server should do when setting
+				size greater than the current size.
+				We send a SSH_FXP_FSETSTAT here since we have a file handle</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Write"><label for="File-fold-method-Write">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1415">Write</a>(b []<a href="../../builtin.html#name-byte">byte</a>) (<a href="../../builtin.html#name-int">int</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-Write-docs' class="fold-docs">
+<span class="md-text">				Write writes len(b) bytes to the File. It returns the number of bytes
+				written and an error, if any. Write returns a non-nil error when n !=
+				len(b).
+				
+				To maximise throughput for transferring the entire file (especially
+				over high latency links) it is recommended to use ReadFrom rather
+				than calling Write multiple times. io.Copy will do this
+				automatically.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-WriteAt"><label for="File-fold-method-WriteAt">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1576">WriteAt</a>(b []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (written <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-WriteAt-docs' class="fold-docs">
+<span class="md-text">				WriteAt writes up to len(b) byte to the File at a given offset `off`. It returns
+				the number of bytes written and an error, if any. WriteAt follows io.WriterAt semantics,
+				so the file offset is not altered during the write.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-WriteTo"><label for="File-fold-method-WriteTo">(*File) <a href="../../../src/github.com/pkg/sftp/client.go.html#line-1204">WriteTo</a>(w <a href="../../io.html">io</a>.<a href="../../io.html#name-Writer">Writer</a>) (written <a href="../../builtin.html#name-int64">int64</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-WriteTo-docs' class="fold-docs">
+<span class="md-text">				WriteTo writes the file to the given Writer.
+				The return value is the number of bytes written.
+				Any error encountered during the write is also returned.
+				
+				This method is preferred over calling Read multiple times
+				to maximise throughput for transferring the entire file,
+				especially over high latency links.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="File-fold-impls"><label for="File-fold-impls">Implements (<i>at least 21</i>)</label><span id='File-fold-impls-items' class="fold-items"><span>
+			*File : <a href="#name-WriterAtReaderAt">WriterAtReaderAt</a></span><span>
+			*File : go.uber.org/zap.<a href="../../go.uber.org/zap.html#name-Sink">Sink</a></span><span>
+			*File : go.uber.org/zap/zapcore.<a href="../../go.uber.org/zap/zapcore.html#name-WriteSyncer">WriteSyncer</a></span><span>
+			*File : io.<a href="../../io.html#name-Closer">Closer</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadCloser">ReadCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-Reader">Reader</a></span><span>
+			*File : io.<a href="../../io.html#name-ReaderAt">ReaderAt</a></span><span>
+			*File : io.<a href="../../io.html#name-ReaderFrom">ReaderFrom</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadSeekCloser">ReadSeekCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadSeeker">ReadSeeker</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriter">ReadWriter</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriteSeeker">ReadWriteSeeker</a></span><span>
+			*File : io.<a href="../../io.html#name-Seeker">Seeker</a></span><span>
+			*File : io.<a href="../../io.html#name-WriteCloser">WriteCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-Writer">Writer</a></span><span>
+			*File : io.<a href="../../io.html#name-WriterAt">WriterAt</a></span><span>
+			*File : io.<a href="../../io.html#name-WriterTo">WriterTo</a></span><span>
+			*File : io.<a href="../../io.html#name-WriteSeeker">WriteSeeker</a></span><span>
+			*File : io/fs.<a href="../../io/fs.html#name-File">File</a></span><span>
+			*File : mime/multipart.<a href="../../mime/multipart.html#name-File">File</a></span></span>
+		<input type='checkbox' class="fold" id="File-fold-results"><label for="File-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='File-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Client">Client</a>).<a href="../../../src/github.com/pkg/sftp/client.go.html#line-250">Create</a>(path <a href="../../builtin.html#name-string">string</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Client">Client</a>).<a href="../../../src/github.com/pkg/sftp/client.go.html#line-569">Open</a>(path <a href="../../builtin.html#name-string">string</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Client">Client</a>).<a href="../../../src/github.com/pkg/sftp/client.go.html#line-576">OpenFile</a>(path <a href="../../builtin.html#name-string">string</a>, f <a href="../../builtin.html#name-int">int</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-FileAttrFlags" data-popularity="75">	<input type='checkbox' class="fold" id="FileAttrFlags-fold-content"><label for="FileAttrFlags-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-34">FileAttrFlags</a> <i>(struct)</i></label><span id='FileAttrFlags-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileAttrFlags that indicate whether SFTP file attributes were passed. When a flag is
+		true the corresponding attribute should be available from the FileStat
+		object returned by Attributes method. Used with SetStat.</span>
+
+		<input type='checkbox' class="fold" id="FileAttrFlags-fold-fields"><label for="FileAttrFlags-fold-fields">Fields (<i>total 4</i>)</label><span id='FileAttrFlags-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-35">Acmodtime</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-35">Permissions</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-35">Size</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-35">UidGid</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="FileAttrFlags-fold-results"><label for="FileAttrFlags-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='FileAttrFlags-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Request">Request</a>).<a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-49">AttrFlags</a>() <b>FileAttrFlags</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileCmder" data-popularity="350">	<input type='checkbox' class="fold" id="FileCmder-fold-content"><label for="FileCmder-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-54">FileCmder</a> <b><i>(interface)</i></b></label><span id='FileCmder-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileCmder should return an error
+		Note in cases of an error, the error text will be sent to the client.
+		Called for Methods: Setstat, Rename, Rmdir, Mkdir, Link, Symlink, Remove</span>
+
+		<input type='checkbox' class="fold" id="FileCmder-fold-methods"><label for="FileCmder-fold-methods">Methods (<i>only one</i>)</label><span id='FileCmder-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( FileCmder) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<a href="#name-Request">Request</a>) <a href="../../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="FileCmder-fold-impledby"><label for="FileCmder-fold-impledby">Implemented By (<i>at least 2</i>)</label><span id='FileCmder-fold-impledby-items' class="fold-items"><span>
+			 <a href="#name-PosixRenameFileCmder">PosixRenameFileCmder</a> <i>(interface)</i></span><span>
+			 <a href="#name-StatVFSFileCmder">StatVFSFileCmder</a> <i>(interface)</i></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileLister" data-popularity="500">	<input type='checkbox' class="fold" id="FileLister-fold-content"><label for="FileLister-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-77">FileLister</a> <b><i>(interface)</i></b></label><span id='FileLister-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileLister should return an object that fulfils the ListerAt interface
+		Note in cases of an error, the error text will be sent to the client.
+		Called for Methods: List, Stat, Readlink</span>
+
+		<input type='checkbox' class="fold" id="FileLister-fold-methods"><label for="FileLister-fold-methods">Methods (<i>only one</i>)</label><span id='FileLister-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( FileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="FileLister-fold-impledby"><label for="FileLister-fold-impledby">Implemented By (<i>at least 3</i>)</label><span id='FileLister-fold-impledby-items' class="fold-items"><span>
+			 <a href="#name-LstatFileLister">LstatFileLister</a> <i>(interface)</i></span><span>
+			 <a href="#name-NameLookupFileLister">NameLookupFileLister</a> <i>(interface)</i></span><span>
+			 <a href="#name-RealPathFileLister">RealPathFileLister</a> <i>(interface)</i></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileOpenFlags" data-popularity="75">	<input type='checkbox' class="fold" id="FileOpenFlags-fold-content"><label for="FileOpenFlags-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-10">FileOpenFlags</a> <i>(struct)</i></label><span id='FileOpenFlags-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileOpenFlags defines Open and Write Flags. Correlate directly with with os.OpenFile flags
+		(https://golang.org/pkg/os/#pkg-constants).</span>
+
+		<input type='checkbox' class="fold" id="FileOpenFlags-fold-fields"><label for="FileOpenFlags-fold-fields">Fields (<i>total 6</i>)</label><span id='FileOpenFlags-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Append</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Creat</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Excl</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Read</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Trunc</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-11">Write</a> <i><a href="../../builtin.html#name-bool">bool</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="FileOpenFlags-fold-results"><label for="FileOpenFlags-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='FileOpenFlags-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Request">Request</a>).<a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-27">Pflags</a>() <b>FileOpenFlags</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileReader" data-popularity="50">	<input type='checkbox' class="fold" id="FileReader-fold-content"><label for="FileReader-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-26">FileReader</a> <b><i>(interface)</i></b></label><span id='FileReader-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileReader should return an io.ReaderAt for the filepath
+		Note in cases of an error, the error text will be sent to the client.
+		Called for Methods: Get</span>
+
+		<input type='checkbox' class="fold" id="FileReader-fold-methods"><label for="FileReader-fold-methods">Methods (<i>only one</i>)</label><span id='FileReader-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( FileReader) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-27">Fileread</a>(*<a href="#name-Request">Request</a>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-ReaderAt">ReaderAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileStat" data-popularity="125">	<input type='checkbox' class="fold" id="FileStat-fold-content"><label for="FileStat-fold-content"> type <a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-49">FileStat</a> <i>(struct)</i></label><span id='FileStat-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileStat holds the original unmarshalled values from a call to READDIR or
+		*STAT. It is exported for the purposes of accessing the raw values via
+		os.FileInfo.Sys(). It is also used server side to store the unmarshalled
+		values for SetStat.</span>
+
+		<input type='checkbox' class="fold" id="FileStat-fold-fields"><label for="FileStat-fold-fields">Fields (<i>total 7</i>)</label><span id='FileStat-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-53">Atime</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-56">Extended</a> <i>[]<a href="#name-StatExtended">StatExtended</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-55">GID</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-51">Mode</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-52">Mtime</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-50">Size</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-54">UID</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="FileStat-fold-methods"><label for="FileStat-fold-methods">Methods (<i>only one</i>)</label><span id='FileStat-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="FileStat-fold-method-FileMode"><label for="FileStat-fold-method-FileMode">( FileStat) <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-54">FileMode</a>() <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a></label><span id='FileStat-fold-method-FileMode-docs' class="fold-docs">
+<span class="md-text">				FileMode returns the Mode SFTP file attributes wrapped as os.FileMode</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="FileStat-fold-results"><label for="FileStat-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='FileStat-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Request">Request</a>).<a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-60">Attributes</a>() *<b>FileStat</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-FileWriter" data-popularity="200">	<input type='checkbox' class="fold" id="FileWriter-fold-content"><label for="FileWriter-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-38">FileWriter</a> <b><i>(interface)</i></b></label><span id='FileWriter-fold-content-docs' class="fold-docs">
+<span class="md-text">		FileWriter should return an io.WriterAt for the filepath.
+		
+		The request server code will call Close() on the returned io.WriterAt
+		ojbect if an io.Closer type assertion succeeds.
+		Note in cases of an error, the error text will be sent to the client.
+		Note when receiving an Append flag it is important to not open files using
+		O_APPEND if you plan to use WriteAt, as they conflict.
+		Called for Methods: Put, Open</span>
+
+		<input type='checkbox' class="fold" id="FileWriter-fold-methods"><label for="FileWriter-fold-methods">Methods (<i>only one</i>)</label><span id='FileWriter-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( FileWriter) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-39">Filewrite</a>(*<a href="#name-Request">Request</a>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-WriterAt">WriterAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="FileWriter-fold-impledby"><label for="FileWriter-fold-impledby">Implemented By (<i>at least one exported</i>)</label><span id='FileWriter-fold-impledby-items' class="fold-items"><span>
+			 <a href="#name-OpenFileWriter">OpenFileWriter</a> <i>(interface)</i></span></span>
+
+</span></div><div class="anchor type-res" id="name-Handlers" data-popularity="110">	<input type='checkbox' class="fold" id="Handlers-fold-content"><label for="Handlers-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-16">Handlers</a> <i>(struct)</i></label><span id='Handlers-fold-content-docs' class="fold-docs">
+<span class="md-text">		Handlers contains the 4 SFTP server request handlers.</span>
+
+		<input type='checkbox' class="fold" id="Handlers-fold-fields"><label for="Handlers-fold-fields">Fields (<i>total 4</i>)</label><span id='Handlers-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-19">FileCmd</a> <i><a href="#name-FileCmder">FileCmder</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-17">FileGet</a> <i><a href="#name-FileReader">FileReader</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-20">FileList</a> <i><a href="#name-FileLister">FileLister</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-18">FilePut</a> <i><a href="#name-FileWriter">FileWriter</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="Handlers-fold-results"><label for="Handlers-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Handlers-fold-results-items' class="fold-items"><span>
+			func <a href="#name-InMemHandler">InMemHandler</a>() <b>Handlers</b></span></span>
+		<input type='checkbox' class="fold" id="Handlers-fold-params"><label for="Handlers-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Handlers-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewRequestServer">NewRequestServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, h <b>Handlers</b>, options ...<a href="#name-RequestServerOption">RequestServerOption</a>) *<a href="#name-RequestServer">RequestServer</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-ListerAt" data-popularity="425">	<input type='checkbox' class="fold" id="ListerAt-fold-content"><label for="ListerAt-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-114">ListerAt</a> <b><i>(interface)</i></b></label><span id='ListerAt-fold-content-docs' class="fold-docs">
+<span class="md-text">		ListerAt does for file lists what io.ReaderAt does for files.
+		ListAt should return the number of entries copied and an io.EOF
+		error if at end of list. This is testable by comparing how many you
+		copied to how many could be copied (eg. n &lt; len(ls) below).
+		The copy() builtin is best for the copying.
+		Note in cases of an error, the error text will be sent to the client.</span>
+
+		<input type='checkbox' class="fold" id="ListerAt-fold-methods"><label for="ListerAt-fold-methods">Methods (<i>only one</i>)</label><span id='ListerAt-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( ListerAt) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-115">ListAt</a>([]<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-int64">int64</a>) (<a href="../../builtin.html#name-int">int</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="ListerAt-fold-results"><label for="ListerAt-fold-results">As Outputs Of (<i>at least 5</i>)</label><span id='ListerAt-fold-results-items' class="fold-items"><span>
+			func <a href="#name-FileLister">FileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<b>ListerAt</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-LstatFileLister">LstatFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<b>ListerAt</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-LstatFileLister">LstatFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-86">Lstat</a>(*<a href="#name-Request">Request</a>) (<b>ListerAt</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-NameLookupFileLister">NameLookupFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<b>ListerAt</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-RealPathFileLister">RealPathFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<b>ListerAt</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-LstatFileLister" data-popularity="150">	<input type='checkbox' class="fold" id="LstatFileLister-fold-content"><label for="LstatFileLister-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-84">LstatFileLister</a> <b><i>(interface)</i></b></label><span id='LstatFileLister-fold-content-docs' class="fold-docs">
+<span class="md-text">		LstatFileLister is a FileLister that implements the Lstat method.
+		If this interface is implemented Lstat requests will call it
+		otherwise they will be handled in the same way as Stat</span>
+
+		<input type='checkbox' class="fold" id="LstatFileLister-fold-methods"><label for="LstatFileLister-fold-methods">Methods (<i>total 2</i>)</label><span id='LstatFileLister-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( LstatFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">( LstatFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-86">Lstat</a>(*<a href="#name-Request">Request</a>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="LstatFileLister-fold-impls"><label for="LstatFileLister-fold-impls">Implements (<i>at least one exported</i>)</label><span id='LstatFileLister-fold-impls-items' class="fold-items"><span>
+			 LstatFileLister : <a href="#name-FileLister">FileLister</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-NameLookupFileLister" data-popularity="200">	<input type='checkbox' class="fold" id="NameLookupFileLister-fold-content"><label for="NameLookupFileLister-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-102">NameLookupFileLister</a> <b><i>(interface)</i></b></label><span id='NameLookupFileLister-fold-content-docs' class="fold-docs">
+<span class="md-text">		NameLookupFileLister is a FileLister that implmeents the LookupUsername and LookupGroupName methods.
+		If this interface is implemented, then longname ls formatting will use these to convert usernames and groupnames.</span>
+
+		<input type='checkbox' class="fold" id="NameLookupFileLister-fold-methods"><label for="NameLookupFileLister-fold-methods">Methods (<i>total 3</i>)</label><span id='NameLookupFileLister-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( NameLookupFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">( NameLookupFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-105">LookupGroupName</a>(<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></span></span><span>
+			<span class="nodocs">( NameLookupFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-104">LookupUserName</a>(<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="NameLookupFileLister-fold-impls"><label for="NameLookupFileLister-fold-impls">Implements (<i>at least one exported</i>)</label><span id='NameLookupFileLister-fold-impls-items' class="fold-items"><span>
+			 NameLookupFileLister : <a href="#name-FileLister">FileLister</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-OpenFileWriter" data-popularity="150">	<input type='checkbox' class="fold" id="OpenFileWriter-fold-content"><label for="OpenFileWriter-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-46">OpenFileWriter</a> <b><i>(interface)</i></b></label><span id='OpenFileWriter-fold-content-docs' class="fold-docs">
+<span class="md-text">		OpenFileWriter is a FileWriter that implements the generic OpenFile method.
+		You need to implement this optional interface if you want to be able
+		to read and write from/to the same handle.
+		Called for Methods: Open</span>
+
+		<input type='checkbox' class="fold" id="OpenFileWriter-fold-methods"><label for="OpenFileWriter-fold-methods">Methods (<i>total 2</i>)</label><span id='OpenFileWriter-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( OpenFileWriter) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-39">Filewrite</a>(*<a href="#name-Request">Request</a>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-WriterAt">WriterAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">( OpenFileWriter) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-48">OpenFile</a>(*<a href="#name-Request">Request</a>) (<a href="#name-WriterAtReaderAt">WriterAtReaderAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="OpenFileWriter-fold-impls"><label for="OpenFileWriter-fold-impls">Implements (<i>at least one exported</i>)</label><span id='OpenFileWriter-fold-impls-items' class="fold-items"><span>
+			 OpenFileWriter : <a href="#name-FileWriter">FileWriter</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-PosixRenameFileCmder" data-popularity="150">	<input type='checkbox' class="fold" id="PosixRenameFileCmder-fold-content"><label for="PosixRenameFileCmder-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-61">PosixRenameFileCmder</a> <b><i>(interface)</i></b></label><span id='PosixRenameFileCmder-fold-content-docs' class="fold-docs">
+<span class="md-text">		PosixRenameFileCmder is a FileCmder that implements the PosixRename method.
+		If this interface is implemented PosixRename requests will call it
+		otherwise they will be handled in the same way as Rename</span>
+
+		<input type='checkbox' class="fold" id="PosixRenameFileCmder-fold-methods"><label for="PosixRenameFileCmder-fold-methods">Methods (<i>total 2</i>)</label><span id='PosixRenameFileCmder-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( PosixRenameFileCmder) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<a href="#name-Request">Request</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">( PosixRenameFileCmder) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-63">PosixRename</a>(*<a href="#name-Request">Request</a>) <a href="../../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="PosixRenameFileCmder-fold-impls"><label for="PosixRenameFileCmder-fold-impls">Implements (<i>at least one exported</i>)</label><span id='PosixRenameFileCmder-fold-impls-items' class="fold-items"><span>
+			 PosixRenameFileCmder : <a href="#name-FileCmder">FileCmder</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-RealPathFileLister" data-popularity="150">	<input type='checkbox' class="fold" id="RealPathFileLister-fold-content"><label for="RealPathFileLister-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-95">RealPathFileLister</a> <b><i>(interface)</i></b></label><span id='RealPathFileLister-fold-content-docs' class="fold-docs">
+<span class="md-text">		RealPathFileLister is a FileLister that implements the Realpath method.
+		We use "/" as start directory for relative paths, implementing this
+		interface you can customize the start directory.
+		You have to return an absolute POSIX path.
+		
+		Deprecated: if you want to set a start directory use WithStartDirectory RequestServerOption instead.</span>
+
+		<input type='checkbox' class="fold" id="RealPathFileLister-fold-methods"><label for="RealPathFileLister-fold-methods">Methods (<i>total 2</i>)</label><span id='RealPathFileLister-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( RealPathFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<a href="#name-Request">Request</a>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">( RealPathFileLister) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-97">RealPath</a>(<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="RealPathFileLister-fold-impls"><label for="RealPathFileLister-fold-impls">Implements (<i>at least one exported</i>)</label><span id='RealPathFileLister-fold-impls-items' class="fold-items"><span>
+			 RealPathFileLister : <a href="#name-FileLister">FileLister</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Request" data-popularity="890">	<input type='checkbox' class="fold" id="Request-fold-content"><label for="Request-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request.go.html#line-125">Request</a> <i>(struct)</i></label><span id='Request-fold-content-docs' class="fold-docs">
+<span class="md-text">		Request contains the data and state for the incoming service request.</span>
+
+		<input type='checkbox' class="fold" id="Request-fold-fields"><label for="Request-fold-fields">Fields (<i>total 5</i>)</label><span id='Request-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Request-fold-field-Attrs"><label for="Request-fold-field-Attrs"><a href="../../../src/github.com/pkg/sftp/request.go.html#line-131">Attrs</a> <i>[]<a href="../../builtin.html#name-byte">byte</a></i></label><span id='Request-fold-field-Attrs-docs' class="fold-docs">
+<span class="md-text">				// convert to sub-struct</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request.go.html#line-129">Filepath</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request.go.html#line-130">Flags</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-field-Method"><label for="Request-fold-field-Method"><a href="../../../src/github.com/pkg/sftp/request.go.html#line-128">Method</a> <i><a href="../../builtin.html#name-string">string</a></i></label><span id='Request-fold-field-Method-docs' class="fold-docs">
+<span class="md-text">				Get, Put, Setstat, Stat, Rename, Remove
+				Rmdir, Mkdir, List, Readlink, Link, Symlink</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-field-Target"><label for="Request-fold-field-Target"><a href="../../../src/github.com/pkg/sftp/request.go.html#line-132">Target</a> <i><a href="../../builtin.html#name-string">string</a></i></label><span id='Request-fold-field-Target-docs' class="fold-docs">
+<span class="md-text">				// for renames and sym-links</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Request-fold-methods"><label for="Request-fold-methods">Methods (<i>total 5</i>)</label><span id='Request-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Request-fold-method-AttrFlags"><label for="Request-fold-method-AttrFlags">(*Request) <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-49">AttrFlags</a>() <a href="#name-FileAttrFlags">FileAttrFlags</a></label><span id='Request-fold-method-AttrFlags-docs' class="fold-docs">
+<span class="md-text">				AttrFlags returns a FileAttrFlags boolean struct based on the
+				bitmap/uint32 file attribute flags from the SFTP packaet.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-method-Attributes"><label for="Request-fold-method-Attributes">(*Request) <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-60">Attributes</a>() *<a href="#name-FileStat">FileStat</a></label><span id='Request-fold-method-Attributes-docs' class="fold-docs">
+<span class="md-text">				Attributes parses file attributes byte blob and return them in a
+				FileStat object.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-method-Context"><label for="Request-fold-method-Context">(*Request) <a href="../../../src/github.com/pkg/sftp/request.go.html#line-204">Context</a>() <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a></label><span id='Request-fold-method-Context-docs' class="fold-docs">
+<span class="md-text">				Context returns the request's context. To change the context,
+				use WithContext.
+				
+				The returned context is always non-nil; it defaults to the
+				background context.
+				
+				For incoming server requests, the context is canceled when the
+				request is complete or the client's connection closes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-method-Pflags"><label for="Request-fold-method-Pflags">(*Request) <a href="../../../src/github.com/pkg/sftp/request-attrs.go.html#line-27">Pflags</a>() <a href="#name-FileOpenFlags">FileOpenFlags</a></label><span id='Request-fold-method-Pflags-docs' class="fold-docs">
+<span class="md-text">				Pflags converts the bitmap/uint32 from SFTP Open packet pflag values,
+				into a FileOpenFlags struct with booleans set for flags set in bitmap.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Request-fold-method-WithContext"><label for="Request-fold-method-WithContext">(*Request) <a href="../../../src/github.com/pkg/sftp/request.go.html#line-213">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Request</b></label><span id='Request-fold-method-WithContext-docs' class="fold-docs">
+<span class="md-text">				WithContext returns a copy of r with its context changed to ctx.
+				The provided ctx must be non-nil.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Request-fold-results"><label for="Request-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Request-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewRequest">NewRequest</a>(method, path <a href="../../builtin.html#name-string">string</a>) *<b>Request</b></span><span>
+			func (*Request).<a href="../../../src/github.com/pkg/sftp/request.go.html#line-213">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Request</b></span></span>
+		<input type='checkbox' class="fold" id="Request-fold-params"><label for="Request-fold-params">As Inputs Of (<i>at least 14</i>)</label><span id='Request-fold-params-items' class="fold-items"><span>
+			func <a href="#name-FileCmder">FileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<b>Request</b>) <a href="../../builtin.html#name-error">error</a></span><span>
+			func <a href="#name-FileLister">FileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<b>Request</b>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-FileReader">FileReader</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-27">Fileread</a>(*<b>Request</b>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-ReaderAt">ReaderAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-FileWriter">FileWriter</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-39">Filewrite</a>(*<b>Request</b>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-WriterAt">WriterAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-LstatFileLister">LstatFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<b>Request</b>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-LstatFileLister">LstatFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-86">Lstat</a>(*<b>Request</b>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-NameLookupFileLister">NameLookupFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<b>Request</b>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-OpenFileWriter">OpenFileWriter</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-39">Filewrite</a>(*<b>Request</b>) (<a href="../../io.html">io</a>.<a href="../../io.html#name-WriterAt">WriterAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-OpenFileWriter">OpenFileWriter</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-48">OpenFile</a>(*<b>Request</b>) (<a href="#name-WriterAtReaderAt">WriterAtReaderAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-PosixRenameFileCmder">PosixRenameFileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<b>Request</b>) <a href="../../builtin.html#name-error">error</a></span><span>
+			func <a href="#name-PosixRenameFileCmder">PosixRenameFileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-63">PosixRename</a>(*<b>Request</b>) <a href="../../builtin.html#name-error">error</a></span><span>
+			func <a href="#name-RealPathFileLister">RealPathFileLister</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-78">Filelist</a>(*<b>Request</b>) (<a href="#name-ListerAt">ListerAt</a>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-StatVFSFileCmder">StatVFSFileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<b>Request</b>) <a href="../../builtin.html#name-error">error</a></span><span>
+			func <a href="#name-StatVFSFileCmder">StatVFSFileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-71">StatVFS</a>(*<b>Request</b>) (*<a href="#name-StatVFS">StatVFS</a>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-RequestServer" data-popularity="825">	<input type='checkbox' class="fold" id="RequestServer-fold-content"><label for="RequestServer-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-24">RequestServer</a> <i>(struct)</i></label><span id='RequestServer-fold-content-docs' class="fold-docs">
+<span class="md-text">		RequestServer abstracts the sftp protocol with an http request-like protocol</span>
+
+		<input type='checkbox' class="fold" id="RequestServer-fold-fields"><label for="RequestServer-fold-fields">Fields (<i>total 4</i>)</label><span id='RequestServer-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-25">Handlers</a> <i><a href="#name-Handlers">Handlers</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-field-Mutex"><label for="RequestServer-fold-field-Mutex"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-27">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-17">Mutex</a> <i><a href="../../sync.html">sync</a>.<a href="../../sync.html#name-Mutex">Mutex</a></i></label><span id='RequestServer-fold-field-Mutex-docs' class="fold-docs">
+<span class="md-text">				// used to serialise writes to sendPacket</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-27" class="path-duplicate">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184" class="path-duplicate">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-13">Reader</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-27" class="path-duplicate">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184" class="path-duplicate">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-14">WriteCloser</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="RequestServer-fold-methods"><label for="RequestServer-fold-methods">Methods (<i>total 7</i>)</label><span id='RequestServer-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-method-Close"><label for="RequestServer-fold-method-Close">(*RequestServer) <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-126">Close</a>() <a href="../../builtin.html#name-error">error</a></label><span id='RequestServer-fold-method-Close-docs' class="fold-docs">
+<span class="md-text">				Close the read/write/closer to trigger exiting the main server loop</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-method-Lock"><label for="RequestServer-fold-method-Lock">( RequestServer) <a href="../../../src/sync/mutex.go.html#line-81">Lock</a>()</label><span id='RequestServer-fold-method-Lock-docs' class="fold-docs">
+<span class="md-text">				Lock locks m.
+				If the lock is already in use, the calling goroutine
+				blocks until the mutex is available.</span>
+</span></span><span>
+			<span class="nodocs">( RequestServer) <a href="../../../src/io/io.go.html#line-84">Read</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-method-Serve"><label for="RequestServer-fold-method-Serve">(*RequestServer) <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-160">Serve</a>() <a href="../../builtin.html#name-error">error</a></label><span id='RequestServer-fold-method-Serve-docs' class="fold-docs">
+<span class="md-text">				Serve requests for user session</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-method-TryLock"><label for="RequestServer-fold-method-TryLock">( RequestServer) <a href="../../../src/sync/mutex.go.html#line-98">TryLock</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='RequestServer-fold-method-TryLock-docs' class="fold-docs">
+<span class="md-text">				TryLock tries to lock m and reports whether it succeeded.
+				
+				Note that while correct uses of TryLock do exist, they are rare,
+				and use of TryLock is often a sign of a deeper problem
+				in a particular use of mutexes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RequestServer-fold-method-Unlock"><label for="RequestServer-fold-method-Unlock">( RequestServer) <a href="../../../src/sync/mutex.go.html#line-212">Unlock</a>()</label><span id='RequestServer-fold-method-Unlock-docs' class="fold-docs">
+<span class="md-text">				Unlock unlocks m.
+				It is a run-time error if m is not locked on entry to Unlock.
+				
+				A locked Mutex is not associated with a particular goroutine.
+				It is allowed for one goroutine to lock a Mutex and then
+				arrange for another goroutine to unlock it.</span>
+</span></span><span>
+			<span class="nodocs">( RequestServer) <a href="../../../src/io/io.go.html#line-97">Write</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="RequestServer-fold-impls"><label for="RequestServer-fold-impls">Implements (<i>at least 8</i>)</label><span id='RequestServer-fold-impls-items' class="fold-items"><span>
+			*RequestServer : io.<a href="../../io.html#name-Closer">Closer</a></span><span>
+			*RequestServer : io.<a href="../../io.html#name-ReadCloser">ReadCloser</a></span><span>
+			 RequestServer : io.<a href="../../io.html#name-Reader">Reader</a></span><span>
+			*RequestServer : io.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a></span><span>
+			 RequestServer : io.<a href="../../io.html#name-ReadWriter">ReadWriter</a></span><span>
+			*RequestServer : io.<a href="../../io.html#name-WriteCloser">WriteCloser</a></span><span>
+			 RequestServer : io.<a href="../../io.html#name-Writer">Writer</a></span><span>
+			 RequestServer : sync.<a href="../../sync.html#name-Locker">Locker</a></span></span>
+		<input type='checkbox' class="fold" id="RequestServer-fold-results"><label for="RequestServer-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='RequestServer-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewRequestServer">NewRequestServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, h <a href="#name-Handlers">Handlers</a>, options ...<a href="#name-RequestServerOption">RequestServerOption</a>) *<b>RequestServer</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-RequestServerOption" data-popularity="185">	<input type='checkbox' class="fold" id="RequestServerOption-fold-content"><label for="RequestServerOption-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-38">RequestServerOption</a> <i>(func)</i></label><span id='RequestServerOption-fold-content-docs' class="fold-docs">
+<span class="md-text">		A RequestServerOption is a function which applies configuration to a RequestServer.</span>
+
+		<input type='checkbox' class="fold" id="RequestServerOption-fold-results"><label for="RequestServerOption-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='RequestServerOption-fold-results-items' class="fold-items"><span>
+			func <a href="#name-WithRSAllocator">WithRSAllocator</a>() <b>RequestServerOption</b></span><span>
+			func <a href="#name-WithStartDirectory">WithStartDirectory</a>(startDirectory <a href="../../builtin.html#name-string">string</a>) <b>RequestServerOption</b></span></span>
+		<input type='checkbox' class="fold" id="RequestServerOption-fold-params"><label for="RequestServerOption-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='RequestServerOption-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewRequestServer">NewRequestServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, h <a href="#name-Handlers">Handlers</a>, options ...<b>RequestServerOption</b>) *<a href="#name-RequestServer">RequestServer</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Server" data-popularity="825">	<input type='checkbox' class="fold" id="Server-fold-content"><label for="Server-fold-content"> type <a href="../../../src/github.com/pkg/sftp/server.go.html#line-28">Server</a> <i>(struct)</i></label><span id='Server-fold-content-docs' class="fold-docs">
+<span class="md-text">		Server is an SSH File Transfer Protocol (sftp) server.
+		This is intended to provide the sftp subsystem to an ssh server daemon.
+		This implementation currently supports most of sftp server protocol version 3,
+		as specified at http://tools.ietf.org/html/draft-ietf-secsh-filexfer-02</span>
+
+		<input type='checkbox' class="fold" id="Server-fold-fields"><label for="Server-fold-fields">Fields (<i>total 3</i>)</label><span id='Server-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Server-fold-field-Mutex"><label for="Server-fold-field-Mutex"><a href="../../../src/github.com/pkg/sftp/server.go.html#line-29">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-17">Mutex</a> <i><a href="../../sync.html">sync</a>.<a href="../../sync.html#name-Mutex">Mutex</a></i></label><span id='Server-fold-field-Mutex-docs' class="fold-docs">
+<span class="md-text">				// used to serialise writes to sendPacket</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/server.go.html#line-29" class="path-duplicate">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184" class="path-duplicate">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-13">Reader</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/server.go.html#line-29" class="path-duplicate">serverConn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-184" class="path-duplicate">conn</a>.<a href="../../../src/github.com/pkg/sftp/conn.go.html#line-14">WriteCloser</a> <i><a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="Server-fold-methods"><label for="Server-fold-methods">Methods (<i>total 7</i>)</label><span id='Server-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( Server) <a href="../../../src/github.com/pkg/sftp/conn.go.html#line-33">Close</a>() <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<input type='checkbox' class="fold" id="Server-fold-method-Lock"><label for="Server-fold-method-Lock">( Server) <a href="../../../src/sync/mutex.go.html#line-81">Lock</a>()</label><span id='Server-fold-method-Lock-docs' class="fold-docs">
+<span class="md-text">				Lock locks m.
+				If the lock is already in use, the calling goroutine
+				blocks until the mutex is available.</span>
+</span></span><span>
+			<span class="nodocs">( Server) <a href="../../../src/io/io.go.html#line-84">Read</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="Server-fold-method-Serve"><label for="Server-fold-method-Serve">(*Server) <a href="../../../src/github.com/pkg/sftp/server.go.html#line-319">Serve</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Server-fold-method-Serve-docs' class="fold-docs">
+<span class="md-text">				Serve serves SFTP connections until the streams stop or the SFTP subsystem
+				is stopped.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Server-fold-method-TryLock"><label for="Server-fold-method-TryLock">( Server) <a href="../../../src/sync/mutex.go.html#line-98">TryLock</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Server-fold-method-TryLock-docs' class="fold-docs">
+<span class="md-text">				TryLock tries to lock m and reports whether it succeeded.
+				
+				Note that while correct uses of TryLock do exist, they are rare,
+				and use of TryLock is often a sign of a deeper problem
+				in a particular use of mutexes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Server-fold-method-Unlock"><label for="Server-fold-method-Unlock">( Server) <a href="../../../src/sync/mutex.go.html#line-212">Unlock</a>()</label><span id='Server-fold-method-Unlock-docs' class="fold-docs">
+<span class="md-text">				Unlock unlocks m.
+				It is a run-time error if m is not locked on entry to Unlock.
+				
+				A locked Mutex is not associated with a particular goroutine.
+				It is allowed for one goroutine to lock a Mutex and then
+				arrange for another goroutine to unlock it.</span>
+</span></span><span>
+			<span class="nodocs">( Server) <a href="../../../src/io/io.go.html#line-97">Write</a>(p []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="Server-fold-impls"><label for="Server-fold-impls">Implements (<i>at least 8</i>)</label><span id='Server-fold-impls-items' class="fold-items"><span>
+			 Server : io.<a href="../../io.html#name-Closer">Closer</a></span><span>
+			 Server : io.<a href="../../io.html#name-ReadCloser">ReadCloser</a></span><span>
+			 Server : io.<a href="../../io.html#name-Reader">Reader</a></span><span>
+			 Server : io.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a></span><span>
+			 Server : io.<a href="../../io.html#name-ReadWriter">ReadWriter</a></span><span>
+			 Server : io.<a href="../../io.html#name-WriteCloser">WriteCloser</a></span><span>
+			 Server : io.<a href="../../io.html#name-Writer">Writer</a></span><span>
+			 Server : sync.<a href="../../sync.html#name-Locker">Locker</a></span></span>
+		<input type='checkbox' class="fold" id="Server-fold-results"><label for="Server-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Server-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewServer">NewServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, options ...<a href="#name-ServerOption">ServerOption</a>) (*<b>Server</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-ServerOption" data-popularity="260">	<input type='checkbox' class="fold" id="ServerOption-fold-content"><label for="ServerOption-fold-content"> type <a href="../../../src/github.com/pkg/sftp/server.go.html#line-100">ServerOption</a> <i>(func)</i></label><span id='ServerOption-fold-content-docs' class="fold-docs">
+<span class="md-text">		A ServerOption is a function which applies configuration to a Server.</span>
+
+		<input type='checkbox' class="fold" id="ServerOption-fold-results"><label for="ServerOption-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='ServerOption-fold-results-items' class="fold-items"><span>
+			func <a href="#name-ReadOnly">ReadOnly</a>() <b>ServerOption</b></span><span>
+			func <a href="#name-WithAllocator">WithAllocator</a>() <b>ServerOption</b></span><span>
+			func <a href="#name-WithDebug">WithDebug</a>(w <a href="../../io.html">io</a>.<a href="../../io.html#name-Writer">Writer</a>) <b>ServerOption</b></span></span>
+		<input type='checkbox' class="fold" id="ServerOption-fold-params"><label for="ServerOption-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='ServerOption-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewServer">NewServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, options ...<b>ServerOption</b>) (*<a href="#name-Server">Server</a>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-StatExtended" data-popularity="0">	<input type='checkbox' class="fold" id="StatExtended-fold-content"><label for="StatExtended-fold-content"> type <a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-60">StatExtended</a> <i>(struct)</i></label><span id='StatExtended-fold-content-docs' class="fold-docs">
+<span class="md-text">		StatExtended contains additional, extended information for a FileStat.</span>
+
+		<input type='checkbox' class="fold" id="StatExtended-fold-fields"><label for="StatExtended-fold-fields">Fields (<i>total 2</i>)</label><span id='StatExtended-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-62">ExtData</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/attrs.go.html#line-61">ExtType</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span></span>
+
+</span></div><div class="anchor type-res" id="name-StatusError" data-popularity="150">	<input type='checkbox' class="fold" id="StatusError-fold-content"><label for="StatusError-fold-content"> type <a href="../../../src/github.com/pkg/sftp/sftp.go.html#line-220">StatusError</a> <i>(struct)</i></label><span id='StatusError-fold-content-docs' class="fold-docs">
+<span class="md-text">		A StatusError is returned when an SFTP operation fails, and provides
+		additional information about the failure.</span>
+
+		<input type='checkbox' class="fold" id="StatusError-fold-fields"><label for="StatusError-fold-fields">Fields (<i>only one</i>)</label><span id='StatusError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/sftp.go.html#line-221">Code</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="StatusError-fold-methods"><label for="StatusError-fold-methods">Methods (<i>total 2</i>)</label><span id='StatusError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*StatusError) <a href="../../../src/github.com/pkg/sftp/sftp.go.html#line-225">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="StatusError-fold-method-FxCode"><label for="StatusError-fold-method-FxCode">(*StatusError) <a href="../../../src/github.com/pkg/sftp/sftp.go.html#line-230">FxCode</a>() <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a></label><span id='StatusError-fold-method-FxCode-docs' class="fold-docs">
+<span class="md-text">				FxCode returns the error code typed to match against the exported codes</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StatusError-fold-impls"><label for="StatusError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='StatusError-fold-impls-items' class="fold-items"><span>
+			*StatusError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-StatVFS" data-popularity="350">	<input type='checkbox' class="fold" id="StatVFS-fold-content"><label for="StatVFS-fold-content"> type <a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1090">StatVFS</a> <i>(struct)</i></label><span id='StatVFS-fold-content-docs' class="fold-docs">
+<span class="md-text">		A StatVFS contains statistics about a filesystem.</span>
+
+		<input type='checkbox' class="fold" id="StatVFS-fold-fields"><label for="StatVFS-fold-fields">Fields (<i>total 12</i>)</label><span id='StatVFS-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Bavail"><label for="StatVFS-fold-field-Bavail"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1096">Bavail</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Bavail-docs' class="fold-docs">
+<span class="md-text">				// free blocks for non-root</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Bfree"><label for="StatVFS-fold-field-Bfree"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1095">Bfree</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Bfree-docs' class="fold-docs">
+<span class="md-text">				// free blocks in file system</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Blocks"><label for="StatVFS-fold-field-Blocks"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1094">Blocks</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Blocks-docs' class="fold-docs">
+<span class="md-text">				// number of blocks (unit f_frsize)</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Bsize"><label for="StatVFS-fold-field-Bsize"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1092">Bsize</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Bsize-docs' class="fold-docs">
+<span class="md-text">				// file system block size</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Favail"><label for="StatVFS-fold-field-Favail"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1099">Favail</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Favail-docs' class="fold-docs">
+<span class="md-text">				// free file inodes for to non-root</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Ffree"><label for="StatVFS-fold-field-Ffree"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1098">Ffree</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Ffree-docs' class="fold-docs">
+<span class="md-text">				// free file inodes</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Files"><label for="StatVFS-fold-field-Files"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1097">Files</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Files-docs' class="fold-docs">
+<span class="md-text">				// total file inodes</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Flag"><label for="StatVFS-fold-field-Flag"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1101">Flag</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Flag-docs' class="fold-docs">
+<span class="md-text">				// bit mask of f_flag values</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Frsize"><label for="StatVFS-fold-field-Frsize"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1093">Frsize</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Frsize-docs' class="fold-docs">
+<span class="md-text">				// fundamental fs block size</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Fsid"><label for="StatVFS-fold-field-Fsid"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1100">Fsid</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Fsid-docs' class="fold-docs">
+<span class="md-text">				// file system id</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1091">ID</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-field-Namemax"><label for="StatVFS-fold-field-Namemax"><a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1102">Namemax</a> <i><a href="../../builtin.html#name-uint64">uint64</a></i></label><span id='StatVFS-fold-field-Namemax-docs' class="fold-docs">
+<span class="md-text">				// maximum filename length</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StatVFS-fold-methods"><label for="StatVFS-fold-methods">Methods (<i>total 3</i>)</label><span id='StatVFS-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-method-FreeSpace"><label for="StatVFS-fold-method-FreeSpace">(*StatVFS) <a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1111">FreeSpace</a>() <a href="../../builtin.html#name-uint64">uint64</a></label><span id='StatVFS-fold-method-FreeSpace-docs' class="fold-docs">
+<span class="md-text">				FreeSpace calculates the amount of free space in a filesystem.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-method-MarshalBinary"><label for="StatVFS-fold-method-MarshalBinary">(*StatVFS) <a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1126">MarshalBinary</a>() ([]<a href="../../builtin.html#name-byte">byte</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='StatVFS-fold-method-MarshalBinary-docs' class="fold-docs">
+<span class="md-text">				MarshalBinary encodes the StatVFS as an SSH_FXP_EXTENDED_REPLY packet.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StatVFS-fold-method-TotalSpace"><label for="StatVFS-fold-method-TotalSpace">(*StatVFS) <a href="../../../src/github.com/pkg/sftp/packet.go.html#line-1106">TotalSpace</a>() <a href="../../builtin.html#name-uint64">uint64</a></label><span id='StatVFS-fold-method-TotalSpace-docs' class="fold-docs">
+<span class="md-text">				TotalSpace calculates the amount of total space in a filesystem.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StatVFS-fold-impls"><label for="StatVFS-fold-impls">Implements (<i>at least one exported</i>)</label><span id='StatVFS-fold-impls-items' class="fold-items"><span>
+			*StatVFS : encoding.<a href="../../encoding.html#name-BinaryMarshaler">BinaryMarshaler</a></span></span>
+		<input type='checkbox' class="fold" id="StatVFS-fold-results"><label for="StatVFS-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='StatVFS-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Client">Client</a>).<a href="../../../src/github.com/pkg/sftp/client.go.html#line-677">StatVFS</a>(path <a href="../../builtin.html#name-string">string</a>) (*<b>StatVFS</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-StatVFSFileCmder">StatVFSFileCmder</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-71">StatVFS</a>(*<a href="#name-Request">Request</a>) (*<b>StatVFS</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-StatVFSFileCmder" data-popularity="150">	<input type='checkbox' class="fold" id="StatVFSFileCmder-fold-content"><label for="StatVFSFileCmder-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-69">StatVFSFileCmder</a> <b><i>(interface)</i></b></label><span id='StatVFSFileCmder-fold-content-docs' class="fold-docs">
+<span class="md-text">		StatVFSFileCmder is a FileCmder that implements the StatVFS method.
+		You need to implement this interface if you want to handle statvfs requests.
+		Please also be sure that the statvfs@openssh.com extension is enabled</span>
+
+		<input type='checkbox' class="fold" id="StatVFSFileCmder-fold-methods"><label for="StatVFSFileCmder-fold-methods">Methods (<i>total 2</i>)</label><span id='StatVFSFileCmder-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( StatVFSFileCmder) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-55">Filecmd</a>(*<a href="#name-Request">Request</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">( StatVFSFileCmder) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-71">StatVFS</a>(*<a href="#name-Request">Request</a>) (*<a href="#name-StatVFS">StatVFS</a>, <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="StatVFSFileCmder-fold-impls"><label for="StatVFSFileCmder-fold-impls">Implements (<i>at least one exported</i>)</label><span id='StatVFSFileCmder-fold-impls-items' class="fold-items"><span>
+			 StatVFSFileCmder : <a href="#name-FileCmder">FileCmder</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-TransferError" data-popularity="50">	<input type='checkbox' class="fold" id="TransferError-fold-content"><label for="TransferError-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-121">TransferError</a> <b><i>(interface)</i></b></label><span id='TransferError-fold-content-docs' class="fold-docs">
+<span class="md-text">		TransferError is an optional interface that readerAt and writerAt
+		can implement to be notified about the error causing Serve() to exit
+		with the request still open</span>
+
+		<input type='checkbox' class="fold" id="TransferError-fold-methods"><label for="TransferError-fold-methods">Methods (<i>only one</i>)</label><span id='TransferError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( TransferError) <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-122">TransferError</a>(err <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+
+</span></div><div class="anchor type-res" id="name-WriterAtReaderAt" data-popularity="725">	<input type='checkbox' class="fold" id="WriterAtReaderAt-fold-content"><label for="WriterAtReaderAt-fold-content"> type <a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-10">WriterAtReaderAt</a> <b><i>(interface)</i></b></label><span id='WriterAtReaderAt-fold-content-docs' class="fold-docs">
+<span class="md-text">		WriterAtReaderAt defines the interface to return when a file is to
+		be opened for reading and writing</span>
+
+		<input type='checkbox' class="fold" id="WriterAtReaderAt-fold-methods"><label for="WriterAtReaderAt-fold-methods">Methods (<i>total 2</i>)</label><span id='WriterAtReaderAt-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( WriterAtReaderAt) <a href="../../../src/io/io.go.html#line-228">ReadAt</a>(p []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">( WriterAtReaderAt) <a href="../../../src/io/io.go.html#line-247">WriteAt</a>(p []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="WriterAtReaderAt-fold-impledby"><label for="WriterAtReaderAt-fold-impledby">Implemented By (<i>at least 3</i>)</label><span id='WriterAtReaderAt-fold-impledby-items' class="fold-items"><span>
+			*<a href="#name-File">File</a></span><span>
+			*github.com/hirochachacha/go-smb2.<a href="../hirochachacha/go-smb2.html#name-File">File</a></span><span>
+			*os.<a href="../../os.html#name-File">File</a></span></span>
+		<input type='checkbox' class="fold" id="WriterAtReaderAt-fold-impls"><label for="WriterAtReaderAt-fold-impls">Implements (<i>at least 2</i>)</label><span id='WriterAtReaderAt-fold-impls-items' class="fold-items"><span>
+			 WriterAtReaderAt : io.<a href="../../io.html#name-ReaderAt">ReaderAt</a></span><span>
+			 WriterAtReaderAt : io.<a href="../../io.html#name-WriterAt">WriterAt</a></span></span>
+		<input type='checkbox' class="fold" id="WriterAtReaderAt-fold-results"><label for="WriterAtReaderAt-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='WriterAtReaderAt-fold-results-items' class="fold-items"><span>
+			func <a href="#name-OpenFileWriter">OpenFileWriter</a>.<a href="../../../src/github.com/pkg/sftp/request-interfaces.go.html#line-48">OpenFile</a>(*<a href="#name-Request">Request</a>) (<b>WriterAtReaderAt</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 22)</i></span></span>
+
+<div class="anchor value-res" id="name-InMemHandler">	<input type='checkbox' class="fold" id="InMemHandler-fold-content"><label for="InMemHandler-fold-content"> func <a href="../../../src/github.com/pkg/sftp/request-example.go.html#line-24">InMemHandler</a>() <a href="#name-Handlers">Handlers</a></label><span id='InMemHandler-fold-content-docs' class="fold-docs">
+<span class="md-text">		InMemHandler returns a Hanlders object with the test handlers.</span>
+
+</span></div><div class="anchor value-res" id="name-Join">	<input type='checkbox' class="fold" id="Join-fold-content"><label for="Join-fold-content"> func <a href="../../../src/github.com/pkg/sftp/match.go.html#line-129">Join</a>(elem ...<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='Join-fold-content-docs' class="fold-docs">
+<span class="md-text">		Join joins any number of path elements into a single path, separating
+		them with slashes.
+		
+		This is an alias for path.Join from the standard library,
+		offered so that callers need not import the path package.
+		For details, see https://golang.org/pkg/path/#Join.</span>
+
+</span></div><div class="anchor value-res" id="name-Match">	<input type='checkbox' class="fold" id="Match-fold-content"><label for="Match-fold-content"> func <a href="../../../src/github.com/pkg/sftp/match.go.html#line-16">Match</a>(pattern, name <a href="../../builtin.html#name-string">string</a>) (matched <a href="../../builtin.html#name-bool">bool</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='Match-fold-content-docs' class="fold-docs">
+<span class="md-text">		Match reports whether name matches the shell pattern.
+		
+		This is an alias for path.Match from the standard library,
+		offered so that callers need not import the path package.
+		For details, see https://golang.org/pkg/path/#Match.</span>
+
+</span></div><div class="anchor value-res" id="name-MaxConcurrentRequestsPerFile">	<input type='checkbox' class="fold" id="MaxConcurrentRequestsPerFile-fold-content"><label for="MaxConcurrentRequestsPerFile-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-90">MaxConcurrentRequestsPerFile</a>(n <a href="../../builtin.html#name-int">int</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='MaxConcurrentRequestsPerFile-fold-content-docs' class="fold-docs">
+<span class="md-text">		MaxConcurrentRequestsPerFile sets the maximum concurrent requests allowed for a single file.
+		
+		The default maximum concurrent requests is 64.</span>
+
+</span></div><div class="anchor value-res" id="name-MaxPacket">	<input type='checkbox' class="fold" id="MaxPacket-fold-content"><label for="MaxPacket-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-83">MaxPacket</a>(size <a href="../../builtin.html#name-int">int</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='MaxPacket-fold-content-docs' class="fold-docs">
+<span class="md-text">		MaxPacket sets the maximum size of the payload, measured in bytes.
+		This option only accepts sizes servers should support, ie. &lt;= 32768 bytes.
+		This is a synonym for MaxPacketChecked that provides backward compatibility.
+		
+		If you get the error "failed to send packet header: EOF" when copying a
+		large file, try lowering this number.
+		
+		The default packet size is 32768 bytes.</span>
+
+</span></div><div class="anchor value-res" id="name-MaxPacketChecked">	<input type='checkbox' class="fold" id="MaxPacketChecked-fold-content"><label for="MaxPacketChecked-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-43">MaxPacketChecked</a>(size <a href="../../builtin.html#name-int">int</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='MaxPacketChecked-fold-content-docs' class="fold-docs">
+<span class="md-text">		MaxPacketChecked sets the maximum size of the payload, measured in bytes.
+		This option only accepts sizes servers should support, ie. &lt;= 32768 bytes.
+		
+		If you get the error "failed to send packet header: EOF" when copying a
+		large file, try lowering this number.
+		
+		The default packet size is 32768 bytes.</span>
+
+</span></div><div class="anchor value-res" id="name-MaxPacketUnchecked">	<input type='checkbox' class="fold" id="MaxPacketUnchecked-fold-content"><label for="MaxPacketUnchecked-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-65">MaxPacketUnchecked</a>(size <a href="../../builtin.html#name-int">int</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='MaxPacketUnchecked-fold-content-docs' class="fold-docs">
+<span class="md-text">		MaxPacketUnchecked sets the maximum size of the payload, measured in bytes.
+		It accepts sizes larger than the 32768 bytes all servers should support.
+		Only use a setting higher than 32768 if your application always connects to
+		the same server or after sufficiently broad testing.
+		
+		If you get the error "failed to send packet header: EOF" when copying a
+		large file, try lowering this number.
+		
+		The default packet size is 32768 bytes.</span>
+
+</span></div><div class="anchor value-res" id="name-NewClient">	<input type='checkbox' class="fold" id="NewClient-fold-content"><label for="NewClient-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-180">NewClient</a>(conn *<a href="../../golang.org/x/crypto/ssh.html">ssh</a>.<a href="../../golang.org/x/crypto/ssh.html#name-Client">Client</a>, opts ...<a href="#name-ClientOption">ClientOption</a>) (*<a href="#name-Client">Client</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='NewClient-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewClient creates a new SFTP client on conn, using zero or more option
+		functions.</span>
+
+</span></div><div class="anchor value-res" id="name-NewClientPipe">	<input type='checkbox' class="fold" id="NewClientPipe-fold-content"><label for="NewClientPipe-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-203">NewClientPipe</a>(rd <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>, wr <a href="../../io.html">io</a>.<a href="../../io.html#name-WriteCloser">WriteCloser</a>, opts ...<a href="#name-ClientOption">ClientOption</a>) (*<a href="#name-Client">Client</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='NewClientPipe-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewClientPipe creates a new SFTP client given a Reader and a WriteCloser.
+		This can be used for connecting to an SFTP server over TCP/TLS or by using
+		the system's ssh client program (e.g. via exec.Command).</span>
+
+</span></div><div class="anchor value-res" id="name-NewRequest">	<input type='checkbox' class="fold" id="NewRequest-fold-content"><label for="NewRequest-fold-content"> func <a href="../../../src/github.com/pkg/sftp/request.go.html#line-144">NewRequest</a>(method, path <a href="../../builtin.html#name-string">string</a>) *<a href="#name-Request">Request</a></label><span id='NewRequest-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewRequest creates a new Request object.</span>
+
+</span></div><div class="anchor value-res" id="name-NewRequestServer">	<input type='checkbox' class="fold" id="NewRequestServer-fold-content"><label for="NewRequestServer-fold-content"> func <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-62">NewRequestServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, h <a href="#name-Handlers">Handlers</a>, options ...<a href="#name-RequestServerOption">RequestServerOption</a>) *<a href="#name-RequestServer">RequestServer</a></label><span id='NewRequestServer-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewRequestServer creates/allocates/returns new RequestServer.
+		Normally there will be one server per user-session.</span>
+
+</span></div><div class="anchor value-res" id="name-NewServer">	<input type='checkbox' class="fold" id="NewServer-fold-content"><label for="NewServer-fold-content"> func <a href="../../../src/github.com/pkg/sftp/server.go.html#line-76">NewServer</a>(rwc <a href="../../io.html">io</a>.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a>, options ...<a href="#name-ServerOption">ServerOption</a>) (*<a href="#name-Server">Server</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='NewServer-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewServer creates a new Server instance around the provided streams, serving
+		content from the root of the filesystem.  Optionally, ServerOption
+		functions may be specified to further configure the Server.
+		
+		A subsequent call to Serve() is required to begin serving files over SFTP.</span>
+
+</span></div><div class="anchor value-res" id="name-ReadOnly">	<input type='checkbox' class="fold" id="ReadOnly-fold-content"><label for="ReadOnly-fold-content"> func <a href="../../../src/github.com/pkg/sftp/server.go.html#line-111">ReadOnly</a>() <a href="#name-ServerOption">ServerOption</a></label><span id='ReadOnly-fold-content-docs' class="fold-docs">
+<span class="md-text">		ReadOnly configures a Server to serve files in read-only mode.</span>
+
+</span></div><div class="anchor value-res" id="name-SetSFTPExtensions">	<input type='checkbox' class="fold" id="SetSFTPExtensions-fold-content"><label for="SetSFTPExtensions-fold-content"> func <a href="../../../src/github.com/pkg/sftp/sftp.go.html#line-247">SetSFTPExtensions</a>(extensions ...<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='SetSFTPExtensions-fold-content-docs' class="fold-docs">
+<span class="md-text">		SetSFTPExtensions allows to customize the supported server extensions.
+		See the variable supportedSFTPExtensions for supported extensions.
+		This method accepts a slice of sshExtensionPair names for example 'hardlink@openssh.com'.
+		If an invalid extension is given an error will be returned and nothing will be changed</span>
+
+</span></div><div class="anchor value-res" id="name-Split">	<input type='checkbox' class="fold" id="Split-fold-content"><label for="Split-fold-content"> func <a href="../../../src/github.com/pkg/sftp/match.go.html#line-31">Split</a>(p <a href="../../builtin.html#name-string">string</a>) (dir, file <a href="../../builtin.html#name-string">string</a>)</label><span id='Split-fold-content-docs' class="fold-docs">
+<span class="md-text">		Split splits the path p immediately following the final slash,
+		separating it into a directory and file name component.
+		
+		This is an alias for path.Split from the standard library,
+		offered so that callers need not import the path package.
+		For details, see https://golang.org/pkg/path/#Split.</span>
+
+</span></div><div class="anchor value-res" id="name-UseConcurrentReads">	<input type='checkbox' class="fold" id="UseConcurrentReads-fold-content"><label for="UseConcurrentReads-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-126">UseConcurrentReads</a>(value <a href="../../builtin.html#name-bool">bool</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='UseConcurrentReads-fold-content-docs' class="fold-docs">
+<span class="md-text">		UseConcurrentReads allows the Client to perform concurrent Reads.
+		
+		Concurrent reads are generally safe to use and not using them will degrade
+		performance, so this option is enabled by default.
+		
+		When enabled, WriteTo will use Stat/Fstat to get the file size and determines
+		how many concurrent workers to use.
+		Some "read once" servers will delete the file if they receive a stat call on an
+		open file and then the download will fail.
+		Disabling concurrent reads you will be able to download files from these servers.
+		If concurrent reads are disabled, the UseFstat option is ignored.</span>
+
+</span></div><div class="anchor value-res" id="name-UseConcurrentWrites">	<input type='checkbox' class="fold" id="UseConcurrentWrites-fold-content"><label for="UseConcurrentWrites-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-108">UseConcurrentWrites</a>(value <a href="../../builtin.html#name-bool">bool</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='UseConcurrentWrites-fold-content-docs' class="fold-docs">
+<span class="md-text">		UseConcurrentWrites allows the Client to perform concurrent Writes.
+		
+		Using concurrency while doing writes, requires special consideration.
+		A write to a later offset in a file after an error,
+		could end up with a file length longer than what was successfully written.
+		
+		When using this option, if you receive an error during `io.Copy` or `io.WriteTo`,
+		you may need to `Truncate` the target Writer to avoid “holes” in the data written.</span>
+
+</span></div><div class="anchor value-res" id="name-UseFstat">	<input type='checkbox' class="fold" id="UseFstat-fold-content"><label for="UseFstat-fold-content"> func <a href="../../../src/github.com/pkg/sftp/client.go.html#line-150">UseFstat</a>(value <a href="../../builtin.html#name-bool">bool</a>) <a href="#name-ClientOption">ClientOption</a></label><span id='UseFstat-fold-content-docs' class="fold-docs">
+<span class="md-text">		UseFstat sets whether to use Fstat or Stat when File.WriteTo is called
+		(usually when copying files).
+		Some servers limit the amount of open files and calling Stat after opening
+		the file will throw an error From the server. Setting this flag will call
+		Fstat instead of Stat which is suppose to be called on an open file handle.
+		
+		It has been found that that with IBM Sterling SFTP servers which have
+		"extractability" level set to 1 which means only 1 file can be opened at
+		any given time.
+		
+		If the server you are working with still has an issue with both Stat and
+		Fstat calls you can always open a file and read it until the end.
+		
+		Another reason to read the file until its end and Fstat doesn't work is
+		that in some servers, reading a full file will automatically delete the
+		file as some of these mainframes map the file to a message in a queue.
+		Once the file has been read it will get deleted.</span>
+
+</span></div><div class="anchor value-res" id="name-WithAllocator">	<input type='checkbox' class="fold" id="WithAllocator-fold-content"><label for="WithAllocator-fold-content"> func <a href="../../../src/github.com/pkg/sftp/server.go.html#line-122">WithAllocator</a>() <a href="#name-ServerOption">ServerOption</a></label><span id='WithAllocator-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithAllocator enable the allocator.
+		After processing a packet we keep in memory the allocated slices
+		and we reuse them for new packets.
+		The allocator is experimental</span>
+
+</span></div><div class="anchor value-res" id="name-WithDebug">	<input type='checkbox' class="fold" id="WithDebug-fold-content"><label for="WithDebug-fold-content"> func <a href="../../../src/github.com/pkg/sftp/server.go.html#line-103">WithDebug</a>(w <a href="../../io.html">io</a>.<a href="../../io.html#name-Writer">Writer</a>) <a href="#name-ServerOption">ServerOption</a></label><span id='WithDebug-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithDebug enables Server debugging output to the supplied io.Writer.</span>
+
+</span></div><div class="anchor value-res" id="name-WithRSAllocator">	<input type='checkbox' class="fold" id="WithRSAllocator-fold-content"><label for="WithRSAllocator-fold-content"> func <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-44">WithRSAllocator</a>() <a href="#name-RequestServerOption">RequestServerOption</a></label><span id='WithRSAllocator-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithRSAllocator enable the allocator.
+		After processing a packet we keep in memory the allocated slices
+		and we reuse them for new packets.
+		The allocator is experimental</span>
+
+</span></div><div class="anchor value-res" id="name-WithStartDirectory">	<input type='checkbox' class="fold" id="WithStartDirectory-fold-content"><label for="WithStartDirectory-fold-content"> func <a href="../../../src/github.com/pkg/sftp/request-server.go.html#line-54">WithStartDirectory</a>(startDirectory <a href="../../builtin.html#name-string">string</a>) <a href="#name-RequestServerOption">RequestServerOption</a></label><span id='WithStartDirectory-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithStartDirectory sets a start directory to use as base for relative paths.
+		If unset the default is "/"</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 4)</i></span></span>
+
+<div class="anchor value-res" id="name-ErrBadPattern">	<input type='checkbox' class="fold" id="ErrBadPattern-fold-content"><label for="ErrBadPattern-fold-content">  var <a href="../../../src/github.com/pkg/sftp/match.go.html#line-9">ErrBadPattern</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrBadPattern-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrBadPattern indicates a globbing pattern was malformed.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInternalInconsistency">	<input type='checkbox' class="fold" id="ErrInternalInconsistency-fold-content"><label for="ErrInternalInconsistency-fold-content">  var <a href="../../../src/github.com/pkg/sftp/client.go.html#line-26">ErrInternalInconsistency</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInternalInconsistency-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrInternalInconsistency indicates the packets sent and the data queued to be
+		written to the file don't match up. It is an unusual error and usually is
+		caused by bad behavior server side or connection issues. The error is
+		limited in scope to the call where it happened, the client object is still
+		OK to use as long as the connection is still open.</span>
+
+</span></div><div class="anchor value-res" id="name-InternalInconsistency">	<input type='checkbox' class="fold" id="InternalInconsistency-fold-content"><label for="InternalInconsistency-fold-content">  var <a href="../../../src/github.com/pkg/sftp/client.go.html#line-30">InternalInconsistency</a> <a href="../../builtin.html#name-error">error</a></label><span id='InternalInconsistency-fold-content-docs' class="fold-docs">
+<span class="md-text">		InternalInconsistency alias for ErrInternalInconsistency.
+		
+		Deprecated: please use ErrInternalInconsistency</span>
+
+</span></div><div class="anchor value-res" id="name-MaxFilelist">	<input type='checkbox' class="fold" id="MaxFilelist-fold-content"><label for="MaxFilelist-fold-content">  var <a href="../../../src/github.com/pkg/sftp/request.go.html#line-15">MaxFilelist</a> <a href="../../builtin.html#name-int64">int64</a></label><span id='MaxFilelist-fold-content-docs' class="fold-docs">
+<span class="md-text">		MaxFilelist is the max number of files to return in a readdir batch.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 21)</i></span></span>
+
+<div class="anchor value-res" id="name-EBADF">	<span class="nodocs">const <a href="../../../src/github.com/pkg/sftp/stat_posix.go.html#line-11">EBADF</a> <a href="../../syscall.html">syscall</a>.<a href="../../syscall.html#name-Errno">Errno</a> = 9</span></div><div class="anchor value-res" id="name-ErrSSHFxBadMessage">	<input type='checkbox' class="fold" id="ErrSSHFxBadMessage-fold-content"><label for="ErrSSHFxBadMessage-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-14">ErrSSHFxBadMessage</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 5</label><span id='ErrSSHFxBadMessage-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxBadMessage">	<input type='checkbox' class="fold" id="ErrSshFxBadMessage-fold-content"><label for="ErrSshFxBadMessage-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-27">ErrSshFxBadMessage</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 5</label><span id='ErrSshFxBadMessage-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxConnectionLost">	<input type='checkbox' class="fold" id="ErrSshFxConnectionLost-fold-content"><label for="ErrSshFxConnectionLost-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-29">ErrSshFxConnectionLost</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 7</label><span id='ErrSshFxConnectionLost-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxConnectionLost">	<input type='checkbox' class="fold" id="ErrSSHFxConnectionLost-fold-content"><label for="ErrSSHFxConnectionLost-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-16">ErrSSHFxConnectionLost</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 7</label><span id='ErrSSHFxConnectionLost-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxEof">	<input type='checkbox' class="fold" id="ErrSshFxEof-fold-content"><label for="ErrSshFxEof-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-23">ErrSshFxEof</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 1</label><span id='ErrSshFxEof-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxEOF">	<input type='checkbox' class="fold" id="ErrSSHFxEOF-fold-content"><label for="ErrSSHFxEOF-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-10">ErrSSHFxEOF</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 1</label><span id='ErrSSHFxEOF-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxFailure">	<input type='checkbox' class="fold" id="ErrSshFxFailure-fold-content"><label for="ErrSshFxFailure-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-26">ErrSshFxFailure</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 4</label><span id='ErrSshFxFailure-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxFailure">	<input type='checkbox' class="fold" id="ErrSSHFxFailure-fold-content"><label for="ErrSSHFxFailure-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-13">ErrSSHFxFailure</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 4</label><span id='ErrSSHFxFailure-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxNoConnection">	<input type='checkbox' class="fold" id="ErrSSHFxNoConnection-fold-content"><label for="ErrSSHFxNoConnection-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-15">ErrSSHFxNoConnection</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 6</label><span id='ErrSSHFxNoConnection-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxNoConnection">	<input type='checkbox' class="fold" id="ErrSshFxNoConnection-fold-content"><label for="ErrSshFxNoConnection-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-28">ErrSshFxNoConnection</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 6</label><span id='ErrSshFxNoConnection-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxNoSuchFile">	<input type='checkbox' class="fold" id="ErrSSHFxNoSuchFile-fold-content"><label for="ErrSSHFxNoSuchFile-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-11">ErrSSHFxNoSuchFile</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 2</label><span id='ErrSSHFxNoSuchFile-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxNoSuchFile">	<input type='checkbox' class="fold" id="ErrSshFxNoSuchFile-fold-content"><label for="ErrSshFxNoSuchFile-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-24">ErrSshFxNoSuchFile</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 2</label><span id='ErrSshFxNoSuchFile-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxOk">	<input type='checkbox' class="fold" id="ErrSshFxOk-fold-content"><label for="ErrSshFxOk-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-22">ErrSshFxOk</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 0</label><span id='ErrSshFxOk-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxOk">	<input type='checkbox' class="fold" id="ErrSSHFxOk-fold-content"><label for="ErrSSHFxOk-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-9">ErrSSHFxOk</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 0</label><span id='ErrSSHFxOk-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxOpUnsupported">	<input type='checkbox' class="fold" id="ErrSshFxOpUnsupported-fold-content"><label for="ErrSshFxOpUnsupported-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-30">ErrSshFxOpUnsupported</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 8</label><span id='ErrSshFxOpUnsupported-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxOpUnsupported">	<input type='checkbox' class="fold" id="ErrSSHFxOpUnsupported-fold-content"><label for="ErrSSHFxOpUnsupported-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-17">ErrSSHFxOpUnsupported</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 8</label><span id='ErrSSHFxOpUnsupported-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSSHFxPermissionDenied">	<input type='checkbox' class="fold" id="ErrSSHFxPermissionDenied-fold-content"><label for="ErrSSHFxPermissionDenied-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-12">ErrSSHFxPermissionDenied</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 3</label><span id='ErrSSHFxPermissionDenied-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error types that match the SFTP's SSH_FXP_STATUS codes. Gives you more
+		direct control of the errors being sent vs. letting the library work them
+		out from the standard os/io errors.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrSshFxPermissionDenied">	<input type='checkbox' class="fold" id="ErrSshFxPermissionDenied-fold-content"><label for="ErrSshFxPermissionDenied-fold-content">const <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-25">ErrSshFxPermissionDenied</a> <a href="../../../src/github.com/pkg/sftp/request-errors.go.html#line-3">fxerr</a> = 3</label><span id='ErrSshFxPermissionDenied-fold-content-docs' class="fold-docs">
+<span class="md-text">		Deprecated error types, these are aliases for the new ones, please use the new ones directly</span>
+
+</span></div><div class="anchor value-res" id="name-S_IFMT">	<span class="nodocs">const <a href="../../../src/github.com/pkg/sftp/syscall_good.go.html#line-8">S_IFMT</a> = 61440</span></div><div class="anchor value-res" id="name-SftpServerWorkerCount">	<input type='checkbox' class="fold" id="SftpServerWorkerCount-fold-content"><label for="SftpServerWorkerCount-fold-content">const <a href="../../../src/github.com/pkg/sftp/server.go.html#line-21">SftpServerWorkerCount</a> = 8</label><span id='SftpServerWorkerCount-fold-content-docs' class="fold-docs">
+<span class="md-text">		SftpServerWorkerCount defines the number of workers for the SFTP server</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

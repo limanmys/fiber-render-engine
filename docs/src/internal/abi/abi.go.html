@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: abi.go in package internal/abi</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	abi.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/abi.html">internal/abi</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2020 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> abi</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"internal/goarch"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"unsafe"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// RegArgs is a struct that has space for each argument</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// and return value register on the current architecture.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Assembly code knows the layout of the first two fields</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// of RegArgs.</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// RegArgs also contains additional space to hold pointers</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// when it may not be safe to keep them only in the integer</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// register space otherwise.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">type</span> <a href="../../../pkg/internal/abi.html#name-RegArgs" class="ident">RegArgs</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-22"><code>	<span class="comment">// Values in these slots should be precisely the bit-by-bit</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">	// representation of how they would appear in a register.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">	// This means that on big endian arches, integer values should</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">	// be in the top bits of the slot. Floats are usually just</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">	// directly represented, but some architectures treat narrow</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">	// width floating point values specially (e.g. they're promoted</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">	// first, or they need to be NaN-boxed).</span></code></span>
+<span class="codeline" id="line-30"><code>	Ints   [<a href="abi_amd64.go.html#line-11" class="ident">IntArgRegs</a>]<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>  <span class="comment">// untyped integer registers</span></code></span>
+<span class="codeline" id="line-31"><code>	Floats [<a href="abi_amd64.go.html#line-14" class="ident">FloatArgRegs</a>]<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> <span class="comment">// untyped float registers</span></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>	<span class="comment">// Fields above this point are known to assembly.</span></code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code>	<span class="comment">// Ptrs is a space that duplicates Ints but with pointer type,</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">	// used to make pointers passed or returned  in registers</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">	// visible to the GC by making the type unsafe.Pointer.</span></code></span>
+<span class="codeline" id="line-38"><code>	Ptrs [<a href="abi_amd64.go.html#line-11" class="ident">IntArgRegs</a>]<a href="../../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a></code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>	<span class="comment">// ReturnIsPtr is a bitmap that indicates which registers</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">	// contain or will contain pointers on the return path from</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">	// a reflectcall. The i'th bit indicates whether the i'th</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">	// register contains or will contain a valid Go pointer.</span></code></span>
+<span class="codeline" id="line-44"><code>	ReturnIsPtr <a href="#line-87" class="ident">IntArgRegBitmap</a></code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="keyword">func</span> (<label for="r0" class="ident">r</label> *<a href="#line-21" class="ident">RegArgs</a>) <label for="r1" class="ident">Dump</label>() {</code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"Ints:"</span>)</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">for</span> <label for="r2" class="ident">_</label>, <label for="r3" class="ident">x</label> := <span class="keyword">range</span> <label for="r0" class="ident">r</label>.<a href="#line-30" class="ident">Ints</a> {</code></span>
+<span class="codeline" id="line-50"><code>		<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">" "</span>, <label for="r3" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-51"><code>	}</code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../pkg/builtin.html#name-println" class="ident">println</a>()</code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"Floats:"</span>)</code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">for</span> <label for="r4" class="ident">_</label>, <label for="r5" class="ident">x</label> := <span class="keyword">range</span> <label for="r0" class="ident">r</label>.<a href="#line-31" class="ident">Floats</a> {</code></span>
+<span class="codeline" id="line-55"><code>		<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">" "</span>, <label for="r5" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-56"><code>	}</code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../pkg/builtin.html#name-println" class="ident">println</a>()</code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"Ptrs:"</span>)</code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">for</span> <label for="r6" class="ident">_</label>, <label for="r7" class="ident">x</label> := <span class="keyword">range</span> <label for="r0" class="ident">r</label>.<a href="#line-38" class="ident">Ptrs</a> {</code></span>
+<span class="codeline" id="line-60"><code>		<a href="../../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">" "</span>, <label for="r7" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-61"><code>	}</code></span>
+<span class="codeline" id="line-62"><code>	<a href="../../../pkg/builtin.html#name-println" class="ident">println</a>()</code></span>
+<span class="codeline" id="line-63"><code>}</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">// IntRegArgAddr returns a pointer inside of r.Ints[reg] that is appropriately</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// offset for an argument of size argSize.</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// argSize must be non-zero, fit in a register, and a power-of-two.</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// This method is a helper for dealing with the endianness of different CPU</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">// architectures, since sub-word-sized arguments in big endian architectures</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">// need to be "aligned" to the upper edge of the register to be interpreted</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">// by the CPU correctly.</span></code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r8" class="ident">r</label> *<a href="#line-21" class="ident">RegArgs</a>) <label for="r9" class="ident">IntRegArgAddr</label>(<label for="r10" class="ident">reg</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r11" class="ident">argSize</label> <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) <a href="../../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a> {</code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">if</span> <label for="r11" class="ident">argSize</label> &gt; <a href="../../../pkg/internal/goarch.html" class="ident i0">goarch</a>.<a href="../goarch/goarch.go.html#line-33" class="ident">PtrSize</a> || <label for="r11" class="ident">argSize</label> == <span class="lit-number">0</span> || <label for="r11" class="ident">argSize</label>&amp;(<label for="r11" class="ident">argSize</label>-<span class="lit-number">1</span>) != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-76"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"invalid argSize"</span>)</code></span>
+<span class="codeline" id="line-77"><code>	}</code></span>
+<span class="codeline" id="line-78"><code>	<label for="r12" class="ident">offset</label> := <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">if</span> <a href="../../../pkg/internal/goarch.html" class="ident i0">goarch</a>.<a href="../goarch/goarch.go.html#line-39" class="ident">BigEndian</a> {</code></span>
+<span class="codeline" id="line-80"><code>		<label for="r12" class="ident">offset</label> = <a href="../../../pkg/internal/goarch.html" class="ident i0">goarch</a>.<a href="../goarch/goarch.go.html#line-33" class="ident">PtrSize</a> - <label for="r11" class="ident">argSize</label></code></span>
+<span class="codeline" id="line-81"><code>	}</code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">return</span> <a href="../../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r8" class="ident">r</label>.<a href="#line-30" class="ident">Ints</a>[<label for="r10" class="ident">reg</label>])) + <label for="r12" class="ident">offset</label>)</code></span>
+<span class="codeline" id="line-83"><code>}</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">// IntArgRegBitmap is a bitmap large enough to hold one bit per</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// integer argument/return register.</span></code></span>
+<span class="codeline" id="line-87"><code><span class="keyword">type</span> <a href="../../../pkg/internal/abi.html#name-IntArgRegBitmap" class="ident">IntArgRegBitmap</a> [(<a href="abi_amd64.go.html#line-11" class="ident">IntArgRegs</a> + <span class="lit-number">7</span>) / <span class="lit-number">8</span>]<a href="../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// Set sets the i'th bit of the bitmap to 1.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="keyword">func</span> (<label for="r13" class="ident">b</label> *<a href="#line-87" class="ident">IntArgRegBitmap</a>) <label for="r14" class="ident">Set</label>(<label for="r15" class="ident">i</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-91"><code>	<label for="r13" class="ident">b</label>[<label for="r15" class="ident">i</label>/<span class="lit-number">8</span>] |= <a href="../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>(<span class="lit-number">1</span>) &lt;&lt; (<label for="r15" class="ident">i</label> % <span class="lit-number">8</span>)</code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// Get returns whether the i'th bit of the bitmap is set.</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">// nosplit because it's called in extremely sensitive contexts, like</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">// on the reflectcall return path.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">//go:nosplit</span></code></span>
+<span class="codeline" id="line-100"><code><span class="keyword">func</span> (<label for="r16" class="ident">b</label> *<a href="#line-87" class="ident">IntArgRegBitmap</a>) <label for="r17" class="ident">Get</label>(<label for="r18" class="ident">i</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">return</span> <label for="r16" class="ident">b</label>[<label for="r18" class="ident">i</label>/<span class="lit-number">8</span>]&amp;(<a href="../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>(<span class="lit-number">1</span>)&lt;&lt;(<label for="r18" class="ident">i</label>%<span class="lit-number">8</span>)) != <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-102"><code>}</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">// FuncPC* intrinsics.</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">// CAREFUL: In programs with plugins, FuncPC* can return different values</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">// for the same function (because there are actually multiple copies of</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">// the same function in the address space). To be safe, don't use the</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">// results of this function in any == expression. It is only safe to</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// use the result as an address at which to start executing code.</span></code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// FuncPCABI0 returns the entry PC of the function f, which must be a</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">// direct reference of a function defined as ABI0. Otherwise it is a</span></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">// compile-time error.</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// Implemented as a compile intrinsic.</span></code></span>
+<span class="codeline" id="line-117"><code><span class="keyword">func</span> <label for="r19" class="ident"><a href="../../../pkg/internal/abi.html#name-FuncPCABI0" class="ident">FuncPCABI0</a></label>(<label for="r20" class="ident">f</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a></code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// FuncPCABIInternal returns the entry PC of the function f. If f is a</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// direct reference of a function, it must be defined as ABIInternal.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">// Otherwise it is a compile-time error. If f is not a direct reference</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">// of a defined function, it assumes that f is a func value. Otherwise</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">// the behavior is undefined.</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">// Implemented as a compile intrinsic.</span></code></span>
+<span class="codeline" id="line-126"><code><span class="keyword">func</span> <label for="r21" class="ident"><a href="../../../pkg/internal/abi.html#name-FuncPCABIInternal" class="ident">FuncPCABIInternal</a></label>(<label for="r22" class="ident">f</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a></code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

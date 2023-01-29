@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: MICToken.go in package github.com/jcmturner/gokrb5/v8/gssapi</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	MICToken.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html">github.com/jcmturner/gokrb5/v8/gssapi</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> gssapi</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"crypto/hmac"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"encoding/hex"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"errors"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i5"><span class="lit-string i5">"fmt"</span></label></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i6"><span class="lit-string i6">"github.com/jcmturner/gokrb5/v8/crypto"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i7"><span class="lit-string i7">"github.com/jcmturner/gokrb5/v8/iana/keyusage"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i8"><span class="lit-string i8">"github.com/jcmturner/gokrb5/v8/types"</span></label></code></span>
+<span class="codeline" id="line-14"><code>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// RFC 4121, section 4.2.6.1</span></code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-19"><code>	<span class="comment">// MICTokenFlagSentByAcceptor - this flag indicates the sender is the context acceptor.  When not set, it indicates the sender is the context initiator</span></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-MICTokenFlagSentByAcceptor" class="ident">MICTokenFlagSentByAcceptor</a> = <span class="lit-number">1</span> &lt;&lt; <a href="../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-21"><code>	<span class="comment">// MICTokenFlagSealed - this flag indicates confidentiality is provided for.  It SHALL NOT be set in MIC tokens</span></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-MICTokenFlagSealed" class="ident">MICTokenFlagSealed</a></code></span>
+<span class="codeline" id="line-23"><code>	<span class="comment">// MICTokenFlagAcceptorSubkey - a subkey asserted by the context acceptor is used to protect the message</span></code></span>
+<span class="codeline" id="line-24"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-MICTokenFlagAcceptorSubkey" class="ident">MICTokenFlagAcceptorSubkey</a></code></span>
+<span class="codeline" id="line-25"><code>)</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-28"><code>	micHdrLen = <span class="lit-number">16</span> <span class="comment">// Length of the MIC Token's header</span></code></span>
+<span class="codeline" id="line-29"><code>)</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// MICToken represents a GSS API MIC token, as defined in RFC 4121.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// It contains the header fields, the payload (this is not transmitted) and</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// the checksum, and provides the logic for converting to/from bytes plus</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// computing and verifying checksums</span></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-MICToken" class="ident">MICToken</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-36"><code>	<span class="comment">// const GSS Token ID: 0x0404</span></code></span>
+<span class="codeline" id="line-37"><code>	Flags <a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="comment">// contains three flags: acceptor, sealed, acceptor subkey</span></code></span>
+<span class="codeline" id="line-38"><code>	<span class="comment">// const Filler: 0xFF 0xFF 0xFF 0xFF 0xFF</span></code></span>
+<span class="codeline" id="line-39"><code>	SndSeqNum <a href="../../../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> <span class="comment">// sender's sequence number. big-endian</span></code></span>
+<span class="codeline" id="line-40"><code>	Payload   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="comment">// your data! :)</span></code></span>
+<span class="codeline" id="line-41"><code>	Checksum  []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="comment">// checksum of { payload | header }</span></code></span>
+<span class="codeline" id="line-42"><code>}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// Return the 2 bytes identifying a GSS API MIC token</span></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">func</span> getGSSMICTokenID() *[<span class="lit-number">2</span>]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">return</span> &amp;[<span class="lit-number">2</span>]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{<span class="lit-number">0x04</span>, <span class="lit-number">0x04</span>}</code></span>
+<span class="codeline" id="line-47"><code>}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// Return the filler bytes used in header</span></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">func</span> fillerBytes() *[<span class="lit-number">5</span>]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-51"><code>	<span class="keyword">return</span> &amp;[<span class="lit-number">5</span>]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{<span class="lit-number">0xFF</span>, <span class="lit-number">0xFF</span>, <span class="lit-number">0xFF</span>, <span class="lit-number">0xFF</span>, <span class="lit-number">0xFF</span>}</code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// Marshal the MICToken into a byte slice.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// The payload should have been set and the checksum computed, otherwise an error is returned.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="keyword">func</span> (<label for="r2" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r3" class="ident">Marshal</label>() ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">if</span> <label for="r2" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"checksum has not been set"</span>)</code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code>	<label for="r4" class="ident">bytes</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="#line-28" class="ident">micHdrLen</a>+<a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a>))</code></span>
+<span class="codeline" id="line-62"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r4" class="ident">bytes</label>[<span class="lit-number">0</span>:<a href="#line-28" class="ident">micHdrLen</a>], <label for="r2" class="ident">mt</label>.<a href="#line-101" class="ident">getMICChecksumHeader</a>()[:])</code></span>
+<span class="codeline" id="line-63"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r4" class="ident">bytes</label>[<a href="#line-28" class="ident">micHdrLen</a>:], <label for="r2" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a>)</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">return</span> <label for="r4" class="ident">bytes</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-66"><code>}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// SetChecksum uses the passed encryption key and key usage to compute the checksum over the payload and</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// the header, and sets the Checksum field of this MICToken.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// If the payload has not been set or the checksum has already been set, an error is returned.</span></code></span>
+<span class="codeline" id="line-71"><code><span class="keyword">func</span> (<label for="r5" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r6" class="ident">SetChecksum</label>(<label for="r7" class="ident">key</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i8">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>, <label for="r8" class="ident">keyUsage</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">if</span> <label for="r5" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"checksum has already been computed"</span>)</code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code>	<label for="r9" class="ident">checksum</label>, <label for="r10" class="ident">err</label> := <label for="r5" class="ident">mt</label>.<a href="#line-85" class="ident">checksum</a>(<label for="r7" class="ident">key</label>, <label for="r8" class="ident">keyUsage</label>)</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r10" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">return</span> <label for="r10" class="ident">err</label></code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<label for="r5" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a> = <label for="r9" class="ident">checksum</label></code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-81"><code>}</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">// Compute and return the checksum of this token, computed using the passed key and key usage.</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">// Note: This will NOT update the struct's Checksum field.</span></code></span>
+<span class="codeline" id="line-85"><code><span class="keyword">func</span> (<label for="r11" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r12" class="ident">checksum</label>(<label for="r13" class="ident">key</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i8">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>, <label for="r14" class="ident">keyUsage</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">if</span> <label for="r11" class="ident">mt</label>.<a href="#line-40" class="ident">Payload</a> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-87"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"cannot compute checksum with uninitialized payload"</span>)</code></span>
+<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-89"><code>	<label for="r15" class="ident">d</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="#line-28" class="ident">micHdrLen</a>+<a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">mt</label>.<a href="#line-40" class="ident">Payload</a>))</code></span>
+<span class="codeline" id="line-90"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r15" class="ident">d</label>[<span class="lit-number">0</span>:], <label for="r11" class="ident">mt</label>.<a href="#line-40" class="ident">Payload</a>)</code></span>
+<span class="codeline" id="line-91"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r15" class="ident">d</label>[<a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">mt</label>.<a href="#line-40" class="ident">Payload</a>):], <label for="r11" class="ident">mt</label>.<a href="#line-101" class="ident">getMICChecksumHeader</a>())</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>	<label for="r16" class="ident">encType</label>, <label for="r17" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/crypto.html" class="ident i6">crypto</a>.<a href="../crypto/crypto.go.html#line-16" class="ident">GetEtype</a>(<label for="r13" class="ident">key</label>.<a href="../types/Cryptosystem.go^b5b5f.html#line-23" class="ident">KeyType</a>)</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <label for="r17" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r17" class="ident">err</label></code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">return</span> <label for="r16" class="ident">encType</label>.<a href="../crypto/etype/etype.go.html#line-26" class="ident">GetChecksumHash</a>(<label for="r13" class="ident">key</label>.<a href="../types/Cryptosystem.go^b5b5f.html#line-24" class="ident">KeyValue</a>, <label for="r15" class="ident">d</label>, <label for="r14" class="ident">keyUsage</label>)</code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// Build a header suitable for a checksum computation</span></code></span>
+<span class="codeline" id="line-101"><code><span class="keyword">func</span> (<label for="r18" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r19" class="ident">getMICChecksumHeader</label>() []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-102"><code>	<label for="r20" class="ident">header</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="#line-28" class="ident">micHdrLen</a>)</code></span>
+<span class="codeline" id="line-103"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r20" class="ident">header</label>[<span class="lit-number">0</span>:<span class="lit-number">2</span>], <a href="#line-45" class="ident">getGSSMICTokenID</a>()[:])</code></span>
+<span class="codeline" id="line-104"><code>	<label for="r20" class="ident">header</label>[<span class="lit-number">2</span>] = <label for="r18" class="ident">mt</label>.<a href="#line-37" class="ident">Flags</a></code></span>
+<span class="codeline" id="line-105"><code>	<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r20" class="ident">header</label>[<span class="lit-number">3</span>:<span class="lit-number">8</span>], <a href="#line-50" class="ident">fillerBytes</a>()[:])</code></span>
+<span class="codeline" id="line-106"><code>	<a href="../../../../../../pkg/encoding/binary.html" class="ident i2">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../../../encoding/binary/binary.go.html#line-184" class="ident">PutUint64</a>(<label for="r20" class="ident">header</label>[<span class="lit-number">8</span>:<span class="lit-number">16</span>], <label for="r18" class="ident">mt</label>.<a href="#line-39" class="ident">SndSeqNum</a>)</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> <label for="r20" class="ident">header</label></code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// Verify computes the token's checksum with the provided key and usage,</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// and compares it to the checksum present in the token.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// In case of any failure, (false, err) is returned, with err an explanatory error.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="keyword">func</span> (<label for="r21" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r22" class="ident">Verify</label>(<label for="r23" class="ident">key</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i8">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>, <label for="r24" class="ident">keyUsage</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-114"><code>	<label for="r25" class="ident">computed</label>, <label for="r26" class="ident">err</label> := <label for="r21" class="ident">mt</label>.<a href="#line-85" class="ident">checksum</a>(<label for="r23" class="ident">key</label>, <label for="r24" class="ident">keyUsage</label>)</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">if</span> <label for="r26" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-116"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r26" class="ident">err</label></code></span>
+<span class="codeline" id="line-117"><code>	}</code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">if</span> !<a href="../../../../../../pkg/crypto/hmac.html" class="ident i1">hmac</a>.<a href="../../../../../crypto/hmac/hmac.go.html#line-175" class="ident">Equal</a>(<label for="r25" class="ident">computed</label>, <label for="r21" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a>) {</code></span>
+<span class="codeline" id="line-119"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../../../pkg/fmt.html" class="ident i5">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(</code></span>
+<span class="codeline" id="line-120"><code>			<span class="lit-string">"checksum mismatch. Computed: %s, Contained in token: %s"</span>,</code></span>
+<span class="codeline" id="line-121"><code>			<a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<label for="r25" class="ident">computed</label>), <a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<label for="r21" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a>))</code></span>
+<span class="codeline" id="line-122"><code>	}</code></span>
+<span class="codeline" id="line-123"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-124"><code>}</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">// Unmarshal bytes into the corresponding MICToken.</span></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">// If expectFromAcceptor is true we expect the token to have been emitted by the gss acceptor,</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">// and will check the according flag, returning an error if the token does not match the expectation.</span></code></span>
+<span class="codeline" id="line-129"><code><span class="keyword">func</span> (<label for="r27" class="ident">mt</label> *<a href="#line-35" class="ident">MICToken</a>) <label for="r28" class="ident">Unmarshal</label>(<label for="r29" class="ident">b</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r30" class="ident">expectFromAcceptor</label> <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r29" class="ident">b</label>) &lt; <a href="#line-28" class="ident">micHdrLen</a> {</code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"bytes shorter than header length"</span>)</code></span>
+<span class="codeline" id="line-132"><code>	}</code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<a href="#line-45" class="ident">getGSSMICTokenID</a>()[:], <label for="r29" class="ident">b</label>[<span class="lit-number">0</span>:<span class="lit-number">2</span>]) {</code></span>
+<span class="codeline" id="line-134"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i5">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"wrong Token ID, Expected %s, was %s"</span>,</code></span>
+<span class="codeline" id="line-135"><code>			<a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<a href="#line-45" class="ident">getGSSMICTokenID</a>()[:]),</code></span>
+<span class="codeline" id="line-136"><code>			<a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<label for="r29" class="ident">b</label>[<span class="lit-number">0</span>:<span class="lit-number">2</span>]))</code></span>
+<span class="codeline" id="line-137"><code>	}</code></span>
+<span class="codeline" id="line-138"><code>	<label for="r31" class="ident">flags</label> := <label for="r29" class="ident">b</label>[<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-139"><code>	<label for="r32" class="ident">isFromAcceptor</label> := <label for="r31" class="ident">flags</label>&amp;<a href="#line-20" class="ident">MICTokenFlagSentByAcceptor</a> != <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">if</span> <label for="r32" class="ident">isFromAcceptor</label> &amp;&amp; !<label for="r30" class="ident">expectFromAcceptor</label> {</code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"unexpected acceptor flag is set: not expecting a token from the acceptor"</span>)</code></span>
+<span class="codeline" id="line-142"><code>	}</code></span>
+<span class="codeline" id="line-143"><code>	<span class="keyword">if</span> !<label for="r32" class="ident">isFromAcceptor</label> &amp;&amp; <label for="r30" class="ident">expectFromAcceptor</label> {</code></span>
+<span class="codeline" id="line-144"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/errors.html" class="ident i4">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"unexpected acceptor flag is not set: expecting a token from the acceptor, not in the initiator"</span>)</code></span>
+<span class="codeline" id="line-145"><code>	}</code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r29" class="ident">b</label>[<span class="lit-number">3</span>:<span class="lit-number">8</span>], <a href="#line-50" class="ident">fillerBytes</a>()[:]) {</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i5">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"unexpected filler bytes: expecting %s, was %s"</span>,</code></span>
+<span class="codeline" id="line-148"><code>			<a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<a href="#line-50" class="ident">fillerBytes</a>()[:]),</code></span>
+<span class="codeline" id="line-149"><code>			<a href="../../../../../../pkg/encoding/hex.html" class="ident i3">hex</a>.<a href="../../../../../encoding/hex/hex.go.html#line-106" class="ident">EncodeToString</a>(<label for="r29" class="ident">b</label>[<span class="lit-number">3</span>:<span class="lit-number">8</span>]))</code></span>
+<span class="codeline" id="line-150"><code>	}</code></span>
+<span class="codeline" id="line-151"><code></code></span>
+<span class="codeline" id="line-152"><code>	<label for="r27" class="ident">mt</label>.<a href="#line-37" class="ident">Flags</a> = <label for="r31" class="ident">flags</label></code></span>
+<span class="codeline" id="line-153"><code>	<label for="r27" class="ident">mt</label>.<a href="#line-39" class="ident">SndSeqNum</a> = <a href="../../../../../../pkg/encoding/binary.html" class="ident i2">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../../../encoding/binary/binary.go.html#line-178" class="ident">Uint64</a>(<label for="r29" class="ident">b</label>[<span class="lit-number">8</span>:<span class="lit-number">16</span>])</code></span>
+<span class="codeline" id="line-154"><code>	<label for="r27" class="ident">mt</label>.<a href="#line-41" class="ident">Checksum</a> = <label for="r29" class="ident">b</label>[<a href="#line-28" class="ident">micHdrLen</a>:]</code></span>
+<span class="codeline" id="line-155"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-156"><code>}</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// NewInitiatorMICToken builds a new initiator token (acceptor flag will be set to 0) and computes the authenticated checksum.</span></code></span>
+<span class="codeline" id="line-159"><code><span class="comment">// Other flags are set to 0.</span></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">// Note that in certain circumstances you may need to provide a sequence number that has been defined earlier.</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">// This is currently not supported.</span></code></span>
+<span class="codeline" id="line-162"><code><span class="keyword">func</span> <label for="r33" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-NewInitiatorMICToken" class="ident">NewInitiatorMICToken</a></label>(<label for="r34" class="ident">payload</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r35" class="ident">key</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i8">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>) (*<a href="#line-35" class="ident">MICToken</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-163"><code>	<label for="r36" class="ident">token</label> := <a href="#line-35" class="ident">MICToken</a>{</code></span>
+<span class="codeline" id="line-164"><code>		<a href="#line-37" class="ident">Flags</a>:     <span class="lit-number">0x00</span>,</code></span>
+<span class="codeline" id="line-165"><code>		<a href="#line-39" class="ident">SndSeqNum</a>: <span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-166"><code>		<a href="#line-40" class="ident">Payload</a>:   <label for="r34" class="ident">payload</label>,</code></span>
+<span class="codeline" id="line-167"><code>	}</code></span>
+<span class="codeline" id="line-168"><code></code></span>
+<span class="codeline" id="line-169"><code>	<span class="keyword">if</span> <label for="r37" class="ident">err</label> := <label for="r36" class="ident">token</label>.<a href="#line-71" class="ident">SetChecksum</a>(<label for="r35" class="ident">key</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/keyusage.html" class="ident i7">keyusage</a>.<a href="../iana/keyusage/constants.go.html#line-29" class="ident">GSSAPI_INITIATOR_SIGN</a>); <label for="r37" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-170"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r37" class="ident">err</label></code></span>
+<span class="codeline" id="line-171"><code>	}</code></span>
+<span class="codeline" id="line-172"><code></code></span>
+<span class="codeline" id="line-173"><code>	<span class="keyword">return</span> &amp;<label for="r36" class="ident">token</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-174"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

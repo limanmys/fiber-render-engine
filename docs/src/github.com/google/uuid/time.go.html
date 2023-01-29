@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: time.go in package github.com/google/uuid</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	time.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/google/uuid.html">github.com/google/uuid</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2016 Google Inc.  All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> uuid</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"sync"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"time"</span></label></code></span>
+<span class="codeline" id="line-11"><code>)</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// A Time represents a time as the number of 100's of nanoseconds since 15 Oct</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// 1582.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/google/uuid.html#name-Time" class="ident">Time</a> <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-18"><code>	lillian    = <span class="lit-number">2299160</span>          <span class="comment">// Julian day of 15 Oct 1582</span></code></span>
+<span class="codeline" id="line-19"><code>	unix       = <span class="lit-number">2440587</span>          <span class="comment">// Julian day of 1 Jan 1970</span></code></span>
+<span class="codeline" id="line-20"><code>	epoch      = <a href="#line-19" class="ident">unix</a> - <a href="#line-18" class="ident">lillian</a>   <span class="comment">// Days between epochs</span></code></span>
+<span class="codeline" id="line-21"><code>	g1582      = <a href="#line-20" class="ident">epoch</a> * <span class="lit-number">86400</span>    <span class="comment">// seconds between epochs</span></code></span>
+<span class="codeline" id="line-22"><code>	g1582ns100 = <a href="#line-21" class="ident">g1582</a> * <span class="lit-number">10000000</span> <span class="comment">// 100s of a nanoseconds between epochs</span></code></span>
+<span class="codeline" id="line-23"><code>)</code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-26"><code>	timeMu   <a href="../../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-27"><code>	lasttime <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> <span class="comment">// last time we returned</span></code></span>
+<span class="codeline" id="line-28"><code>	clockSeq <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a> <span class="comment">// clock sequence for this run</span></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code>	timeNow = <a href="../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../time/time.go.html#line-1089" class="ident">Now</a> <span class="comment">// for testing</span></code></span>
+<span class="codeline" id="line-31"><code>)</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// UnixTime converts t the number of seconds and nanoseconds using the Unix</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// epoch of 1 Jan 1970.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">func</span> (<label for="r0" class="ident">t</label> <a href="#line-15" class="ident">Time</a>) <label for="r1" class="ident">UnixTime</label>() (<label for="r2" class="ident">sec</label>, <label for="r3" class="ident">nsec</label> <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>) {</code></span>
+<span class="codeline" id="line-36"><code>	<label for="r2" class="ident">sec</label> = <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r0" class="ident">t</label> - <a href="#line-22" class="ident">g1582ns100</a>)</code></span>
+<span class="codeline" id="line-37"><code>	<label for="r3" class="ident">nsec</label> = (<label for="r2" class="ident">sec</label> % <span class="lit-number">10000000</span>) * <span class="lit-number">100</span></code></span>
+<span class="codeline" id="line-38"><code>	<label for="r2" class="ident">sec</label> /= <span class="lit-number">10000000</span></code></span>
+<span class="codeline" id="line-39"><code>	<span class="keyword">return</span> <label for="r2" class="ident">sec</label>, <label for="r3" class="ident">nsec</label></code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// GetTime returns the current Time (100s of nanoseconds since 15 Oct 1582) and</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// clock sequence as well as adjusting the clock sequence as needed.  An error</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// is returned if the current time cannot be determined.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../pkg/github.com/google/uuid.html#name-GetTime" class="ident">GetTime</a></label>() (<a href="#line-15" class="ident">Time</a>, <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">defer</span> <a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-47"><code>	<a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">return</span> <a href="#line-51" class="ident">getTime</a>()</code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> getTime() (<a href="#line-15" class="ident">Time</a>, <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-52"><code>	<label for="r6" class="ident">t</label> := <a href="#line-30" class="ident">timeNow</a>()</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code>	<span class="comment">// If we don't have a clock sequence already, set one.</span></code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">if</span> <a href="#line-28" class="ident">clockSeq</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-56"><code>		<a href="#line-97" class="ident">setClockSequence</a>(-<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code>	<label for="r7" class="ident">now</label> := <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r6" class="ident">t</label>.<a href="../../../time/time.go.html#line-1196" class="ident">UnixNano</a>()/<span class="lit-number">100</span>) + <a href="#line-22" class="ident">g1582ns100</a></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// If time has gone backwards with this clock sequence then we</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">	// increment the clock sequence</span></code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">if</span> <label for="r7" class="ident">now</label> &lt;= <a href="#line-27" class="ident">lasttime</a> {</code></span>
+<span class="codeline" id="line-63"><code>		<a href="#line-28" class="ident">clockSeq</a> = ((<a href="#line-28" class="ident">clockSeq</a> + <span class="lit-number">1</span>) &amp; <span class="lit-number">0x3fff</span>) | <span class="lit-number">0x8000</span></code></span>
+<span class="codeline" id="line-64"><code>	}</code></span>
+<span class="codeline" id="line-65"><code>	<a href="#line-27" class="ident">lasttime</a> = <label for="r7" class="ident">now</label></code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">return</span> <a href="#line-15" class="ident">Time</a>(<label for="r7" class="ident">now</label>), <a href="#line-28" class="ident">clockSeq</a>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-67"><code>}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// ClockSequence returns the current clock sequence, generating one if not</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// already set.  The clock sequence is only used for Version 1 UUIDs.</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">// The uuid package does not use global static storage for the clock sequence or</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">// the last time a UUID was generated.  Unless SetClockSequence is used, a new</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// random clock sequence is generated the first time a clock sequence is</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">// requested by ClockSequence, GetTime, or NewUUID.  (section 4.2.1.1)</span></code></span>
+<span class="codeline" id="line-76"><code><span class="keyword">func</span> <label for="r8" class="ident"><a href="../../../../pkg/github.com/google/uuid.html#name-ClockSequence" class="ident">ClockSequence</a></label>() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">defer</span> <a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-78"><code>	<a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">return</span> <a href="#line-82" class="ident">clockSequence</a>()</code></span>
+<span class="codeline" id="line-80"><code>}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> clockSequence() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <a href="#line-28" class="ident">clockSeq</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-84"><code>		<a href="#line-97" class="ident">setClockSequence</a>(-<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-85"><code>	}</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="#line-28" class="ident">clockSeq</a> &amp; <span class="lit-number">0x3fff</span>)</code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// SetClockSequence sets the clock sequence to the lower 14 bits of seq.  Setting to</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">// -1 causes a new sequence to be generated.</span></code></span>
+<span class="codeline" id="line-91"><code><span class="keyword">func</span> <label for="r10" class="ident"><a href="../../../../pkg/github.com/google/uuid.html#name-SetClockSequence" class="ident">SetClockSequence</a></label>(<label for="r11" class="ident">seq</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-92"><code>	<span class="keyword">defer</span> <a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-93"><code>	<a href="#line-26" class="ident">timeMu</a>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-94"><code>	<a href="#line-97" class="ident">setClockSequence</a>(<label for="r11" class="ident">seq</label>)</code></span>
+<span class="codeline" id="line-95"><code>}</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code><span class="keyword">func</span> setClockSequence(<label for="r13" class="ident">seq</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">if</span> <label for="r13" class="ident">seq</label> == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-99"><code>		<span class="keyword">var</span> <label for="r14" class="ident">b</label> [<span class="lit-number">2</span>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-100"><code>		<a href="util.go.html#line-12" class="ident">randomBits</a>(<label for="r14" class="ident">b</label>[:]) <span class="comment">// clock sequence</span></code></span>
+<span class="codeline" id="line-101"><code>		<label for="r13" class="ident">seq</label> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">b</label>[<span class="lit-number">0</span>])&lt;&lt;<span class="lit-number">8</span> | <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">b</label>[<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-102"><code>	}</code></span>
+<span class="codeline" id="line-103"><code>	<label for="r15" class="ident">oldSeq</label> := <a href="#line-28" class="ident">clockSeq</a></code></span>
+<span class="codeline" id="line-104"><code>	<a href="#line-28" class="ident">clockSeq</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r13" class="ident">seq</label>&amp;<span class="lit-number">0x3fff</span>) | <span class="lit-number">0x8000</span> <span class="comment">// Set our variant</span></code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">if</span> <label for="r15" class="ident">oldSeq</label> != <a href="#line-28" class="ident">clockSeq</a> {</code></span>
+<span class="codeline" id="line-106"><code>		<a href="#line-27" class="ident">lasttime</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-107"><code>	}</code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// Time returns the time in 100s of nanoseconds since 15 Oct 1582 encoded in</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// uuid.  The time is only defined for version 1 and 2 UUIDs.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="keyword">func</span> (<label for="r16" class="ident">uuid</label> <a href="uuid.go.html#line-20" class="ident">UUID</a>) <label for="r17" class="ident">Time</label>() <a href="#line-15" class="ident">Time</a> {</code></span>
+<span class="codeline" id="line-113"><code>	<label for="r18" class="ident">time</label> := <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-156" class="ident">Uint32</a>(<label for="r16" class="ident">uuid</label>[<span class="lit-number">0</span>:<span class="lit-number">4</span>]))</code></span>
+<span class="codeline" id="line-114"><code>	<label for="r18" class="ident">time</label> |= <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-138" class="ident">Uint16</a>(<label for="r16" class="ident">uuid</label>[<span class="lit-number">4</span>:<span class="lit-number">6</span>])) &lt;&lt; <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-115"><code>	<label for="r18" class="ident">time</label> |= <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-138" class="ident">Uint16</a>(<label for="r16" class="ident">uuid</label>[<span class="lit-number">6</span>:<span class="lit-number">8</span>])&amp;<span class="lit-number">0xfff</span>) &lt;&lt; <span class="lit-number">48</span></code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">return</span> <a href="#line-15" class="ident">Time</a>(<label for="r18" class="ident">time</label>)</code></span>
+<span class="codeline" id="line-117"><code>}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// ClockSequence returns the clock sequence encoded in uuid.</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// The clock sequence is only well defined for version 1 and 2 UUIDs.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">func</span> (<label for="r19" class="ident">uuid</label> <a href="uuid.go.html#line-20" class="ident">UUID</a>) <label for="r20" class="ident">ClockSequence</label>() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-138" class="ident">Uint16</a>(<label for="r19" class="ident">uuid</label>[<span class="lit-number">8</span>:<span class="lit-number">10</span>])) &amp; <span class="lit-number">0x3fff</span></code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

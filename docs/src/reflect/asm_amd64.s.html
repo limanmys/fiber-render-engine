@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: asm_amd64.s in package reflect</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	asm_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/reflect.html">reflect</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2012 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-6"><code>#include "funcdata.h"</code></span>
+<span class="codeline" id="line-7"><code>#include "go_asm.h"</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code>// The frames of each of the two functions below contain two locals, at offsets</code></span>
+<span class="codeline" id="line-10"><code>// that are known to the runtime.</code></span>
+<span class="codeline" id="line-11"><code>//</code></span>
+<span class="codeline" id="line-12"><code>// The first local is a bool called retValid with a whole pointer-word reserved</code></span>
+<span class="codeline" id="line-13"><code>// for it on the stack. The purpose of this word is so that the runtime knows</code></span>
+<span class="codeline" id="line-14"><code>// whether the stack-allocated return space contains valid values for stack</code></span>
+<span class="codeline" id="line-15"><code>// scanning.</code></span>
+<span class="codeline" id="line-16"><code>//</code></span>
+<span class="codeline" id="line-17"><code>// The second local is an abi.RegArgs value whose offset is also known to the</code></span>
+<span class="codeline" id="line-18"><code>// runtime, so that a stack map for it can be constructed, since it contains</code></span>
+<span class="codeline" id="line-19"><code>// pointers visible to the GC.</code></span>
+<span class="codeline" id="line-20"><code>#define LOCAL_RETVALID 32</code></span>
+<span class="codeline" id="line-21"><code>#define LOCAL_REGARGS 40</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code>// makeFuncStub is the code half of the function returned by MakeFunc.</code></span>
+<span class="codeline" id="line-24"><code>// See the comment on the declaration of makeFuncStub in makefunc.go</code></span>
+<span class="codeline" id="line-25"><code>// for more details.</code></span>
+<span class="codeline" id="line-26"><code>// No arg size here; runtime pulls arg map out of the func value.</code></span>
+<span class="codeline" id="line-27"><code>// This frame contains two locals. See the comment above LOCAL_RETVALID.</code></span>
+<span class="codeline" id="line-28"><code>TEXT ·makeFuncStub(SB),(NOSPLIT|WRAPPER),$312</code></span>
+<span class="codeline" id="line-29"><code>	NO_LOCAL_POINTERS</code></span>
+<span class="codeline" id="line-30"><code>	// NO_LOCAL_POINTERS is a lie. The stack map for the two locals in this</code></span>
+<span class="codeline" id="line-31"><code>	// frame is specially handled in the runtime. See the comment above LOCAL_RETVALID.</code></span>
+<span class="codeline" id="line-32"><code>	LEAQ	LOCAL_REGARGS(SP), R12</code></span>
+<span class="codeline" id="line-33"><code>	CALL	runtime·spillArgs(SB)</code></span>
+<span class="codeline" id="line-34"><code>	MOVQ	DX, 24(SP) // outside of moveMakeFuncArgPtrs's arg area</code></span>
+<span class="codeline" id="line-35"><code>	MOVQ	DX, 0(SP)</code></span>
+<span class="codeline" id="line-36"><code>	MOVQ	R12, 8(SP)</code></span>
+<span class="codeline" id="line-37"><code>	CALL	·moveMakeFuncArgPtrs(SB)</code></span>
+<span class="codeline" id="line-38"><code>	MOVQ	24(SP), DX</code></span>
+<span class="codeline" id="line-39"><code>	MOVQ	DX, 0(SP)</code></span>
+<span class="codeline" id="line-40"><code>	LEAQ	argframe+0(FP), CX</code></span>
+<span class="codeline" id="line-41"><code>	MOVQ	CX, 8(SP)</code></span>
+<span class="codeline" id="line-42"><code>	MOVB	$0, LOCAL_RETVALID(SP)</code></span>
+<span class="codeline" id="line-43"><code>	LEAQ	LOCAL_RETVALID(SP), AX</code></span>
+<span class="codeline" id="line-44"><code>	MOVQ	AX, 16(SP)</code></span>
+<span class="codeline" id="line-45"><code>	LEAQ	LOCAL_REGARGS(SP), AX</code></span>
+<span class="codeline" id="line-46"><code>	MOVQ	AX, 24(SP)</code></span>
+<span class="codeline" id="line-47"><code>	CALL	·callReflect(SB)</code></span>
+<span class="codeline" id="line-48"><code>	LEAQ	LOCAL_REGARGS(SP), R12</code></span>
+<span class="codeline" id="line-49"><code>	CALL	runtime·unspillArgs(SB)</code></span>
+<span class="codeline" id="line-50"><code>	RET</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code>// methodValueCall is the code half of the function returned by makeMethodValue.</code></span>
+<span class="codeline" id="line-53"><code>// See the comment on the declaration of methodValueCall in makefunc.go</code></span>
+<span class="codeline" id="line-54"><code>// for more details.</code></span>
+<span class="codeline" id="line-55"><code>// No arg size here; runtime pulls arg map out of the func value.</code></span>
+<span class="codeline" id="line-56"><code>// This frame contains two locals. See the comment above LOCAL_RETVALID.</code></span>
+<span class="codeline" id="line-57"><code>TEXT ·methodValueCall(SB),(NOSPLIT|WRAPPER),$312</code></span>
+<span class="codeline" id="line-58"><code>	NO_LOCAL_POINTERS</code></span>
+<span class="codeline" id="line-59"><code>	// NO_LOCAL_POINTERS is a lie. The stack map for the two locals in this</code></span>
+<span class="codeline" id="line-60"><code>	// frame is specially handled in the runtime. See the comment above LOCAL_RETVALID.</code></span>
+<span class="codeline" id="line-61"><code>	LEAQ	LOCAL_REGARGS(SP), R12</code></span>
+<span class="codeline" id="line-62"><code>	CALL	runtime·spillArgs(SB)</code></span>
+<span class="codeline" id="line-63"><code>	MOVQ	DX, 24(SP) // outside of moveMakeFuncArgPtrs's arg area</code></span>
+<span class="codeline" id="line-64"><code>	MOVQ	DX, 0(SP)</code></span>
+<span class="codeline" id="line-65"><code>	MOVQ	R12, 8(SP)</code></span>
+<span class="codeline" id="line-66"><code>	CALL	·moveMakeFuncArgPtrs(SB)</code></span>
+<span class="codeline" id="line-67"><code>	MOVQ	24(SP), DX</code></span>
+<span class="codeline" id="line-68"><code>	MOVQ	DX, 0(SP)</code></span>
+<span class="codeline" id="line-69"><code>	LEAQ	argframe+0(FP), CX</code></span>
+<span class="codeline" id="line-70"><code>	MOVQ	CX, 8(SP)</code></span>
+<span class="codeline" id="line-71"><code>	MOVB	$0, LOCAL_RETVALID(SP)</code></span>
+<span class="codeline" id="line-72"><code>	LEAQ	LOCAL_RETVALID(SP), AX</code></span>
+<span class="codeline" id="line-73"><code>	MOVQ	AX, 16(SP)</code></span>
+<span class="codeline" id="line-74"><code>	LEAQ	LOCAL_REGARGS(SP), AX</code></span>
+<span class="codeline" id="line-75"><code>	MOVQ	AX, 24(SP)</code></span>
+<span class="codeline" id="line-76"><code>	CALL	·callMethod(SB)</code></span>
+<span class="codeline" id="line-77"><code>	LEAQ	LOCAL_REGARGS(SP), R12</code></span>
+<span class="codeline" id="line-78"><code>	CALL	runtime·unspillArgs(SB)</code></span>
+<span class="codeline" id="line-79"><code>	RET</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

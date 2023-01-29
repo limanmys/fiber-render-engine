@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: cmac.go in package github.com/hirochachacha/go-smb2/internal/crypto/cmac</title>
+<link href="../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	cmac.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/crypto/cmac.html">github.com/hirochachacha/go-smb2/internal/crypto/cmac</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Portions Copyright 2016 Hiroshi Ioka. All rights reserved.</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// Redistribution and use in source and binary forms, with or without</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// modification, are permitted provided that the following conditions are</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// met:</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//    * Redistributions of source code must retain the above copyright</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// notice, this list of conditions and the following disclaimer.</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">//    * Redistributions in binary form must reproduce the above</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// copyright notice, this list of conditions and the following disclaimer</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// in the documentation and/or other materials provided with the</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// distribution.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//    * Neither the name of Google Inc. nor the names of its</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// contributors may be used to endorse or promote products derived from</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// this software without specific prior written permission.</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// CMAC message authentication code, defined in</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// NIST Special Publication SP 800-38B.</span></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">package</span> cmac</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-36"><code>	<label for="i0"><span class="lit-string i0">"crypto/cipher"</span></label></code></span>
+<span class="codeline" id="line-37"><code>	<label for="i1"><span class="lit-string i1">"hash"</span></label></code></span>
+<span class="codeline" id="line-38"><code>)</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-41"><code>	<span class="comment">// minimal irreducible polynomial of degree b</span></code></span>
+<span class="codeline" id="line-42"><code>	r64  = <span class="lit-number">0x1b</span></code></span>
+<span class="codeline" id="line-43"><code>	r128 = <span class="lit-number">0x87</span></code></span>
+<span class="codeline" id="line-44"><code>)</code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">type</span> cmac <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-47"><code>	k1, k2, ci, digest []<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-48"><code>	p                  <a href="../../../../../../../pkg/builtin.html#name-int" class="ident">int</a> <span class="comment">// position in ci</span></code></span>
+<span class="codeline" id="line-49"><code>	c                  <a href="../../../../../../../pkg/crypto/cipher.html" class="ident i0">cipher</a>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-15" class="ident">Block</a></code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// TODO(rsc): Should this return an error instead of panic?</span></code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// NewCMAC returns a new instance of a CMAC message authentication code</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// digest using the given Cipher.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/crypto/cmac.html#name-New" class="ident">New</a></label>(<label for="r1" class="ident">c</label> <a href="../../../../../../../pkg/crypto/cipher.html" class="ident i0">cipher</a>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-15" class="ident">Block</a>) <a href="../../../../../../../pkg/hash.html" class="ident i1">hash</a>.<a href="../../../../../../hash/hash.go.html#line-26" class="ident">Hash</a> {</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">var</span> <label for="r2" class="ident">r</label> <a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-58"><code>	<label for="r3" class="ident">n</label> := <label for="r1" class="ident">c</label>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-17" class="ident">BlockSize</a>()</code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">switch</span> <label for="r3" class="ident">n</label> {</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">case</span> <span class="lit-number">64</span> / <span class="lit-number">8</span>:</code></span>
+<span class="codeline" id="line-61"><code>		<label for="r2" class="ident">r</label> = <a href="#line-42" class="ident">r64</a></code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">case</span> <span class="lit-number">128</span> / <span class="lit-number">8</span>:</code></span>
+<span class="codeline" id="line-63"><code>		<label for="r2" class="ident">r</label> = <a href="#line-43" class="ident">r128</a></code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-65"><code>		<a href="../../../../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"crypto/cmac: NewCMAC: invalid cipher block size"</span>)</code></span>
+<span class="codeline" id="line-66"><code>	}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code>	<label for="r4" class="ident">d</label> := <a href="../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-46" class="ident">cmac</a>)</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r4" class="ident">d</label>.<a href="#line-49" class="ident">c</a> = <label for="r1" class="ident">c</label></code></span>
+<span class="codeline" id="line-70"><code>	<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a> = <a href="../../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r3" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-71"><code>	<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k2</a> = <a href="../../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r3" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-72"><code>	<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">ci</a> = <a href="../../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r3" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-73"><code>	<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">digest</a> = <a href="../../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r3" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<span class="comment">// Subkey generation, p. 7</span></code></span>
+<span class="codeline" id="line-76"><code>	<label for="r1" class="ident">c</label>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-21" class="ident">Encrypt</a>(<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>, <label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>)</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">if</span> <a href="#line-136" class="ident">shift1</a>(<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>, <label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>) != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-78"><code>		<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>[<label for="r3" class="ident">n</label>-<span class="lit-number">1</span>] ^= <label for="r2" class="ident">r</label></code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <a href="#line-136" class="ident">shift1</a>(<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k1</a>, <label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k2</a>) != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-81"><code>		<label for="r4" class="ident">d</label>.<a href="#line-47" class="ident">k2</a>[<label for="r3" class="ident">n</label>-<span class="lit-number">1</span>] ^= <label for="r2" class="ident">r</label></code></span>
+<span class="codeline" id="line-82"><code>	}</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">return</span> <label for="r4" class="ident">d</label></code></span>
+<span class="codeline" id="line-85"><code>}</code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// Reset clears the digest state, starting a new digest.</span></code></span>
+<span class="codeline" id="line-88"><code><span class="keyword">func</span> (<label for="r5" class="ident">d</label> *<a href="#line-46" class="ident">cmac</a>) <label for="r6" class="ident">Reset</label>() {</code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">for</span> <label for="r7" class="ident">i</label> := <span class="keyword">range</span> <label for="r5" class="ident">d</label>.<a href="#line-47" class="ident">ci</a> {</code></span>
+<span class="codeline" id="line-90"><code>		<label for="r5" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>[<label for="r7" class="ident">i</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-91"><code>	}</code></span>
+<span class="codeline" id="line-92"><code>	<label for="r5" class="ident">d</label>.<a href="#line-48" class="ident">p</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-93"><code>}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// Write adds the given data to the digest state.</span></code></span>
+<span class="codeline" id="line-96"><code><span class="keyword">func</span> (<label for="r8" class="ident">d</label> *<a href="#line-46" class="ident">cmac</a>) <label for="r9" class="ident">Write</label>(<label for="r10" class="ident">p</label> []<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r11" class="ident">n</label> <a href="../../../../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r12" class="ident">err</label> <a href="../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-97"><code>	<span class="comment">// Xor input into ci.</span></code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">for</span> <label for="r13" class="ident">_</label>, <label for="r14" class="ident">c</label> := <span class="keyword">range</span> <label for="r10" class="ident">p</label> {</code></span>
+<span class="codeline" id="line-99"><code>		<span class="comment">// If ci is full, encrypt and start over.</span></code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">if</span> <label for="r8" class="ident">d</label>.<a href="#line-48" class="ident">p</a> &gt;= <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r8" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>) {</code></span>
+<span class="codeline" id="line-101"><code>			<label for="r8" class="ident">d</label>.<a href="#line-49" class="ident">c</a>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-21" class="ident">Encrypt</a>(<label for="r8" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>, <label for="r8" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>)</code></span>
+<span class="codeline" id="line-102"><code>			<label for="r8" class="ident">d</label>.<a href="#line-48" class="ident">p</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-103"><code>		}</code></span>
+<span class="codeline" id="line-104"><code>		<label for="r8" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>[<label for="r8" class="ident">d</label>.<a href="#line-48" class="ident">p</a>] ^= <label for="r14" class="ident">c</label></code></span>
+<span class="codeline" id="line-105"><code>		<label for="r8" class="ident">d</label>.<a href="#line-48" class="ident">p</a>++</code></span>
+<span class="codeline" id="line-106"><code>	}</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">p</label>), <a href="../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// Sum returns the CMAC digest, one cipher block in length,</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// of the data written with Write.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="keyword">func</span> (<label for="r15" class="ident">d</label> *<a href="#line-46" class="ident">cmac</a>) <label for="r16" class="ident">Sum</label>(<label for="r17" class="ident">in</label> []<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) []<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-113"><code>	<span class="comment">// Finish last block, mix in key, encrypt.</span></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">	// Don't edit ci, in case caller wants</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">	// to keep digesting after call to Sum.</span></code></span>
+<span class="codeline" id="line-116"><code>	<label for="r18" class="ident">k</label> := <label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">k1</a></code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">if</span> <label for="r15" class="ident">d</label>.<a href="#line-48" class="ident">p</a> &lt; <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>) {</code></span>
+<span class="codeline" id="line-118"><code>		<label for="r18" class="ident">k</label> = <label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">k2</a></code></span>
+<span class="codeline" id="line-119"><code>	}</code></span>
+<span class="codeline" id="line-120"><code>	<span class="keyword">for</span> <label for="r19" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r19" class="ident">i</label> &lt; <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>); <label for="r19" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-121"><code>		<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>[<label for="r19" class="ident">i</label>] = <label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">ci</a>[<label for="r19" class="ident">i</label>] ^ <label for="r18" class="ident">k</label>[<label for="r19" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-122"><code>	}</code></span>
+<span class="codeline" id="line-123"><code>	<span class="keyword">if</span> <label for="r15" class="ident">d</label>.<a href="#line-48" class="ident">p</a> &lt; <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>) {</code></span>
+<span class="codeline" id="line-124"><code>		<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>[<label for="r15" class="ident">d</label>.<a href="#line-48" class="ident">p</a>] ^= <span class="lit-number">0x80</span></code></span>
+<span class="codeline" id="line-125"><code>	}</code></span>
+<span class="codeline" id="line-126"><code>	<label for="r15" class="ident">d</label>.<a href="#line-49" class="ident">c</a>.<a href="../../../../../../crypto/cipher/cipher.go.html#line-21" class="ident">Encrypt</a>(<label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>, <label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>)</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">return</span> <a href="../../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r17" class="ident">in</label>, <label for="r15" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>...)</code></span>
+<span class="codeline" id="line-128"><code>}</code></span>
+<span class="codeline" id="line-129"><code></code></span>
+<span class="codeline" id="line-130"><code><span class="keyword">func</span> (<label for="r20" class="ident">d</label> *<a href="#line-46" class="ident">cmac</a>) <label for="r21" class="ident">Size</label>() <a href="../../../../../../../pkg/builtin.html#name-int" class="ident">int</a> { <span class="keyword">return</span> <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r20" class="ident">d</label>.<a href="#line-47" class="ident">digest</a>) }</code></span>
+<span class="codeline" id="line-131"><code></code></span>
+<span class="codeline" id="line-132"><code><span class="keyword">func</span> (<label for="r22" class="ident">d</label> *<a href="#line-46" class="ident">cmac</a>) <label for="r23" class="ident">BlockSize</label>() <a href="../../../../../../../pkg/builtin.html#name-int" class="ident">int</a> { <span class="keyword">return</span> <span class="lit-number">16</span> }</code></span>
+<span class="codeline" id="line-133"><code></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">// Utility routines</span></code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code><span class="keyword">func</span> shift1(<label for="r25" class="ident">src</label>, <label for="r26" class="ident">dst</label> []<a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">var</span> <label for="r27" class="ident">b</label> <a href="../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">for</span> <label for="r28" class="ident">i</label> := <a href="../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r25" class="ident">src</label>) - <span class="lit-number">1</span>; <label for="r28" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r28" class="ident">i</label>-- {</code></span>
+<span class="codeline" id="line-139"><code>		<label for="r29" class="ident">bb</label> := <label for="r25" class="ident">src</label>[<label for="r28" class="ident">i</label>] &gt;&gt; <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-140"><code>		<label for="r26" class="ident">dst</label>[<label for="r28" class="ident">i</label>] = <label for="r25" class="ident">src</label>[<label for="r28" class="ident">i</label>]&lt;&lt;<span class="lit-number">1</span> | <label for="r27" class="ident">b</label></code></span>
+<span class="codeline" id="line-141"><code>		<label for="r27" class="ident">b</label> = <label for="r29" class="ident">bb</label></code></span>
+<span class="codeline" id="line-142"><code>	}</code></span>
+<span class="codeline" id="line-143"><code>	<span class="keyword">return</span> <label for="r27" class="ident">b</label></code></span>
+<span class="codeline" id="line-144"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

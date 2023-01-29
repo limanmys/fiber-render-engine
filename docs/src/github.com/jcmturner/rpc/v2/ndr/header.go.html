@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: header.go in package github.com/jcmturner/rpc/v2/ndr</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	header.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html">github.com/jcmturner/rpc/v2/ndr</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> ndr</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>)</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">Serialization Version 1</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">https://msdn.microsoft.com/en-us/library/cc243563.aspx</span></code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">Common Header - https://msdn.microsoft.com/en-us/library/cc243890.aspx</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">8 bytes in total:</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">- First byte - Version: Must equal 1</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">- Second byte -  1st 4 bits: Endianess (0=Big; 1=Little); 2nd 4 bits: Character Encoding (0=ASCII; 1=EBCDIC)</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">- 3rd - Floating point representation (This does not seem to be the case in examples for Microsoft test sources)</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">- 4th - Common Header Length: Must equal 8</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">- 5th - 8th - Filler: MUST be set to 0xcccccccc on marshaling, and SHOULD be ignored during unmarshaling.</span></code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">Private Header - https://msdn.microsoft.com/en-us/library/cc243919.aspx</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">8 bytes in total:</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">- First 4 bytes - Indicates the length of a serialized top-level type in the octet stream. It MUST include the padding length and exclude the header itself.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">- Second 4 bytes - Filler: MUST be set to 0 (zero) during marshaling, and SHOULD be ignored during unmarshaling.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-27"><code>	protocolVersion   <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-28"><code>	commonHeaderBytes <a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a> = <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-29"><code>	bigEndian                = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-30"><code>	littleEndian             = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-31"><code>	ascii             <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-32"><code>	ebcdic            <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-33"><code>	ieee              <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-34"><code>	vax               <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-35"><code>	cray              <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-36"><code>	ibm               <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>  = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-37"><code>)</code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// CommonHeader implements the NDR common header: https://msdn.microsoft.com/en-us/library/cc243889.aspx</span></code></span>
+<span class="codeline" id="line-40"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-CommonHeader" class="ident">CommonHeader</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-41"><code>	Version             <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-42"><code>	Endianness          <a href="../../../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-34" class="ident">ByteOrder</a></code></span>
+<span class="codeline" id="line-43"><code>	CharacterEncoding   <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-44"><code>	FloatRepresentation <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-45"><code>	HeaderLength        <a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-46"><code>	Filler              []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-47"><code>}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// PrivateHeader implements the NDR private header: https://msdn.microsoft.com/en-us/library/cc243919.aspx</span></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html#name-PrivateHeader" class="ident">PrivateHeader</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-51"><code>	ObjectBufferLength <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-52"><code>	Filler             []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-53"><code>}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">func</span> (<label for="r0" class="ident">dec</label> *<a href="decoder.go.html#line-21" class="ident">Decoder</a>) <label for="r1" class="ident">readCommonHeader</label>() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-56"><code>	<span class="comment">// Version</span></code></span>
+<span class="codeline" id="line-57"><code>	<label for="r2" class="ident">vb</label>, <label for="r3" class="ident">err</label> := <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-22" class="ident">r</a>.<a href="../../../../../bufio/bufio.go.html#line-259" class="ident">ReadByte</a>()</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"could not read first byte of common header for version"</span>}</code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-41" class="ident">Version</a> = <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>(<label for="r2" class="ident">vb</label>)</code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">if</span> <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-41" class="ident">Version</a> != <a href="#line-27" class="ident">protocolVersion</a> {</code></span>
+<span class="codeline" id="line-63"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"byte stream does not indicate a RPC Type serialization of version %v"</span>, <a href="#line-27" class="ident">protocolVersion</a>)}</code></span>
+<span class="codeline" id="line-64"><code>	}</code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// Read Endianness &amp; Character Encoding</span></code></span>
+<span class="codeline" id="line-66"><code>	<label for="r4" class="ident">eb</label>, <label for="r3" class="ident">err</label> := <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-22" class="ident">r</a>.<a href="../../../../../bufio/bufio.go.html#line-259" class="ident">ReadByte</a>()</code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"could not read second byte of common header for endianness"</span>}</code></span>
+<span class="codeline" id="line-69"><code>	}</code></span>
+<span class="codeline" id="line-70"><code>	<label for="r5" class="ident">endian</label> := <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r4" class="ident">eb</label> &gt;&gt; <span class="lit-number">4</span> &amp; <span class="lit-number">0xF</span>)</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <label for="r5" class="ident">endian</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r5" class="ident">endian</label> != <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"common header does not indicate a valid endianness"</span>}</code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code>	<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-43" class="ident">CharacterEncoding</a> = <a href="../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>(<label for="r2" class="ident">vb</label> &amp; <span class="lit-number">0xF</span>)</code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">if</span> <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-43" class="ident">CharacterEncoding</a> != <span class="lit-number">0</span> &amp;&amp; <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-43" class="ident">CharacterEncoding</a> != <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-76"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"common header does not indicate a valid character encoding"</span>}</code></span>
+<span class="codeline" id="line-77"><code>	}</code></span>
+<span class="codeline" id="line-78"><code>	<span class="keyword">switch</span> <label for="r5" class="ident">endian</label> {</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">case</span> <a href="#line-30" class="ident">littleEndian</a>:</code></span>
+<span class="codeline" id="line-80"><code>		<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-42" class="ident">Endianness</a> = <a href="../../../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-54" class="ident">LittleEndian</a></code></span>
+<span class="codeline" id="line-81"><code>	<span class="keyword">case</span> <a href="#line-29" class="ident">bigEndian</a>:</code></span>
+<span class="codeline" id="line-82"><code>		<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-42" class="ident">Endianness</a> = <a href="../../../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a></code></span>
+<span class="codeline" id="line-83"><code>	}</code></span>
+<span class="codeline" id="line-84"><code>	<span class="comment">// Common header length</span></code></span>
+<span class="codeline" id="line-85"><code>	<label for="r6" class="ident">lb</label>, <label for="r3" class="ident">err</label> := <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-385" class="ident">readBytes</a>(<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-87"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"could not read common header length: %v"</span>, <label for="r3" class="ident">err</label>)}</code></span>
+<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-89"><code>	<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-45" class="ident">HeaderLength</a> = <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-42" class="ident">Endianness</a>.<a href="../../../../../encoding/binary/binary.go.html#line-35" class="ident">Uint16</a>(<label for="r6" class="ident">lb</label>)</code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">if</span> <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-45" class="ident">HeaderLength</a> != <a href="#line-28" class="ident">commonHeaderBytes</a> {</code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"common header does not indicate a valid length"</span>}</code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code>	<span class="comment">// Filler bytes</span></code></span>
+<span class="codeline" id="line-94"><code>	<label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-46" class="ident">Filler</a>, <label for="r3" class="ident">err</label> = <label for="r0" class="ident">dec</label>.<a href="decoder.go.html#line-385" class="ident">readBytes</a>(<span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-96"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"could not read common header filler: %v"</span>, <label for="r3" class="ident">err</label>)}</code></span>
+<span class="codeline" id="line-97"><code>	}</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-99"><code>}</code></span>
+<span class="codeline" id="line-100"><code></code></span>
+<span class="codeline" id="line-101"><code><span class="keyword">func</span> (<label for="r7" class="ident">dec</label> *<a href="decoder.go.html#line-21" class="ident">Decoder</a>) <label for="r8" class="ident">readPrivateHeader</label>() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-102"><code>	<span class="comment">// The next 8 bytes after the common header comprise the RPC type marshalling private header for constructed types.</span></code></span>
+<span class="codeline" id="line-103"><code>	<label for="r9" class="ident">err</label> := <a href="../../../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-229" class="ident">Read</a>(<label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-22" class="ident">r</a>, <label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-24" class="ident">ch</a>.<a href="#line-42" class="ident">Endianness</a>, &amp;<label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-25" class="ident">ph</a>.<a href="#line-51" class="ident">ObjectBufferLength</a>)</code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"could not read private header object buffer length"</span>}</code></span>
+<span class="codeline" id="line-106"><code>	}</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">if</span> <label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-25" class="ident">ph</a>.<a href="#line-51" class="ident">ObjectBufferLength</a>%<span class="lit-number">8</span> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-108"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <span class="lit-string">"object buffer length not a multiple of 8"</span>}</code></span>
+<span class="codeline" id="line-109"><code>	}</code></span>
+<span class="codeline" id="line-110"><code>	<span class="comment">// Filler bytes</span></code></span>
+<span class="codeline" id="line-111"><code>	<label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-25" class="ident">ph</a>.<a href="#line-52" class="ident">Filler</a>, <label for="r9" class="ident">err</label> = <label for="r7" class="ident">dec</label>.<a href="decoder.go.html#line-385" class="ident">readBytes</a>(<span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-112"><code>	<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-113"><code>		<span class="keyword">return</span> <a href="error.go.html#line-6" class="ident">Malformed</a>{<a href="error.go.html#line-7" class="ident">EText</a>: <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"could not read private header filler: %v"</span>, <label for="r9" class="ident">err</label>)}</code></span>
+<span class="codeline" id="line-114"><code>	}</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

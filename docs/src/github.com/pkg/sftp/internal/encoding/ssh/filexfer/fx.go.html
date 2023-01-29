@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: fx.go in package github.com/pkg/sftp/internal/encoding/ssh/filexfer</title>
+<link href="../../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	fx.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html">github.com/pkg/sftp/internal/encoding/ssh/filexfer</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> filexfer</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-5"><code>)</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// Status defines the SFTP error codes used in SSH_FXP_STATUS response packets.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-Status" class="ident">Status</a> <a href="../../../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Defines the various SSH_FX_* values.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-12"><code>	<span class="comment">// see draft-ietf-secsh-filexfer-02</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">	// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-7</span></code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusOK" class="ident">StatusOK</a> = <a href="#line-8" class="ident">Status</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a>)</code></span>
+<span class="codeline" id="line-15"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusEOF" class="ident">StatusEOF</a></code></span>
+<span class="codeline" id="line-16"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusNoSuchFile" class="ident">StatusNoSuchFile</a></code></span>
+<span class="codeline" id="line-17"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusPermissionDenied" class="ident">StatusPermissionDenied</a></code></span>
+<span class="codeline" id="line-18"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusFailure" class="ident">StatusFailure</a></code></span>
+<span class="codeline" id="line-19"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusBadMessage" class="ident">StatusBadMessage</a></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusNoConnection" class="ident">StatusNoConnection</a></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusConnectionLost" class="ident">StatusConnectionLost</a></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusOPUnsupported" class="ident">StatusOPUnsupported</a></code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-03#section-7</span></code></span>
+<span class="codeline" id="line-25"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV4InvalidHandle" class="ident">StatusV4InvalidHandle</a></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV4NoSuchPath" class="ident">StatusV4NoSuchPath</a></code></span>
+<span class="codeline" id="line-27"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV4FileAlreadyExists" class="ident">StatusV4FileAlreadyExists</a></code></span>
+<span class="codeline" id="line-28"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV4WriteProtect" class="ident">StatusV4WriteProtect</a></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-04#section-7</span></code></span>
+<span class="codeline" id="line-31"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV4NoMedia" class="ident">StatusV4NoMedia</a></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-05#section-7</span></code></span>
+<span class="codeline" id="line-34"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV5NoSpaceOnFilesystem" class="ident">StatusV5NoSpaceOnFilesystem</a></code></span>
+<span class="codeline" id="line-35"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV5QuotaExceeded" class="ident">StatusV5QuotaExceeded</a></code></span>
+<span class="codeline" id="line-36"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV5UnknownPrincipal" class="ident">StatusV5UnknownPrincipal</a></code></span>
+<span class="codeline" id="line-37"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV5LockConflict" class="ident">StatusV5LockConflict</a></code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-06#section-8</span></code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6DirNotEmpty" class="ident">StatusV6DirNotEmpty</a></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6NotADirectory" class="ident">StatusV6NotADirectory</a></code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6InvalidFilename" class="ident">StatusV6InvalidFilename</a></code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6LinkLoop" class="ident">StatusV6LinkLoop</a></code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-07#section-8</span></code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6CannotDelete" class="ident">StatusV6CannotDelete</a></code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6InvalidParameter" class="ident">StatusV6InvalidParameter</a></code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6FileIsADirectory" class="ident">StatusV6FileIsADirectory</a></code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6ByteRangeLockConflict" class="ident">StatusV6ByteRangeLockConflict</a></code></span>
+<span class="codeline" id="line-50"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6ByteRangeLockRefused" class="ident">StatusV6ByteRangeLockRefused</a></code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6DeletePending" class="ident">StatusV6DeletePending</a></code></span>
+<span class="codeline" id="line-52"><code></code></span>
+<span class="codeline" id="line-53"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-08#section-8.1</span></code></span>
+<span class="codeline" id="line-54"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6FileCorrupt" class="ident">StatusV6FileCorrupt</a></code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-10#section-9.1</span></code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6OwnerInvalid" class="ident">StatusV6OwnerInvalid</a></code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6GroupInvalid" class="ident">StatusV6GroupInvalid</a></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-9.1</span></code></span>
+<span class="codeline" id="line-61"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-StatusV6NoMatchingByteRangeLock" class="ident">StatusV6NoMatchingByteRangeLock</a></code></span>
+<span class="codeline" id="line-62"><code>)</code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r0" class="ident">s</label> <a href="#line-8" class="ident">Status</a>) <label for="r1" class="ident">Error</label>() <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">return</span> <label for="r0" class="ident">s</label>.<a href="#line-78" class="ident">String</a>()</code></span>
+<span class="codeline" id="line-66"><code>}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// Is returns true if the target is the same Status code,</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// or target is a StatusPacket with the same Status code.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="keyword">func</span> (<label for="r2" class="ident">s</label> <a href="#line-8" class="ident">Status</a>) <label for="r3" class="ident">Is</label>(<label for="r4" class="ident">target</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <label for="r5" class="ident">target</label>, <label for="r6" class="ident">ok</label> := <label for="r4" class="ident">target</label>.(*<a href="response_packets.go.html#line-10" class="ident">StatusPacket</a>); <label for="r6" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">return</span> <label for="r5" class="ident">target</label>.<a href="response_packets.go.html#line-11" class="ident">StatusCode</a> == <label for="r2" class="ident">s</label></code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">return</span> <label for="r2" class="ident">s</label> == <label for="r4" class="ident">target</label></code></span>
+<span class="codeline" id="line-76"><code>}</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="keyword">func</span> (<label for="r7" class="ident">s</label> <a href="#line-8" class="ident">Status</a>) <label for="r8" class="ident">String</label>() <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">switch</span> <label for="r7" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">StatusOK</a>:</code></span>
+<span class="codeline" id="line-81"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_OK"</span></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">case</span> <a href="#line-15" class="ident">StatusEOF</a>:</code></span>
+<span class="codeline" id="line-83"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_EOF"</span></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">case</span> <a href="#line-16" class="ident">StatusNoSuchFile</a>:</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_SUCH_FILE"</span></code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">case</span> <a href="#line-17" class="ident">StatusPermissionDenied</a>:</code></span>
+<span class="codeline" id="line-87"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_PERMISSION_DENIED"</span></code></span>
+<span class="codeline" id="line-88"><code>	<span class="keyword">case</span> <a href="#line-18" class="ident">StatusFailure</a>:</code></span>
+<span class="codeline" id="line-89"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_FAILURE"</span></code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">case</span> <a href="#line-19" class="ident">StatusBadMessage</a>:</code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_BAD_MESSAGE"</span></code></span>
+<span class="codeline" id="line-92"><code>	<span class="keyword">case</span> <a href="#line-20" class="ident">StatusNoConnection</a>:</code></span>
+<span class="codeline" id="line-93"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_CONNECTION"</span></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">case</span> <a href="#line-21" class="ident">StatusConnectionLost</a>:</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_CONNECTION_LOST"</span></code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">case</span> <a href="#line-22" class="ident">StatusOPUnsupported</a>:</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_OP_UNSUPPORTED"</span></code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">case</span> <a href="#line-25" class="ident">StatusV4InvalidHandle</a>:</code></span>
+<span class="codeline" id="line-99"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_INVALID_HANDLE"</span></code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">case</span> <a href="#line-26" class="ident">StatusV4NoSuchPath</a>:</code></span>
+<span class="codeline" id="line-101"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_SUCH_PATH"</span></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">case</span> <a href="#line-27" class="ident">StatusV4FileAlreadyExists</a>:</code></span>
+<span class="codeline" id="line-103"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_FILE_ALREADY_EXISTS"</span></code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">case</span> <a href="#line-28" class="ident">StatusV4WriteProtect</a>:</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_WRITE_PROTECT"</span></code></span>
+<span class="codeline" id="line-106"><code>	<span class="keyword">case</span> <a href="#line-31" class="ident">StatusV4NoMedia</a>:</code></span>
+<span class="codeline" id="line-107"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_MEDIA"</span></code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">case</span> <a href="#line-34" class="ident">StatusV5NoSpaceOnFilesystem</a>:</code></span>
+<span class="codeline" id="line-109"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_SPACE_ON_FILESYSTEM"</span></code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">case</span> <a href="#line-35" class="ident">StatusV5QuotaExceeded</a>:</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_QUOTA_EXCEEDED"</span></code></span>
+<span class="codeline" id="line-112"><code>	<span class="keyword">case</span> <a href="#line-36" class="ident">StatusV5UnknownPrincipal</a>:</code></span>
+<span class="codeline" id="line-113"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_UNKNOWN_PRINCIPAL"</span></code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">case</span> <a href="#line-37" class="ident">StatusV5LockConflict</a>:</code></span>
+<span class="codeline" id="line-115"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_LOCK_CONFLICT"</span></code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">case</span> <a href="#line-40" class="ident">StatusV6DirNotEmpty</a>:</code></span>
+<span class="codeline" id="line-117"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_DIR_NOT_EMPTY"</span></code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">case</span> <a href="#line-41" class="ident">StatusV6NotADirectory</a>:</code></span>
+<span class="codeline" id="line-119"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NOT_A_DIRECTORY"</span></code></span>
+<span class="codeline" id="line-120"><code>	<span class="keyword">case</span> <a href="#line-42" class="ident">StatusV6InvalidFilename</a>:</code></span>
+<span class="codeline" id="line-121"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_INVALID_FILENAME"</span></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">case</span> <a href="#line-43" class="ident">StatusV6LinkLoop</a>:</code></span>
+<span class="codeline" id="line-123"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_LINK_LOOP"</span></code></span>
+<span class="codeline" id="line-124"><code>	<span class="keyword">case</span> <a href="#line-46" class="ident">StatusV6CannotDelete</a>:</code></span>
+<span class="codeline" id="line-125"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_CANNOT_DELETE"</span></code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">case</span> <a href="#line-47" class="ident">StatusV6InvalidParameter</a>:</code></span>
+<span class="codeline" id="line-127"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_INVALID_PARAMETER"</span></code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">case</span> <a href="#line-48" class="ident">StatusV6FileIsADirectory</a>:</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_FILE_IS_A_DIRECTORY"</span></code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">case</span> <a href="#line-49" class="ident">StatusV6ByteRangeLockConflict</a>:</code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_BYTE_RANGE_LOCK_CONFLICT"</span></code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">case</span> <a href="#line-50" class="ident">StatusV6ByteRangeLockRefused</a>:</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_BYTE_RANGE_LOCK_REFUSED"</span></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">case</span> <a href="#line-51" class="ident">StatusV6DeletePending</a>:</code></span>
+<span class="codeline" id="line-135"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_DELETE_PENDING"</span></code></span>
+<span class="codeline" id="line-136"><code>	<span class="keyword">case</span> <a href="#line-54" class="ident">StatusV6FileCorrupt</a>:</code></span>
+<span class="codeline" id="line-137"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_FILE_CORRUPT"</span></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">case</span> <a href="#line-57" class="ident">StatusV6OwnerInvalid</a>:</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_OWNER_INVALID"</span></code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">case</span> <a href="#line-58" class="ident">StatusV6GroupInvalid</a>:</code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_GROUP_INVALID"</span></code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">case</span> <a href="#line-61" class="ident">StatusV6NoMatchingByteRangeLock</a>:</code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_MATCHING_BYTE_RANGE_LOCK"</span></code></span>
+<span class="codeline" id="line-144"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-145"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"SSH_FX_UNKNOWN(%d)"</span>, <label for="r7" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-146"><code>	}</code></span>
+<span class="codeline" id="line-147"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

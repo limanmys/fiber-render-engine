@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: reflect</title>
+<link href="../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>reflect</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../index.html#pkg-reflect">reflect</a><i> (on <a href="https://pkg.go.dev/reflect" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../dep/reflect.html">13 packages</a>, and imported by <a href="../dep/reflect.html#imported-by">41 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../src/reflect/abi.go.html">abi.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/deepequal.go.html">deepequal.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/float32reg_generic.go.html">float32reg_generic.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/makefunc.go.html">makefunc.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/swapper.go.html">swapper.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-5-fold-content"><label for="file-5-fold-content">   <a href="../src/reflect/type.go.html#doc">#d</a> <a href="../src/reflect/type.go.html">type.go</a></label><span id='file-5-fold-content-items' class="fold-items">
+<span class="md-text">		Package reflect implements run-time reflection, allowing a program to
+		manipulate objects with arbitrary types. The typical use is to take a value
+		with static type interface{} and extract its dynamic type information by
+		calling TypeOf, which returns a Type.
+		
+		A call to ValueOf returns a Value representing the run-time data.
+		Zero takes a Type and returns a Value representing a zero value
+		for that type.
+		
+		See "The Laws of Reflection" for an introduction to reflection in Go:
+		https://golang.org/doc/articles/laws_of_reflection.html</span>
+</span>
+	<span class="nodocs">      <a href="../src/reflect/value.go.html">value.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/visiblefields.go.html">visiblefields.go</a></span>
+	<span class="nodocs">      <a href="../src/reflect/asm_amd64.s.html">asm_amd64.s</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Kind</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			for _, v := range []any{"hi", 42, func() {}} {
+				switch v := reflect.ValueOf(v); v.Kind() {
+				case reflect.String:
+					fmt.Println(v.String())
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					fmt.Println(v.Int())
+				default:
+					fmt.Printf("unhandled kind %s", v.Kind())
+				}
+			}
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">MakeFunc</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			// swap is the implementation passed to MakeFunc.
+			// It must work in terms of reflect.Values so that it is possible
+			// to write code without knowing beforehand what the types
+			// will be.
+			swap := func(in []reflect.Value) []reflect.Value {
+				return []reflect.Value{in[1], in[0]}
+			}
+		
+			// makeSwap expects fptr to be a pointer to a nil function.
+			// It sets that pointer to a new function created with MakeFunc.
+			// When the function is invoked, reflect turns the arguments
+			// into Values, calls swap, and then turns swap's result slice
+			// into the values returned by the new function.
+			makeSwap := func(fptr any) {
+				// fptr is a pointer to a function.
+				// Obtain the function value itself (likely nil) as a reflect.Value
+				// so that we can query its type and then set the value.
+				fn := reflect.ValueOf(fptr).Elem()
+		
+				// Make a function of the right type.
+				v := reflect.MakeFunc(fn.Type(), swap)
+		
+				// Assign it to the value fn represents.
+				fn.Set(v)
+			}
+		
+			// Make and call a swap function for ints.
+			var intSwap func(int, int) (int, int)
+			makeSwap(&amp;intSwap)
+			fmt.Println(intSwap(0, 1))
+		
+			// Make and call a swap function for float64s.
+			var floatSwap func(float64, float64) (float64, float64)
+			makeSwap(&amp;floatSwap)
+			fmt.Println(floatSwap(2.72, 3.14))
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">StructOf</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"bytes"
+			"encoding/json"
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			typ := reflect.StructOf([]reflect.StructField{
+				{
+					Name: "Height",
+					Type: reflect.TypeOf(float64(0)),
+					Tag:  `json:"height"`,
+				},
+				{
+					Name: "Age",
+					Type: reflect.TypeOf(int(0)),
+					Tag:  `json:"age"`,
+				},
+			})
+		
+			v := reflect.New(typ).Elem()
+			v.Field(0).SetFloat(0.4)
+			v.Field(1).SetInt(2)
+			s := v.Addr().Interface()
+		
+			w := new(bytes.Buffer)
+			if err := json.NewEncoder(w).Encode(s); err != nil {
+				panic(err)
+			}
+		
+			fmt.Printf("value: %+v\n", s)
+			fmt.Printf("json:  %s", w.Bytes())
+		
+			r := bytes.NewReader([]byte(`{"height":1.5,"age":10}`))
+			if err := json.NewDecoder(r).Decode(s); err != nil {
+				panic(err)
+			}
+			fmt.Printf("value: %+v\n", s)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">StructTag</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			type S struct {
+				F string `species:"gopher" color:"blue"`
+			}
+		
+			s := S{}
+			st := reflect.TypeOf(s)
+			field := st.Field(0)
+			fmt.Println(field.Tag.Get("color"), field.Tag.Get("species"))
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-4-fold-content"><label for="example-4-fold-content">StructTag_Lookup</label><span id='example-4-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			type S struct {
+				F0 string `alias:"field_0"`
+				F1 string `alias:""`
+				F2 string
+			}
+		
+			s := S{}
+			st := reflect.TypeOf(s)
+			for i := 0; i &lt; st.NumField(); i++ {
+				field := st.Field(i)
+				if alias, ok := field.Tag.Lookup("alias"); ok {
+					if alias == "" {
+						fmt.Println("(blank)")
+					} else {
+						fmt.Println(alias)
+					}
+				} else {
+					fmt.Println("(not specified)")
+				}
+			}
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-5-fold-content"><label for="example-5-fold-content">TypeOf</label><span id='example-5-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"io"
+			"os"
+			"reflect"
+		)
+		
+		func main() {
+			// As interface types are only used for static typing, a
+			// common idiom to find the reflection Type for an interface
+			// type Foo is to use a *Foo value.
+			writerType := reflect.TypeOf((*io.Writer)(nil)).Elem()
+		
+			fileType := reflect.TypeOf((*os.File)(nil))
+			fmt.Println(fileType.Implements(writerType))
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-6-fold-content"><label for="example-6-fold-content">Value_FieldByIndex</label><span id='example-6-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			// This example shows a case in which the name of a promoted field
+			// is hidden by another field: FieldByName will not work, so
+			// FieldByIndex must be used instead.
+			type user struct {
+				firstName string
+				lastName  string
+			}
+		
+			type data struct {
+				user
+				firstName string
+				lastName  string
+			}
+		
+			u := data{
+				user:      user{"Embedded John", "Embedded Doe"},
+				firstName: "John",
+				lastName:  "Doe",
+			}
+		
+			s := reflect.ValueOf(u).FieldByIndex([]int{0, 1})
+			fmt.Println("embedded last name:", s)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-7-fold-content"><label for="example-7-fold-content">Value_FieldByName</label><span id='example-7-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"reflect"
+		)
+		
+		func main() {
+			type user struct {
+				firstName string
+				lastName  string
+			}
+			u := user{firstName: "John", lastName: "Doe"}
+			s := reflect.ValueOf(u)
+		
+			fmt.Println("Name:", s.FieldByName("firstName"))
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 13)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-ChanDir" data-popularity="275">	<input type='checkbox' class="fold" id="ChanDir-fold-content"><label for="ChanDir-fold-content"> type <a href="../src/reflect/type.go.html#line-355">ChanDir</a> <a href="builtin.html#name-int">int</a> <i>(basic type)</i></label><span id='ChanDir-fold-content-docs' class="fold-docs">
+<span class="md-text">		ChanDir represents a channel type's direction.</span>
+
+		<input type='checkbox' class="fold" id="ChanDir-fold-methods"><label for="ChanDir-fold-methods">Methods (<i>only one</i>)</label><span id='ChanDir-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( ChanDir) <a href="../src/reflect/type.go.html#line-1097">String</a>() <a href="builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="ChanDir-fold-impls"><label for="ChanDir-fold-impls">Implements (<i>at least 2</i>)</label><span id='ChanDir-fold-impls-items' class="fold-items"><span>
+			 ChanDir : fmt.<a href="fmt.html#name-Stringer">Stringer</a></span><span>
+			 ChanDir : github.com/ChrisTrenkamp/goxpath/tree.<a href="github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="ChanDir-fold-results"><label for="ChanDir-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='ChanDir-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-142">ChanDir</a>() <b>ChanDir</b></span></span>
+		<input type='checkbox' class="fold" id="ChanDir-fold-params"><label for="ChanDir-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='ChanDir-fold-params-items' class="fold-items"><span>
+			func <a href="#name-ChanOf">ChanOf</a>(dir <b>ChanDir</b>, t <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></span></span>
+		<input type='checkbox' class="fold" id="ChanDir-fold-values"><label for="ChanDir-fold-values">As Types Of (<i>total 3</i>)</label><span id='ChanDir-fold-values-items' class="fold-items"><span>
+			const <a href="#name-BothDir">BothDir</a></span><span>
+			const <a href="#name-RecvDir">RecvDir</a></span><span>
+			const <a href="#name-SendDir">SendDir</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Kind" data-popularity="315">	<input type='checkbox' class="fold" id="Kind-fold-content"><label for="Kind-fold-content"> type <a href="../src/reflect/type.go.html#line-241">Kind</a> <a href="builtin.html#name-uint">uint</a> <i>(basic type)</i></label><span id='Kind-fold-content-docs' class="fold-docs">
+<span class="md-text">		A Kind represents the specific kind of type that a Type represents.
+		The zero Kind is not a valid kind.</span>
+
+		<input type='checkbox' class="fold" id="Kind-fold-methods"><label for="Kind-fold-methods">Methods (<i>only one</i>)</label><span id='Kind-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Kind-fold-method-String"><label for="Kind-fold-method-String">( Kind) <a href="../src/reflect/type.go.html#line-641">String</a>() <a href="builtin.html#name-string">string</a></label><span id='Kind-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns the name of k.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Kind-fold-impls"><label for="Kind-fold-impls">Implements (<i>at least 2</i>)</label><span id='Kind-fold-impls-items' class="fold-items"><span>
+			 Kind : fmt.<a href="fmt.html#name-Stringer">Stringer</a></span><span>
+			 Kind : github.com/ChrisTrenkamp/goxpath/tree.<a href="github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Kind-fold-results"><label for="Kind-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Kind-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-103">Kind</a>() <b>Kind</b></span><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-1608">Kind</a>() <b>Kind</b></span></span>
+		<input type='checkbox' class="fold" id="Kind-fold-values"><label for="Kind-fold-values">As Types Of (<i>total 28</i>)</label><span id='Kind-fold-values-items' class="fold-items"><span>
+			const <a href="#name-Array">Array</a></span><span>
+			const <a href="#name-Bool">Bool</a></span><span>
+			const <a href="#name-Chan">Chan</a></span><span>
+			const <a href="#name-Complex128">Complex128</a></span><span>
+			const <a href="#name-Complex64">Complex64</a></span><span>
+			const <a href="#name-Float32">Float32</a></span><span>
+			const <a href="#name-Float64">Float64</a></span><span>
+			const <a href="#name-Func">Func</a></span><span>
+			const <a href="#name-Int">Int</a></span><span>
+			const <a href="#name-Int16">Int16</a></span><span>
+			const <a href="#name-Int32">Int32</a></span><span>
+			const <a href="#name-Int64">Int64</a></span><span>
+			const <a href="#name-Int8">Int8</a></span><span>
+			const <a href="#name-Interface">Interface</a></span><span>
+			const <a href="#name-Invalid">Invalid</a></span><span>
+			const <a href="#name-Map">Map</a></span><span>
+			const <a href="#name-Pointer">Pointer</a></span><span>
+			const <a href="#name-Ptr">Ptr</a></span><span>
+			const <a href="#name-Slice">Slice</a></span><span>
+			const <a href="#name-String">String</a></span><span>
+			const <a href="#name-Struct">Struct</a></span><span>
+			const <a href="#name-Uint">Uint</a></span><span>
+			const <a href="#name-Uint16">Uint16</a></span><span>
+			const <a href="#name-Uint32">Uint32</a></span><span>
+			const <a href="#name-Uint64">Uint64</a></span><span>
+			const <a href="#name-Uint8">Uint8</a></span><span>
+			const <a href="#name-Uintptr">Uintptr</a></span><span>
+			const <a href="#name-UnsafePointer">UnsafePointer</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-MapIter" data-popularity="345">	<input type='checkbox' class="fold" id="MapIter-fold-content"><label for="MapIter-fold-content"> type <a href="../src/reflect/value.go.html#line-1746">MapIter</a> <i>(struct)</i></label><span id='MapIter-fold-content-docs' class="fold-docs">
+<span class="md-text">		A MapIter is an iterator for ranging over a map.
+		See Value.MapRange.</span>
+
+		<input type='checkbox' class="fold" id="MapIter-fold-methods"><label for="MapIter-fold-methods">Methods (<i>total 4</i>)</label><span id='MapIter-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="MapIter-fold-method-Key"><label for="MapIter-fold-method-Key">(*MapIter) <a href="../src/reflect/value.go.html#line-1752">Key</a>() <a href="#name-Value">Value</a></label><span id='MapIter-fold-method-Key-docs' class="fold-docs">
+<span class="md-text">				Key returns the key of iter's current map entry.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapIter-fold-method-Next"><label for="MapIter-fold-method-Next">(*MapIter) <a href="../src/reflect/value.go.html#line-1836">Next</a>() <a href="builtin.html#name-bool">bool</a></label><span id='MapIter-fold-method-Next-docs' class="fold-docs">
+<span class="md-text">				Next advances the map iterator and reports whether there is another
+				entry. It returns false when iter is exhausted; subsequent
+				calls to Key, Value, or Next will panic.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapIter-fold-method-Reset"><label for="MapIter-fold-method-Reset">(*MapIter) <a href="../src/reflect/value.go.html#line-1855">Reset</a>(v <a href="#name-Value">Value</a>)</label><span id='MapIter-fold-method-Reset-docs' class="fold-docs">
+<span class="md-text">				Reset modifies iter to iterate over v.
+				It panics if v's Kind is not Map and v is not the zero Value.
+				Reset(Value{}) causes iter to not to refer to any map,
+				which may allow the previously iterated-over map to be garbage collected.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapIter-fold-method-Value"><label for="MapIter-fold-method-Value">(*MapIter) <a href="../src/reflect/value.go.html#line-1793">Value</a>() <a href="#name-Value">Value</a></label><span id='MapIter-fold-method-Value-docs' class="fold-docs">
+<span class="md-text">				Value returns the value of iter's current map entry.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="MapIter-fold-results"><label for="MapIter-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='MapIter-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-1878">MapRange</a>() *<b>MapIter</b></span></span>
+		<input type='checkbox' class="fold" id="MapIter-fold-params"><label for="MapIter-fold-params">As Inputs Of (<i>at least 2</i>)</label><span id='MapIter-fold-params-items' class="fold-items"><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-1769">SetIterKey</a>(iter *<b>MapIter</b>)</span><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-1810">SetIterValue</a>(iter *<b>MapIter</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Method" data-popularity="200">	<input type='checkbox' class="fold" id="Method-fold-content"><label for="Method-fold-content"> type <a href="../src/reflect/type.go.html#line-613">Method</a> <i>(struct)</i></label><span id='Method-fold-content-docs' class="fold-docs">
+<span class="md-text">		Method represents a single method.</span>
+
+		<input type='checkbox' class="fold" id="Method-fold-fields"><label for="Method-fold-fields">Fields (<i>total 5</i>)</label><span id='Method-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Method-fold-field-Func"><label for="Method-fold-field-Func"><a href="../src/reflect/type.go.html#line-625">Func</a> <i><a href="#name-Value">Value</a></i></label><span id='Method-fold-field-Func-docs' class="fold-docs">
+<span class="md-text">				// func with receiver as first argument</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Method-fold-field-Index"><label for="Method-fold-field-Index"><a href="../src/reflect/type.go.html#line-626">Index</a> <i><a href="builtin.html#name-int">int</a></i></label><span id='Method-fold-field-Index-docs' class="fold-docs">
+<span class="md-text">				// index for Type.Method</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Method-fold-field-Name"><label for="Method-fold-field-Name"><a href="../src/reflect/type.go.html#line-615">Name</a> <i><a href="builtin.html#name-string">string</a></i></label><span id='Method-fold-field-Name-docs' class="fold-docs">
+<span class="md-text">				Name is the method name.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Method-fold-field-PkgPath"><label for="Method-fold-field-PkgPath"><a href="../src/reflect/type.go.html#line-622">PkgPath</a> <i><a href="builtin.html#name-string">string</a></i></label><span id='Method-fold-field-PkgPath-docs' class="fold-docs">
+<span class="md-text">				PkgPath is the package path that qualifies a lower case (unexported)
+				method name. It is empty for upper case (exported) method names.
+				The combination of PkgPath and Name uniquely identifies a method
+				in a method set.
+				See https://golang.org/ref/spec#Uniqueness_of_identifiers</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Method-fold-field-Type"><label for="Method-fold-field-Type"><a href="../src/reflect/type.go.html#line-624">Type</a> <i><a href="#name-Type">Type</a></i></label><span id='Method-fold-field-Type-docs' class="fold-docs">
+<span class="md-text">				// method type</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Method-fold-methods"><label for="Method-fold-methods">Methods (<i>only one</i>)</label><span id='Method-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Method-fold-method-IsExported"><label for="Method-fold-method-IsExported">( Method) <a href="../src/reflect/type.go.html#line-630">IsExported</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Method-fold-method-IsExported-docs' class="fold-docs">
+<span class="md-text">				IsExported reports whether the method is exported.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Method-fold-results"><label for="Method-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Method-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-61">Method</a>(<a href="builtin.html#name-int">int</a>) <b>Method</b></span><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-71">MethodByName</a>(<a href="builtin.html#name-string">string</a>) (<b>Method</b>, <a href="builtin.html#name-bool">bool</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-SelectCase" data-popularity="35">	<input type='checkbox' class="fold" id="SelectCase-fold-content"><label for="SelectCase-fold-content"> type <a href="../src/reflect/value.go.html#line-2857">SelectCase</a> <i>(struct)</i></label><span id='SelectCase-fold-content-docs' class="fold-docs">
+<span class="md-text">		A SelectCase describes a single case in a select operation.
+		The kind of case depends on Dir, the communication direction.
+		
+		If Dir is SelectDefault, the case represents a default case.
+		Chan and Send must be zero Values.
+		
+		If Dir is SelectSend, the case represents a send operation.
+		Normally Chan's underlying value must be a channel, and Send's underlying value must be
+		assignable to the channel's element type. As a special case, if Chan is a zero Value,
+		then the case is ignored, and the field Send will also be ignored and may be either zero
+		or non-zero.
+		
+		If Dir is SelectRecv, the case represents a receive operation.
+		Normally Chan's underlying value must be a channel and Send must be a zero Value.
+		If Chan is a zero Value, then the case is ignored, but Send must still be a zero Value.
+		When a receive operation is selected, the received Value is returned by Select.</span>
+
+		<input type='checkbox' class="fold" id="SelectCase-fold-fields"><label for="SelectCase-fold-fields">Fields (<i>total 3</i>)</label><span id='SelectCase-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="SelectCase-fold-field-Chan"><label for="SelectCase-fold-field-Chan"><a href="../src/reflect/value.go.html#line-2859">Chan</a> <i><a href="#name-Value">Value</a></i></label><span id='SelectCase-fold-field-Chan-docs' class="fold-docs">
+<span class="md-text">				// channel to use (for send or receive)</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SelectCase-fold-field-Dir"><label for="SelectCase-fold-field-Dir"><a href="../src/reflect/value.go.html#line-2858">Dir</a> <i><a href="#name-SelectDir">SelectDir</a></i></label><span id='SelectCase-fold-field-Dir-docs' class="fold-docs">
+<span class="md-text">				// direction of case</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SelectCase-fold-field-Send"><label for="SelectCase-fold-field-Send"><a href="../src/reflect/value.go.html#line-2860">Send</a> <i><a href="#name-Value">Value</a></i></label><span id='SelectCase-fold-field-Send-docs' class="fold-docs">
+<span class="md-text">				// value to send (for send)</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SelectCase-fold-params"><label for="SelectCase-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='SelectCase-fold-params-items' class="fold-items"><span>
+			func <a href="#name-Select">Select</a>(cases []<b>SelectCase</b>) (chosen <a href="builtin.html#name-int">int</a>, recv <a href="#name-Value">Value</a>, recvOK <a href="builtin.html#name-bool">bool</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-SelectDir" data-popularity="15">	<input type='checkbox' class="fold" id="SelectDir-fold-content"><label for="SelectDir-fold-content"> type <a href="../src/reflect/value.go.html#line-2830">SelectDir</a> <a href="builtin.html#name-int">int</a> <i>(basic type)</i></label><span id='SelectDir-fold-content-docs' class="fold-docs">
+<span class="md-text">		A SelectDir describes the communication direction of a select case.</span>
+
+		<input type='checkbox' class="fold" id="SelectDir-fold-values"><label for="SelectDir-fold-values">As Types Of (<i>total 3</i>)</label><span id='SelectDir-fold-values-items' class="fold-items"><span>
+			const <a href="#name-SelectDefault">SelectDefault</a></span><span>
+			const <a href="#name-SelectRecv">SelectRecv</a></span><span>
+			const <a href="#name-SelectSend">SelectSend</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-SliceHeader" data-popularity="0">	<input type='checkbox' class="fold" id="SliceHeader-fold-content"><label for="SliceHeader-fold-content"> type <a href="../src/reflect/value.go.html#line-2681">SliceHeader</a> <i>(struct)</i></label><span id='SliceHeader-fold-content-docs' class="fold-docs">
+<span class="md-text">		SliceHeader is the runtime representation of a slice.
+		It cannot be used safely or portably and its representation may
+		change in a later release.
+		Moreover, the Data field is not sufficient to guarantee the data
+		it references will not be garbage collected, so programs must keep
+		a separate, correctly typed pointer to the underlying data.</span>
+
+		<input type='checkbox' class="fold" id="SliceHeader-fold-fields"><label for="SliceHeader-fold-fields">Fields (<i>total 3</i>)</label><span id='SliceHeader-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-2684">Cap</a> <i><a href="builtin.html#name-int">int</a></i></span></span><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-2682">Data</a> <i><a href="builtin.html#name-uintptr">uintptr</a></i></span></span><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-2683">Len</a> <i><a href="builtin.html#name-int">int</a></i></span></span></span>
+
+</span></div><div class="anchor type-res" id="name-StringHeader" data-popularity="0">	<input type='checkbox' class="fold" id="StringHeader-fold-content"><label for="StringHeader-fold-content"> type <a href="../src/reflect/value.go.html#line-2670">StringHeader</a> <i>(struct)</i></label><span id='StringHeader-fold-content-docs' class="fold-docs">
+<span class="md-text">		StringHeader is the runtime representation of a string.
+		It cannot be used safely or portably and its representation may
+		change in a later release.
+		Moreover, the Data field is not sufficient to guarantee the data
+		it references will not be garbage collected, so programs must keep
+		a separate, correctly typed pointer to the underlying data.</span>
+
+		<input type='checkbox' class="fold" id="StringHeader-fold-fields"><label for="StringHeader-fold-fields">Fields (<i>total 2</i>)</label><span id='StringHeader-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-2671">Data</a> <i><a href="builtin.html#name-uintptr">uintptr</a></i></span></span><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-2672">Len</a> <i><a href="builtin.html#name-int">int</a></i></span></span></span>
+
+</span></div><div class="anchor type-res" id="name-StructField" data-popularity="495">	<input type='checkbox' class="fold" id="StructField-fold-content"><label for="StructField-fold-content"> type <a href="../src/reflect/type.go.html#line-1147">StructField</a> <i>(struct)</i></label><span id='StructField-fold-content-docs' class="fold-docs">
+<span class="md-text">		A StructField describes a single field in a struct.</span>
+
+		<input type='checkbox' class="fold" id="StructField-fold-fields"><label for="StructField-fold-fields">Fields (<i>total 7</i>)</label><span id='StructField-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Anonymous"><label for="StructField-fold-field-Anonymous"><a href="../src/reflect/type.go.html#line-1160">Anonymous</a> <i><a href="builtin.html#name-bool">bool</a></i></label><span id='StructField-fold-field-Anonymous-docs' class="fold-docs">
+<span class="md-text">				// is an embedded field</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Index"><label for="StructField-fold-field-Index"><a href="../src/reflect/type.go.html#line-1159">Index</a> <i>[]<a href="builtin.html#name-int">int</a></i></label><span id='StructField-fold-field-Index-docs' class="fold-docs">
+<span class="md-text">				// index sequence for Type.FieldByIndex</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Name"><label for="StructField-fold-field-Name"><a href="../src/reflect/type.go.html#line-1149">Name</a> <i><a href="builtin.html#name-string">string</a></i></label><span id='StructField-fold-field-Name-docs' class="fold-docs">
+<span class="md-text">				Name is the field name.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Offset"><label for="StructField-fold-field-Offset"><a href="../src/reflect/type.go.html#line-1158">Offset</a> <i><a href="builtin.html#name-uintptr">uintptr</a></i></label><span id='StructField-fold-field-Offset-docs' class="fold-docs">
+<span class="md-text">				// offset within struct, in bytes</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-PkgPath"><label for="StructField-fold-field-PkgPath"><a href="../src/reflect/type.go.html#line-1154">PkgPath</a> <i><a href="builtin.html#name-string">string</a></i></label><span id='StructField-fold-field-PkgPath-docs' class="fold-docs">
+<span class="md-text">				PkgPath is the package path that qualifies a lower case (unexported)
+				field name. It is empty for upper case (exported) field names.
+				See https://golang.org/ref/spec#Uniqueness_of_identifiers</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Tag"><label for="StructField-fold-field-Tag"><a href="../src/reflect/type.go.html#line-1157">Tag</a> <i><a href="#name-StructTag">StructTag</a></i></label><span id='StructField-fold-field-Tag-docs' class="fold-docs">
+<span class="md-text">				// field tag string</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructField-fold-field-Type"><label for="StructField-fold-field-Type"><a href="../src/reflect/type.go.html#line-1156">Type</a> <i><a href="#name-Type">Type</a></i></label><span id='StructField-fold-field-Type-docs' class="fold-docs">
+<span class="md-text">				// field type</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StructField-fold-methods"><label for="StructField-fold-methods">Methods (<i>only one</i>)</label><span id='StructField-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StructField-fold-method-IsExported"><label for="StructField-fold-method-IsExported">( StructField) <a href="../src/reflect/type.go.html#line-1164">IsExported</a>() <a href="builtin.html#name-bool">bool</a></label><span id='StructField-fold-method-IsExported-docs' class="fold-docs">
+<span class="md-text">				IsExported reports whether the field is exported.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StructField-fold-results"><label for="StructField-fold-results">As Outputs Of (<i>at least 5</i>)</label><span id='StructField-fold-results-items' class="fold-items"><span>
+			func <a href="#name-VisibleFields">VisibleFields</a>(t <a href="#name-Type">Type</a>) []<b>StructField</b></span><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-165">Field</a>(i <a href="builtin.html#name-int">int</a>) <b>StructField</b></span><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-171">FieldByIndex</a>(index []<a href="builtin.html#name-int">int</a>) <b>StructField</b></span><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-175">FieldByName</a>(name <a href="builtin.html#name-string">string</a>) (<b>StructField</b>, <a href="builtin.html#name-bool">bool</a>)</span><span>
+			func <a href="#name-Type">Type</a>.<a href="../src/reflect/type.go.html#line-189">FieldByNameFunc</a>(match func(<a href="builtin.html#name-string">string</a>) <a href="builtin.html#name-bool">bool</a>) (<b>StructField</b>, <a href="builtin.html#name-bool">bool</a>)</span></span>
+		<input type='checkbox' class="fold" id="StructField-fold-params"><label for="StructField-fold-params">As Inputs Of (<i>at least 2</i>)</label><span id='StructField-fold-params-items' class="fold-items"><span>
+			func <a href="#name-StructOf">StructOf</a>(fields []<b>StructField</b>) <a href="#name-Type">Type</a></span><span>
+			func gorm.io/gorm/schema.(*<a href="gorm.io/gorm/schema.html#name-Schema">Schema</a>).<a href="../src/gorm.io/gorm/schema/field.go.html#line-93">ParseField</a>(fieldStruct <b>StructField</b>) *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-StructTag" data-popularity="100">	<input type='checkbox' class="fold" id="StructTag-fold-content"><label for="StructTag-fold-content"> type <a href="../src/reflect/type.go.html#line-1176">StructTag</a> <a href="builtin.html#name-string">string</a> <i>(basic type)</i></label><span id='StructTag-fold-content-docs' class="fold-docs">
+<span class="md-text">		A StructTag is the tag string in a struct field.
+		
+		By convention, tag strings are a concatenation of
+		optionally space-separated key:"value" pairs.
+		Each key is a non-empty string consisting of non-control
+		characters other than space (U+0020 ' '), quote (U+0022 '"'),
+		and colon (U+003A ':').  Each value is quoted using U+0022 '"'
+		characters and Go string literal syntax.</span>
+
+		<input type='checkbox' class="fold" id="StructTag-fold-methods"><label for="StructTag-fold-methods">Methods (<i>total 2</i>)</label><span id='StructTag-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StructTag-fold-method-Get"><label for="StructTag-fold-method-Get">( StructTag) <a href="../src/reflect/type.go.html#line-1183">Get</a>(key <a href="builtin.html#name-string">string</a>) <a href="builtin.html#name-string">string</a></label><span id='StructTag-fold-method-Get-docs' class="fold-docs">
+<span class="md-text">				Get returns the value associated with key in the tag string.
+				If there is no such key in the tag, Get returns the empty string.
+				If the tag does not have the conventional format, the value
+				returned by Get is unspecified. To determine whether a tag is
+				explicitly set to the empty string, use Lookup.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StructTag-fold-method-Lookup"><label for="StructTag-fold-method-Lookup">( StructTag) <a href="../src/reflect/type.go.html#line-1194">Lookup</a>(key <a href="builtin.html#name-string">string</a>) (value <a href="builtin.html#name-string">string</a>, ok <a href="builtin.html#name-bool">bool</a>)</label><span id='StructTag-fold-method-Lookup-docs' class="fold-docs">
+<span class="md-text">				Lookup returns the value associated with key in the tag string.
+				If the key is present in the tag the value (which may be empty)
+				is returned. Otherwise the returned value will be the empty string.
+				The ok return value reports whether the value was explicitly set in
+				the tag string. If the tag does not have the conventional format,
+				the value returned by Lookup is unspecified.</span>
+</span></span></span>
+
+</span></div><div class="anchor type-res" id="name-Type" data-popularity="3725">	<input type='checkbox' class="fold" id="Type-fold-content"><label for="Type-fold-content"> type <a href="../src/reflect/type.go.html#line-39">Type</a> <b><i>(interface)</i></b></label><span id='Type-fold-content-docs' class="fold-docs">
+<span class="md-text">		Type is the representation of a Go type.
+		
+		Not all methods apply to all kinds of types. Restrictions,
+		if any, are noted in the documentation for each method.
+		Use the Kind method to find out the kind of type before
+		calling kind-specific methods. Calling a method
+		inappropriate to the kind of type causes a run-time panic.
+		
+		Type values are comparable, such as with the == operator,
+		so they can be used as map keys.
+		Two Type values are equal if they represent identical types.</span>
+
+		<input type='checkbox' class="fold" id="Type-fold-methods"><label for="Type-fold-methods">Methods (<i>total 29</i>)</label><span id='Type-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Align"><label for="Type-fold-method-Align">( Type) <a href="../src/reflect/type.go.html#line-44">Align</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-Align-docs' class="fold-docs">
+<span class="md-text">				Align returns the alignment in bytes of a value of
+				this type when allocated in memory.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-AssignableTo"><label for="Type-fold-method-AssignableTo">( Type) <a href="../src/reflect/type.go.html#line-109">AssignableTo</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></label><span id='Type-fold-method-AssignableTo-docs' class="fold-docs">
+<span class="md-text">				AssignableTo reports whether a value of the type is assignable to type u.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Bits"><label for="Type-fold-method-Bits">( Type) <a href="../src/reflect/type.go.html#line-138">Bits</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-Bits-docs' class="fold-docs">
+<span class="md-text">				Bits returns the size of the type in bits.
+				It panics if the type's Kind is not one of the
+				sized or unsized Int, Uint, Float, or Complex kinds.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-ChanDir"><label for="Type-fold-method-ChanDir">( Type) <a href="../src/reflect/type.go.html#line-142">ChanDir</a>() <a href="#name-ChanDir">ChanDir</a></label><span id='Type-fold-method-ChanDir-docs' class="fold-docs">
+<span class="md-text">				ChanDir returns a channel type's direction.
+				It panics if the type's Kind is not Chan.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Comparable"><label for="Type-fold-method-Comparable">( Type) <a href="../src/reflect/type.go.html#line-121">Comparable</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Type-fold-method-Comparable-docs' class="fold-docs">
+<span class="md-text">				Comparable reports whether values of this type are comparable.
+				Even if Comparable returns true, the comparison may still panic.
+				For example, values of interface type are comparable,
+				but the comparison will panic if their dynamic type is not comparable.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-ConvertibleTo"><label for="Type-fold-method-ConvertibleTo">( Type) <a href="../src/reflect/type.go.html#line-115">ConvertibleTo</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></label><span id='Type-fold-method-ConvertibleTo-docs' class="fold-docs">
+<span class="md-text">				ConvertibleTo reports whether a value of the type is convertible to type u.
+				Even if ConvertibleTo returns true, the conversion may still panic.
+				For example, a slice of type []T is convertible to *[N]T,
+				but the conversion will panic if its length is less than N.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Elem"><label for="Type-fold-method-Elem">( Type) <a href="../src/reflect/type.go.html#line-160">Elem</a>() <b>Type</b></label><span id='Type-fold-method-Elem-docs' class="fold-docs">
+<span class="md-text">				Elem returns a type's element type.
+				It panics if the type's Kind is not Array, Chan, Map, Pointer, or Slice.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Field"><label for="Type-fold-method-Field">( Type) <a href="../src/reflect/type.go.html#line-165">Field</a>(i <a href="builtin.html#name-int">int</a>) <a href="#name-StructField">StructField</a></label><span id='Type-fold-method-Field-docs' class="fold-docs">
+<span class="md-text">				Field returns a struct type's i'th field.
+				It panics if the type's Kind is not Struct.
+				It panics if i is not in the range [0, NumField()).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-FieldAlign"><label for="Type-fold-method-FieldAlign">( Type) <a href="../src/reflect/type.go.html#line-48">FieldAlign</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-FieldAlign-docs' class="fold-docs">
+<span class="md-text">				FieldAlign returns the alignment in bytes of a value of
+				this type when used as a field in a struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-FieldByIndex"><label for="Type-fold-method-FieldByIndex">( Type) <a href="../src/reflect/type.go.html#line-171">FieldByIndex</a>(index []<a href="builtin.html#name-int">int</a>) <a href="#name-StructField">StructField</a></label><span id='Type-fold-method-FieldByIndex-docs' class="fold-docs">
+<span class="md-text">				FieldByIndex returns the nested field corresponding
+				to the index sequence. It is equivalent to calling Field
+				successively for each index i.
+				It panics if the type's Kind is not Struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-FieldByName"><label for="Type-fold-method-FieldByName">( Type) <a href="../src/reflect/type.go.html#line-175">FieldByName</a>(name <a href="builtin.html#name-string">string</a>) (<a href="#name-StructField">StructField</a>, <a href="builtin.html#name-bool">bool</a>)</label><span id='Type-fold-method-FieldByName-docs' class="fold-docs">
+<span class="md-text">				FieldByName returns the struct field with the given name
+				and a boolean indicating if the field was found.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-FieldByNameFunc"><label for="Type-fold-method-FieldByNameFunc">( Type) <a href="../src/reflect/type.go.html#line-189">FieldByNameFunc</a>(match func(<a href="builtin.html#name-string">string</a>) <a href="builtin.html#name-bool">bool</a>) (<a href="#name-StructField">StructField</a>, <a href="builtin.html#name-bool">bool</a>)</label><span id='Type-fold-method-FieldByNameFunc-docs' class="fold-docs">
+<span class="md-text">				FieldByNameFunc returns the struct field with a name
+				that satisfies the match function and a boolean indicating if
+				the field was found.
+				
+				FieldByNameFunc considers the fields in the struct itself
+				and then the fields in any embedded structs, in breadth first order,
+				stopping at the shallowest nesting depth containing one or more
+				fields satisfying the match function. If multiple fields at that depth
+				satisfy the match function, they cancel each other
+				and FieldByNameFunc returns no match.
+				This behavior mirrors Go's handling of name lookup in
+				structs containing embedded fields.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Implements"><label for="Type-fold-method-Implements">( Type) <a href="../src/reflect/type.go.html#line-106">Implements</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></label><span id='Type-fold-method-Implements-docs' class="fold-docs">
+<span class="md-text">				Implements reports whether the type implements the interface type u.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-In"><label for="Type-fold-method-In">( Type) <a href="../src/reflect/type.go.html#line-194">In</a>(i <a href="builtin.html#name-int">int</a>) <b>Type</b></label><span id='Type-fold-method-In-docs' class="fold-docs">
+<span class="md-text">				In returns the type of a function type's i'th input parameter.
+				It panics if the type's Kind is not Func.
+				It panics if i is not in the range [0, NumIn()).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-IsVariadic"><label for="Type-fold-method-IsVariadic">( Type) <a href="../src/reflect/type.go.html#line-156">IsVariadic</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Type-fold-method-IsVariadic-docs' class="fold-docs">
+<span class="md-text">				IsVariadic reports whether a function type's final input parameter
+				is a "..." parameter. If so, t.In(t.NumIn() - 1) returns the parameter's
+				implicit actual type []T.
+				
+				For concreteness, if t represents func(x int, y ... float64), then
+				
+					t.NumIn() == 2
+					t.In(0) is the reflect.Type for "int"
+					t.In(1) is the reflect.Type for "[]float64"
+					t.IsVariadic() == true
+				
+				IsVariadic panics if the type's Kind is not Func.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Key"><label for="Type-fold-method-Key">( Type) <a href="../src/reflect/type.go.html#line-198">Key</a>() <b>Type</b></label><span id='Type-fold-method-Key-docs' class="fold-docs">
+<span class="md-text">				Key returns a map type's key type.
+				It panics if the type's Kind is not Map.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Kind"><label for="Type-fold-method-Kind">( Type) <a href="../src/reflect/type.go.html#line-103">Kind</a>() <a href="#name-Kind">Kind</a></label><span id='Type-fold-method-Kind-docs' class="fold-docs">
+<span class="md-text">				Kind returns the specific kind of this type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Len"><label for="Type-fold-method-Len">( Type) <a href="../src/reflect/type.go.html#line-202">Len</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-Len-docs' class="fold-docs">
+<span class="md-text">				Len returns an array type's length.
+				It panics if the type's Kind is not Array.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Method"><label for="Type-fold-method-Method">( Type) <a href="../src/reflect/type.go.html#line-61">Method</a>(<a href="builtin.html#name-int">int</a>) <a href="#name-Method">Method</a></label><span id='Type-fold-method-Method-docs' class="fold-docs">
+<span class="md-text">				Method returns the i'th method in the type's method set.
+				It panics if i is not in the range [0, NumMethod()).
+				
+				For a non-interface type T or *T, the returned Method's Type and Func
+				fields describe a function whose first argument is the receiver,
+				and only exported methods are accessible.
+				
+				For an interface type, the returned Method's Type field gives the
+				method signature, without a receiver, and the Func field is nil.
+				
+				Methods are sorted in lexicographic order.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-MethodByName"><label for="Type-fold-method-MethodByName">( Type) <a href="../src/reflect/type.go.html#line-71">MethodByName</a>(<a href="builtin.html#name-string">string</a>) (<a href="#name-Method">Method</a>, <a href="builtin.html#name-bool">bool</a>)</label><span id='Type-fold-method-MethodByName-docs' class="fold-docs">
+<span class="md-text">				MethodByName returns the method with that name in the type's
+				method set and a boolean indicating if the method was found.
+				
+				For a non-interface type T or *T, the returned Method's Type and Func
+				fields describe a function whose first argument is the receiver.
+				
+				For an interface type, the returned Method's Type field gives the
+				method signature, without a receiver, and the Func field is nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Name"><label for="Type-fold-method-Name">( Type) <a href="../src/reflect/type.go.html#line-82">Name</a>() <a href="builtin.html#name-string">string</a></label><span id='Type-fold-method-Name-docs' class="fold-docs">
+<span class="md-text">				Name returns the type's name within its package for a defined type.
+				For other (non-defined) types it returns the empty string.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-NumField"><label for="Type-fold-method-NumField">( Type) <a href="../src/reflect/type.go.html#line-206">NumField</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-NumField-docs' class="fold-docs">
+<span class="md-text">				NumField returns a struct type's field count.
+				It panics if the type's Kind is not Struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-NumIn"><label for="Type-fold-method-NumIn">( Type) <a href="../src/reflect/type.go.html#line-210">NumIn</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-NumIn-docs' class="fold-docs">
+<span class="md-text">				NumIn returns a function type's input parameter count.
+				It panics if the type's Kind is not Func.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-NumMethod"><label for="Type-fold-method-NumMethod">( Type) <a href="../src/reflect/type.go.html#line-78">NumMethod</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-NumMethod-docs' class="fold-docs">
+<span class="md-text">				NumMethod returns the number of methods accessible using Method.
+				
+				For a non-interface type, it returns the number of exported methods.
+				
+				For an interface type, it returns the number of exported and unexported methods.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-NumOut"><label for="Type-fold-method-NumOut">( Type) <a href="../src/reflect/type.go.html#line-214">NumOut</a>() <a href="builtin.html#name-int">int</a></label><span id='Type-fold-method-NumOut-docs' class="fold-docs">
+<span class="md-text">				NumOut returns a function type's output parameter count.
+				It panics if the type's Kind is not Func.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Out"><label for="Type-fold-method-Out">( Type) <a href="../src/reflect/type.go.html#line-219">Out</a>(i <a href="builtin.html#name-int">int</a>) <b>Type</b></label><span id='Type-fold-method-Out-docs' class="fold-docs">
+<span class="md-text">				Out returns the type of a function type's i'th output parameter.
+				It panics if the type's Kind is not Func.
+				It panics if i is not in the range [0, NumOut()).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-PkgPath"><label for="Type-fold-method-PkgPath">( Type) <a href="../src/reflect/type.go.html#line-89">PkgPath</a>() <a href="builtin.html#name-string">string</a></label><span id='Type-fold-method-PkgPath-docs' class="fold-docs">
+<span class="md-text">				PkgPath returns a defined type's package path, that is, the import path
+				that uniquely identifies the package, such as "encoding/base64".
+				If the type was predeclared (string, error) or not defined (*T, struct{},
+				[]int, or A where A is an alias for a non-defined type), the package path
+				will be the empty string.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-Size"><label for="Type-fold-method-Size">( Type) <a href="../src/reflect/type.go.html#line-93">Size</a>() <a href="builtin.html#name-uintptr">uintptr</a></label><span id='Type-fold-method-Size-docs' class="fold-docs">
+<span class="md-text">				Size returns the number of bytes needed to store
+				a value of the given type; it is analogous to unsafe.Sizeof.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Type-fold-method-String"><label for="Type-fold-method-String">( Type) <a href="../src/reflect/type.go.html#line-100">String</a>() <a href="builtin.html#name-string">string</a></label><span id='Type-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns a string representation of the type.
+				The string representation may use shortened package names
+				(e.g., base64 instead of "encoding/base64") and is not
+				guaranteed to be unique among types. To test for type identity,
+				compare the Types directly.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Type-fold-impls"><label for="Type-fold-impls">Implements (<i>at least 2</i>)</label><span id='Type-fold-impls-items' class="fold-items"><span>
+			 Type : fmt.<a href="fmt.html#name-Stringer">Stringer</a></span><span>
+			 Type : github.com/ChrisTrenkamp/goxpath/tree.<a href="github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Type-fold-results"><label for="Type-fold-results">As Outputs Of (<i>at least 19</i>)</label><span id='Type-fold-results-items' class="fold-items"><span>
+			func <a href="#name-ArrayOf">ArrayOf</a>(length <a href="builtin.html#name-int">int</a>, elem <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-ChanOf">ChanOf</a>(dir <a href="#name-ChanDir">ChanDir</a>, t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-FuncOf">FuncOf</a>(in, out []<b>Type</b>, variadic <a href="builtin.html#name-bool">bool</a>) <b>Type</b></span><span>
+			func <a href="#name-MapOf">MapOf</a>(key, elem <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-PointerTo">PointerTo</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-PtrTo">PtrTo</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-SliceOf">SliceOf</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-StructOf">StructOf</a>(fields []<a href="#name-StructField">StructField</a>) <b>Type</b></span><span>
+			func <a href="#name-TypeOf">TypeOf</a>(i <a href="builtin.html#name-any">any</a>) <b>Type</b></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-160">Elem</a>() <b>Type</b></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-194">In</a>(i <a href="builtin.html#name-int">int</a>) <b>Type</b></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-198">Key</a>() <b>Type</b></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-219">Out</a>(i <a href="builtin.html#name-int">int</a>) <b>Type</b></span><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-2525">Type</a>() <b>Type</b></span><span>
+			func database/sql.(*<a href="database/sql.html#name-ColumnType">ColumnType</a>).<a href="../src/database/sql/sql.go.html#line-3155">ScanType</a>() <b>Type</b></span><span>
+			func database/sql/driver.<a href="database/sql/driver.html#name-RowsColumnTypeScanType">RowsColumnTypeScanType</a>.<a href="../src/database/sql/driver/driver.go.html#line-466">ColumnTypeScanType</a>(index <a href="builtin.html#name-int">int</a>) <b>Type</b></span><span>
+			func github.com/jackc/pgx/v5/stdlib.(*<a href="github.com/jackc/pgx/v5/stdlib.html#name-Rows">Rows</a>).<a href="../src/github.com/jackc/pgx/v5/stdlib/sql.go.html#line-564">ColumnTypeScanType</a>(index <a href="builtin.html#name-int">int</a>) <b>Type</b></span><span>
+			func gorm.io/gorm.<a href="gorm.io/gorm.html#name-ColumnType">ColumnType</a>.<a href="../src/gorm.io/gorm/migrator.go.html#line-49">ScanType</a>() <b>Type</b></span><span>
+			func gorm.io/gorm/migrator.<a href="gorm.io/gorm/migrator.html#name-ColumnType">ColumnType</a>.<a href="../src/gorm.io/gorm/migrator/column_type.go.html#line-92">ScanType</a>() <b>Type</b></span></span>
+		<input type='checkbox' class="fold" id="Type-fold-params"><label for="Type-fold-params">As Inputs Of (<i>at least 21</i>)</label><span id='Type-fold-params-items' class="fold-items"><span>
+			func <a href="#name-ArrayOf">ArrayOf</a>(length <a href="builtin.html#name-int">int</a>, elem <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-ChanOf">ChanOf</a>(dir <a href="#name-ChanDir">ChanDir</a>, t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-FuncOf">FuncOf</a>(in, out []<b>Type</b>, variadic <a href="builtin.html#name-bool">bool</a>) <b>Type</b></span><span>
+			func <a href="#name-MakeChan">MakeChan</a>(typ <b>Type</b>, buffer <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-MakeFunc">MakeFunc</a>(typ <b>Type</b>, fn func(args []<a href="#name-Value">Value</a>) (results []<a href="#name-Value">Value</a>)) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-MakeMap">MakeMap</a>(typ <b>Type</b>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-MakeMapWithSize">MakeMapWithSize</a>(typ <b>Type</b>, n <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-MakeSlice">MakeSlice</a>(typ <b>Type</b>, len, cap <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-MapOf">MapOf</a>(key, elem <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-New">New</a>(typ <b>Type</b>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-NewAt">NewAt</a>(typ <b>Type</b>, p <a href="unsafe.html">unsafe</a>.<a href="unsafe.html#name-Pointer">Pointer</a>) <a href="#name-Value">Value</a></span><span>
+			func <a href="#name-PointerTo">PointerTo</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-PtrTo">PtrTo</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-SliceOf">SliceOf</a>(t <b>Type</b>) <b>Type</b></span><span>
+			func <a href="#name-VisibleFields">VisibleFields</a>(t <b>Type</b>) []<a href="#name-StructField">StructField</a></span><span>
+			func <a href="#name-Zero">Zero</a>(typ <b>Type</b>) <a href="#name-Value">Value</a></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-109">AssignableTo</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-115">ConvertibleTo</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func Type.<a href="../src/reflect/type.go.html#line-106">Implements</a>(u <b>Type</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-3164">CanConvert</a>(t <b>Type</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func <a href="#name-Value">Value</a>.<a href="../src/reflect/value.go.html#line-3151">Convert</a>(t <b>Type</b>) <a href="#name-Value">Value</a></span></span>
+		<input type='checkbox' class="fold" id="Type-fold-values"><label for="Type-fold-values">As Types Of (<i>total 3</i>)</label><span id='Type-fold-values-items' class="fold-items"><span>
+			  var gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-ByteReflectType">ByteReflectType</a></span><span>
+			  var gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-TimePtrReflectType">TimePtrReflectType</a></span><span>
+			  var gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-TimeReflectType">TimeReflectType</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Value" data-popularity="7515">	<input type='checkbox' class="fold" id="Value-fold-content"><label for="Value-fold-content"> type <a href="../src/reflect/value.go.html#line-39">Value</a> <i>(struct)</i></label><span id='Value-fold-content-docs' class="fold-docs">
+<span class="md-text">		Value is the reflection interface to a Go value.
+		
+		Not all methods apply to all kinds of values. Restrictions,
+		if any, are noted in the documentation for each method.
+		Use the Kind method to find out the kind of value before
+		calling kind-specific methods. Calling a method
+		inappropriate to the kind of type causes a run time panic.
+		
+		The zero Value represents no value.
+		Its IsValid method returns false, its Kind method returns Invalid,
+		its String method returns "&lt;invalid Value&gt;", and all other methods panic.
+		Most functions and methods never return an invalid value.
+		If one does, its documentation states the conditions explicitly.
+		
+		A Value can be used concurrently by multiple goroutines provided that
+		the underlying Go value can be used concurrently for the equivalent
+		direct operations.
+		
+		To compare two Values, compare the results of the Interface method.
+		Using == on two Values does not compare the underlying values
+		they represent.</span>
+
+		<input type='checkbox' class="fold" id="Value-fold-methods"><label for="Value-fold-methods">Methods (<i>total 70</i>)</label><span id='Value-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Addr"><label for="Value-fold-method-Addr">( Value) <a href="../src/reflect/value.go.html#line-269">Addr</a>() <b>Value</b></label><span id='Value-fold-method-Addr-docs' class="fold-docs">
+<span class="md-text">				Addr returns a pointer value representing the address of v.
+				It panics if CanAddr() returns false.
+				Addr is typically used to obtain a pointer to a struct field
+				or slice element in order to call a method that requires a
+				pointer receiver.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Bool"><label for="Value-fold-method-Bool">( Value) <a href="../src/reflect/value.go.html#line-281">Bool</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-Bool-docs' class="fold-docs">
+<span class="md-text">				Bool returns v's underlying value.
+				It panics if v's kind is not Bool.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Bytes"><label for="Value-fold-method-Bytes">( Value) <a href="../src/reflect/value.go.html#line-298">Bytes</a>() []<a href="builtin.html#name-byte">byte</a></label><span id='Value-fold-method-Bytes-docs' class="fold-docs">
+<span class="md-text">				Bytes returns v's underlying value.
+				It panics if v's underlying value is not a slice of bytes or
+				an addressable array of bytes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Call"><label for="Value-fold-method-Call">( Value) <a href="../src/reflect/value.go.html#line-365">Call</a>(in []<b>Value</b>) []<b>Value</b></label><span id='Value-fold-method-Call-docs' class="fold-docs">
+<span class="md-text">				Call calls the function v with the input arguments in.
+				For example, if len(in) == 3, v.Call(in) represents the Go call v(in[0], in[1], in[2]).
+				Call panics if v's Kind is not Func.
+				It returns the output results as Values.
+				As in Go, each input argument must be assignable to the
+				type of the function's corresponding input parameter.
+				If v is a variadic function, Call creates the variadic slice parameter
+				itself, copying in the corresponding values.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CallSlice"><label for="Value-fold-method-CallSlice">( Value) <a href="../src/reflect/value.go.html#line-378">CallSlice</a>(in []<b>Value</b>) []<b>Value</b></label><span id='Value-fold-method-CallSlice-docs' class="fold-docs">
+<span class="md-text">				CallSlice calls the variadic function v with the input arguments in,
+				assigning the slice in[len(in)-1] to v's final variadic argument.
+				For example, if len(in) == 3, v.CallSlice(in) represents the Go call v(in[0], in[1], in[2]...).
+				CallSlice panics if v's Kind is not Func or if v is not variadic.
+				It returns the output results as Values.
+				As in Go, each input argument must be assignable to the
+				type of the function's corresponding input parameter.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanAddr"><label for="Value-fold-method-CanAddr">( Value) <a href="../src/reflect/value.go.html#line-344">CanAddr</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanAddr-docs' class="fold-docs">
+<span class="md-text">				CanAddr reports whether the value's address can be obtained with Addr.
+				Such values are called addressable. A value is addressable if it is
+				an element of a slice, an element of an addressable array,
+				a field of an addressable struct, or the result of dereferencing a pointer.
+				If CanAddr returns false, calling Addr will panic.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanComplex"><label for="Value-fold-method-CanComplex">( Value) <a href="../src/reflect/value.go.html#line-1186">CanComplex</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanComplex-docs' class="fold-docs">
+<span class="md-text">				CanComplex reports whether Complex can be used without panicking.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanConvert"><label for="Value-fold-method-CanConvert">( Value) <a href="../src/reflect/value.go.html#line-3164">CanConvert</a>(t <a href="#name-Type">Type</a>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanConvert-docs' class="fold-docs">
+<span class="md-text">				CanConvert reports whether the value v can be converted to type t.
+				If v.CanConvert(t) returns true then v.Convert(t) will not panic.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanFloat"><label for="Value-fold-method-CanFloat">( Value) <a href="../src/reflect/value.go.html#line-1362">CanFloat</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanFloat-docs' class="fold-docs">
+<span class="md-text">				CanFloat reports whether Float can be used without panicking.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanInt"><label for="Value-fold-method-CanInt">( Value) <a href="../src/reflect/value.go.html#line-1433">CanInt</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanInt-docs' class="fold-docs">
+<span class="md-text">				CanInt reports whether Int can be used without panicking.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanInterface"><label for="Value-fold-method-CanInterface">( Value) <a href="../src/reflect/value.go.html#line-1463">CanInterface</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanInterface-docs' class="fold-docs">
+<span class="md-text">				CanInterface reports whether Interface can be used without panicking.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanSet"><label for="Value-fold-method-CanSet">( Value) <a href="../src/reflect/value.go.html#line-353">CanSet</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanSet-docs' class="fold-docs">
+<span class="md-text">				CanSet reports whether the value of v can be changed.
+				A Value can be changed only if it is addressable and was not
+				obtained by the use of unexported struct fields.
+				If CanSet returns false, calling Set or any type-specific
+				setter (e.g., SetBool, SetInt) will panic.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-CanUint"><label for="Value-fold-method-CanUint">( Value) <a href="../src/reflect/value.go.html#line-2562">CanUint</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-CanUint-docs' class="fold-docs">
+<span class="md-text">				CanUint reports whether Uint can be used without panicking.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Cap"><label for="Value-fold-method-Cap">( Value) <a href="../src/reflect/value.go.html#line-1153">Cap</a>() <a href="builtin.html#name-int">int</a></label><span id='Value-fold-method-Cap-docs' class="fold-docs">
+<span class="md-text">				Cap returns v's capacity.
+				It panics if v's Kind is not Array, Chan, Slice or pointer to Array.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Close"><label for="Value-fold-method-Close">( Value) <a href="../src/reflect/value.go.html#line-1179">Close</a>()</label><span id='Value-fold-method-Close-docs' class="fold-docs">
+<span class="md-text">				Close closes the channel v.
+				It panics if v's Kind is not Chan.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Complex"><label for="Value-fold-method-Complex">( Value) <a href="../src/reflect/value.go.html#line-1197">Complex</a>() <a href="builtin.html#name-complex128">complex128</a></label><span id='Value-fold-method-Complex-docs' class="fold-docs">
+<span class="md-text">				Complex returns v's underlying value, as a complex128.
+				It panics if v's Kind is not Complex64 or Complex128</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Convert"><label for="Value-fold-method-Convert">( Value) <a href="../src/reflect/value.go.html#line-3151">Convert</a>(t <a href="#name-Type">Type</a>) <b>Value</b></label><span id='Value-fold-method-Convert-docs' class="fold-docs">
+<span class="md-text">				Convert returns the value v converted to type t.
+				If the usual Go conversion rules do not allow conversion
+				of the value v to type t, or if converting v to type t panics, Convert panics.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Elem"><label for="Value-fold-method-Elem">( Value) <a href="../src/reflect/value.go.html#line-1212">Elem</a>() <b>Value</b></label><span id='Value-fold-method-Elem-docs' class="fold-docs">
+<span class="md-text">				Elem returns the value that the interface v contains
+				or that the pointer v points to.
+				It panics if v's Kind is not Interface or Pointer.
+				It returns the zero Value if v is nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Field"><label for="Value-fold-method-Field">( Value) <a href="../src/reflect/value.go.html#line-1264">Field</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-Field-docs' class="fold-docs">
+<span class="md-text">				Field returns the i'th field of the struct v.
+				It panics if v's Kind is not Struct or i is out of range.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-FieldByIndex"><label for="Value-fold-method-FieldByIndex">( Value) <a href="../src/reflect/value.go.html#line-1297">FieldByIndex</a>(index []<a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-FieldByIndex-docs' class="fold-docs">
+<span class="md-text">				FieldByIndex returns the nested field corresponding to index.
+				It panics if evaluation requires stepping through a nil
+				pointer or a field that is not a struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-FieldByIndexErr"><label for="Value-fold-method-FieldByIndexErr">( Value) <a href="../src/reflect/value.go.html#line-1320">FieldByIndexErr</a>(index []<a href="builtin.html#name-int">int</a>) (<b>Value</b>, <a href="builtin.html#name-error">error</a>)</label><span id='Value-fold-method-FieldByIndexErr-docs' class="fold-docs">
+<span class="md-text">				FieldByIndexErr returns the nested field corresponding to index.
+				It returns an error if evaluation requires stepping through a nil
+				pointer, but panics if it must step through a field that
+				is not a struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-FieldByName"><label for="Value-fold-method-FieldByName">( Value) <a href="../src/reflect/value.go.html#line-1342">FieldByName</a>(name <a href="builtin.html#name-string">string</a>) <b>Value</b></label><span id='Value-fold-method-FieldByName-docs' class="fold-docs">
+<span class="md-text">				FieldByName returns the struct field with the given name.
+				It returns the zero Value if no field was found.
+				It panics if v's Kind is not struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-FieldByNameFunc"><label for="Value-fold-method-FieldByNameFunc">( Value) <a href="../src/reflect/value.go.html#line-1354">FieldByNameFunc</a>(match func(<a href="builtin.html#name-string">string</a>) <a href="builtin.html#name-bool">bool</a>) <b>Value</b></label><span id='Value-fold-method-FieldByNameFunc-docs' class="fold-docs">
+<span class="md-text">				FieldByNameFunc returns the struct field with a name
+				that satisfies the match function.
+				It panics if v's Kind is not struct.
+				It returns the zero Value if no field was found.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Float"><label for="Value-fold-method-Float">( Value) <a href="../src/reflect/value.go.html#line-1373">Float</a>() <a href="builtin.html#name-float64">float64</a></label><span id='Value-fold-method-Float-docs' class="fold-docs">
+<span class="md-text">				Float returns v's underlying value, as a float64.
+				It panics if v's Kind is not Float32 or Float64</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Index"><label for="Value-fold-method-Index">( Value) <a href="../src/reflect/value.go.html#line-1388">Index</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-Index-docs' class="fold-docs">
+<span class="md-text">				Index returns v's i'th element.
+				It panics if v's Kind is not Array, Slice, or String or i is out of range.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Int"><label for="Value-fold-method-Int">( Value) <a href="../src/reflect/value.go.html#line-1444">Int</a>() <a href="builtin.html#name-int64">int64</a></label><span id='Value-fold-method-Int-docs' class="fold-docs">
+<span class="md-text">				Int returns v's underlying value, as an int64.
+				It panics if v's Kind is not Int, Int8, Int16, Int32, or Int64.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Interface"><label for="Value-fold-method-Interface">( Value) <a href="../src/reflect/value.go.html#line-1477">Interface</a>() (i <a href="builtin.html#name-any">any</a>)</label><span id='Value-fold-method-Interface-docs' class="fold-docs">
+<span class="md-text">				Interface returns v's current value as an interface{}.
+				It is equivalent to:
+				
+					var i interface{} = (v's underlying value)
+				
+				It panics if the Value was obtained by accessing
+				unexported struct fields.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-InterfaceData"><label for="Value-fold-method-InterfaceData">( Value) <a href="../src/reflect/value.go.html#line-1520">InterfaceData</a>() [2]<a href="builtin.html#name-uintptr">uintptr</a></label><span id='Value-fold-method-InterfaceData-docs' class="fold-docs">
+<span class="md-text">				InterfaceData returns a pair of unspecified uintptr values.
+				It panics if v's Kind is not Interface.
+				
+				In earlier versions of Go, this function returned the interface's
+				value as a uintptr pair. As of Go 1.4, the implementation of
+				interface values precludes any defined use of InterfaceData.
+				
+				Deprecated: The memory representation of interface values is not
+				compatible with InterfaceData.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-IsNil"><label for="Value-fold-method-IsNil">( Value) <a href="../src/reflect/value.go.html#line-1537">IsNil</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-IsNil-docs' class="fold-docs">
+<span class="md-text">				IsNil reports whether its argument v is nil. The argument must be
+				a chan, func, interface, map, pointer, or slice value; if it is
+				not, IsNil panics. Note that IsNil is not always equivalent to a
+				regular comparison with nil in Go. For example, if v was created
+				by calling ValueOf with an uninitialized interface variable i,
+				i==nil will be true but v.IsNil will panic as v will be the zero
+				Value.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-IsValid"><label for="Value-fold-method-IsValid">( Value) <a href="../src/reflect/value.go.html#line-1562">IsValid</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-IsValid-docs' class="fold-docs">
+<span class="md-text">				IsValid reports whether v represents a value.
+				It returns false if v is the zero Value.
+				If IsValid returns false, all other methods except String panic.
+				Most functions and methods never return an invalid Value.
+				If one does, its documentation states the conditions explicitly.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-IsZero"><label for="Value-fold-method-IsZero">( Value) <a href="../src/reflect/value.go.html#line-1568">IsZero</a>() <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-IsZero-docs' class="fold-docs">
+<span class="md-text">				IsZero reports whether v is the zero value for its type.
+				It panics if the argument is invalid.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Kind"><label for="Value-fold-method-Kind">( Value) <a href="../src/reflect/value.go.html#line-1608">Kind</a>() <a href="#name-Kind">Kind</a></label><span id='Value-fold-method-Kind-docs' class="fold-docs">
+<span class="md-text">				Kind returns v's Kind.
+				If v is the zero Value (IsValid returns false), Kind returns Invalid.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Len"><label for="Value-fold-method-Len">( Value) <a href="../src/reflect/value.go.html#line-1614">Len</a>() <a href="builtin.html#name-int">int</a></label><span id='Value-fold-method-Len-docs' class="fold-docs">
+<span class="md-text">				Len returns v's length.
+				It panics if v's Kind is not Array, Chan, Map, Slice, String, or pointer to Array.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-MapIndex"><label for="Value-fold-method-MapIndex">( Value) <a href="../src/reflect/value.go.html#line-1649">MapIndex</a>(key <b>Value</b>) <b>Value</b></label><span id='Value-fold-method-MapIndex-docs' class="fold-docs">
+<span class="md-text">				MapIndex returns the value associated with key in the map v.
+				It panics if v's Kind is not Map.
+				It returns the zero Value if key is not found in the map or if v represents a nil map.
+				As in Go, the key's value must be assignable to the map's key type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-MapKeys"><label for="Value-fold-method-MapKeys">( Value) <a href="../src/reflect/value.go.html#line-1688">MapKeys</a>() []<b>Value</b></label><span id='Value-fold-method-MapKeys-docs' class="fold-docs">
+<span class="md-text">				MapKeys returns a slice containing all the keys present in the map,
+				in unspecified order.
+				It panics if v's Kind is not Map.
+				It returns an empty slice if v represents a nil map.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-MapRange"><label for="Value-fold-method-MapRange">( Value) <a href="../src/reflect/value.go.html#line-1878">MapRange</a>() *<a href="#name-MapIter">MapIter</a></label><span id='Value-fold-method-MapRange-docs' class="fold-docs">
+<span class="md-text">				MapRange returns a range iterator for a map.
+				It panics if v's Kind is not Map.
+				
+				Call Next to advance the iterator, and Key/Value to access each entry.
+				Next returns false when the iterator is exhausted.
+				MapRange follows the same iteration semantics as a range statement.
+				
+				Example:
+				
+					iter := reflect.ValueOf(m).MapRange()
+					for iter.Next() {
+						k := iter.Key()
+						v := iter.Value()
+						...
+					}</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Method"><label for="Value-fold-method-Method">( Value) <a href="../src/reflect/value.go.html#line-1910">Method</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-Method-docs' class="fold-docs">
+<span class="md-text">				Method returns a function value corresponding to v's i'th method.
+				The arguments to a Call on the returned function should not include
+				a receiver; the returned function will always use v as the receiver.
+				Method panics if i is out of range or if v is a nil interface value.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-MethodByName"><label for="Value-fold-method-MethodByName">( Value) <a href="../src/reflect/value.go.html#line-1946">MethodByName</a>(name <a href="builtin.html#name-string">string</a>) <b>Value</b></label><span id='Value-fold-method-MethodByName-docs' class="fold-docs">
+<span class="md-text">				MethodByName returns a function value corresponding to the method
+				of v with the given name.
+				The arguments to a Call on the returned function should not include
+				a receiver; the returned function will always use v as the receiver.
+				It returns the zero Value if no method was found.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-NumField"><label for="Value-fold-method-NumField">( Value) <a href="../src/reflect/value.go.html#line-1962">NumField</a>() <a href="builtin.html#name-int">int</a></label><span id='Value-fold-method-NumField-docs' class="fold-docs">
+<span class="md-text">				NumField returns the number of fields in the struct v.
+				It panics if v's Kind is not Struct.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-NumMethod"><label for="Value-fold-method-NumMethod">( Value) <a href="../src/reflect/value.go.html#line-1931">NumMethod</a>() <a href="builtin.html#name-int">int</a></label><span id='Value-fold-method-NumMethod-docs' class="fold-docs">
+<span class="md-text">				NumMethod returns the number of methods in the value's method set.
+				
+				For a non-interface type, it returns the number of exported methods.
+				
+				For an interface type, it returns the number of exported and unexported methods.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-OverflowComplex"><label for="Value-fold-method-OverflowComplex">( Value) <a href="../src/reflect/value.go.html#line-1970">OverflowComplex</a>(x <a href="builtin.html#name-complex128">complex128</a>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-OverflowComplex-docs' class="fold-docs">
+<span class="md-text">				OverflowComplex reports whether the complex128 x cannot be represented by v's type.
+				It panics if v's Kind is not Complex64 or Complex128.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-OverflowFloat"><label for="Value-fold-method-OverflowFloat">( Value) <a href="../src/reflect/value.go.html#line-1983">OverflowFloat</a>(x <a href="builtin.html#name-float64">float64</a>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-OverflowFloat-docs' class="fold-docs">
+<span class="md-text">				OverflowFloat reports whether the float64 x cannot be represented by v's type.
+				It panics if v's Kind is not Float32 or Float64.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-OverflowInt"><label for="Value-fold-method-OverflowInt">( Value) <a href="../src/reflect/value.go.html#line-2003">OverflowInt</a>(x <a href="builtin.html#name-int64">int64</a>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-OverflowInt-docs' class="fold-docs">
+<span class="md-text">				OverflowInt reports whether the int64 x cannot be represented by v's type.
+				It panics if v's Kind is not Int, Int8, Int16, Int32, or Int64.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-OverflowUint"><label for="Value-fold-method-OverflowUint">( Value) <a href="../src/reflect/value.go.html#line-2016">OverflowUint</a>(x <a href="builtin.html#name-uint64">uint64</a>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-OverflowUint-docs' class="fold-docs">
+<span class="md-text">				OverflowUint reports whether the uint64 x cannot be represented by v's type.
+				It panics if v's Kind is not Uint, Uintptr, Uint8, Uint16, Uint32, or Uint64.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Pointer"><label for="Value-fold-method-Pointer">( Value) <a href="../src/reflect/value.go.html#line-2048">Pointer</a>() <a href="builtin.html#name-uintptr">uintptr</a></label><span id='Value-fold-method-Pointer-docs' class="fold-docs">
+<span class="md-text">				Pointer returns v's value as a uintptr.
+				It returns uintptr instead of unsafe.Pointer so that
+				code using reflect cannot obtain unsafe.Pointers
+				without importing the unsafe package explicitly.
+				It panics if v's Kind is not Chan, Func, Map, Pointer, Slice, or UnsafePointer.
+				
+				If v's Kind is Func, the returned pointer is an underlying
+				code pointer, but not necessarily enough to identify a
+				single function uniquely. The only guarantee is that the
+				result is zero if and only if v is a nil func Value.
+				
+				If v's Kind is Slice, the returned pointer is to the first
+				element of the slice. If the slice is nil the returned value
+				is 0.  If the slice is empty but non-nil the return value is non-zero.
+				
+				It's preferred to use uintptr(Value.UnsafePointer()) to get the equivalent result.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Recv"><label for="Value-fold-method-Recv">( Value) <a href="../src/reflect/value.go.html#line-2093">Recv</a>() (x <b>Value</b>, ok <a href="builtin.html#name-bool">bool</a>)</label><span id='Value-fold-method-Recv-docs' class="fold-docs">
+<span class="md-text">				Recv receives and returns a value from the channel v.
+				It panics if v's Kind is not Chan.
+				The receive blocks until a value is ready.
+				The boolean value ok is true if the value x corresponds to a send
+				on the channel, false if it is a zero value received because the channel is closed.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Send"><label for="Value-fold-method-Send">( Value) <a href="../src/reflect/value.go.html#line-2126">Send</a>(x <b>Value</b>)</label><span id='Value-fold-method-Send-docs' class="fold-docs">
+<span class="md-text">				Send sends x on the channel v.
+				It panics if v's kind is not Chan or if x's type is not the same type as v's element type.
+				As in Go, x's value must be assignable to the channel's element type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Set"><label for="Value-fold-method-Set">( Value) <a href="../src/reflect/value.go.html#line-2153">Set</a>(x <b>Value</b>)</label><span id='Value-fold-method-Set-docs' class="fold-docs">
+<span class="md-text">				Set assigns x to the value v.
+				It panics if CanSet returns false.
+				As in Go, x's value must be assignable to v's type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetBool"><label for="Value-fold-method-SetBool">( Value) <a href="../src/reflect/value.go.html#line-2174">SetBool</a>(x <a href="builtin.html#name-bool">bool</a>)</label><span id='Value-fold-method-SetBool-docs' class="fold-docs">
+<span class="md-text">				SetBool sets v's underlying value.
+				It panics if v's Kind is not Bool or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetBytes"><label for="Value-fold-method-SetBytes">( Value) <a href="../src/reflect/value.go.html#line-2182">SetBytes</a>(x []<a href="builtin.html#name-byte">byte</a>)</label><span id='Value-fold-method-SetBytes-docs' class="fold-docs">
+<span class="md-text">				SetBytes sets v's underlying value.
+				It panics if v's underlying value is not a slice of bytes.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetCap"><label for="Value-fold-method-SetCap">( Value) <a href="../src/reflect/value.go.html#line-2266">SetCap</a>(n <a href="builtin.html#name-int">int</a>)</label><span id='Value-fold-method-SetCap-docs' class="fold-docs">
+<span class="md-text">				SetCap sets v's capacity to n.
+				It panics if v's Kind is not Slice or if n is smaller than the length or
+				greater than the capacity of the slice.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetComplex"><label for="Value-fold-method-SetComplex">( Value) <a href="../src/reflect/value.go.html#line-2204">SetComplex</a>(x <a href="builtin.html#name-complex128">complex128</a>)</label><span id='Value-fold-method-SetComplex-docs' class="fold-docs">
+<span class="md-text">				SetComplex sets v's underlying value to x.
+				It panics if v's Kind is not Complex64 or Complex128, or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetFloat"><label for="Value-fold-method-SetFloat">( Value) <a href="../src/reflect/value.go.html#line-2218">SetFloat</a>(x <a href="builtin.html#name-float64">float64</a>)</label><span id='Value-fold-method-SetFloat-docs' class="fold-docs">
+<span class="md-text">				SetFloat sets v's underlying value to x.
+				It panics if v's Kind is not Float32 or Float64, or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetInt"><label for="Value-fold-method-SetInt">( Value) <a href="../src/reflect/value.go.html#line-2232">SetInt</a>(x <a href="builtin.html#name-int64">int64</a>)</label><span id='Value-fold-method-SetInt-docs' class="fold-docs">
+<span class="md-text">				SetInt sets v's underlying value to x.
+				It panics if v's Kind is not Int, Int8, Int16, Int32, or Int64, or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetIterKey"><label for="Value-fold-method-SetIterKey">( Value) <a href="../src/reflect/value.go.html#line-1769">SetIterKey</a>(iter *<a href="#name-MapIter">MapIter</a>)</label><span id='Value-fold-method-SetIterKey-docs' class="fold-docs">
+<span class="md-text">				SetIterKey assigns to v the key of iter's current map entry.
+				It is equivalent to v.Set(iter.Key()), but it avoids allocating a new Value.
+				As in Go, the key must be assignable to v's type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetIterValue"><label for="Value-fold-method-SetIterValue">( Value) <a href="../src/reflect/value.go.html#line-1810">SetIterValue</a>(iter *<a href="#name-MapIter">MapIter</a>)</label><span id='Value-fold-method-SetIterValue-docs' class="fold-docs">
+<span class="md-text">				SetIterValue assigns to v the value of iter's current map entry.
+				It is equivalent to v.Set(iter.Value()), but it avoids allocating a new Value.
+				As in Go, the value must be assignable to v's type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetLen"><label for="Value-fold-method-SetLen">( Value) <a href="../src/reflect/value.go.html#line-2253">SetLen</a>(n <a href="builtin.html#name-int">int</a>)</label><span id='Value-fold-method-SetLen-docs' class="fold-docs">
+<span class="md-text">				SetLen sets v's length to n.
+				It panics if v's Kind is not Slice or if n is negative or
+				greater than the capacity of the slice.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetMapIndex"><label for="Value-fold-method-SetMapIndex">( Value) <a href="../src/reflect/value.go.html#line-2282">SetMapIndex</a>(key, elem <b>Value</b>)</label><span id='Value-fold-method-SetMapIndex-docs' class="fold-docs">
+<span class="md-text">				SetMapIndex sets the element associated with key in the map v to elem.
+				It panics if v's Kind is not Map.
+				If elem is the zero Value, SetMapIndex deletes the key from the map.
+				Otherwise if v holds a nil map, SetMapIndex will panic.
+				As in Go, key's elem must be assignable to the map's key type,
+				and elem's value must be assignable to the map's elem type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetPointer"><label for="Value-fold-method-SetPointer">( Value) <a href="../src/reflect/value.go.html#line-2352">SetPointer</a>(x <a href="unsafe.html">unsafe</a>.<a href="unsafe.html#name-Pointer">Pointer</a>)</label><span id='Value-fold-method-SetPointer-docs' class="fold-docs">
+<span class="md-text">				SetPointer sets the unsafe.Pointer value v to x.
+				It panics if v's Kind is not UnsafePointer.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetString"><label for="Value-fold-method-SetString">( Value) <a href="../src/reflect/value.go.html#line-2360">SetString</a>(x <a href="builtin.html#name-string">string</a>)</label><span id='Value-fold-method-SetString-docs' class="fold-docs">
+<span class="md-text">				SetString sets v's underlying value to x.
+				It panics if v's Kind is not String or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-SetUint"><label for="Value-fold-method-SetUint">( Value) <a href="../src/reflect/value.go.html#line-2330">SetUint</a>(x <a href="builtin.html#name-uint64">uint64</a>)</label><span id='Value-fold-method-SetUint-docs' class="fold-docs">
+<span class="md-text">				SetUint sets v's underlying value to x.
+				It panics if v's Kind is not Uint, Uintptr, Uint8, Uint16, Uint32, or Uint64, or if CanSet() is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Slice"><label for="Value-fold-method-Slice">( Value) <a href="../src/reflect/value.go.html#line-2369">Slice</a>(i, j <a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-Slice-docs' class="fold-docs">
+<span class="md-text">				Slice returns v[i:j].
+				It panics if v's Kind is not Array, Slice or String, or if v is an unaddressable array,
+				or if the indexes are out of bounds.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Slice3"><label for="Value-fold-method-Slice3">( Value) <a href="../src/reflect/value.go.html#line-2431">Slice3</a>(i, j, k <a href="builtin.html#name-int">int</a>) <b>Value</b></label><span id='Value-fold-method-Slice3-docs' class="fold-docs">
+<span class="md-text">				Slice3 is the 3-index form of the slice operation: it returns v[i:j:k].
+				It panics if v's Kind is not Array or Slice, or if v is an unaddressable array,
+				or if the indexes are out of bounds.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-String"><label for="Value-fold-method-String">( Value) <a href="../src/reflect/value.go.html#line-2486">String</a>() <a href="builtin.html#name-string">string</a></label><span id='Value-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns the string v's underlying value, as a string.
+				String is a special case because of Go's String method convention.
+				Unlike the other getters, it does not panic if v's Kind is not String.
+				Instead, it returns a string of the form "&lt;T value&gt;" where T is v's type.
+				The fmt package treats Values specially. It does not call their String
+				method implicitly but instead prints the concrete values they hold.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-TryRecv"><label for="Value-fold-method-TryRecv">( Value) <a href="../src/reflect/value.go.html#line-2508">TryRecv</a>() (x <b>Value</b>, ok <a href="builtin.html#name-bool">bool</a>)</label><span id='Value-fold-method-TryRecv-docs' class="fold-docs">
+<span class="md-text">				TryRecv attempts to receive a value from the channel v but will not block.
+				It panics if v's Kind is not Chan.
+				If the receive delivers a value, x is the transferred value and ok is true.
+				If the receive cannot finish without blocking, x is the zero Value and ok is false.
+				If the channel is closed, x is the zero value for the channel's element type and ok is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-TrySend"><label for="Value-fold-method-TrySend">( Value) <a href="../src/reflect/value.go.html#line-2518">TrySend</a>(x <b>Value</b>) <a href="builtin.html#name-bool">bool</a></label><span id='Value-fold-method-TrySend-docs' class="fold-docs">
+<span class="md-text">				TrySend attempts to send x on the channel v but will not block.
+				It panics if v's Kind is not Chan.
+				It reports whether the value was sent.
+				As in Go, x's value must be assignable to the channel's element type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Type"><label for="Value-fold-method-Type">( Value) <a href="../src/reflect/value.go.html#line-2525">Type</a>() <a href="#name-Type">Type</a></label><span id='Value-fold-method-Type-docs' class="fold-docs">
+<span class="md-text">				Type returns v's type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-Uint"><label for="Value-fold-method-Uint">( Value) <a href="../src/reflect/value.go.html#line-2573">Uint</a>() <a href="builtin.html#name-uint64">uint64</a></label><span id='Value-fold-method-Uint-docs' class="fold-docs">
+<span class="md-text">				Uint returns v's underlying value, as a uint64.
+				It panics if v's Kind is not Uint, Uintptr, Uint8, Uint16, Uint32, or Uint64.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-UnsafeAddr"><label for="Value-fold-method-UnsafeAddr">( Value) <a href="../src/reflect/value.go.html#line-2603">UnsafeAddr</a>() <a href="builtin.html#name-uintptr">uintptr</a></label><span id='Value-fold-method-UnsafeAddr-docs' class="fold-docs">
+<span class="md-text">				UnsafeAddr returns a pointer to v's data, as a uintptr.
+				It is for advanced clients that also import the "unsafe" package.
+				It panics if v is not addressable.
+				
+				It's preferred to use uintptr(Value.Addr().UnsafePointer()) to get the equivalent result.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Value-fold-method-UnsafePointer"><label for="Value-fold-method-UnsafePointer">( Value) <a href="../src/reflect/value.go.html#line-2624">UnsafePointer</a>() <a href="unsafe.html">unsafe</a>.<a href="unsafe.html#name-Pointer">Pointer</a></label><span id='Value-fold-method-UnsafePointer-docs' class="fold-docs">
+<span class="md-text">				UnsafePointer returns v's value as a unsafe.Pointer.
+				It panics if v's Kind is not Chan, Func, Map, Pointer, Slice, or UnsafePointer.
+				
+				If v's Kind is Func, the returned pointer is an underlying
+				code pointer, but not necessarily enough to identify a
+				single function uniquely. The only guarantee is that the
+				result is zero if and only if v is a nil func Value.
+				
+				If v's Kind is Slice, the returned pointer is to the first
+				element of the slice. If the slice is nil the returned value
+				is nil.  If the slice is empty but non-nil the return value is non-nil.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Value-fold-impls"><label for="Value-fold-impls">Implements (<i>at least 3</i>)</label><span id='Value-fold-impls-items' class="fold-items"><span>
+			 Value : database/sql/driver.<a href="database/sql/driver.html#name-Validator">Validator</a></span><span>
+			 Value : fmt.<a href="fmt.html#name-Stringer">Stringer</a></span><span>
+			 Value : github.com/ChrisTrenkamp/goxpath/tree.<a href="github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Value-fold-results"><label for="Value-fold-results">As Outputs Of (<i>at least 38</i>)</label><span id='Value-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Append">Append</a>(s <b>Value</b>, x ...<b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-AppendSlice">AppendSlice</a>(s, t <b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-Indirect">Indirect</a>(v <b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-MakeChan">MakeChan</a>(typ <a href="#name-Type">Type</a>, buffer <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func <a href="#name-MakeFunc">MakeFunc</a>(typ <a href="#name-Type">Type</a>, fn func(args []<b>Value</b>) (results []<b>Value</b>)) <b>Value</b></span><span>
+			func <a href="#name-MakeMap">MakeMap</a>(typ <a href="#name-Type">Type</a>) <b>Value</b></span><span>
+			func <a href="#name-MakeMapWithSize">MakeMapWithSize</a>(typ <a href="#name-Type">Type</a>, n <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func <a href="#name-MakeSlice">MakeSlice</a>(typ <a href="#name-Type">Type</a>, len, cap <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func <a href="#name-New">New</a>(typ <a href="#name-Type">Type</a>) <b>Value</b></span><span>
+			func <a href="#name-NewAt">NewAt</a>(typ <a href="#name-Type">Type</a>, p <a href="unsafe.html">unsafe</a>.<a href="unsafe.html#name-Pointer">Pointer</a>) <b>Value</b></span><span>
+			func <a href="#name-Select">Select</a>(cases []<a href="#name-SelectCase">SelectCase</a>) (chosen <a href="builtin.html#name-int">int</a>, recv <b>Value</b>, recvOK <a href="builtin.html#name-bool">bool</a>)</span><span>
+			func <a href="#name-ValueOf">ValueOf</a>(i <a href="builtin.html#name-any">any</a>) <b>Value</b></span><span>
+			func <a href="#name-Zero">Zero</a>(typ <a href="#name-Type">Type</a>) <b>Value</b></span><span>
+			func (*<a href="#name-MapIter">MapIter</a>).<a href="../src/reflect/value.go.html#line-1752">Key</a>() <b>Value</b></span><span>
+			func (*<a href="#name-MapIter">MapIter</a>).<a href="../src/reflect/value.go.html#line-1793">Value</a>() <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-269">Addr</a>() <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-365">Call</a>(in []<b>Value</b>) []<b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-378">CallSlice</a>(in []<b>Value</b>) []<b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-3151">Convert</a>(t <a href="#name-Type">Type</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1212">Elem</a>() <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1264">Field</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1297">FieldByIndex</a>(index []<a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1320">FieldByIndexErr</a>(index []<a href="builtin.html#name-int">int</a>) (<b>Value</b>, <a href="builtin.html#name-error">error</a>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1342">FieldByName</a>(name <a href="builtin.html#name-string">string</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1354">FieldByNameFunc</a>(match func(<a href="builtin.html#name-string">string</a>) <a href="builtin.html#name-bool">bool</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1388">Index</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1649">MapIndex</a>(key <b>Value</b>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1688">MapKeys</a>() []<b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1910">Method</a>(i <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1946">MethodByName</a>(name <a href="builtin.html#name-string">string</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2093">Recv</a>() (x <b>Value</b>, ok <a href="builtin.html#name-bool">bool</a>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2369">Slice</a>(i, j <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2431">Slice3</a>(i, j, k <a href="builtin.html#name-int">int</a>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2508">TryRecv</a>() (x <b>Value</b>, ok <a href="builtin.html#name-bool">bool</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GetIdentityFieldValuesMap">GetIdentityFieldValuesMap</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, reflectValue <b>Value</b>, fields []*<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>) (map[<a href="builtin.html#name-string">string</a>][]<b>Value</b>, [][]interface{})</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GetIdentityFieldValuesMapFromValues">GetIdentityFieldValuesMapFromValues</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, values []interface{}, fields []*<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>) (map[<a href="builtin.html#name-string">string</a>][]<b>Value</b>, [][]interface{})</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GetRelationsValues">GetRelationsValues</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, reflectValue <b>Value</b>, rels []*<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Relationship">Relationship</a>) (reflectResults <b>Value</b>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-Schema">Schema</a>.<a href="../src/gorm.io/gorm/schema/schema.go.html#line-53">MakeSlice</a>() <b>Value</b></span></span>
+		<input type='checkbox' class="fold" id="Value-fold-params"><label for="Value-fold-params">As Inputs Of (<i>at least 29</i>)</label><span id='Value-fold-params-items' class="fold-items"><span>
+			func <a href="#name-Append">Append</a>(s <b>Value</b>, x ...<b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-Append">Append</a>(s <b>Value</b>, x ...<b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-AppendSlice">AppendSlice</a>(s, t <b>Value</b>) <b>Value</b></span><span>
+			func <a href="#name-Copy">Copy</a>(dst, src <b>Value</b>) <a href="builtin.html#name-int">int</a></span><span>
+			func <a href="#name-Indirect">Indirect</a>(v <b>Value</b>) <b>Value</b></span><span>
+			func (*<a href="#name-MapIter">MapIter</a>).<a href="../src/reflect/value.go.html#line-1855">Reset</a>(v <b>Value</b>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-365">Call</a>(in []<b>Value</b>) []<b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-378">CallSlice</a>(in []<b>Value</b>) []<b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-1649">MapIndex</a>(key <b>Value</b>) <b>Value</b></span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2126">Send</a>(x <b>Value</b>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2153">Set</a>(x <b>Value</b>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2282">SetMapIndex</a>(key, elem <b>Value</b>)</span><span>
+			func Value.<a href="../src/reflect/value.go.html#line-2518">TrySend</a>(x <b>Value</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func encoding/gob.(*<a href="encoding/gob.html#name-Decoder">Decoder</a>).<a href="../src/encoding/gob/decoder.go.html#line-211">DecodeValue</a>(v <b>Value</b>) <a href="builtin.html#name-error">error</a></span><span>
+			func encoding/gob.(*<a href="encoding/gob.html#name-Encoder">Encoder</a>).<a href="../src/encoding/gob/encoder.go.html#line-218">EncodeValue</a>(value <b>Value</b>) <a href="builtin.html#name-error">error</a></span><span>
+			func go/ast.<a href="go/ast.html#name-NotNilFilter">NotNilFilter</a>(_ <a href="builtin.html#name-string">string</a>, v <b>Value</b>) <a href="builtin.html#name-bool">bool</a></span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GetIdentityFieldValuesMap">GetIdentityFieldValuesMap</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, reflectValue <b>Value</b>, fields []*<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>) (map[<a href="builtin.html#name-string">string</a>][]<b>Value</b>, [][]interface{})</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GetRelationsValues">GetRelationsValues</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, reflectValue <b>Value</b>, rels []*<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Relationship">Relationship</a>) (reflectResults <b>Value</b>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GobSerializer">GobSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-148">Scan</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, dbValue interface{}) (err <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-GobSerializer">GobSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-169">Value</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, fieldValue interface{}) (interface{}, <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-JSONSerializer">JSONSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-77">Scan</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, dbValue interface{}) (err <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-JSONSerializer">JSONSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-101">Value</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, fieldValue interface{}) (interface{}, <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.(*<a href="gorm.io/gorm/schema.html#name-Relationship">Relationship</a>).<a href="../src/gorm.io/gorm/schema/relationship.go.html#line-596">ToQueryConditions</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, reflectValue <b>Value</b>) (conds []<a href="gorm.io/gorm/clause.html">clause</a>.<a href="gorm.io/gorm/clause.html#name-Expression">Expression</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-SerializerInterface">SerializerInterface</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-63">Scan</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, dbValue interface{}) <a href="builtin.html#name-error">error</a></span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-SerializerInterface">SerializerInterface</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-69">Value</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, fieldValue interface{}) (interface{}, <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-SerializerValuerInterface">SerializerValuerInterface</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-69">Value</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, fieldValue interface{}) (interface{}, <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-UnixSecondSerializer">UnixSecondSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-117">Scan</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, dbValue interface{}) (err <a href="builtin.html#name-error">error</a>)</span><span>
+			func gorm.io/gorm/schema.<a href="gorm.io/gorm/schema.html#name-UnixSecondSerializer">UnixSecondSerializer</a>.<a href="../src/gorm.io/gorm/schema/serializer.go.html#line-127">Value</a>(ctx <a href="context.html">context</a>.<a href="context.html#name-Context">Context</a>, field *<a href="gorm.io/gorm/schema.html">schema</a>.<a href="gorm.io/gorm/schema.html#name-Field">Field</a>, dst <b>Value</b>, fieldValue interface{}) (result interface{}, err <a href="builtin.html#name-error">error</a>)</span><span>
+			func internal/fmtsort.<a href="internal/fmtsort.html#name-Sort">Sort</a>(mapValue <b>Value</b>) *<a href="internal/fmtsort.html">fmtsort</a>.<a href="internal/fmtsort.html#name-SortedMap">SortedMap</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-ValueError" data-popularity="100">	<input type='checkbox' class="fold" id="ValueError-fold-content"><label for="ValueError-fold-content"> type <a href="../src/reflect/value.go.html#line-161">ValueError</a> <i>(struct)</i></label><span id='ValueError-fold-content-docs' class="fold-docs">
+<span class="md-text">		A ValueError occurs when a Value method is invoked on
+		a Value that does not support it. Such cases are documented
+		in the description of each method.</span>
+
+		<input type='checkbox' class="fold" id="ValueError-fold-fields"><label for="ValueError-fold-fields">Fields (<i>total 2</i>)</label><span id='ValueError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-163">Kind</a> <i><a href="#name-Kind">Kind</a></i></span></span><span>
+			<span class="nodocs"><a href="../src/reflect/value.go.html#line-162">Method</a> <i><a href="builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="ValueError-fold-methods"><label for="ValueError-fold-methods">Methods (<i>only one</i>)</label><span id='ValueError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*ValueError) <a href="../src/reflect/value.go.html#line-166">Error</a>() <a href="builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="ValueError-fold-impls"><label for="ValueError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='ValueError-fold-impls-items' class="fold-items"><span>
+			*ValueError : <a href="builtin.html#name-error">error</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 26)</i></span></span>
+
+<div class="anchor value-res" id="name-Append">	<input type='checkbox' class="fold" id="Append-fold-content"><label for="Append-fold-content"> func <a href="../src/reflect/value.go.html#line-2735">Append</a>(s <a href="#name-Value">Value</a>, x ...<a href="#name-Value">Value</a>) <a href="#name-Value">Value</a></label><span id='Append-fold-content-docs' class="fold-docs">
+<span class="md-text">		Append appends the values x to a slice s and returns the resulting slice.
+		As in Go, each x's value must be assignable to the slice's element type.</span>
+
+</span></div><div class="anchor value-res" id="name-AppendSlice">	<input type='checkbox' class="fold" id="AppendSlice-fold-content"><label for="AppendSlice-fold-content"> func <a href="../src/reflect/value.go.html#line-2746">AppendSlice</a>(s, t <a href="#name-Value">Value</a>) <a href="#name-Value">Value</a></label><span id='AppendSlice-fold-content-docs' class="fold-docs">
+<span class="md-text">		AppendSlice appends a slice t to a slice s and returns the resulting slice.
+		The slices s and t must have the same element type.</span>
+
+</span></div><div class="anchor value-res" id="name-ArrayOf">	<input type='checkbox' class="fold" id="ArrayOf-fold-content"><label for="ArrayOf-fold-content"> func <a href="../src/reflect/type.go.html#line-2907">ArrayOf</a>(length <a href="builtin.html#name-int">int</a>, elem <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='ArrayOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		ArrayOf returns the array type with the given length and element type.
+		For example, if t represents int, ArrayOf(5, t) represents [5]int.
+		
+		If the resulting type would be larger than the available address space,
+		ArrayOf panics.</span>
+
+</span></div><div class="anchor value-res" id="name-ChanOf">	<input type='checkbox' class="fold" id="ChanOf-fold-content"><label for="ChanOf-fold-content"> func <a href="../src/reflect/type.go.html#line-1852">ChanOf</a>(dir <a href="#name-ChanDir">ChanDir</a>, t <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='ChanOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		ChanOf returns the channel type with the given direction and element type.
+		For example, if t represents int, ChanOf(RecvDir, t) represents &lt;-chan int.
+		
+		The gc runtime imposes a limit of 64 kB on channel element types.
+		If t's size is equal to or exceeds this limit, ChanOf panics.</span>
+
+</span></div><div class="anchor value-res" id="name-Copy">	<input type='checkbox' class="fold" id="Copy-fold-content"><label for="Copy-fold-content"> func <a href="../src/reflect/value.go.html#line-2762">Copy</a>(dst, src <a href="#name-Value">Value</a>) <a href="builtin.html#name-int">int</a></label><span id='Copy-fold-content-docs' class="fold-docs">
+<span class="md-text">		Copy copies the contents of src into dst until either
+		dst has been filled or src has been exhausted.
+		It returns the number of elements copied.
+		Dst and src each must have kind Slice or Array, and
+		dst and src must have the same element type.
+		
+		As a special case, src can have kind String if the element type of dst is kind Uint8.</span>
+
+</span></div><div class="anchor value-res" id="name-DeepEqual">	<input type='checkbox' class="fold" id="DeepEqual-fold-content"><label for="DeepEqual-fold-content"> func <a href="../src/reflect/deepequal.go.html#line-228">DeepEqual</a>(x, y <a href="builtin.html#name-any">any</a>) <a href="builtin.html#name-bool">bool</a></label><span id='DeepEqual-fold-content-docs' class="fold-docs">
+<span class="md-text">		DeepEqual reports whether x and y are “deeply equal,” defined as follows.
+		Two values of identical type are deeply equal if one of the following cases applies.
+		Values of distinct types are never deeply equal.
+		
+		Array values are deeply equal when their corresponding elements are deeply equal.
+		
+		Struct values are deeply equal if their corresponding fields,
+		both exported and unexported, are deeply equal.
+		
+		Func values are deeply equal if both are nil; otherwise they are not deeply equal.
+		
+		Interface values are deeply equal if they hold deeply equal concrete values.
+		
+		Map values are deeply equal when all of the following are true:
+		they are both nil or both non-nil, they have the same length,
+		and either they are the same map object or their corresponding keys
+		(matched using Go equality) map to deeply equal values.
+		
+		Pointer values are deeply equal if they are equal using Go's == operator
+		or if they point to deeply equal values.
+		
+		Slice values are deeply equal when all of the following are true:
+		they are both nil or both non-nil, they have the same length,
+		and either they point to the same initial entry of the same underlying array
+		(that is, &amp;x[0] == &amp;y[0]) or their corresponding elements (up to length) are deeply equal.
+		Note that a non-nil empty slice and a nil slice (for example, []byte{} and []byte(nil))
+		are not deeply equal.
+		
+		Other values - numbers, bools, strings, and channels - are deeply equal
+		if they are equal using Go's == operator.
+		
+		In general DeepEqual is a recursive relaxation of Go's == operator.
+		However, this idea is impossible to implement without some inconsistency.
+		Specifically, it is possible for a value to be unequal to itself,
+		either because it is of func type (uncomparable in general)
+		or because it is a floating-point NaN value (not equal to itself in floating-point comparison),
+		or because it is an array, struct, or interface containing
+		such a value.
+		On the other hand, pointer values are always equal to themselves,
+		even if they point at or contain such problematic values,
+		because they compare equal using Go's == operator, and that
+		is a sufficient condition to be deeply equal, regardless of content.
+		DeepEqual has been defined so that the same short-cut applies
+		to slices and maps: if x and y are the same slice or the same map,
+		they are deeply equal regardless of content.
+		
+		As DeepEqual traverses the data values it may find a cycle. The
+		second and subsequent times that DeepEqual compares two pointer
+		values that have been compared before, it treats the values as
+		equal rather than examining the values to which they point.
+		This ensures that DeepEqual terminates.</span>
+
+</span></div><div class="anchor value-res" id="name-FuncOf">	<input type='checkbox' class="fold" id="FuncOf-fold-content"><label for="FuncOf-fold-content"> func <a href="../src/reflect/type.go.html#line-2016">FuncOf</a>(in, out []<a href="#name-Type">Type</a>, variadic <a href="builtin.html#name-bool">bool</a>) <a href="#name-Type">Type</a></label><span id='FuncOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		FuncOf returns the function type with the given argument and result types.
+		For example if k represents int and e represents string,
+		FuncOf([]Type{k}, []Type{e}, false) represents func(int) string.
+		
+		The variadic argument controls whether the function is variadic. FuncOf
+		panics if the in[len(in)-1] does not represent a slice and variadic is
+		true.</span>
+
+</span></div><div class="anchor value-res" id="name-Indirect">	<input type='checkbox' class="fold" id="Indirect-fold-content"><label for="Indirect-fold-content"> func <a href="../src/reflect/value.go.html#line-3030">Indirect</a>(v <a href="#name-Value">Value</a>) <a href="#name-Value">Value</a></label><span id='Indirect-fold-content-docs' class="fold-docs">
+<span class="md-text">		Indirect returns the value that v points to.
+		If v is a nil pointer, Indirect returns a zero Value.
+		If v is not a pointer, Indirect returns v.</span>
+
+</span></div><div class="anchor value-res" id="name-MakeChan">	<input type='checkbox' class="fold" id="MakeChan-fold-content"><label for="MakeChan-fold-content"> func <a href="../src/reflect/value.go.html#line-2996">MakeChan</a>(typ <a href="#name-Type">Type</a>, buffer <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></label><span id='MakeChan-fold-content-docs' class="fold-docs">
+<span class="md-text">		MakeChan creates a new channel with the specified type and buffer size.</span>
+
+</span></div><div class="anchor value-res" id="name-MakeFunc">	<input type='checkbox' class="fold" id="MakeFunc-fold-content"><label for="MakeFunc-fold-content"> func <a href="../src/reflect/makefunc.go.html#line-46">MakeFunc</a>(typ <a href="#name-Type">Type</a>, fn func(args []<a href="#name-Value">Value</a>) (results []<a href="#name-Value">Value</a>)) <a href="#name-Value">Value</a></label><span id='MakeFunc-fold-content-docs' class="fold-docs">
+<span class="md-text">		MakeFunc returns a new function of the given Type
+		that wraps the function fn. When called, that new function
+		does the following:
+		
+		  - converts its arguments to a slice of Values.
+		  - runs results := fn(args).
+		  - returns the results as a slice of Values, one per formal result.
+		
+		The implementation fn can assume that the argument Value slice
+		has the number and type of arguments given by typ.
+		If typ describes a variadic function, the final Value is itself
+		a slice representing the variadic arguments, as in the
+		body of a variadic function. The result Value slice returned by fn
+		must have the number and type of results given by typ.
+		
+		The Value.Call method allows the caller to invoke a typed function
+		in terms of Values; in contrast, MakeFunc allows the caller to implement
+		a typed function in terms of Values.
+		
+		The Examples section of the documentation includes an illustration
+		of how to use MakeFunc to build a swap function for different types.</span>
+
+</span></div><div class="anchor value-res" id="name-MakeMap">	<input type='checkbox' class="fold" id="MakeMap-fold-content"><label for="MakeMap-fold-content"> func <a href="../src/reflect/value.go.html#line-3012">MakeMap</a>(typ <a href="#name-Type">Type</a>) <a href="#name-Value">Value</a></label><span id='MakeMap-fold-content-docs' class="fold-docs">
+<span class="md-text">		MakeMap creates a new map with the specified type.</span>
+
+</span></div><div class="anchor value-res" id="name-MakeMapWithSize">	<input type='checkbox' class="fold" id="MakeMapWithSize-fold-content"><label for="MakeMapWithSize-fold-content"> func <a href="../src/reflect/value.go.html#line-3018">MakeMapWithSize</a>(typ <a href="#name-Type">Type</a>, n <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></label><span id='MakeMapWithSize-fold-content-docs' class="fold-docs">
+<span class="md-text">		MakeMapWithSize creates a new map with the specified type
+		and initial space for approximately n elements.</span>
+
+</span></div><div class="anchor value-res" id="name-MakeSlice">	<input type='checkbox' class="fold" id="MakeSlice-fold-content"><label for="MakeSlice-fold-content"> func <a href="../src/reflect/value.go.html#line-2977">MakeSlice</a>(typ <a href="#name-Type">Type</a>, len, cap <a href="builtin.html#name-int">int</a>) <a href="#name-Value">Value</a></label><span id='MakeSlice-fold-content-docs' class="fold-docs">
+<span class="md-text">		MakeSlice creates a new zero-initialized slice value
+		for the specified slice type, length, and capacity.</span>
+
+</span></div><div class="anchor value-res" id="name-MapOf">	<input type='checkbox' class="fold" id="MapOf-fold-content"><label for="MapOf-fold-content"> func <a href="../src/reflect/type.go.html#line-1915">MapOf</a>(key, elem <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='MapOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		MapOf returns the map type with the given key and element types.
+		For example, if k represents int and e represents string,
+		MapOf(k, e) represents map[int]string.
+		
+		If the key type is not a valid map key type (that is, if it does
+		not implement Go's == operator), MapOf panics.</span>
+
+</span></div><div class="anchor value-res" id="name-New">	<input type='checkbox' class="fold" id="New-fold-content"><label for="New-fold-content"> func <a href="../src/reflect/value.go.html#line-3084">New</a>(typ <a href="#name-Type">Type</a>) <a href="#name-Value">Value</a></label><span id='New-fold-content-docs' class="fold-docs">
+<span class="md-text">		New returns a Value representing a pointer to a new zero value
+		for the specified type. That is, the returned Value's Type is PointerTo(typ).</span>
+
+</span></div><div class="anchor value-res" id="name-NewAt">	<input type='checkbox' class="fold" id="NewAt-fold-content"><label for="NewAt-fold-content"> func <a href="../src/reflect/value.go.html#line-3101">NewAt</a>(typ <a href="#name-Type">Type</a>, p <a href="unsafe.html">unsafe</a>.<a href="unsafe.html#name-Pointer">Pointer</a>) <a href="#name-Value">Value</a></label><span id='NewAt-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewAt returns a Value representing a pointer to a value of the
+		specified type, using p as that pointer.</span>
+
+</span></div><div class="anchor value-res" id="name-PointerTo">	<input type='checkbox' class="fold" id="PointerTo-fold-content"><label for="PointerTo-fold-content"> func <a href="../src/reflect/type.go.html#line-1448">PointerTo</a>(t <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='PointerTo-fold-content-docs' class="fold-docs">
+<span class="md-text">		PointerTo returns the pointer type with element t.
+		For example, if t represents type Foo, PointerTo(t) represents *Foo.</span>
+
+</span></div><div class="anchor value-res" id="name-PtrTo">	<input type='checkbox' class="fold" id="PtrTo-fold-content"><label for="PtrTo-fold-content"> func <a href="../src/reflect/type.go.html#line-1444">PtrTo</a>(t <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='PtrTo-fold-content-docs' class="fold-docs">
+<span class="md-text">		PtrTo returns the pointer type with element t.
+		For example, if t represents type Foo, PtrTo(t) represents *Foo.
+		
+		PtrTo is the old spelling of PointerTo.
+		The two functions behave identically.</span>
+
+</span></div><div class="anchor value-res" id="name-Select">	<input type='checkbox' class="fold" id="Select-fold-content"><label for="Select-fold-content"> func <a href="../src/reflect/value.go.html#line-2871">Select</a>(cases []<a href="#name-SelectCase">SelectCase</a>) (chosen <a href="builtin.html#name-int">int</a>, recv <a href="#name-Value">Value</a>, recvOK <a href="builtin.html#name-bool">bool</a>)</label><span id='Select-fold-content-docs' class="fold-docs">
+<span class="md-text">		Select executes a select operation described by the list of cases.
+		Like the Go select statement, it blocks until at least one of the cases
+		can proceed, makes a uniform pseudo-random choice,
+		and then executes that case. It returns the index of the chosen case
+		and, if that case was a receive operation, the value received and a
+		boolean indicating whether the value corresponds to a send on the channel
+		(as opposed to a zero value received because the channel is closed).
+		Select supports a maximum of 65536 cases.</span>
+
+</span></div><div class="anchor value-res" id="name-SliceOf">	<input type='checkbox' class="fold" id="SliceOf-fold-content"><label for="SliceOf-fold-content"> func <a href="../src/reflect/type.go.html#line-2355">SliceOf</a>(t <a href="#name-Type">Type</a>) <a href="#name-Type">Type</a></label><span id='SliceOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		SliceOf returns the slice type with element type t.
+		For example, if t represents int, SliceOf(t) represents []int.</span>
+
+</span></div><div class="anchor value-res" id="name-StructOf">	<input type='checkbox' class="fold" id="StructOf-fold-content"><label for="StructOf-fold-content"> func <a href="../src/reflect/type.go.html#line-2436">StructOf</a>(fields []<a href="#name-StructField">StructField</a>) <a href="#name-Type">Type</a></label><span id='StructOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		StructOf returns the struct type containing fields.
+		The Offset and Index fields are ignored and computed as they would be
+		by the compiler.
+		
+		StructOf currently does not generate wrapper methods for embedded
+		fields and panics if passed unexported StructFields.
+		These limitations may be lifted in a future version.</span>
+
+</span></div><div class="anchor value-res" id="name-Swapper">	<input type='checkbox' class="fold" id="Swapper-fold-content"><label for="Swapper-fold-content"> func <a href="../src/reflect/swapper.go.html#line-17">Swapper</a>(slice <a href="builtin.html#name-any">any</a>) func(i, j <a href="builtin.html#name-int">int</a>)</label><span id='Swapper-fold-content-docs' class="fold-docs">
+<span class="md-text">		Swapper returns a function that swaps the elements in the provided
+		slice.
+		
+		Swapper panics if the provided interface is not a slice.</span>
+
+</span></div><div class="anchor value-res" id="name-TypeOf">	<input type='checkbox' class="fold" id="TypeOf-fold-content"><label for="TypeOf-fold-content"> func <a href="../src/reflect/type.go.html#line-1431">TypeOf</a>(i <a href="builtin.html#name-any">any</a>) <a href="#name-Type">Type</a></label><span id='TypeOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		TypeOf returns the reflection Type that represents the dynamic type of i.
+		If i is a nil interface value, TypeOf returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-ValueOf">	<input type='checkbox' class="fold" id="ValueOf-fold-content"><label for="ValueOf-fold-content"> func <a href="../src/reflect/value.go.html#line-3039">ValueOf</a>(i <a href="builtin.html#name-any">any</a>) <a href="#name-Value">Value</a></label><span id='ValueOf-fold-content-docs' class="fold-docs">
+<span class="md-text">		ValueOf returns a new Value initialized to the concrete value
+		stored in the interface i. ValueOf(nil) returns the zero Value.</span>
+
+</span></div><div class="anchor value-res" id="name-VisibleFields">	<input type='checkbox' class="fold" id="VisibleFields-fold-content"><label for="VisibleFields-fold-content"> func <a href="../src/reflect/visiblefields.go.html#line-16">VisibleFields</a>(t <a href="#name-Type">Type</a>) []<a href="#name-StructField">StructField</a></label><span id='VisibleFields-fold-content-docs' class="fold-docs">
+<span class="md-text">		VisibleFields returns all the visible fields in t, which must be a
+		struct type. A field is defined as visible if it's accessible
+		directly with a FieldByName call. The returned fields include fields
+		inside anonymous struct members and unexported fields. They follow
+		the same order found in the struct, with anonymous fields followed
+		immediately by their promoted fields.
+		
+		For each element e of the returned slice, the corresponding field
+		can be retrieved from a value v of type t by calling v.FieldByIndex(e.Index).</span>
+
+</span></div><div class="anchor value-res" id="name-Zero">	<input type='checkbox' class="fold" id="Zero-fold-content"><label for="Zero-fold-content"> func <a href="../src/reflect/value.go.html#line-3058">Zero</a>(typ <a href="#name-Type">Type</a>) <a href="#name-Value">Value</a></label><span id='Zero-fold-content-docs' class="fold-docs">
+<span class="md-text">		Zero returns a Value representing the zero value for the specified type.
+		The result is different from the zero value of the Value struct,
+		which represents no value at all.
+		For example, Zero(TypeOf(42)) returns a Value with Kind Int and value 0.
+		The returned value is neither addressable nor settable.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 34)</i></span></span>
+
+<div class="anchor value-res" id="name-Array">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-261">Array</a> <a href="#name-Kind">Kind</a> = 17</span></div><div class="anchor value-res" id="name-Bool">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-245">Bool</a> <a href="#name-Kind">Kind</a> = 1</span></div><div class="anchor value-res" id="name-BothDir">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-360">BothDir</a> <a href="#name-ChanDir">ChanDir</a> = 3 // <span class="md-text">chan</span></span></div><div class="anchor value-res" id="name-Chan">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-262">Chan</a> <a href="#name-Kind">Kind</a> = 18</span></div><div class="anchor value-res" id="name-Complex128">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-260">Complex128</a> <a href="#name-Kind">Kind</a> = 16</span></div><div class="anchor value-res" id="name-Complex64">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-259">Complex64</a> <a href="#name-Kind">Kind</a> = 15</span></div><div class="anchor value-res" id="name-Float32">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-257">Float32</a> <a href="#name-Kind">Kind</a> = 13</span></div><div class="anchor value-res" id="name-Float64">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-258">Float64</a> <a href="#name-Kind">Kind</a> = 14</span></div><div class="anchor value-res" id="name-Func">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-263">Func</a> <a href="#name-Kind">Kind</a> = 19</span></div><div class="anchor value-res" id="name-Int">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-246">Int</a> <a href="#name-Kind">Kind</a> = 2</span></div><div class="anchor value-res" id="name-Int16">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-248">Int16</a> <a href="#name-Kind">Kind</a> = 4</span></div><div class="anchor value-res" id="name-Int32">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-249">Int32</a> <a href="#name-Kind">Kind</a> = 5</span></div><div class="anchor value-res" id="name-Int64">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-250">Int64</a> <a href="#name-Kind">Kind</a> = 6</span></div><div class="anchor value-res" id="name-Int8">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-247">Int8</a> <a href="#name-Kind">Kind</a> = 3</span></div><div class="anchor value-res" id="name-Interface">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-264">Interface</a> <a href="#name-Kind">Kind</a> = 20</span></div><div class="anchor value-res" id="name-Invalid">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-244">Invalid</a> <a href="#name-Kind">Kind</a> = 0</span></div><div class="anchor value-res" id="name-Map">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-265">Map</a> <a href="#name-Kind">Kind</a> = 21</span></div><div class="anchor value-res" id="name-Pointer">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-266">Pointer</a> <a href="#name-Kind">Kind</a> = 22</span></div><div class="anchor value-res" id="name-Ptr">	<input type='checkbox' class="fold" id="Ptr-fold-content"><label for="Ptr-fold-content">const <a href="../src/reflect/type.go.html#line-274">Ptr</a> <a href="#name-Kind">Kind</a> = 22</label><span id='Ptr-fold-content-docs' class="fold-docs">
+<span class="md-text">		Ptr is the old name for the Pointer kind.</span>
+
+</span></div><div class="anchor value-res" id="name-RecvDir">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-358">RecvDir</a> <a href="#name-ChanDir">ChanDir</a> = 1 // <span class="md-text">&lt;-chan</span></span></div><div class="anchor value-res" id="name-SelectDefault">	<span class="nodocs">const <a href="../src/reflect/value.go.html#line-2838">SelectDefault</a> <a href="#name-SelectDir">SelectDir</a> = 3 // <span class="md-text">default</span></span></div><div class="anchor value-res" id="name-SelectRecv">	<span class="nodocs">const <a href="../src/reflect/value.go.html#line-2837">SelectRecv</a> <a href="#name-SelectDir">SelectDir</a> = 2 // <span class="md-text">case &lt;-Chan:</span></span></div><div class="anchor value-res" id="name-SelectSend">	<span class="nodocs">const <a href="../src/reflect/value.go.html#line-2836">SelectSend</a> <a href="#name-SelectDir">SelectDir</a> = 1 // <span class="md-text">case Chan &lt;- Send</span></span></div><div class="anchor value-res" id="name-SendDir">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-359">SendDir</a> <a href="#name-ChanDir">ChanDir</a> = 2 // <span class="md-text">chan&lt;-</span></span></div><div class="anchor value-res" id="name-Slice">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-267">Slice</a> <a href="#name-Kind">Kind</a> = 23</span></div><div class="anchor value-res" id="name-String">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-268">String</a> <a href="#name-Kind">Kind</a> = 24</span></div><div class="anchor value-res" id="name-Struct">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-269">Struct</a> <a href="#name-Kind">Kind</a> = 25</span></div><div class="anchor value-res" id="name-Uint">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-251">Uint</a> <a href="#name-Kind">Kind</a> = 7</span></div><div class="anchor value-res" id="name-Uint16">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-253">Uint16</a> <a href="#name-Kind">Kind</a> = 9</span></div><div class="anchor value-res" id="name-Uint32">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-254">Uint32</a> <a href="#name-Kind">Kind</a> = 10</span></div><div class="anchor value-res" id="name-Uint64">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-255">Uint64</a> <a href="#name-Kind">Kind</a> = 11</span></div><div class="anchor value-res" id="name-Uint8">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-252">Uint8</a> <a href="#name-Kind">Kind</a> = 8</span></div><div class="anchor value-res" id="name-Uintptr">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-256">Uintptr</a> <a href="#name-Kind">Kind</a> = 12</span></div><div class="anchor value-res" id="name-UnsafePointer">	<span class="nodocs">const <a href="../src/reflect/type.go.html#line-270">UnsafePointer</a> <a href="#name-Kind">Kind</a> = 26</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: migrator.go in package gorm.io/gorm</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	migrator.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/gorm.io/gorm.html">gorm.io/gorm</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> gorm</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"reflect"</span></label></code></span>
+<span class="codeline" id="line-5"><code></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"gorm.io/gorm/clause"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i2"><span class="lit-string i2">"gorm.io/gorm/schema"</span></label></code></span>
+<span class="codeline" id="line-8"><code>)</code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Migrator returns migrator</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">func</span> (<label for="r0" class="ident">db</label> *<a href="gorm.go.html#line-91" class="ident">DB</a>) <label for="r1" class="ident">Migrator</label>() <a href="#line-64" class="ident">Migrator</a> {</code></span>
+<span class="codeline" id="line-12"><code>	<label for="r2" class="ident">tx</label> := <label for="r0" class="ident">db</label>.<a href="gorm.go.html#line-373" class="ident">getInstance</a>()</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code>	<span class="comment">// apply scopes to migrator</span></code></span>
+<span class="codeline" id="line-15"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">tx</label>.<a href="gorm.go.html#line-95" class="ident">Statement</a>.<a href="statement.go.html#line-48" class="ident">scopes</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-16"><code>		<label for="r3" class="ident">scopes</label> := <label for="r2" class="ident">tx</label>.<a href="gorm.go.html#line-95" class="ident">Statement</a>.<a href="statement.go.html#line-48" class="ident">scopes</a></code></span>
+<span class="codeline" id="line-17"><code>		<label for="r2" class="ident">tx</label>.<a href="gorm.go.html#line-95" class="ident">Statement</a>.<a href="statement.go.html#line-48" class="ident">scopes</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-18"><code>		<span class="keyword">for</span> <label for="r4" class="ident">_</label>, <label for="r5" class="ident">scope</label> := <span class="keyword">range</span> <label for="r3" class="ident">scopes</label> {</code></span>
+<span class="codeline" id="line-19"><code>			<label for="r2" class="ident">tx</label> = <label for="r5" class="ident">scope</label>(<label for="r2" class="ident">tx</label>)</code></span>
+<span class="codeline" id="line-20"><code>		}</code></span>
+<span class="codeline" id="line-21"><code>	}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code>	<span class="keyword">return</span> <label for="r2" class="ident">tx</label>.<a href="gorm.go.html#line-56" class="ident">Dialector</a>.<a href="interfaces.go.html#line-15" class="ident">Migrator</a>(<label for="r2" class="ident">tx</label>.<a href="gorm.go.html#line-215" class="ident">Session</a>(&amp;<a href="gorm.go.html#line-100" class="ident">Session</a>{}))</code></span>
+<span class="codeline" id="line-24"><code>}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// AutoMigrate run auto migration for given models</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">func</span> (<label for="r6" class="ident">db</label> *<a href="gorm.go.html#line-91" class="ident">DB</a>) <label for="r7" class="ident">AutoMigrate</label>(<label for="r8" class="ident">dst</label> ...<span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">return</span> <label for="r6" class="ident">db</label>.<a href="#line-11" class="ident">Migrator</a>().<a href="#line-66" class="ident">AutoMigrate</a>(<label for="r8" class="ident">dst</label>...)</code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// ViewOption view option</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">type</span> <a href="../../../pkg/gorm.io/gorm.html#name-ViewOption" class="ident">ViewOption</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-33"><code>	Replace     <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-34"><code>	CheckOption <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-35"><code>	Query       *<a href="gorm.go.html#line-91" class="ident">DB</a></code></span>
+<span class="codeline" id="line-36"><code>}</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// ColumnType column type interface</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">type</span> <a href="../../../pkg/gorm.io/gorm.html#name-ColumnType" class="ident">ColumnType</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-Name" class="ident">Name</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-DatabaseTypeName" class="ident">DatabaseTypeName</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>                 <span class="comment">// varchar</span></code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-ColumnType" class="ident">ColumnType</a>() (columnType <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) <span class="comment">// varchar(64)</span></code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-PrimaryKey" class="ident">PrimaryKey</a>() (isPrimaryKey <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-AutoIncrement" class="ident">AutoIncrement</a>() (isAutoIncrement <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-Length" class="ident">Length</a>() (length <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-DecimalSize" class="ident">DecimalSize</a>() (precision <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>, scale <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-Nullable" class="ident">Nullable</a>() (nullable <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-Unique" class="ident">Unique</a>() (unique <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-ScanType" class="ident">ScanType</a>() <a href="../../../pkg/reflect.html" class="ident i0">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a></code></span>
+<span class="codeline" id="line-50"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-Comment" class="ident">Comment</a>() (value <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../imp/gorm.io/gorm.ColumnType.html#name-DefaultValue" class="ident">DefaultValue</a>() (value <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="keyword">type</span> <a href="../../../pkg/gorm.io/gorm.html#name-Index" class="ident">Index</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-Table" class="ident">Table</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-56"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-Name" class="ident">Name</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-Columns" class="ident">Columns</a>() []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-PrimaryKey" class="ident">PrimaryKey</a>() (isPrimaryKey <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-59"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-Unique" class="ident">Unique</a>() (unique <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>, ok <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-60"><code>	<a href="../../../imp/gorm.io/gorm.Index.html#name-Option" class="ident">Option</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-61"><code>}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// Migrator migrator interface</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">type</span> <a href="../../../pkg/gorm.io/gorm.html#name-Migrator" class="ident">Migrator</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// AutoMigrate</span></code></span>
+<span class="codeline" id="line-66"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-AutoMigrate" class="ident">AutoMigrate</a>(dst ...<span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code>	<span class="comment">// Database</span></code></span>
+<span class="codeline" id="line-69"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-CurrentDatabase" class="ident">CurrentDatabase</a>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-70"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-FullDataTypeOf" class="ident">FullDataTypeOf</a>(*<a href="../../../pkg/gorm.io/gorm/schema.html" class="ident i2">schema</a>.<a href="schema/field.go.html#line-53" class="ident">Field</a>) <a href="../../../pkg/gorm.io/gorm/clause.html" class="ident i1">clause</a>.<a href="clause/expression.go.html#line-21" class="ident">Expr</a></code></span>
+<span class="codeline" id="line-71"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-GetTypeAliases" class="ident">GetTypeAliases</a>(databaseTypeName <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>	<span class="comment">// Tables</span></code></span>
+<span class="codeline" id="line-74"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-CreateTable" class="ident">CreateTable</a>(dst ...<span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-75"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-DropTable" class="ident">DropTable</a>(dst ...<span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-76"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-HasTable" class="ident">HasTable</a>(dst <span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-77"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-RenameTable" class="ident">RenameTable</a>(oldName, newName <span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-78"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-GetTables" class="ident">GetTables</a>() (tableList []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, err <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code>	<span class="comment">// Columns</span></code></span>
+<span class="codeline" id="line-81"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-AddColumn" class="ident">AddColumn</a>(dst <span class="keyword">interface</span>{}, field <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-82"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-DropColumn" class="ident">DropColumn</a>(dst <span class="keyword">interface</span>{}, field <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-83"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-AlterColumn" class="ident">AlterColumn</a>(dst <span class="keyword">interface</span>{}, field <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-84"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-MigrateColumn" class="ident">MigrateColumn</a>(dst <span class="keyword">interface</span>{}, field *<a href="../../../pkg/gorm.io/gorm/schema.html" class="ident i2">schema</a>.<a href="schema/field.go.html#line-53" class="ident">Field</a>, columnType <a href="#line-39" class="ident">ColumnType</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-85"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-HasColumn" class="ident">HasColumn</a>(dst <span class="keyword">interface</span>{}, field <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-86"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-RenameColumn" class="ident">RenameColumn</a>(dst <span class="keyword">interface</span>{}, oldName, field <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-87"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-ColumnTypes" class="ident">ColumnTypes</a>(dst <span class="keyword">interface</span>{}) ([]<a href="#line-39" class="ident">ColumnType</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>	<span class="comment">// Views</span></code></span>
+<span class="codeline" id="line-90"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-CreateView" class="ident">CreateView</a>(name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, option <a href="#line-32" class="ident">ViewOption</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-91"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-DropView" class="ident">DropView</a>(name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>	<span class="comment">// Constraints</span></code></span>
+<span class="codeline" id="line-94"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-CreateConstraint" class="ident">CreateConstraint</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-95"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-DropConstraint" class="ident">DropConstraint</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-96"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-HasConstraint" class="ident">HasConstraint</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code>	<span class="comment">// Indexes</span></code></span>
+<span class="codeline" id="line-99"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-CreateIndex" class="ident">CreateIndex</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-100"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-DropIndex" class="ident">DropIndex</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-101"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-HasIndex" class="ident">HasIndex</a>(dst <span class="keyword">interface</span>{}, name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-102"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-RenameIndex" class="ident">RenameIndex</a>(dst <span class="keyword">interface</span>{}, oldName, newName <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-103"><code>	<a href="../../../imp/gorm.io/gorm.Migrator.html#name-GetIndexes" class="ident">GetIndexes</a>(dst <span class="keyword">interface</span>{}) ([]<a href="#line-54" class="ident">Index</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-104"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

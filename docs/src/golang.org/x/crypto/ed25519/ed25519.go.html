@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: ed25519.go in package golang.org/x/crypto/ed25519</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	ed25519.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/golang.org/x/crypto/ed25519.html">golang.org/x/crypto/ed25519</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2019 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package ed25519 implements the Ed25519 signature algorithm. See</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// https://ed25519.cr.yp.to/.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// These functions are also compatible with the “Ed25519” function defined in</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// RFC 8032. However, unlike RFC 8032's formulation, this package's private key</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// representation includes a public key suffix to make multiple signing</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// operations with the same key more efficient. This package refers to the RFC</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// 8032 private key as the “seed”.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// Beginning with Go 1.13, the functionality of this package was moved to the</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// standard library as crypto/ed25519. This package only acts as a compatibility</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// wrapper.</span></code></span></div><span class="codeline" id="line-17"><code><span class="keyword">package</span> ed25519</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-20"><code>	<label for="i0"><span class="lit-string i0">"crypto/ed25519"</span></label></code></span>
+<span class="codeline" id="line-21"><code>	<label for="i1"><span class="lit-string i1">"io"</span></label></code></span>
+<span class="codeline" id="line-22"><code>)</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-25"><code>	<span class="comment">// PublicKeySize is the size, in bytes, of public keys as used in this package.</span></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-PublicKeySize" class="ident">PublicKeySize</a> = <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-27"><code>	<span class="comment">// PrivateKeySize is the size, in bytes, of private keys as used in this package.</span></code></span>
+<span class="codeline" id="line-28"><code>	<a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-PrivateKeySize" class="ident">PrivateKeySize</a> = <span class="lit-number">64</span></code></span>
+<span class="codeline" id="line-29"><code>	<span class="comment">// SignatureSize is the size, in bytes, of signatures generated and verified by this package.</span></code></span>
+<span class="codeline" id="line-30"><code>	<a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-SignatureSize" class="ident">SignatureSize</a> = <span class="lit-number">64</span></code></span>
+<span class="codeline" id="line-31"><code>	<span class="comment">// SeedSize is the size, in bytes, of private key seeds. These are the private key representations used by RFC 8032.</span></code></span>
+<span class="codeline" id="line-32"><code>	<a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-SeedSize" class="ident">SeedSize</a> = <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-33"><code>)</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// PublicKey is the type of Ed25519 public keys.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// This type is an alias for crypto/ed25519's PublicKey type.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// See the crypto/ed25519 package for the methods on this type.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">type</span> <a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-PublicKey" class="ident">PublicKey</a> = <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-38" class="ident">PublicKey</a></code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// PrivateKey is the type of Ed25519 private keys. It implements crypto.Signer.</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// This type is an alias for crypto/ed25519's PrivateKey type.</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// See the crypto/ed25519 package for the methods on this type.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">type</span> <a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-PrivateKey" class="ident">PrivateKey</a> = <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-53" class="ident">PrivateKey</a></code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// GenerateKey generates a public/private key pair using entropy from rand.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// If rand is nil, crypto/rand.Reader will be used.</span></code></span>
+<span class="codeline" id="line-49"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-GenerateKey" class="ident">GenerateKey</a></label>(<label for="r1" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>) (<a href="#line-39" class="ident">PublicKey</a>, <a href="#line-45" class="ident">PrivateKey</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-95" class="ident">GenerateKey</a>(<label for="r1" class="ident">rand</label>)</code></span>
+<span class="codeline" id="line-51"><code>}</code></span>
+<span class="codeline" id="line-52"><code></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// NewKeyFromSeed calculates a private key from a seed. It will panic if</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// len(seed) is not SeedSize. This function is provided for interoperability</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// with RFC 8032. RFC 8032's private keys correspond to seeds in this</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// package.</span></code></span>
+<span class="codeline" id="line-57"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-NewKeyFromSeed" class="ident">NewKeyFromSeed</a></label>(<label for="r3" class="ident">seed</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="#line-45" class="ident">PrivateKey</a> {</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-116" class="ident">NewKeyFromSeed</a>(<label for="r3" class="ident">seed</label>)</code></span>
+<span class="codeline" id="line-59"><code>}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// Sign signs the message with privateKey and returns a signature. It will</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// panic if len(privateKey) is not PrivateKeySize.</span></code></span>
+<span class="codeline" id="line-63"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-Sign" class="ident">Sign</a></label>(<label for="r5" class="ident">privateKey</label> <a href="#line-45" class="ident">PrivateKey</a>, <label for="r6" class="ident">message</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-143" class="ident">Sign</a>(<label for="r5" class="ident">privateKey</label>, <label for="r6" class="ident">message</label>)</code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// Verify reports whether sig is a valid signature of message by publicKey. It</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// will panic if len(publicKey) is not PublicKeySize.</span></code></span>
+<span class="codeline" id="line-69"><code><span class="keyword">func</span> <label for="r7" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ed25519.html#name-Verify" class="ident">Verify</a></label>(<label for="r8" class="ident">publicKey</label> <a href="#line-39" class="ident">PublicKey</a>, <label for="r9" class="ident">message</label>, <label for="r10" class="ident">sig</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/crypto/ed25519.html" class="ident i0">ed25519</a>.<a href="../../../../crypto/ed25519/ed25519.go.html#line-195" class="ident">Verify</a>(<label for="r8" class="ident">publicKey</label>, <label for="r9" class="ident">message</label>, <label for="r10" class="ident">sig</label>)</code></span>
+<span class="codeline" id="line-71"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

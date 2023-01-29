@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: runtime/cgo</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>cgo</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../index.html#pkg-runtime/cgo">runtime/cgo</a><i> (on <a href="https://pkg.go.dev/runtime/cgo" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../dep/runtime/cgo.html">3 packages</a>, and imported by <a href="../../dep/runtime/cgo.html#imported-by">2 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../src/runtime/cgo/callbacks.go.html">callbacks.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/callbacks_traceback.go.html">callbacks_traceback.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/handle.go.html">handle.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/iscgo.go.html">iscgo.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/linux.go.html">linux.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/mmap.go.html">mmap.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/setenv.go.html">setenv.go</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/sigaction.go.html">sigaction.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-8-fold-content"><label for="file-8-fold-content">   <a href="../../src/runtime/cgo/cgo.go.html#doc">#d</a> <a href="../../src/runtime/cgo/cgo.go.html">cgo.go</a></label><span id='file-8-fold-content-items' class="fold-items">
+<span class="md-text">		Package cgo contains runtime support for code generated
+		by the cgo tool.  See the documentation for the cgo command
+		for details on using cgo.</span>
+</span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_context.c.html">gcc_context.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_fatalf.c.html">gcc_fatalf.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_libinit.c.html">gcc_libinit.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_linux_amd64.c.html">gcc_linux_amd64.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_mmap.c.html">gcc_mmap.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_setenv.c.html">gcc_setenv.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_sigaction.c.html">gcc_sigaction.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_traceback.c.html">gcc_traceback.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_util.c.html">gcc_util.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/linux_syscall.c.html">linux_syscall.c</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/abi_amd64.h.html">abi_amd64.h</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/libcgo.h.html">libcgo.h</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/libcgo_unix.h.html">libcgo_unix.h</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/asm_amd64.s.html">asm_amd64.s</a></span>
+	<span class="nodocs">      <a href="../../src/runtime/cgo/gcc_amd64.S^3000a.html">gcc_amd64.S</a></span></div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (only one)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Handle" data-popularity="175">	<input type='checkbox' class="fold" id="Handle-fold-content"><label for="Handle-fold-content"> type <a href="../../src/runtime/cgo/handle.go.html#line-97">Handle</a> <a href="../builtin.html#name-uintptr">uintptr</a> <i>(basic type)</i></label><span id='Handle-fold-content-docs' class="fold-docs">
+<span class="md-text">		Handle provides a way to pass values that contain Go pointers
+		(pointers to memory allocated by Go) between Go and C without
+		breaking the cgo pointer passing rules. A Handle is an integer
+		value that can represent any Go value. A Handle can be passed
+		through C and back to Go, and Go code can use the Handle to
+		retrieve the original Go value.
+		
+		The underlying type of Handle is guaranteed to fit in an integer type
+		that is large enough to hold the bit pattern of any pointer. The zero
+		value of a Handle is not valid, and thus is safe to use as a sentinel
+		in C APIs.
+		
+		For instance, on the Go side:
+		
+			package main
+		
+			/*
+			#include &lt;stdint.h&gt; // for uintptr_t
+		
+			extern void MyGoPrint(uintptr_t handle);
+			void myprint(uintptr_t handle);
+			*/
+			import "C"
+			import "runtime/cgo"
+		
+			//export MyGoPrint
+			func MyGoPrint(handle C.uintptr_t) {
+				h := cgo.Handle(handle)
+				val := h.Value().(string)
+				println(val)
+				h.Delete()
+			}
+		
+			func main() {
+				val := "hello Go"
+				C.myprint(C.uintptr_t(cgo.NewHandle(val)))
+				// Output: hello Go
+			}
+		
+		and on the C side:
+		
+			#include &lt;stdint.h&gt; // for uintptr_t
+		
+			// A Go function
+			extern void MyGoPrint(uintptr_t handle);
+		
+			// A C function
+			void myprint(uintptr_t handle) {
+			    MyGoPrint(handle);
+			}
+		
+		Some C functions accept a void* argument that points to an arbitrary
+		data value supplied by the caller. It is not safe to coerce a cgo.Handle
+		(an integer) to a Go unsafe.Pointer, but instead we can pass the address
+		of the cgo.Handle to the void* parameter, as in this variant of the
+		previous example:
+		
+			package main
+		
+			/*
+			extern void MyGoPrint(void *context);
+			static inline void myprint(void *context) {
+			    MyGoPrint(context);
+			}
+			*/
+			import "C"
+			import (
+				"runtime/cgo"
+				"unsafe"
+			)
+		
+			//export MyGoPrint
+			func MyGoPrint(context unsafe.Pointer) {
+				h := *(*cgo.Handle)(context)
+				val := h.Value().(string)
+				println(val)
+				h.Delete()
+			}
+		
+			func main() {
+				val := "hello Go"
+				h := cgo.NewHandle(val)
+				C.myprint(unsafe.Pointer(&amp;h))
+				// Output: hello Go
+			}</span>
+
+		<input type='checkbox' class="fold" id="Handle-fold-methods"><label for="Handle-fold-methods">Methods (<i>total 2</i>)</label><span id='Handle-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Handle-fold-method-Delete"><label for="Handle-fold-method-Delete">( Handle) <a href="../../src/runtime/cgo/handle.go.html#line-134">Delete</a>()</label><span id='Handle-fold-method-Delete-docs' class="fold-docs">
+<span class="md-text">				Delete invalidates a handle. This method should only be called once
+				the program no longer needs to pass the handle to C and the C code
+				no longer has a copy of the handle value.
+				
+				The method panics if the handle is invalid.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Handle-fold-method-Value"><label for="Handle-fold-method-Value">( Handle) <a href="../../src/runtime/cgo/handle.go.html#line-121">Value</a>() <a href="../builtin.html#name-any">any</a></label><span id='Handle-fold-method-Value-docs' class="fold-docs">
+<span class="md-text">				Value returns the associated Go value for a valid handle.
+				
+				The method panics if the handle is invalid.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Handle-fold-results"><label for="Handle-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Handle-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewHandle">NewHandle</a>(v <a href="../builtin.html#name-any">any</a>) <b>Handle</b></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (only one)</i></span></span>
+
+<div class="anchor value-res" id="name-NewHandle">	<input type='checkbox' class="fold" id="NewHandle-fold-content"><label for="NewHandle-fold-content"> func <a href="../../src/runtime/cgo/handle.go.html#line-108">NewHandle</a>(v <a href="../builtin.html#name-any">any</a>) <a href="#name-Handle">Handle</a></label><span id='NewHandle-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewHandle returns a handle for a given value.
+		
+		The handle is valid until the program calls Delete on it. The handle
+		uses resources, and this package assumes that C code may hold on to
+		the handle, so a program must explicitly call Delete when the handle
+		is no longer needed.
+		
+		The intended use is to pass the returned handle to C code, which
+		passes it back to Go, which calls Value.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

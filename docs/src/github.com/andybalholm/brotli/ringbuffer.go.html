@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: ringbuffer.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	ringbuffer.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">/* Copyright 2013 Google Inc. All Rights Reserved.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">   Distributed under MIT license.</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">   See file LICENSE for detail or copy at https://opensource.org/licenses/MIT</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">/* A ringBuffer(window_bits, tail_bits) contains `1 &lt;&lt; window_bits' bytes of</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">   data in a circular manner: writing a byte writes it to:</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">     `position() % (1 &lt;&lt; window_bits)'.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">   For convenience, the ringBuffer array contains another copy of the</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">   first `1 &lt;&lt; tail_bits' bytes:</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">     buffer_[i] == buffer_[i + (1 &lt;&lt; window_bits)], if i &lt; (1 &lt;&lt; tail_bits),</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">   and another copy of the last two bytes:</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">     buffer_[-1] == buffer_[(1 &lt;&lt; window_bits) - 1] and</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">     buffer_[-2] == buffer_[(1 &lt;&lt; window_bits) - 2]. */</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">type</span> ringBuffer <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-19"><code>	size_       <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-20"><code>	mask_       <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-21"><code>	tail_size_  <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-22"><code>	total_size_ <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-23"><code>	cur_size_   <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-24"><code>	pos_        <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-25"><code>	data_       []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-26"><code>	buffer_     []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-27"><code>}</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">func</span> ringBufferInit(<label for="r1" class="ident">rb</label> *<a href="#line-18" class="ident">ringBuffer</a>) {</code></span>
+<span class="codeline" id="line-30"><code>	<label for="r1" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-31"><code>}</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">func</span> ringBufferSetup(<label for="r3" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>, <label for="r4" class="ident">rb</label> *<a href="#line-18" class="ident">ringBuffer</a>) {</code></span>
+<span class="codeline" id="line-34"><code>	<span class="keyword">var</span> <label for="r5" class="ident">window_bits</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="quality.go.html#line-110" class="ident">computeRbBits</a>(<label for="r3" class="ident">params</label>)</code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">var</span> <label for="r6" class="ident">tail_bits</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <label for="r3" class="ident">params</label>.<a href="params.go.html#line-30" class="ident">lgblock</a></code></span>
+<span class="codeline" id="line-36"><code>	*(*<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>)(&amp;<label for="r4" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>) = <span class="lit-number">1</span> &lt;&lt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r5" class="ident">window_bits</label>)</code></span>
+<span class="codeline" id="line-37"><code>	*(*<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>)(&amp;<label for="r4" class="ident">rb</label>.<a href="#line-20" class="ident">mask_</a>) = (<span class="lit-number">1</span> &lt;&lt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r5" class="ident">window_bits</label>)) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-38"><code>	*(*<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>)(&amp;<label for="r4" class="ident">rb</label>.<a href="#line-21" class="ident">tail_size_</a>) = <span class="lit-number">1</span> &lt;&lt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r6" class="ident">tail_bits</label>)</code></span>
+<span class="codeline" id="line-39"><code>	*(*<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>)(&amp;<label for="r4" class="ident">rb</label>.<a href="#line-22" class="ident">total_size_</a>) = <label for="r4" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a> + <label for="r4" class="ident">rb</label>.<a href="#line-21" class="ident">tail_size_</a></code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="keyword">const</span> kSlackForEightByteHashingEverywhere <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">/* Allocates or re-allocates data_ to the given length + plus some slack</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">   region before and after. Fills the slack regions with zeros. */</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> ringBufferInitBuffer(<label for="r8" class="ident">buflen</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r9" class="ident">rb</label> *<a href="#line-18" class="ident">ringBuffer</a>) {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">var</span> <label for="r10" class="ident">new_data</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">var</span> <label for="r11" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-49"><code>	<label for="r12" class="ident">size</label> := <span class="lit-number">2</span> + <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r8" class="ident">buflen</label>) + <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="#line-42" class="ident">kSlackForEightByteHashingEverywhere</a>)</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>) &lt; <label for="r12" class="ident">size</label> {</code></span>
+<span class="codeline" id="line-51"><code>		<label for="r10" class="ident">new_data</label> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r12" class="ident">size</label>)</code></span>
+<span class="codeline" id="line-52"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-53"><code>		<label for="r10" class="ident">new_data</label> = <label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[:<label for="r12" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-54"><code>	}</code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">if</span> <label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-56"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r10" class="ident">new_data</label>, <label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[:<span class="lit-number">2</span>+<label for="r9" class="ident">rb</label>.<a href="#line-23" class="ident">cur_size_</a>+<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="#line-42" class="ident">kSlackForEightByteHashingEverywhere</a>)])</code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code>	<label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a> = <label for="r10" class="ident">new_data</label></code></span>
+<span class="codeline" id="line-60"><code>	<label for="r9" class="ident">rb</label>.<a href="#line-23" class="ident">cur_size_</a> = <label for="r8" class="ident">buflen</label></code></span>
+<span class="codeline" id="line-61"><code>	<label for="r9" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a> = <label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">2</span>:]</code></span>
+<span class="codeline" id="line-62"><code>	<label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">1</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-63"><code>	<label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">0</span>] = <label for="r9" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">for</span> <label for="r11" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r11" class="ident">i</label> &lt; <a href="#line-42" class="ident">kSlackForEightByteHashingEverywhere</a>; <label for="r11" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r9" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r9" class="ident">rb</label>.<a href="#line-23" class="ident">cur_size_</a>+<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r11" class="ident">i</label>)] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-66"><code>	}</code></span>
+<span class="codeline" id="line-67"><code>}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="keyword">func</span> ringBufferWriteTail(<label for="r14" class="ident">bytes</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r15" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r16" class="ident">rb</label> *<a href="#line-18" class="ident">ringBuffer</a>) {</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">var</span> <label for="r17" class="ident">masked_pos</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r16" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> &amp; <label for="r16" class="ident">rb</label>.<a href="#line-20" class="ident">mask_</a>)</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r17" class="ident">masked_pos</label>) &lt; <label for="r16" class="ident">rb</label>.<a href="#line-21" class="ident">tail_size_</a> {</code></span>
+<span class="codeline" id="line-72"><code>		<span class="comment">/* Just fill the tail buffer with the beginning data. */</span></code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">var</span> <label for="r18" class="ident">p</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r16" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a> + <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r17" class="ident">masked_pos</label>))</code></span>
+<span class="codeline" id="line-74"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r16" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r18" class="ident">p</label>:], <label for="r14" class="ident">bytes</label>[:<a href="platform.go.html#line-57" class="ident">brotli_min_size_t</a>(<label for="r15" class="ident">n</label>, <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r16" class="ident">rb</label>.<a href="#line-21" class="ident">tail_size_</a>-<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r17" class="ident">masked_pos</label>)))])</code></span>
+<span class="codeline" id="line-75"><code>	}</code></span>
+<span class="codeline" id="line-76"><code>}</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">/* Push bytes into the ring buffer. */</span></code></span>
+<span class="codeline" id="line-79"><code><span class="keyword">func</span> ringBufferWrite(<label for="r20" class="ident">bytes</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r21" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r22" class="ident">rb</label> *<a href="#line-18" class="ident">ringBuffer</a>) {</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> == <span class="lit-number">0</span> &amp;&amp; <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">n</label>) &lt; <label for="r22" class="ident">rb</label>.<a href="#line-21" class="ident">tail_size_</a> {</code></span>
+<span class="codeline" id="line-81"><code>		<span class="comment">/* Special case for the first write: to process the first block, we don't</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">		   need to allocate the whole ring-buffer and we don't need the tail</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">		   either. However, we do this memory usage optimization only if the</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">		   first write is less than the tail size, which is also the input block</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">		   size, otherwise it is likely that other blocks will follow and we</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">		   will need to reallocate to the full size anyway. */</span></code></span>
+<span class="codeline" id="line-87"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> = <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>		<a href="#line-46" class="ident">ringBufferInitBuffer</a>(<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a>, <label for="r22" class="ident">rb</label>)</code></span>
+<span class="codeline" id="line-90"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>, <label for="r20" class="ident">bytes</label>[:<label for="r21" class="ident">n</label>])</code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <label for="r22" class="ident">rb</label>.<a href="#line-23" class="ident">cur_size_</a> &lt; <label for="r22" class="ident">rb</label>.<a href="#line-22" class="ident">total_size_</a> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="comment">/* Lazily allocate the full buffer. */</span></code></span>
+<span class="codeline" id="line-96"><code>		<a href="#line-46" class="ident">ringBufferInitBuffer</a>(<label for="r22" class="ident">rb</label>.<a href="#line-22" class="ident">total_size_</a>, <label for="r22" class="ident">rb</label>)</code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code>		<span class="comment">/* Initialize the last two bytes to zero, so that we don't have to worry</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">		   later when we copy the last two bytes to the first two positions. */</span></code></span>
+<span class="codeline" id="line-100"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<span class="lit-number">2</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<span class="lit-number">1</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-103"><code>	}</code></span>
+<span class="codeline" id="line-104"><code>	{</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">var</span> <label for="r23" class="ident">masked_pos</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> &amp; <label for="r22" class="ident">rb</label>.<a href="#line-20" class="ident">mask_</a>)</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>		<span class="comment">/* The length of the writes is limited so that we do not need to worry</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">		   about a write */</span></code></span>
+<span class="codeline" id="line-109"><code>		<a href="#line-69" class="ident">ringBufferWriteTail</a>(<label for="r20" class="ident">bytes</label>, <label for="r21" class="ident">n</label>, <label for="r22" class="ident">rb</label>)</code></span>
+<span class="codeline" id="line-110"><code></code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r23" class="ident">masked_pos</label>+<label for="r21" class="ident">n</label>) &lt;= <label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a> {</code></span>
+<span class="codeline" id="line-112"><code>			<span class="comment">/* A single write fits. */</span></code></span>
+<span class="codeline" id="line-113"><code>			<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r23" class="ident">masked_pos</label>:], <label for="r20" class="ident">bytes</label>[:<label for="r21" class="ident">n</label>])</code></span>
+<span class="codeline" id="line-114"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-115"><code>			<span class="comment">/* Split into two writes.</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">			   Copy into the end of the buffer, including the tail buffer. */</span></code></span>
+<span class="codeline" id="line-117"><code>			<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r23" class="ident">masked_pos</label>:], <label for="r20" class="ident">bytes</label>[:<a href="platform.go.html#line-57" class="ident">brotli_min_size_t</a>(<label for="r21" class="ident">n</label>, <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r22" class="ident">rb</label>.<a href="#line-22" class="ident">total_size_</a>-<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r23" class="ident">masked_pos</label>)))])</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code>			<span class="comment">/* Copy into the beginning of the buffer */</span></code></span>
+<span class="codeline" id="line-120"><code>			<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>, <label for="r20" class="ident">bytes</label>[<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r23" class="ident">masked_pos</label>):][:<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">n</label>)-(<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r23" class="ident">masked_pos</label>))])</code></span>
+<span class="codeline" id="line-121"><code>		}</code></span>
+<span class="codeline" id="line-122"><code>	}</code></span>
+<span class="codeline" id="line-123"><code>	{</code></span>
+<span class="codeline" id="line-124"><code>		<span class="keyword">var</span> <label for="r24" class="ident">not_first_lap</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> = <label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a>&amp;(<span class="lit-number">1</span>&lt;&lt;<span class="lit-number">31</span>) != <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-125"><code>		<span class="keyword">var</span> <label for="r25" class="ident">rb_pos_mask</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = (<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">31</span>) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-126"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">0</span>] = <label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-127"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-25" class="ident">data_</a>[<span class="lit-number">1</span>] = <label for="r22" class="ident">rb</label>.<a href="#line-26" class="ident">buffer_</a>[<label for="r22" class="ident">rb</label>.<a href="#line-19" class="ident">size_</a>-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-128"><code>		<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> = (<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> &amp; <label for="r25" class="ident">rb_pos_mask</label>) + <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">n</label>)&amp;<label for="r25" class="ident">rb_pos_mask</label>)</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">if</span> <label for="r24" class="ident">not_first_lap</label> {</code></span>
+<span class="codeline" id="line-130"><code>			<span class="comment">/* Wrap, but preserve not-a-first-lap feature. */</span></code></span>
+<span class="codeline" id="line-131"><code>			<label for="r22" class="ident">rb</label>.<a href="#line-24" class="ident">pos_</a> |= <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">31</span></code></span>
+<span class="codeline" id="line-132"><code>		}</code></span>
+<span class="codeline" id="line-133"><code>	}</code></span>
+<span class="codeline" id="line-134"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

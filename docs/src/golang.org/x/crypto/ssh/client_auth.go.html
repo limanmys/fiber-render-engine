@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: client_auth.go in package golang.org/x/crypto/ssh</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	client_auth.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/golang.org/x/crypto/ssh.html">golang.org/x/crypto/ssh</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124],
+input[id=r125]:checked ~pre label[for=r125],
+input[id=r126]:checked ~pre label[for=r126],
+input[id=r127]:checked ~pre label[for=r127],
+input[id=r128]:checked ~pre label[for=r128],
+input[id=r129]:checked ~pre label[for=r129],
+input[id=r130]:checked ~pre label[for=r130],
+input[id=r131]:checked ~pre label[for=r131],
+input[id=r132]:checked ~pre label[for=r132],
+input[id=r133]:checked ~pre label[for=r133],
+input[id=r134]:checked ~pre label[for=r134],
+input[id=r135]:checked ~pre label[for=r135],
+input[id=r136]:checked ~pre label[for=r136],
+input[id=r137]:checked ~pre label[for=r137],
+input[id=r138]:checked ~pre label[for=r138],
+input[id=r139]:checked ~pre label[for=r139],
+input[id=r140]:checked ~pre label[for=r140],
+input[id=r141]:checked ~pre label[for=r141],
+input[id=r142]:checked ~pre label[for=r142],
+input[id=r143]:checked ~pre label[for=r143],
+input[id=r144]:checked ~pre label[for=r144],
+input[id=r145]:checked ~pre label[for=r145],
+input[id=r146]:checked ~pre label[for=r146],
+input[id=r147]:checked ~pre label[for=r147],
+input[id=r148]:checked ~pre label[for=r148],
+input[id=r149]:checked ~pre label[for=r149],
+input[id=r150]:checked ~pre label[for=r150],
+input[id=r151]:checked ~pre label[for=r151],
+input[id=r152]:checked ~pre label[for=r152],
+input[id=r153]:checked ~pre label[for=r153],
+input[id=r154]:checked ~pre label[for=r154],
+input[id=r155]:checked ~pre label[for=r155],
+input[id=r156]:checked ~pre label[for=r156],
+input[id=r157]:checked ~pre label[for=r157],
+input[id=r158]:checked ~pre label[for=r158],
+input[id=r159]:checked ~pre label[for=r159],
+input[id=r160]:checked ~pre label[for=r160],
+input[id=r161]:checked ~pre label[for=r161],
+input[id=r162]:checked ~pre label[for=r162],
+input[id=r163]:checked ~pre label[for=r163],
+input[id=r164]:checked ~pre label[for=r164],
+input[id=r165]:checked ~pre label[for=r165],
+input[id=r166]:checked ~pre label[for=r166],
+input[id=r167]:checked ~pre label[for=r167],
+input[id=r168]:checked ~pre label[for=r168],
+input[id=r169]:checked ~pre label[for=r169],
+input[id=r170]:checked ~pre label[for=r170],
+input[id=r171]:checked ~pre label[for=r171],
+input[id=r172]:checked ~pre label[for=r172],
+input[id=r173]:checked ~pre label[for=r173],
+input[id=r174]:checked ~pre label[for=r174],
+input[id=r175]:checked ~pre label[for=r175],
+input[id=r176]:checked ~pre label[for=r176],
+input[id=r177]:checked ~pre label[for=r177],
+input[id=r178]:checked ~pre label[for=r178],
+input[id=r179]:checked ~pre label[for=r179],
+input[id=r180]:checked ~pre label[for=r180],
+input[id=r181]:checked ~pre label[for=r181],
+input[id=r182]:checked ~pre label[for=r182],
+input[id=r183]:checked ~pre label[for=r183],
+input[id=r184]:checked ~pre label[for=r184],
+input[id=r185]:checked ~pre label[for=r185],
+input[id=r186]:checked ~pre label[for=r186],
+input[id=r187]:checked ~pre label[for=r187],
+input[id=r188]:checked ~pre label[for=r188],
+input[id=r189]:checked ~pre label[for=r189],
+input[id=r190]:checked ~pre label[for=r190],
+input[id=r191]:checked ~pre label[for=r191],
+input[id=r192]:checked ~pre label[for=r192],
+input[id=r193]:checked ~pre label[for=r193],
+input[id=r194]:checked ~pre label[for=r194],
+input[id=r195]:checked ~pre label[for=r195],
+input[id=r196]:checked ~pre label[for=r196],
+input[id=r197]:checked ~pre label[for=r197],
+input[id=r198]:checked ~pre label[for=r198],
+input[id=r199]:checked ~pre label[for=r199],
+input[id=r200]:checked ~pre label[for=r200],
+input[id=r201]:checked ~pre label[for=r201],
+input[id=r202]:checked ~pre label[for=r202],
+input[id=r203]:checked ~pre label[for=r203],
+input[id=r204]:checked ~pre label[for=r204],
+input[id=r205]:checked ~pre label[for=r205],
+input[id=r206]:checked ~pre label[for=r206],
+input[id=r207]:checked ~pre label[for=r207],
+input[id=r208]:checked ~pre label[for=r208],
+input[id=r209]:checked ~pre label[for=r209],
+input[id=r210]:checked ~pre label[for=r210],
+input[id=r211]:checked ~pre label[for=r211],
+input[id=r212]:checked ~pre label[for=r212],
+input[id=r213]:checked ~pre label[for=r213],
+input[id=r214]:checked ~pre label[for=r214],
+input[id=r215]:checked ~pre label[for=r215],
+input[id=r216]:checked ~pre label[for=r216],
+input[id=r217]:checked ~pre label[for=r217],
+input[id=r218]:checked ~pre label[for=r218],
+input[id=r219]:checked ~pre label[for=r219],
+input[id=r220]:checked ~pre label[for=r220],
+input[id=r221]:checked ~pre label[for=r221],
+input[id=r222]:checked ~pre label[for=r222],
+input[id=r223]:checked ~pre label[for=r223],
+input[id=r224]:checked ~pre label[for=r224],
+input[id=r225]:checked ~pre label[for=r225],
+input[id=r226]:checked ~pre label[for=r226],
+input[id=r227]:checked ~pre label[for=r227],
+input[id=r228]:checked ~pre label[for=r228],
+input[id=r229]:checked ~pre label[for=r229],
+input[id=r230]:checked ~pre label[for=r230],
+input[id=r231]:checked ~pre label[for=r231],
+input[id=r232]:checked ~pre label[for=r232],
+input[id=r233]:checked ~pre label[for=r233],
+input[id=r234]:checked ~pre label[for=r234],
+input[id=r235]:checked ~pre label[for=r235],
+input[id=r236]:checked ~pre label[for=r236],
+input[id=r237]:checked ~pre label[for=r237],
+input[id=r238]:checked ~pre label[for=r238],
+input[id=r239]:checked ~pre label[for=r239],
+input[id=r240]:checked ~pre label[for=r240],
+input[id=r241]:checked ~pre label[for=r241],
+input[id=r242]:checked ~pre label[for=r242],
+input[id=r243]:checked ~pre label[for=r243],
+input[id=r244]:checked ~pre label[for=r244],
+input[id=r245]:checked ~pre label[for=r245],
+input[id=r246]:checked ~pre label[for=r246]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="r125" type="radio" name="g"/>
+<input id="r126" type="radio" name="g"/>
+<input id="r127" type="radio" name="g"/>
+<input id="r128" type="radio" name="g"/>
+<input id="r129" type="radio" name="g"/>
+<input id="r130" type="radio" name="g"/>
+<input id="r131" type="radio" name="g"/>
+<input id="r132" type="radio" name="g"/>
+<input id="r133" type="radio" name="g"/>
+<input id="r134" type="radio" name="g"/>
+<input id="r135" type="radio" name="g"/>
+<input id="r136" type="radio" name="g"/>
+<input id="r137" type="radio" name="g"/>
+<input id="r138" type="radio" name="g"/>
+<input id="r139" type="radio" name="g"/>
+<input id="r140" type="radio" name="g"/>
+<input id="r141" type="radio" name="g"/>
+<input id="r142" type="radio" name="g"/>
+<input id="r143" type="radio" name="g"/>
+<input id="r144" type="radio" name="g"/>
+<input id="r145" type="radio" name="g"/>
+<input id="r146" type="radio" name="g"/>
+<input id="r147" type="radio" name="g"/>
+<input id="r148" type="radio" name="g"/>
+<input id="r149" type="radio" name="g"/>
+<input id="r150" type="radio" name="g"/>
+<input id="r151" type="radio" name="g"/>
+<input id="r152" type="radio" name="g"/>
+<input id="r153" type="radio" name="g"/>
+<input id="r154" type="radio" name="g"/>
+<input id="r155" type="radio" name="g"/>
+<input id="r156" type="radio" name="g"/>
+<input id="r157" type="radio" name="g"/>
+<input id="r158" type="radio" name="g"/>
+<input id="r159" type="radio" name="g"/>
+<input id="r160" type="radio" name="g"/>
+<input id="r161" type="radio" name="g"/>
+<input id="r162" type="radio" name="g"/>
+<input id="r163" type="radio" name="g"/>
+<input id="r164" type="radio" name="g"/>
+<input id="r165" type="radio" name="g"/>
+<input id="r166" type="radio" name="g"/>
+<input id="r167" type="radio" name="g"/>
+<input id="r168" type="radio" name="g"/>
+<input id="r169" type="radio" name="g"/>
+<input id="r170" type="radio" name="g"/>
+<input id="r171" type="radio" name="g"/>
+<input id="r172" type="radio" name="g"/>
+<input id="r173" type="radio" name="g"/>
+<input id="r174" type="radio" name="g"/>
+<input id="r175" type="radio" name="g"/>
+<input id="r176" type="radio" name="g"/>
+<input id="r177" type="radio" name="g"/>
+<input id="r178" type="radio" name="g"/>
+<input id="r179" type="radio" name="g"/>
+<input id="r180" type="radio" name="g"/>
+<input id="r181" type="radio" name="g"/>
+<input id="r182" type="radio" name="g"/>
+<input id="r183" type="radio" name="g"/>
+<input id="r184" type="radio" name="g"/>
+<input id="r185" type="radio" name="g"/>
+<input id="r186" type="radio" name="g"/>
+<input id="r187" type="radio" name="g"/>
+<input id="r188" type="radio" name="g"/>
+<input id="r189" type="radio" name="g"/>
+<input id="r190" type="radio" name="g"/>
+<input id="r191" type="radio" name="g"/>
+<input id="r192" type="radio" name="g"/>
+<input id="r193" type="radio" name="g"/>
+<input id="r194" type="radio" name="g"/>
+<input id="r195" type="radio" name="g"/>
+<input id="r196" type="radio" name="g"/>
+<input id="r197" type="radio" name="g"/>
+<input id="r198" type="radio" name="g"/>
+<input id="r199" type="radio" name="g"/>
+<input id="r200" type="radio" name="g"/>
+<input id="r201" type="radio" name="g"/>
+<input id="r202" type="radio" name="g"/>
+<input id="r203" type="radio" name="g"/>
+<input id="r204" type="radio" name="g"/>
+<input id="r205" type="radio" name="g"/>
+<input id="r206" type="radio" name="g"/>
+<input id="r207" type="radio" name="g"/>
+<input id="r208" type="radio" name="g"/>
+<input id="r209" type="radio" name="g"/>
+<input id="r210" type="radio" name="g"/>
+<input id="r211" type="radio" name="g"/>
+<input id="r212" type="radio" name="g"/>
+<input id="r213" type="radio" name="g"/>
+<input id="r214" type="radio" name="g"/>
+<input id="r215" type="radio" name="g"/>
+<input id="r216" type="radio" name="g"/>
+<input id="r217" type="radio" name="g"/>
+<input id="r218" type="radio" name="g"/>
+<input id="r219" type="radio" name="g"/>
+<input id="r220" type="radio" name="g"/>
+<input id="r221" type="radio" name="g"/>
+<input id="r222" type="radio" name="g"/>
+<input id="r223" type="radio" name="g"/>
+<input id="r224" type="radio" name="g"/>
+<input id="r225" type="radio" name="g"/>
+<input id="r226" type="radio" name="g"/>
+<input id="r227" type="radio" name="g"/>
+<input id="r228" type="radio" name="g"/>
+<input id="r229" type="radio" name="g"/>
+<input id="r230" type="radio" name="g"/>
+<input id="r231" type="radio" name="g"/>
+<input id="r232" type="radio" name="g"/>
+<input id="r233" type="radio" name="g"/>
+<input id="r234" type="radio" name="g"/>
+<input id="r235" type="radio" name="g"/>
+<input id="r236" type="radio" name="g"/>
+<input id="r237" type="radio" name="g"/>
+<input id="r238" type="radio" name="g"/>
+<input id="r239" type="radio" name="g"/>
+<input id="r240" type="radio" name="g"/>
+<input id="r241" type="radio" name="g"/>
+<input id="r242" type="radio" name="g"/>
+<input id="r243" type="radio" name="g"/>
+<input id="r244" type="radio" name="g"/>
+<input id="r245" type="radio" name="g"/>
+<input id="r246" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2011 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> ssh</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"fmt"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"io"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i4"><span class="lit-string i4">"strings"</span></label></code></span>
+<span class="codeline" id="line-13"><code>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">type</span> authResult <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-18"><code>	authFailure <a href="#line-15" class="ident">authResult</a> = <a href="../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-19"><code>	authPartialSuccess</code></span>
+<span class="codeline" id="line-20"><code>	authSuccess</code></span>
+<span class="codeline" id="line-21"><code>)</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// clientAuthenticate authenticates with the remote server. See RFC 4252.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="connection.go.html#line-88" class="ident">connection</a>) <label for="r1" class="ident">clientAuthenticate</label>(<label for="r2" class="ident">config</label> *<a href="client.go.html#line-201" class="ident">ClientConfig</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-25"><code>	<span class="comment">// initiate user auth session</span></code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> := <label for="r0" class="ident">c</label>.<a href="connection.go.html#line-89" class="ident">transport</a>.<a href="handshake.go.html#line-509" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<a href="messages.go.html#line-133" class="ident">serviceRequestMsg</a>{<a href="common.go.html#line-24" class="ident">serviceUserAuth</a>})); <label for="r3" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-27"><code>		<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-28"><code>	}</code></span>
+<span class="codeline" id="line-29"><code>	<label for="r4" class="ident">packet</label>, <label for="r5" class="ident">err</label> := <label for="r0" class="ident">c</label>.<a href="connection.go.html#line-89" class="ident">transport</a>.<a href="handshake.go.html#line-188" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">if</span> <label for="r5" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-31"><code>		<span class="keyword">return</span> <label for="r5" class="ident">err</label></code></span>
+<span class="codeline" id="line-32"><code>	}</code></span>
+<span class="codeline" id="line-33"><code>	<span class="comment">// The server may choose to send a SSH_MSG_EXT_INFO at this point (if we</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">	// advertised willingness to receive one, which we always do) or not. See</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">	// RFC 8308, Section 2.4.</span></code></span>
+<span class="codeline" id="line-36"><code>	<label for="r6" class="ident">extensions</label> := <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>)</code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">packet</label>) &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r4" class="ident">packet</label>[<span class="lit-number">0</span>] == <a href="messages.go.html#line-145" class="ident">msgExtInfo</a> {</code></span>
+<span class="codeline" id="line-38"><code>		<span class="keyword">var</span> <label for="r7" class="ident">extInfo</label> <a href="messages.go.html#line-147" class="ident">extInfoMsg</a></code></span>
+<span class="codeline" id="line-39"><code>		<span class="keyword">if</span> <label for="r8" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r4" class="ident">packet</label>, &amp;<label for="r7" class="ident">extInfo</label>); <label for="r8" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-40"><code>			<span class="keyword">return</span> <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-41"><code>		}</code></span>
+<span class="codeline" id="line-42"><code>		<label for="r9" class="ident">payload</label> := <label for="r7" class="ident">extInfo</label>.<a href="messages.go.html#line-149" class="ident">Payload</a></code></span>
+<span class="codeline" id="line-43"><code>		<span class="keyword">for</span> <label for="r10" class="ident">i</label> := <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<span class="lit-number">0</span>); <label for="r10" class="ident">i</label> &lt; <label for="r7" class="ident">extInfo</label>.<a href="messages.go.html#line-148" class="ident">NumExtensions</a>; <label for="r10" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-44"><code>			<label for="r11" class="ident">name</label>, <label for="r12" class="ident">rest</label>, <label for="r13" class="ident">ok</label> := <a href="messages.go.html#line-593" class="ident">parseString</a>(<label for="r9" class="ident">payload</label>)</code></span>
+<span class="codeline" id="line-45"><code>			<span class="keyword">if</span> !<label for="r13" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-46"><code>				<span class="keyword">return</span> <a href="common.go.html#line-143" class="ident">parseError</a>(<a href="messages.go.html#line-145" class="ident">msgExtInfo</a>)</code></span>
+<span class="codeline" id="line-47"><code>			}</code></span>
+<span class="codeline" id="line-48"><code>			<label for="r14" class="ident">value</label>, <label for="r12" class="ident">rest</label>, <label for="r13" class="ident">ok</label> := <a href="messages.go.html#line-593" class="ident">parseString</a>(<label for="r12" class="ident">rest</label>)</code></span>
+<span class="codeline" id="line-49"><code>			<span class="keyword">if</span> !<label for="r13" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-50"><code>				<span class="keyword">return</span> <a href="common.go.html#line-143" class="ident">parseError</a>(<a href="messages.go.html#line-145" class="ident">msgExtInfo</a>)</code></span>
+<span class="codeline" id="line-51"><code>			}</code></span>
+<span class="codeline" id="line-52"><code>			<label for="r6" class="ident">extensions</label>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r11" class="ident">name</label>)] = <label for="r14" class="ident">value</label></code></span>
+<span class="codeline" id="line-53"><code>			<label for="r9" class="ident">payload</label> = <label for="r12" class="ident">rest</label></code></span>
+<span class="codeline" id="line-54"><code>		}</code></span>
+<span class="codeline" id="line-55"><code>		<label for="r4" class="ident">packet</label>, <label for="r5" class="ident">err</label> = <label for="r0" class="ident">c</label>.<a href="connection.go.html#line-89" class="ident">transport</a>.<a href="handshake.go.html#line-188" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-56"><code>		<span class="keyword">if</span> <label for="r5" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-57"><code>			<span class="keyword">return</span> <label for="r5" class="ident">err</label></code></span>
+<span class="codeline" id="line-58"><code>		}</code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">var</span> <label for="r15" class="ident">serviceAccept</label> <a href="messages.go.html#line-140" class="ident">serviceAcceptMsg</a></code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">if</span> <label for="r16" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r4" class="ident">packet</label>, &amp;<label for="r15" class="ident">serviceAccept</label>); <label for="r16" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">return</span> <label for="r16" class="ident">err</label></code></span>
+<span class="codeline" id="line-63"><code>	}</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// during the authentication phase the client first attempts the "none" method</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">	// then any untried methods suggested by the server.</span></code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">var</span> <label for="r17" class="ident">tried</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">var</span> <label for="r18" class="ident">lastMethods</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code>	<label for="r19" class="ident">sessionID</label> := <label for="r0" class="ident">c</label>.<a href="connection.go.html#line-89" class="ident">transport</a>.<a href="handshake.go.html#line-149" class="ident">getSessionID</a>()</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">for</span> <label for="r20" class="ident">auth</label> := <a href="#line-118" class="ident">AuthMethod</a>(<a href="../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-131" class="ident">noneAuth</a>)); <label for="r20" class="ident">auth</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>; {</code></span>
+<span class="codeline" id="line-72"><code>		<label for="r21" class="ident">ok</label>, <label for="r22" class="ident">methods</label>, <label for="r23" class="ident">err</label> := <label for="r20" class="ident">auth</label>.<a href="#line-124" class="ident">auth</a>(<label for="r19" class="ident">sessionID</label>, <label for="r2" class="ident">config</label>.<a href="client.go.html#line-207" class="ident">User</a>, <label for="r0" class="ident">c</label>.<a href="connection.go.html#line-89" class="ident">transport</a>, <label for="r2" class="ident">config</label>.<a href="common.go.html#line-257" class="ident">Rand</a>, <label for="r6" class="ident">extensions</label>)</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">if</span> <label for="r23" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-74"><code>			<span class="keyword">return</span> <label for="r23" class="ident">err</label></code></span>
+<span class="codeline" id="line-75"><code>		}</code></span>
+<span class="codeline" id="line-76"><code>		<span class="keyword">if</span> <label for="r21" class="ident">ok</label> == <a href="#line-20" class="ident">authSuccess</a> {</code></span>
+<span class="codeline" id="line-77"><code>			<span class="comment">// success</span></code></span>
+<span class="codeline" id="line-78"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-79"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r21" class="ident">ok</label> == <a href="#line-18" class="ident">authFailure</a> {</code></span>
+<span class="codeline" id="line-80"><code>			<span class="keyword">if</span> <label for="r24" class="ident">m</label> := <label for="r20" class="ident">auth</label>.<a href="#line-127" class="ident">method</a>(); !<a href="#line-108" class="ident">contains</a>(<label for="r17" class="ident">tried</label>, <label for="r24" class="ident">m</label>) {</code></span>
+<span class="codeline" id="line-81"><code>				<label for="r17" class="ident">tried</label> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r17" class="ident">tried</label>, <label for="r24" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-82"><code>			}</code></span>
+<span class="codeline" id="line-83"><code>		}</code></span>
+<span class="codeline" id="line-84"><code>		<span class="keyword">if</span> <label for="r22" class="ident">methods</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-85"><code>			<label for="r22" class="ident">methods</label> = <label for="r18" class="ident">lastMethods</label></code></span>
+<span class="codeline" id="line-86"><code>		}</code></span>
+<span class="codeline" id="line-87"><code>		<label for="r18" class="ident">lastMethods</label> = <label for="r22" class="ident">methods</label></code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>		<label for="r20" class="ident">auth</label> = <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code>	<label for="r25" class="ident">findNext</label>:</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">for</span> <label for="r26" class="ident">_</label>, <label for="r27" class="ident">a</label> := <span class="keyword">range</span> <label for="r2" class="ident">config</label>.<a href="client.go.html#line-212" class="ident">Auth</a> {</code></span>
+<span class="codeline" id="line-93"><code>			<label for="r28" class="ident">candidateMethod</label> := <label for="r27" class="ident">a</label>.<a href="#line-127" class="ident">method</a>()</code></span>
+<span class="codeline" id="line-94"><code>			<span class="keyword">if</span> <a href="#line-108" class="ident">contains</a>(<label for="r17" class="ident">tried</label>, <label for="r28" class="ident">candidateMethod</label>) {</code></span>
+<span class="codeline" id="line-95"><code>				<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-96"><code>			}</code></span>
+<span class="codeline" id="line-97"><code>			<span class="keyword">for</span> <label for="r29" class="ident">_</label>, <label for="r30" class="ident">meth</label> := <span class="keyword">range</span> <label for="r22" class="ident">methods</label> {</code></span>
+<span class="codeline" id="line-98"><code>				<span class="keyword">if</span> <label for="r30" class="ident">meth</label> == <label for="r28" class="ident">candidateMethod</label> {</code></span>
+<span class="codeline" id="line-99"><code>					<label for="r20" class="ident">auth</label> = <label for="r27" class="ident">a</label></code></span>
+<span class="codeline" id="line-100"><code>					<span class="keyword">break</span> <label for="r25" class="ident">findNext</label></code></span>
+<span class="codeline" id="line-101"><code>				}</code></span>
+<span class="codeline" id="line-102"><code>			}</code></span>
+<span class="codeline" id="line-103"><code>		}</code></span>
+<span class="codeline" id="line-104"><code>	}</code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"ssh: unable to authenticate, attempted methods %v, no supported methods remain"</span>, <label for="r17" class="ident">tried</label>)</code></span>
+<span class="codeline" id="line-106"><code>}</code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code><span class="keyword">func</span> contains(<label for="r32" class="ident">list</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r33" class="ident">e</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">for</span> <label for="r34" class="ident">_</label>, <label for="r35" class="ident">s</label> := <span class="keyword">range</span> <label for="r32" class="ident">list</label> {</code></span>
+<span class="codeline" id="line-110"><code>		<span class="keyword">if</span> <label for="r35" class="ident">s</label> == <label for="r33" class="ident">e</label> {</code></span>
+<span class="codeline" id="line-111"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-112"><code>		}</code></span>
+<span class="codeline" id="line-113"><code>	}</code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-115"><code>}</code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// An AuthMethod represents an instance of an RFC 4252 authentication method.</span></code></span>
+<span class="codeline" id="line-118"><code><span class="keyword">type</span> <a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-AuthMethod" class="ident">AuthMethod</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-119"><code>	<span class="comment">// auth authenticates user over transport t.</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">	// Returns true if authentication is successful.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">	// If authentication is not successful, a []string of alternative</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">	// method names is returned. If the slice is nil, it will be ignored</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">	// and the previous set of possible methods will be reused.</span></code></span>
+<span class="codeline" id="line-124"><code>	auth(session []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, user <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, p <a href="transport.go.html#line-27" class="ident">packetConn</a>, rand <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, extensions <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code>	<span class="comment">// method returns the RFC 4252 method name.</span></code></span>
+<span class="codeline" id="line-127"><code>	method() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-128"><code>}</code></span>
+<span class="codeline" id="line-129"><code></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// "none" authentication, RFC 4252 section 5.2.</span></code></span>
+<span class="codeline" id="line-131"><code><span class="keyword">type</span> noneAuth <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-132"><code></code></span>
+<span class="codeline" id="line-133"><code><span class="keyword">func</span> (<label for="r36" class="ident">n</label> *<a href="#line-131" class="ident">noneAuth</a>) <label for="r37" class="ident">auth</label>(<label for="r38" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r39" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r40" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r41" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r42" class="ident">_</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">if</span> <label for="r43" class="ident">err</label> := <label for="r40" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<a href="messages.go.html#line-155" class="ident">userAuthRequestMsg</a>{</code></span>
+<span class="codeline" id="line-135"><code>		<a href="messages.go.html#line-156" class="ident">User</a>:    <label for="r39" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-136"><code>		<a href="messages.go.html#line-157" class="ident">Service</a>: <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-137"><code>		<a href="messages.go.html#line-158" class="ident">Method</a>:  <span class="lit-string">"none"</span>,</code></span>
+<span class="codeline" id="line-138"><code>	})); <label for="r43" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r43" class="ident">err</label></code></span>
+<span class="codeline" id="line-140"><code>	}</code></span>
+<span class="codeline" id="line-141"><code></code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">return</span> <a href="#line-401" class="ident">handleAuthResponse</a>(<label for="r40" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-143"><code>}</code></span>
+<span class="codeline" id="line-144"><code></code></span>
+<span class="codeline" id="line-145"><code><span class="keyword">func</span> (<label for="r44" class="ident">n</label> *<a href="#line-131" class="ident">noneAuth</a>) <label for="r45" class="ident">method</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">return</span> <span class="lit-string">"none"</span></code></span>
+<span class="codeline" id="line-147"><code>}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">// passwordCallback is an AuthMethod that fetches the password through</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">// a function call, e.g. by prompting the user.</span></code></span>
+<span class="codeline" id="line-151"><code><span class="keyword">type</span> passwordCallback <span class="keyword">func</span>() (password <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, err <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code><span class="keyword">func</span> (<label for="r46" class="ident">cb</label> <a href="#line-151" class="ident">passwordCallback</a>) <label for="r47" class="ident">auth</label>(<label for="r48" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r49" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r50" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r51" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r52" class="ident">_</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-154"><code>	<span class="keyword">type</span> <label for="r53" class="ident">passwordAuthMsg</label> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-155"><code>		<label for="r54" class="ident">User</label>     <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`sshtype:"50"`</span></code></span>
+<span class="codeline" id="line-156"><code>		<label for="r55" class="ident">Service</label>  <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-157"><code>		<label for="r56" class="ident">Method</label>   <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-158"><code>		<label for="r57" class="ident">Reply</label>    <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-159"><code>		<label for="r58" class="ident">Password</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-160"><code>	}</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code>	<label for="r59" class="ident">pw</label>, <label for="r60" class="ident">err</label> := <label for="r46" class="ident">cb</label>()</code></span>
+<span class="codeline" id="line-163"><code>	<span class="comment">// REVIEW NOTE: is there a need to support skipping a password attempt?</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">	// The program may only find out that the user doesn't have a password</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">	// when prompting.</span></code></span>
+<span class="codeline" id="line-166"><code>	<span class="keyword">if</span> <label for="r60" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r60" class="ident">err</label></code></span>
+<span class="codeline" id="line-168"><code>	}</code></span>
+<span class="codeline" id="line-169"><code></code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">if</span> <label for="r61" class="ident">err</label> := <label for="r50" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<label for="r53" class="ident">passwordAuthMsg</label>{</code></span>
+<span class="codeline" id="line-171"><code>		<label for="r54" class="ident">User</label>:     <label for="r49" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-172"><code>		<label for="r55" class="ident">Service</label>:  <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-173"><code>		<label for="r56" class="ident">Method</label>:   <label for="r46" class="ident">cb</label>.<a href="#line-183" class="ident">method</a>(),</code></span>
+<span class="codeline" id="line-174"><code>		<label for="r57" class="ident">Reply</label>:    <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>,</code></span>
+<span class="codeline" id="line-175"><code>		<label for="r58" class="ident">Password</label>: <label for="r59" class="ident">pw</label>,</code></span>
+<span class="codeline" id="line-176"><code>	})); <label for="r61" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-177"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r61" class="ident">err</label></code></span>
+<span class="codeline" id="line-178"><code>	}</code></span>
+<span class="codeline" id="line-179"><code></code></span>
+<span class="codeline" id="line-180"><code>	<span class="keyword">return</span> <a href="#line-401" class="ident">handleAuthResponse</a>(<label for="r50" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-181"><code>}</code></span>
+<span class="codeline" id="line-182"><code></code></span>
+<span class="codeline" id="line-183"><code><span class="keyword">func</span> (<label for="r62" class="ident">cb</label> <a href="#line-151" class="ident">passwordCallback</a>) <label for="r63" class="ident">method</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-184"><code>	<span class="keyword">return</span> <span class="lit-string">"password"</span></code></span>
+<span class="codeline" id="line-185"><code>}</code></span>
+<span class="codeline" id="line-186"><code></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">// Password returns an AuthMethod using the given password.</span></code></span>
+<span class="codeline" id="line-188"><code><span class="keyword">func</span> <label for="r64" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-Password" class="ident">Password</a></label>(<label for="r65" class="ident">secret</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-189"><code>	<span class="keyword">return</span> <a href="#line-151" class="ident">passwordCallback</a>(<span class="keyword">func</span>() (<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) { <span class="keyword">return</span> <label for="r65" class="ident">secret</label>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> })</code></span>
+<span class="codeline" id="line-190"><code>}</code></span>
+<span class="codeline" id="line-191"><code></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">// PasswordCallback returns an AuthMethod that uses a callback for</span></code></span>
+<span class="codeline" id="line-193"><code><span class="comment">// fetching a password.</span></code></span>
+<span class="codeline" id="line-194"><code><span class="keyword">func</span> <label for="r66" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-PasswordCallback" class="ident">PasswordCallback</a></label>(<label for="r67" class="ident">prompt</label> <span class="keyword">func</span>() (<label for="r68" class="ident">secret</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r69" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-195"><code>	<span class="keyword">return</span> <a href="#line-151" class="ident">passwordCallback</a>(<label for="r67" class="ident">prompt</label>)</code></span>
+<span class="codeline" id="line-196"><code>}</code></span>
+<span class="codeline" id="line-197"><code></code></span>
+<span class="codeline" id="line-198"><code><span class="keyword">type</span> publickeyAuthMsg <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-199"><code>	User    <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`sshtype:"50"`</span></code></span>
+<span class="codeline" id="line-200"><code>	Service <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-201"><code>	Method  <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-202"><code>	<span class="comment">// HasSig indicates to the receiver packet that the auth request is signed and</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">	// should be used for authentication of the request.</span></code></span>
+<span class="codeline" id="line-204"><code>	HasSig   <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-205"><code>	Algoname <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-206"><code>	PubKey   []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-207"><code>	<span class="comment">// Sig is tagged with "rest" so Marshal will exclude it during</span></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">	// validateKey</span></code></span>
+<span class="codeline" id="line-209"><code>	Sig []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="lit-string">`ssh:"rest"`</span></code></span>
+<span class="codeline" id="line-210"><code>}</code></span>
+<span class="codeline" id="line-211"><code></code></span>
+<span class="codeline" id="line-212"><code><span class="comment">// publicKeyCallback is an AuthMethod that uses a set of key</span></code></span>
+<span class="codeline" id="line-213"><code><span class="comment">// pairs for authentication.</span></code></span>
+<span class="codeline" id="line-214"><code><span class="keyword">type</span> publicKeyCallback <span class="keyword">func</span>() ([]<a href="keys.go.html#line-325" class="ident">Signer</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-215"><code></code></span>
+<span class="codeline" id="line-216"><code><span class="keyword">func</span> (<label for="r70" class="ident">cb</label> <a href="#line-214" class="ident">publicKeyCallback</a>) <label for="r71" class="ident">method</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-217"><code>	<span class="keyword">return</span> <span class="lit-string">"publickey"</span></code></span>
+<span class="codeline" id="line-218"><code>}</code></span>
+<span class="codeline" id="line-219"><code></code></span>
+<span class="codeline" id="line-220"><code><span class="keyword">func</span> pickSignatureAlgorithm(<label for="r73" class="ident">signer</label> <a href="keys.go.html#line-325" class="ident">Signer</a>, <label for="r74" class="ident">extensions</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r75" class="ident">as</label> <a href="keys.go.html#line-342" class="ident">AlgorithmSigner</a>, <label for="r76" class="ident">algo</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-221"><code>	<label for="r77" class="ident">keyFormat</label> := <label for="r73" class="ident">signer</label>.<a href="keys.go.html#line-327" class="ident">PublicKey</a>().<a href="keys.go.html#line-303" class="ident">Type</a>()</code></span>
+<span class="codeline" id="line-222"><code></code></span>
+<span class="codeline" id="line-223"><code>	<span class="comment">// Like in sendKexInit, if the public key implements AlgorithmSigner we</span></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">	// assume it supports all algorithms, otherwise only the key format one.</span></code></span>
+<span class="codeline" id="line-225"><code>	<label for="r75" class="ident">as</label>, <label for="r78" class="ident">ok</label> := <label for="r73" class="ident">signer</label>.(<a href="keys.go.html#line-342" class="ident">AlgorithmSigner</a>)</code></span>
+<span class="codeline" id="line-226"><code>	<span class="keyword">if</span> !<label for="r78" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-227"><code>		<span class="keyword">return</span> <a href="handshake.go.html#line-675" class="ident">algorithmSignerWrapper</a>{<label for="r73" class="ident">signer</label>}, <label for="r77" class="ident">keyFormat</label></code></span>
+<span class="codeline" id="line-228"><code>	}</code></span>
+<span class="codeline" id="line-229"><code></code></span>
+<span class="codeline" id="line-230"><code>	<label for="r79" class="ident">extPayload</label>, <label for="r78" class="ident">ok</label> := <label for="r74" class="ident">extensions</label>[<span class="lit-string">"server-sig-algs"</span>]</code></span>
+<span class="codeline" id="line-231"><code>	<span class="keyword">if</span> !<label for="r78" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-232"><code>		<span class="comment">// If there is no "server-sig-algs" extension, fall back to the key</span></code></span>
+<span class="codeline" id="line-233"><code><span class="comment">		// format algorithm.</span></code></span>
+<span class="codeline" id="line-234"><code>		<span class="keyword">return</span> <label for="r75" class="ident">as</label>, <label for="r77" class="ident">keyFormat</label></code></span>
+<span class="codeline" id="line-235"><code>	}</code></span>
+<span class="codeline" id="line-236"><code></code></span>
+<span class="codeline" id="line-237"><code>	<span class="comment">// The server-sig-algs extension only carries underlying signature</span></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">	// algorithm, but we are trying to select a protocol-level public key</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">	// algorithm, which might be a certificate type. Extend the list of server</span></code></span>
+<span class="codeline" id="line-240"><code><span class="comment">	// supported algorithms to include the corresponding certificate algorithms.</span></code></span>
+<span class="codeline" id="line-241"><code>	<label for="r80" class="ident">serverAlgos</label> := <a href="../../../../../pkg/strings.html" class="ident i4">strings</a>.<a href="../../../../strings/strings.go.html#line-308" class="ident">Split</a>(<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r79" class="ident">extPayload</label>), <span class="lit-string">","</span>)</code></span>
+<span class="codeline" id="line-242"><code>	<span class="keyword">for</span> <label for="r81" class="ident">_</label>, <label for="r82" class="ident">algo</label> := <span class="keyword">range</span> <label for="r80" class="ident">serverAlgos</label> {</code></span>
+<span class="codeline" id="line-243"><code>		<span class="keyword">if</span> <label for="r83" class="ident">certAlgo</label>, <label for="r84" class="ident">ok</label> := <a href="certs.go.html#line-490" class="ident">certificateAlgo</a>(<label for="r82" class="ident">algo</label>); <label for="r84" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-244"><code>			<label for="r80" class="ident">serverAlgos</label> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r80" class="ident">serverAlgos</label>, <label for="r83" class="ident">certAlgo</label>)</code></span>
+<span class="codeline" id="line-245"><code>		}</code></span>
+<span class="codeline" id="line-246"><code>	}</code></span>
+<span class="codeline" id="line-247"><code></code></span>
+<span class="codeline" id="line-248"><code>	<label for="r85" class="ident">keyAlgos</label> := <a href="common.go.html#line-111" class="ident">algorithmsForKeyFormat</a>(<label for="r77" class="ident">keyFormat</label>)</code></span>
+<span class="codeline" id="line-249"><code>	<label for="r76" class="ident">algo</label>, <label for="r86" class="ident">err</label> := <a href="common.go.html#line-147" class="ident">findCommon</a>(<span class="lit-string">"public key signature algorithm"</span>, <label for="r85" class="ident">keyAlgos</label>, <label for="r80" class="ident">serverAlgos</label>)</code></span>
+<span class="codeline" id="line-250"><code>	<span class="keyword">if</span> <label for="r86" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-251"><code>		<span class="comment">// If there is no overlap, try the key anyway with the key format</span></code></span>
+<span class="codeline" id="line-252"><code><span class="comment">		// algorithm, to support servers that fail to list all supported</span></code></span>
+<span class="codeline" id="line-253"><code><span class="comment">		// algorithms.</span></code></span>
+<span class="codeline" id="line-254"><code>		<span class="keyword">return</span> <label for="r75" class="ident">as</label>, <label for="r77" class="ident">keyFormat</label></code></span>
+<span class="codeline" id="line-255"><code>	}</code></span>
+<span class="codeline" id="line-256"><code>	<span class="keyword">return</span> <label for="r75" class="ident">as</label>, <label for="r76" class="ident">algo</label></code></span>
+<span class="codeline" id="line-257"><code>}</code></span>
+<span class="codeline" id="line-258"><code></code></span>
+<span class="codeline" id="line-259"><code><span class="keyword">func</span> (<label for="r87" class="ident">cb</label> <a href="#line-214" class="ident">publicKeyCallback</a>) <label for="r88" class="ident">auth</label>(<label for="r89" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r90" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r91" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r92" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r93" class="ident">extensions</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-260"><code>	<span class="comment">// Authentication is performed by sending an enquiry to test if a key is</span></code></span>
+<span class="codeline" id="line-261"><code><span class="comment">	// acceptable to the remote. If the key is acceptable, the client will</span></code></span>
+<span class="codeline" id="line-262"><code><span class="comment">	// attempt to authenticate with the valid key.  If not the client will repeat</span></code></span>
+<span class="codeline" id="line-263"><code><span class="comment">	// the process with the remaining keys.</span></code></span>
+<span class="codeline" id="line-264"><code></code></span>
+<span class="codeline" id="line-265"><code>	<label for="r94" class="ident">signers</label>, <label for="r95" class="ident">err</label> := <label for="r87" class="ident">cb</label>()</code></span>
+<span class="codeline" id="line-266"><code>	<span class="keyword">if</span> <label for="r95" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-267"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r95" class="ident">err</label></code></span>
+<span class="codeline" id="line-268"><code>	}</code></span>
+<span class="codeline" id="line-269"><code>	<span class="keyword">var</span> <label for="r96" class="ident">methods</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-270"><code>	<span class="keyword">for</span> <label for="r97" class="ident">_</label>, <label for="r98" class="ident">signer</label> := <span class="keyword">range</span> <label for="r94" class="ident">signers</label> {</code></span>
+<span class="codeline" id="line-271"><code>		<label for="r99" class="ident">pub</label> := <label for="r98" class="ident">signer</label>.<a href="keys.go.html#line-327" class="ident">PublicKey</a>()</code></span>
+<span class="codeline" id="line-272"><code>		<label for="r100" class="ident">as</label>, <label for="r101" class="ident">algo</label> := <a href="#line-220" class="ident">pickSignatureAlgorithm</a>(<label for="r98" class="ident">signer</label>, <label for="r93" class="ident">extensions</label>)</code></span>
+<span class="codeline" id="line-273"><code></code></span>
+<span class="codeline" id="line-274"><code>		<label for="r102" class="ident">ok</label>, <label for="r103" class="ident">err</label> := <a href="#line-339" class="ident">validateKey</a>(<label for="r99" class="ident">pub</label>, <label for="r101" class="ident">algo</label>, <label for="r90" class="ident">user</label>, <label for="r91" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-275"><code>		<span class="keyword">if</span> <label for="r103" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-276"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r103" class="ident">err</label></code></span>
+<span class="codeline" id="line-277"><code>		}</code></span>
+<span class="codeline" id="line-278"><code>		<span class="keyword">if</span> !<label for="r102" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-279"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-280"><code>		}</code></span>
+<span class="codeline" id="line-281"><code></code></span>
+<span class="codeline" id="line-282"><code>		<label for="r104" class="ident">pubKey</label> := <label for="r99" class="ident">pub</label>.<a href="keys.go.html#line-307" class="ident">Marshal</a>()</code></span>
+<span class="codeline" id="line-283"><code>		<label for="r105" class="ident">data</label> := <a href="common.go.html#line-317" class="ident">buildDataSignedForAuth</a>(<label for="r89" class="ident">session</label>, <a href="messages.go.html#line-155" class="ident">userAuthRequestMsg</a>{</code></span>
+<span class="codeline" id="line-284"><code>			<a href="messages.go.html#line-156" class="ident">User</a>:    <label for="r90" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-285"><code>			<a href="messages.go.html#line-157" class="ident">Service</a>: <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-286"><code>			<a href="messages.go.html#line-158" class="ident">Method</a>:  <label for="r87" class="ident">cb</label>.<a href="#line-216" class="ident">method</a>(),</code></span>
+<span class="codeline" id="line-287"><code>		}, <label for="r101" class="ident">algo</label>, <label for="r104" class="ident">pubKey</label>)</code></span>
+<span class="codeline" id="line-288"><code>		<label for="r106" class="ident">sign</label>, <label for="r103" class="ident">err</label> := <label for="r100" class="ident">as</label>.<a href="keys.go.html#line-349" class="ident">SignWithAlgorithm</a>(<label for="r92" class="ident">rand</label>, <label for="r105" class="ident">data</label>, <a href="certs.go.html#line-481" class="ident">underlyingAlgo</a>(<label for="r101" class="ident">algo</label>))</code></span>
+<span class="codeline" id="line-289"><code>		<span class="keyword">if</span> <label for="r103" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-290"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r103" class="ident">err</label></code></span>
+<span class="codeline" id="line-291"><code>		}</code></span>
+<span class="codeline" id="line-292"><code></code></span>
+<span class="codeline" id="line-293"><code>		<span class="comment">// manually wrap the serialized signature in a string</span></code></span>
+<span class="codeline" id="line-294"><code>		<label for="r107" class="ident">s</label> := <a href="messages.go.html#line-505" class="ident">Marshal</a>(<label for="r106" class="ident">sign</label>)</code></span>
+<span class="codeline" id="line-295"><code>		<label for="r108" class="ident">sig</label> := <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="messages.go.html#line-767" class="ident">stringLength</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">s</label>)))</code></span>
+<span class="codeline" id="line-296"><code>		<a href="messages.go.html#line-771" class="ident">marshalString</a>(<label for="r108" class="ident">sig</label>, <label for="r107" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-297"><code>		<label for="r109" class="ident">msg</label> := <a href="#line-198" class="ident">publickeyAuthMsg</a>{</code></span>
+<span class="codeline" id="line-298"><code>			<a href="#line-199" class="ident">User</a>:     <label for="r90" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-299"><code>			<a href="#line-200" class="ident">Service</a>:  <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-300"><code>			<a href="#line-201" class="ident">Method</a>:   <label for="r87" class="ident">cb</label>.<a href="#line-216" class="ident">method</a>(),</code></span>
+<span class="codeline" id="line-301"><code>			<a href="#line-204" class="ident">HasSig</a>:   <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a>,</code></span>
+<span class="codeline" id="line-302"><code>			<a href="#line-205" class="ident">Algoname</a>: <label for="r101" class="ident">algo</label>,</code></span>
+<span class="codeline" id="line-303"><code>			<a href="#line-206" class="ident">PubKey</a>:   <label for="r104" class="ident">pubKey</label>,</code></span>
+<span class="codeline" id="line-304"><code>			<a href="#line-209" class="ident">Sig</a>:      <label for="r108" class="ident">sig</label>,</code></span>
+<span class="codeline" id="line-305"><code>		}</code></span>
+<span class="codeline" id="line-306"><code>		<label for="r110" class="ident">p</label> := <a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<label for="r109" class="ident">msg</label>)</code></span>
+<span class="codeline" id="line-307"><code>		<span class="keyword">if</span> <label for="r111" class="ident">err</label> := <label for="r91" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<label for="r110" class="ident">p</label>); <label for="r111" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-308"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r111" class="ident">err</label></code></span>
+<span class="codeline" id="line-309"><code>		}</code></span>
+<span class="codeline" id="line-310"><code>		<span class="keyword">var</span> <label for="r112" class="ident">success</label> <a href="#line-15" class="ident">authResult</a></code></span>
+<span class="codeline" id="line-311"><code>		<label for="r112" class="ident">success</label>, <label for="r96" class="ident">methods</label>, <label for="r103" class="ident">err</label> = <a href="#line-401" class="ident">handleAuthResponse</a>(<label for="r91" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-312"><code>		<span class="keyword">if</span> <label for="r103" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-313"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r103" class="ident">err</label></code></span>
+<span class="codeline" id="line-314"><code>		}</code></span>
+<span class="codeline" id="line-315"><code></code></span>
+<span class="codeline" id="line-316"><code>		<span class="comment">// If authentication succeeds or the list of available methods does not</span></code></span>
+<span class="codeline" id="line-317"><code><span class="comment">		// contain the "publickey" method, do not attempt to authenticate with any</span></code></span>
+<span class="codeline" id="line-318"><code><span class="comment">		// other keys.  According to RFC 4252 Section 7, the latter can occur when</span></code></span>
+<span class="codeline" id="line-319"><code><span class="comment">		// additional authentication methods are required.</span></code></span>
+<span class="codeline" id="line-320"><code>		<span class="keyword">if</span> <label for="r112" class="ident">success</label> == <a href="#line-20" class="ident">authSuccess</a> || !<a href="#line-328" class="ident">containsMethod</a>(<label for="r96" class="ident">methods</label>, <label for="r87" class="ident">cb</label>.<a href="#line-216" class="ident">method</a>()) {</code></span>
+<span class="codeline" id="line-321"><code>			<span class="keyword">return</span> <label for="r112" class="ident">success</label>, <label for="r96" class="ident">methods</label>, <label for="r103" class="ident">err</label></code></span>
+<span class="codeline" id="line-322"><code>		}</code></span>
+<span class="codeline" id="line-323"><code>	}</code></span>
+<span class="codeline" id="line-324"><code></code></span>
+<span class="codeline" id="line-325"><code>	<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <label for="r96" class="ident">methods</label>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-326"><code>}</code></span>
+<span class="codeline" id="line-327"><code></code></span>
+<span class="codeline" id="line-328"><code><span class="keyword">func</span> containsMethod(<label for="r114" class="ident">methods</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r115" class="ident">method</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-329"><code>	<span class="keyword">for</span> <label for="r116" class="ident">_</label>, <label for="r117" class="ident">m</label> := <span class="keyword">range</span> <label for="r114" class="ident">methods</label> {</code></span>
+<span class="codeline" id="line-330"><code>		<span class="keyword">if</span> <label for="r117" class="ident">m</label> == <label for="r115" class="ident">method</label> {</code></span>
+<span class="codeline" id="line-331"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-332"><code>		}</code></span>
+<span class="codeline" id="line-333"><code>	}</code></span>
+<span class="codeline" id="line-334"><code></code></span>
+<span class="codeline" id="line-335"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-336"><code>}</code></span>
+<span class="codeline" id="line-337"><code></code></span>
+<span class="codeline" id="line-338"><code><span class="comment">// validateKey validates the key provided is acceptable to the server.</span></code></span>
+<span class="codeline" id="line-339"><code><span class="keyword">func</span> validateKey(<label for="r119" class="ident">key</label> <a href="keys.go.html#line-301" class="ident">PublicKey</a>, <label for="r120" class="ident">algo</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r121" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r122" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>) (<a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-340"><code>	<label for="r123" class="ident">pubKey</label> := <label for="r119" class="ident">key</label>.<a href="keys.go.html#line-307" class="ident">Marshal</a>()</code></span>
+<span class="codeline" id="line-341"><code>	<label for="r124" class="ident">msg</label> := <a href="#line-198" class="ident">publickeyAuthMsg</a>{</code></span>
+<span class="codeline" id="line-342"><code>		<a href="#line-199" class="ident">User</a>:     <label for="r121" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-343"><code>		<a href="#line-200" class="ident">Service</a>:  <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-344"><code>		<a href="#line-201" class="ident">Method</a>:   <span class="lit-string">"publickey"</span>,</code></span>
+<span class="codeline" id="line-345"><code>		<a href="#line-204" class="ident">HasSig</a>:   <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>,</code></span>
+<span class="codeline" id="line-346"><code>		<a href="#line-205" class="ident">Algoname</a>: <label for="r120" class="ident">algo</label>,</code></span>
+<span class="codeline" id="line-347"><code>		<a href="#line-206" class="ident">PubKey</a>:   <label for="r123" class="ident">pubKey</label>,</code></span>
+<span class="codeline" id="line-348"><code>	}</code></span>
+<span class="codeline" id="line-349"><code>	<span class="keyword">if</span> <label for="r125" class="ident">err</label> := <label for="r122" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<label for="r124" class="ident">msg</label>)); <label for="r125" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-350"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r125" class="ident">err</label></code></span>
+<span class="codeline" id="line-351"><code>	}</code></span>
+<span class="codeline" id="line-352"><code></code></span>
+<span class="codeline" id="line-353"><code>	<span class="keyword">return</span> <a href="#line-356" class="ident">confirmKeyAck</a>(<label for="r119" class="ident">key</label>, <label for="r120" class="ident">algo</label>, <label for="r122" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-354"><code>}</code></span>
+<span class="codeline" id="line-355"><code></code></span>
+<span class="codeline" id="line-356"><code><span class="keyword">func</span> confirmKeyAck(<label for="r127" class="ident">key</label> <a href="keys.go.html#line-301" class="ident">PublicKey</a>, <label for="r128" class="ident">algo</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r129" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>) (<a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-357"><code>	<label for="r130" class="ident">pubKey</label> := <label for="r127" class="ident">key</label>.<a href="keys.go.html#line-307" class="ident">Marshal</a>()</code></span>
+<span class="codeline" id="line-358"><code></code></span>
+<span class="codeline" id="line-359"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-360"><code>		<label for="r131" class="ident">packet</label>, <label for="r132" class="ident">err</label> := <label for="r129" class="ident">c</label>.<a href="transport.go.html#line-34" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-361"><code>		<span class="keyword">if</span> <label for="r132" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-362"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r132" class="ident">err</label></code></span>
+<span class="codeline" id="line-363"><code>		}</code></span>
+<span class="codeline" id="line-364"><code>		<span class="keyword">switch</span> <label for="r131" class="ident">packet</label>[<span class="lit-number">0</span>] {</code></span>
+<span class="codeline" id="line-365"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-178" class="ident">msgUserAuthBanner</a>:</code></span>
+<span class="codeline" id="line-366"><code>			<span class="keyword">if</span> <label for="r133" class="ident">err</label> := <a href="#line-437" class="ident">handleBannerResponse</a>(<label for="r129" class="ident">c</label>, <label for="r131" class="ident">packet</label>); <label for="r133" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-367"><code>				<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r133" class="ident">err</label></code></span>
+<span class="codeline" id="line-368"><code>			}</code></span>
+<span class="codeline" id="line-369"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-309" class="ident">msgUserAuthPubKeyOk</a>:</code></span>
+<span class="codeline" id="line-370"><code>			<span class="keyword">var</span> <label for="r134" class="ident">msg</label> <a href="messages.go.html#line-311" class="ident">userAuthPubKeyOkMsg</a></code></span>
+<span class="codeline" id="line-371"><code>			<span class="keyword">if</span> <label for="r135" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r131" class="ident">packet</label>, &amp;<label for="r134" class="ident">msg</label>); <label for="r135" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-372"><code>				<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <label for="r135" class="ident">err</label></code></span>
+<span class="codeline" id="line-373"><code>			}</code></span>
+<span class="codeline" id="line-374"><code>			<span class="keyword">if</span> <label for="r134" class="ident">msg</label>.<a href="messages.go.html#line-312" class="ident">Algo</a> != <label for="r128" class="ident">algo</label> || !<a href="../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r134" class="ident">msg</label>.<a href="messages.go.html#line-313" class="ident">PubKey</a>, <label for="r130" class="ident">pubKey</label>) {</code></span>
+<span class="codeline" id="line-375"><code>				<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-376"><code>			}</code></span>
+<span class="codeline" id="line-377"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-378"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-167" class="ident">msgUserAuthFailure</a>:</code></span>
+<span class="codeline" id="line-379"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-380"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-381"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="common.go.html#line-138" class="ident">unexpectedMessageError</a>(<a href="messages.go.html#line-309" class="ident">msgUserAuthPubKeyOk</a>, <label for="r131" class="ident">packet</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-382"><code>		}</code></span>
+<span class="codeline" id="line-383"><code>	}</code></span>
+<span class="codeline" id="line-384"><code>}</code></span>
+<span class="codeline" id="line-385"><code></code></span>
+<span class="codeline" id="line-386"><code><span class="comment">// PublicKeys returns an AuthMethod that uses the given key</span></code></span>
+<span class="codeline" id="line-387"><code><span class="comment">// pairs.</span></code></span>
+<span class="codeline" id="line-388"><code><span class="keyword">func</span> <label for="r136" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-PublicKeys" class="ident">PublicKeys</a></label>(<label for="r137" class="ident">signers</label> ...<a href="keys.go.html#line-325" class="ident">Signer</a>) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-389"><code>	<span class="keyword">return</span> <a href="#line-214" class="ident">publicKeyCallback</a>(<span class="keyword">func</span>() ([]<a href="keys.go.html#line-325" class="ident">Signer</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) { <span class="keyword">return</span> <label for="r137" class="ident">signers</label>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> })</code></span>
+<span class="codeline" id="line-390"><code>}</code></span>
+<span class="codeline" id="line-391"><code></code></span>
+<span class="codeline" id="line-392"><code><span class="comment">// PublicKeysCallback returns an AuthMethod that runs the given</span></code></span>
+<span class="codeline" id="line-393"><code><span class="comment">// function to obtain a list of key pairs.</span></code></span>
+<span class="codeline" id="line-394"><code><span class="keyword">func</span> <label for="r138" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-PublicKeysCallback" class="ident">PublicKeysCallback</a></label>(<label for="r139" class="ident">getSigners</label> <span class="keyword">func</span>() (<label for="r140" class="ident">signers</label> []<a href="keys.go.html#line-325" class="ident">Signer</a>, <label for="r141" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-395"><code>	<span class="keyword">return</span> <a href="#line-214" class="ident">publicKeyCallback</a>(<label for="r139" class="ident">getSigners</label>)</code></span>
+<span class="codeline" id="line-396"><code>}</code></span>
+<span class="codeline" id="line-397"><code></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">// handleAuthResponse returns whether the preceding authentication request succeeded</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">// along with a list of remaining authentication methods to try next and</span></code></span>
+<span class="codeline" id="line-400"><code><span class="comment">// an error if an unexpected response was received.</span></code></span>
+<span class="codeline" id="line-401"><code><span class="keyword">func</span> handleAuthResponse(<label for="r143" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-402"><code>	<label for="r144" class="ident">gotMsgExtInfo</label> := <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-403"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-404"><code>		<label for="r145" class="ident">packet</label>, <label for="r146" class="ident">err</label> := <label for="r143" class="ident">c</label>.<a href="transport.go.html#line-34" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-405"><code>		<span class="keyword">if</span> <label for="r146" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-406"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r146" class="ident">err</label></code></span>
+<span class="codeline" id="line-407"><code>		}</code></span>
+<span class="codeline" id="line-408"><code></code></span>
+<span class="codeline" id="line-409"><code>		<span class="keyword">switch</span> <label for="r145" class="ident">packet</label>[<span class="lit-number">0</span>] {</code></span>
+<span class="codeline" id="line-410"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-178" class="ident">msgUserAuthBanner</a>:</code></span>
+<span class="codeline" id="line-411"><code>			<span class="keyword">if</span> <label for="r147" class="ident">err</label> := <a href="#line-437" class="ident">handleBannerResponse</a>(<label for="r143" class="ident">c</label>, <label for="r145" class="ident">packet</label>); <label for="r147" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-412"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r147" class="ident">err</label></code></span>
+<span class="codeline" id="line-413"><code>			}</code></span>
+<span class="codeline" id="line-414"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-145" class="ident">msgExtInfo</a>:</code></span>
+<span class="codeline" id="line-415"><code>			<span class="comment">// Ignore post-authentication RFC 8308 extensions, once.</span></code></span>
+<span class="codeline" id="line-416"><code>			<span class="keyword">if</span> <label for="r144" class="ident">gotMsgExtInfo</label> {</code></span>
+<span class="codeline" id="line-417"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="common.go.html#line-138" class="ident">unexpectedMessageError</a>(<a href="messages.go.html#line-175" class="ident">msgUserAuthSuccess</a>, <label for="r145" class="ident">packet</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-418"><code>			}</code></span>
+<span class="codeline" id="line-419"><code>			<label for="r144" class="ident">gotMsgExtInfo</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-420"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-167" class="ident">msgUserAuthFailure</a>:</code></span>
+<span class="codeline" id="line-421"><code>			<span class="keyword">var</span> <label for="r148" class="ident">msg</label> <a href="messages.go.html#line-169" class="ident">userAuthFailureMsg</a></code></span>
+<span class="codeline" id="line-422"><code>			<span class="keyword">if</span> <label for="r149" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r145" class="ident">packet</label>, &amp;<label for="r148" class="ident">msg</label>); <label for="r149" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-423"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r149" class="ident">err</label></code></span>
+<span class="codeline" id="line-424"><code>			}</code></span>
+<span class="codeline" id="line-425"><code>			<span class="keyword">if</span> <label for="r148" class="ident">msg</label>.<a href="messages.go.html#line-171" class="ident">PartialSuccess</a> {</code></span>
+<span class="codeline" id="line-426"><code>				<span class="keyword">return</span> <a href="#line-19" class="ident">authPartialSuccess</a>, <label for="r148" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-427"><code>			}</code></span>
+<span class="codeline" id="line-428"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <label for="r148" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-429"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-175" class="ident">msgUserAuthSuccess</a>:</code></span>
+<span class="codeline" id="line-430"><code>			<span class="keyword">return</span> <a href="#line-20" class="ident">authSuccess</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-431"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-432"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="common.go.html#line-138" class="ident">unexpectedMessageError</a>(<a href="messages.go.html#line-175" class="ident">msgUserAuthSuccess</a>, <label for="r145" class="ident">packet</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-433"><code>		}</code></span>
+<span class="codeline" id="line-434"><code>	}</code></span>
+<span class="codeline" id="line-435"><code>}</code></span>
+<span class="codeline" id="line-436"><code></code></span>
+<span class="codeline" id="line-437"><code><span class="keyword">func</span> handleBannerResponse(<label for="r151" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r152" class="ident">packet</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-438"><code>	<span class="keyword">var</span> <label for="r153" class="ident">msg</label> <a href="messages.go.html#line-180" class="ident">userAuthBannerMsg</a></code></span>
+<span class="codeline" id="line-439"><code>	<span class="keyword">if</span> <label for="r154" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r152" class="ident">packet</label>, &amp;<label for="r153" class="ident">msg</label>); <label for="r154" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-440"><code>		<span class="keyword">return</span> <label for="r154" class="ident">err</label></code></span>
+<span class="codeline" id="line-441"><code>	}</code></span>
+<span class="codeline" id="line-442"><code></code></span>
+<span class="codeline" id="line-443"><code>	<label for="r155" class="ident">transport</label>, <label for="r156" class="ident">ok</label> := <label for="r151" class="ident">c</label>.(*<a href="handshake.go.html#line-41" class="ident">handshakeTransport</a>)</code></span>
+<span class="codeline" id="line-444"><code>	<span class="keyword">if</span> !<label for="r156" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-445"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-446"><code>	}</code></span>
+<span class="codeline" id="line-447"><code></code></span>
+<span class="codeline" id="line-448"><code>	<span class="keyword">if</span> <label for="r155" class="ident">transport</label>.<a href="handshake.go.html#line-87" class="ident">bannerCallback</a> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-449"><code>		<span class="keyword">return</span> <label for="r155" class="ident">transport</label>.<a href="handshake.go.html#line-87" class="ident">bannerCallback</a>(<label for="r153" class="ident">msg</label>.<a href="messages.go.html#line-181" class="ident">Message</a>)</code></span>
+<span class="codeline" id="line-450"><code>	}</code></span>
+<span class="codeline" id="line-451"><code></code></span>
+<span class="codeline" id="line-452"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-453"><code>}</code></span>
+<span class="codeline" id="line-454"><code></code></span>
+<span class="codeline" id="line-455"><code><span class="comment">// KeyboardInteractiveChallenge should print questions, optionally</span></code></span>
+<span class="codeline" id="line-456"><code><span class="comment">// disabling echoing (e.g. for passwords), and return all the answers.</span></code></span>
+<span class="codeline" id="line-457"><code><span class="comment">// Challenge may be called multiple times in a single session. After</span></code></span>
+<span class="codeline" id="line-458"><code><span class="comment">// successful authentication, the server may send a challenge with no</span></code></span>
+<span class="codeline" id="line-459"><code><span class="comment">// questions, for which the name and instruction messages should be</span></code></span>
+<span class="codeline" id="line-460"><code><span class="comment">// printed.  RFC 4256 section 3.3 details how the UI should behave for</span></code></span>
+<span class="codeline" id="line-461"><code><span class="comment">// both CLI and GUI environments.</span></code></span>
+<span class="codeline" id="line-462"><code><span class="keyword">type</span> <a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-KeyboardInteractiveChallenge" class="ident">KeyboardInteractiveChallenge</a> <span class="keyword">func</span>(name, instruction <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, questions []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, echos []<a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) (answers []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, err <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-463"><code></code></span>
+<span class="codeline" id="line-464"><code><span class="comment">// KeyboardInteractive returns an AuthMethod using a prompt/response</span></code></span>
+<span class="codeline" id="line-465"><code><span class="comment">// sequence controlled by the server.</span></code></span>
+<span class="codeline" id="line-466"><code><span class="keyword">func</span> <label for="r157" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-KeyboardInteractive" class="ident">KeyboardInteractive</a></label>(<label for="r158" class="ident">challenge</label> <a href="#line-462" class="ident">KeyboardInteractiveChallenge</a>) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-467"><code>	<span class="keyword">return</span> <label for="r158" class="ident">challenge</label></code></span>
+<span class="codeline" id="line-468"><code>}</code></span>
+<span class="codeline" id="line-469"><code></code></span>
+<span class="codeline" id="line-470"><code><span class="keyword">func</span> (<label for="r159" class="ident">cb</label> <a href="#line-462" class="ident">KeyboardInteractiveChallenge</a>) <label for="r160" class="ident"><a href="../../../../../imp/golang.org/x/crypto/ssh.KeyboardInteractiveChallenge.html#name-method" class="ident">method</a></label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-471"><code>	<span class="keyword">return</span> <span class="lit-string">"keyboard-interactive"</span></code></span>
+<span class="codeline" id="line-472"><code>}</code></span>
+<span class="codeline" id="line-473"><code></code></span>
+<span class="codeline" id="line-474"><code><span class="keyword">func</span> (<label for="r161" class="ident">cb</label> <a href="#line-462" class="ident">KeyboardInteractiveChallenge</a>) <label for="r162" class="ident"><a href="../../../../../imp/golang.org/x/crypto/ssh.KeyboardInteractiveChallenge.html#name-auth" class="ident">auth</a></label>(<label for="r163" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r164" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r165" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r166" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r167" class="ident">_</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-475"><code>	<span class="keyword">type</span> <label for="r168" class="ident">initiateMsg</label> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-476"><code>		<label for="r169" class="ident">User</label>       <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`sshtype:"50"`</span></code></span>
+<span class="codeline" id="line-477"><code>		<label for="r170" class="ident">Service</label>    <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-478"><code>		<label for="r171" class="ident">Method</label>     <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-479"><code>		<label for="r172" class="ident">Language</label>   <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-480"><code>		<label for="r173" class="ident">Submethods</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-481"><code>	}</code></span>
+<span class="codeline" id="line-482"><code></code></span>
+<span class="codeline" id="line-483"><code>	<span class="keyword">if</span> <label for="r174" class="ident">err</label> := <label for="r165" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<label for="r168" class="ident">initiateMsg</label>{</code></span>
+<span class="codeline" id="line-484"><code>		<label for="r169" class="ident">User</label>:    <label for="r164" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-485"><code>		<label for="r170" class="ident">Service</label>: <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-486"><code>		<label for="r171" class="ident">Method</label>:  <span class="lit-string">"keyboard-interactive"</span>,</code></span>
+<span class="codeline" id="line-487"><code>	})); <label for="r174" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-488"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r174" class="ident">err</label></code></span>
+<span class="codeline" id="line-489"><code>	}</code></span>
+<span class="codeline" id="line-490"><code></code></span>
+<span class="codeline" id="line-491"><code>	<label for="r175" class="ident">gotMsgExtInfo</label> := <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-492"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-493"><code>		<label for="r176" class="ident">packet</label>, <label for="r177" class="ident">err</label> := <label for="r165" class="ident">c</label>.<a href="transport.go.html#line-34" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-494"><code>		<span class="keyword">if</span> <label for="r177" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-495"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r177" class="ident">err</label></code></span>
+<span class="codeline" id="line-496"><code>		}</code></span>
+<span class="codeline" id="line-497"><code></code></span>
+<span class="codeline" id="line-498"><code>		<span class="comment">// like handleAuthResponse, but with less options.</span></code></span>
+<span class="codeline" id="line-499"><code>		<span class="keyword">switch</span> <label for="r176" class="ident">packet</label>[<span class="lit-number">0</span>] {</code></span>
+<span class="codeline" id="line-500"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-178" class="ident">msgUserAuthBanner</a>:</code></span>
+<span class="codeline" id="line-501"><code>			<span class="keyword">if</span> <label for="r178" class="ident">err</label> := <a href="#line-437" class="ident">handleBannerResponse</a>(<label for="r165" class="ident">c</label>, <label for="r176" class="ident">packet</label>); <label for="r178" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-502"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r178" class="ident">err</label></code></span>
+<span class="codeline" id="line-503"><code>			}</code></span>
+<span class="codeline" id="line-504"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-505"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-145" class="ident">msgExtInfo</a>:</code></span>
+<span class="codeline" id="line-506"><code>			<span class="comment">// Ignore post-authentication RFC 8308 extensions, once.</span></code></span>
+<span class="codeline" id="line-507"><code>			<span class="keyword">if</span> <label for="r175" class="ident">gotMsgExtInfo</label> {</code></span>
+<span class="codeline" id="line-508"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="common.go.html#line-138" class="ident">unexpectedMessageError</a>(<a href="messages.go.html#line-187" class="ident">msgUserAuthInfoRequest</a>, <label for="r176" class="ident">packet</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-509"><code>			}</code></span>
+<span class="codeline" id="line-510"><code>			<label for="r175" class="ident">gotMsgExtInfo</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-511"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-512"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-187" class="ident">msgUserAuthInfoRequest</a>:</code></span>
+<span class="codeline" id="line-513"><code>			<span class="comment">// OK</span></code></span>
+<span class="codeline" id="line-514"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-167" class="ident">msgUserAuthFailure</a>:</code></span>
+<span class="codeline" id="line-515"><code>			<span class="keyword">var</span> <label for="r179" class="ident">msg</label> <a href="messages.go.html#line-169" class="ident">userAuthFailureMsg</a></code></span>
+<span class="codeline" id="line-516"><code>			<span class="keyword">if</span> <label for="r180" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r176" class="ident">packet</label>, &amp;<label for="r179" class="ident">msg</label>); <label for="r180" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-517"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r180" class="ident">err</label></code></span>
+<span class="codeline" id="line-518"><code>			}</code></span>
+<span class="codeline" id="line-519"><code>			<span class="keyword">if</span> <label for="r179" class="ident">msg</label>.<a href="messages.go.html#line-171" class="ident">PartialSuccess</a> {</code></span>
+<span class="codeline" id="line-520"><code>				<span class="keyword">return</span> <a href="#line-19" class="ident">authPartialSuccess</a>, <label for="r179" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-521"><code>			}</code></span>
+<span class="codeline" id="line-522"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <label for="r179" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-523"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-175" class="ident">msgUserAuthSuccess</a>:</code></span>
+<span class="codeline" id="line-524"><code>			<span class="keyword">return</span> <a href="#line-20" class="ident">authSuccess</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-525"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-526"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="common.go.html#line-138" class="ident">unexpectedMessageError</a>(<a href="messages.go.html#line-187" class="ident">msgUserAuthInfoRequest</a>, <label for="r176" class="ident">packet</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-527"><code>		}</code></span>
+<span class="codeline" id="line-528"><code></code></span>
+<span class="codeline" id="line-529"><code>		<span class="keyword">var</span> <label for="r181" class="ident">msg</label> <a href="messages.go.html#line-190" class="ident">userAuthInfoRequestMsg</a></code></span>
+<span class="codeline" id="line-530"><code>		<span class="keyword">if</span> <label for="r182" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r176" class="ident">packet</label>, &amp;<label for="r181" class="ident">msg</label>); <label for="r182" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-531"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r182" class="ident">err</label></code></span>
+<span class="codeline" id="line-532"><code>		}</code></span>
+<span class="codeline" id="line-533"><code></code></span>
+<span class="codeline" id="line-534"><code>		<span class="comment">// Manually unpack the prompt/echo pairs.</span></code></span>
+<span class="codeline" id="line-535"><code>		<label for="r183" class="ident">rest</label> := <label for="r181" class="ident">msg</label>.<a href="messages.go.html#line-195" class="ident">Prompts</a></code></span>
+<span class="codeline" id="line-536"><code>		<span class="keyword">var</span> <label for="r184" class="ident">prompts</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-537"><code>		<span class="keyword">var</span> <label for="r185" class="ident">echos</label> []<a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-538"><code>		<span class="keyword">for</span> <label for="r186" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r186" class="ident">i</label> &lt; <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r181" class="ident">msg</label>.<a href="messages.go.html#line-194" class="ident">NumPrompts</a>); <label for="r186" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-539"><code>			<label for="r187" class="ident">prompt</label>, <label for="r188" class="ident">r</label>, <label for="r189" class="ident">ok</label> := <a href="messages.go.html#line-593" class="ident">parseString</a>(<label for="r183" class="ident">rest</label>)</code></span>
+<span class="codeline" id="line-540"><code>			<span class="keyword">if</span> !<label for="r189" class="ident">ok</label> || <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r188" class="ident">r</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-541"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"ssh: prompt format error"</span>)</code></span>
+<span class="codeline" id="line-542"><code>			}</code></span>
+<span class="codeline" id="line-543"><code>			<label for="r184" class="ident">prompts</label> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r184" class="ident">prompts</label>, <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r187" class="ident">prompt</label>))</code></span>
+<span class="codeline" id="line-544"><code>			<label for="r185" class="ident">echos</label> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r185" class="ident">echos</label>, <label for="r188" class="ident">r</label>[<span class="lit-number">0</span>] != <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-545"><code>			<label for="r183" class="ident">rest</label> = <label for="r188" class="ident">r</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-546"><code>		}</code></span>
+<span class="codeline" id="line-547"><code></code></span>
+<span class="codeline" id="line-548"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r183" class="ident">rest</label>) != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-549"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"ssh: extra data following keyboard-interactive pairs"</span>)</code></span>
+<span class="codeline" id="line-550"><code>		}</code></span>
+<span class="codeline" id="line-551"><code></code></span>
+<span class="codeline" id="line-552"><code>		<label for="r190" class="ident">answers</label>, <label for="r177" class="ident">err</label> := <label for="r161" class="ident">cb</label>(<label for="r181" class="ident">msg</label>.<a href="messages.go.html#line-191" class="ident">Name</a>, <label for="r181" class="ident">msg</label>.<a href="messages.go.html#line-192" class="ident">Instruction</a>, <label for="r184" class="ident">prompts</label>, <label for="r185" class="ident">echos</label>)</code></span>
+<span class="codeline" id="line-553"><code>		<span class="keyword">if</span> <label for="r177" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-554"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r177" class="ident">err</label></code></span>
+<span class="codeline" id="line-555"><code>		}</code></span>
+<span class="codeline" id="line-556"><code></code></span>
+<span class="codeline" id="line-557"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r190" class="ident">answers</label>) != <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r184" class="ident">prompts</label>) {</code></span>
+<span class="codeline" id="line-558"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"ssh: incorrect number of answers from keyboard-interactive callback %d (expected %d)"</span>, <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r190" class="ident">answers</label>), <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r184" class="ident">prompts</label>))</code></span>
+<span class="codeline" id="line-559"><code>		}</code></span>
+<span class="codeline" id="line-560"><code>		<label for="r191" class="ident">responseLength</label> := <span class="lit-number">1</span> + <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-561"><code>		<span class="keyword">for</span> <label for="r192" class="ident">_</label>, <label for="r193" class="ident">a</label> := <span class="keyword">range</span> <label for="r190" class="ident">answers</label> {</code></span>
+<span class="codeline" id="line-562"><code>			<label for="r191" class="ident">responseLength</label> += <a href="messages.go.html#line-767" class="ident">stringLength</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r193" class="ident">a</label>))</code></span>
+<span class="codeline" id="line-563"><code>		}</code></span>
+<span class="codeline" id="line-564"><code>		<label for="r194" class="ident">serialized</label> := <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r191" class="ident">responseLength</label>)</code></span>
+<span class="codeline" id="line-565"><code>		<label for="r195" class="ident">p</label> := <label for="r194" class="ident">serialized</label></code></span>
+<span class="codeline" id="line-566"><code>		<label for="r195" class="ident">p</label>[<span class="lit-number">0</span>] = <a href="messages.go.html#line-188" class="ident">msgUserAuthInfoResponse</a></code></span>
+<span class="codeline" id="line-567"><code>		<label for="r195" class="ident">p</label> = <label for="r195" class="ident">p</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-568"><code>		<label for="r195" class="ident">p</label> = <a href="messages.go.html#line-693" class="ident">marshalUint32</a>(<label for="r195" class="ident">p</label>, <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r190" class="ident">answers</label>)))</code></span>
+<span class="codeline" id="line-569"><code>		<span class="keyword">for</span> <label for="r196" class="ident">_</label>, <label for="r197" class="ident">a</label> := <span class="keyword">range</span> <label for="r190" class="ident">answers</label> {</code></span>
+<span class="codeline" id="line-570"><code>			<label for="r195" class="ident">p</label> = <a href="messages.go.html#line-771" class="ident">marshalString</a>(<label for="r195" class="ident">p</label>, []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r197" class="ident">a</label>))</code></span>
+<span class="codeline" id="line-571"><code>		}</code></span>
+<span class="codeline" id="line-572"><code></code></span>
+<span class="codeline" id="line-573"><code>		<span class="keyword">if</span> <label for="r198" class="ident">err</label> := <label for="r165" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<label for="r194" class="ident">serialized</label>); <label for="r198" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-574"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r198" class="ident">err</label></code></span>
+<span class="codeline" id="line-575"><code>		}</code></span>
+<span class="codeline" id="line-576"><code>	}</code></span>
+<span class="codeline" id="line-577"><code>}</code></span>
+<span class="codeline" id="line-578"><code></code></span>
+<span class="codeline" id="line-579"><code><span class="keyword">type</span> retryableAuthMethod <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-580"><code>	authMethod <a href="#line-118" class="ident">AuthMethod</a></code></span>
+<span class="codeline" id="line-581"><code>	maxTries   <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-582"><code>}</code></span>
+<span class="codeline" id="line-583"><code></code></span>
+<span class="codeline" id="line-584"><code><span class="keyword">func</span> (<label for="r199" class="ident">r</label> *<a href="#line-579" class="ident">retryableAuthMethod</a>) <label for="r200" class="ident">auth</label>(<label for="r201" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r202" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r203" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r204" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r205" class="ident">extensions</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r206" class="ident">ok</label> <a href="#line-15" class="ident">authResult</a>, <label for="r207" class="ident">methods</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r208" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-585"><code>	<span class="keyword">for</span> <label for="r209" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r199" class="ident">r</label>.<a href="#line-581" class="ident">maxTries</a> &lt;= <span class="lit-number">0</span> || <label for="r209" class="ident">i</label> &lt; <label for="r199" class="ident">r</label>.<a href="#line-581" class="ident">maxTries</a>; <label for="r209" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-586"><code>		<label for="r206" class="ident">ok</label>, <label for="r207" class="ident">methods</label>, <label for="r208" class="ident">err</label> = <label for="r199" class="ident">r</label>.<a href="#line-580" class="ident">authMethod</a>.<a href="#line-124" class="ident">auth</a>(<label for="r201" class="ident">session</label>, <label for="r202" class="ident">user</label>, <label for="r203" class="ident">c</label>, <label for="r204" class="ident">rand</label>, <label for="r205" class="ident">extensions</label>)</code></span>
+<span class="codeline" id="line-587"><code>		<span class="keyword">if</span> <label for="r206" class="ident">ok</label> != <a href="#line-18" class="ident">authFailure</a> || <label for="r208" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> { <span class="comment">// either success, partial success or error terminate</span></code></span>
+<span class="codeline" id="line-588"><code>			<span class="keyword">return</span> <label for="r206" class="ident">ok</label>, <label for="r207" class="ident">methods</label>, <label for="r208" class="ident">err</label></code></span>
+<span class="codeline" id="line-589"><code>		}</code></span>
+<span class="codeline" id="line-590"><code>	}</code></span>
+<span class="codeline" id="line-591"><code>	<span class="keyword">return</span> <label for="r206" class="ident">ok</label>, <label for="r207" class="ident">methods</label>, <label for="r208" class="ident">err</label></code></span>
+<span class="codeline" id="line-592"><code>}</code></span>
+<span class="codeline" id="line-593"><code></code></span>
+<span class="codeline" id="line-594"><code><span class="keyword">func</span> (<label for="r210" class="ident">r</label> *<a href="#line-579" class="ident">retryableAuthMethod</a>) <label for="r211" class="ident">method</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-595"><code>	<span class="keyword">return</span> <label for="r210" class="ident">r</label>.<a href="#line-580" class="ident">authMethod</a>.<a href="#line-127" class="ident">method</a>()</code></span>
+<span class="codeline" id="line-596"><code>}</code></span>
+<span class="codeline" id="line-597"><code></code></span>
+<span class="codeline" id="line-598"><code><span class="comment">// RetryableAuthMethod is a decorator for other auth methods enabling them to</span></code></span>
+<span class="codeline" id="line-599"><code><span class="comment">// be retried up to maxTries before considering that AuthMethod itself failed.</span></code></span>
+<span class="codeline" id="line-600"><code><span class="comment">// If maxTries is &lt;= 0, will retry indefinitely</span></code></span>
+<span class="codeline" id="line-601"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-602"><code><span class="comment">// This is useful for interactive clients using challenge/response type</span></code></span>
+<span class="codeline" id="line-603"><code><span class="comment">// authentication (e.g. Keyboard-Interactive, Password, etc) where the user</span></code></span>
+<span class="codeline" id="line-604"><code><span class="comment">// could mistype their response resulting in the server issuing a</span></code></span>
+<span class="codeline" id="line-605"><code><span class="comment">// SSH_MSG_USERAUTH_FAILURE (rfc4252 #8 [password] and rfc4256 #3.4</span></code></span>
+<span class="codeline" id="line-606"><code><span class="comment">// [keyboard-interactive]); Without this decorator, the non-retryable</span></code></span>
+<span class="codeline" id="line-607"><code><span class="comment">// AuthMethod would be removed from future consideration, and never tried again</span></code></span>
+<span class="codeline" id="line-608"><code><span class="comment">// (and so the user would never be able to retry their entry).</span></code></span>
+<span class="codeline" id="line-609"><code><span class="keyword">func</span> <label for="r212" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-RetryableAuthMethod" class="ident">RetryableAuthMethod</a></label>(<label for="r213" class="ident">auth</label> <a href="#line-118" class="ident">AuthMethod</a>, <label for="r214" class="ident">maxTries</label> <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-610"><code>	<span class="keyword">return</span> &amp;<a href="#line-579" class="ident">retryableAuthMethod</a>{<a href="#line-580" class="ident">authMethod</a>: <label for="r213" class="ident">auth</label>, <a href="#line-581" class="ident">maxTries</a>: <label for="r214" class="ident">maxTries</label>}</code></span>
+<span class="codeline" id="line-611"><code>}</code></span>
+<span class="codeline" id="line-612"><code></code></span>
+<span class="codeline" id="line-613"><code><span class="comment">// GSSAPIWithMICAuthMethod is an AuthMethod with "gssapi-with-mic" authentication.</span></code></span>
+<span class="codeline" id="line-614"><code><span class="comment">// See RFC 4462 section 3</span></code></span>
+<span class="codeline" id="line-615"><code><span class="comment">// gssAPIClient is implementation of the GSSAPIClient interface, see the definition of the interface for details.</span></code></span>
+<span class="codeline" id="line-616"><code><span class="comment">// target is the server host you want to log in to.</span></code></span>
+<span class="codeline" id="line-617"><code><span class="keyword">func</span> <label for="r215" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/ssh.html#name-GSSAPIWithMICAuthMethod" class="ident">GSSAPIWithMICAuthMethod</a></label>(<label for="r216" class="ident">gssAPIClient</label> <a href="ssh_gss.go.html#line-19" class="ident">GSSAPIClient</a>, <label for="r217" class="ident">target</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-118" class="ident">AuthMethod</a> {</code></span>
+<span class="codeline" id="line-618"><code>	<span class="keyword">if</span> <label for="r216" class="ident">gssAPIClient</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-619"><code>		<a href="../../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"gss-api client must be not nil with enable gssapi-with-mic"</span>)</code></span>
+<span class="codeline" id="line-620"><code>	}</code></span>
+<span class="codeline" id="line-621"><code>	<span class="keyword">return</span> &amp;<a href="#line-624" class="ident">gssAPIWithMICCallback</a>{<a href="#line-625" class="ident">gssAPIClient</a>: <label for="r216" class="ident">gssAPIClient</label>, <a href="#line-626" class="ident">target</a>: <label for="r217" class="ident">target</label>}</code></span>
+<span class="codeline" id="line-622"><code>}</code></span>
+<span class="codeline" id="line-623"><code></code></span>
+<span class="codeline" id="line-624"><code><span class="keyword">type</span> gssAPIWithMICCallback <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-625"><code>	gssAPIClient <a href="ssh_gss.go.html#line-19" class="ident">GSSAPIClient</a></code></span>
+<span class="codeline" id="line-626"><code>	target       <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-627"><code>}</code></span>
+<span class="codeline" id="line-628"><code></code></span>
+<span class="codeline" id="line-629"><code><span class="keyword">func</span> (<label for="r218" class="ident">g</label> *<a href="#line-624" class="ident">gssAPIWithMICCallback</a>) <label for="r219" class="ident">auth</label>(<label for="r220" class="ident">session</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r221" class="ident">user</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r222" class="ident">c</label> <a href="transport.go.html#line-27" class="ident">packetConn</a>, <label for="r223" class="ident">rand</label> <a href="../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r224" class="ident">_</label> <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="#line-15" class="ident">authResult</a>, []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-630"><code>	<label for="r225" class="ident">m</label> := &amp;<a href="messages.go.html#line-155" class="ident">userAuthRequestMsg</a>{</code></span>
+<span class="codeline" id="line-631"><code>		<a href="messages.go.html#line-156" class="ident">User</a>:    <label for="r221" class="ident">user</label>,</code></span>
+<span class="codeline" id="line-632"><code>		<a href="messages.go.html#line-157" class="ident">Service</a>: <a href="common.go.html#line-25" class="ident">serviceSSH</a>,</code></span>
+<span class="codeline" id="line-633"><code>		<a href="messages.go.html#line-158" class="ident">Method</a>:  <label for="r218" class="ident">g</label>.<a href="#line-723" class="ident">method</a>(),</code></span>
+<span class="codeline" id="line-634"><code>	}</code></span>
+<span class="codeline" id="line-635"><code>	<span class="comment">// The GSS-API authentication method is initiated when the client sends an SSH_MSG_USERAUTH_REQUEST.</span></code></span>
+<span class="codeline" id="line-636"><code><span class="comment">	// See RFC 4462 section 3.2.</span></code></span>
+<span class="codeline" id="line-637"><code>	<label for="r225" class="ident">m</label>.<a href="messages.go.html#line-159" class="ident">Payload</a> = <a href="common.go.html#line-344" class="ident">appendU32</a>(<label for="r225" class="ident">m</label>.<a href="messages.go.html#line-159" class="ident">Payload</a>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-638"><code>	<label for="r225" class="ident">m</label>.<a href="messages.go.html#line-159" class="ident">Payload</a> = <a href="common.go.html#line-358" class="ident">appendString</a>(<label for="r225" class="ident">m</label>.<a href="messages.go.html#line-159" class="ident">Payload</a>, <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<a href="ssh_gss.go.html#line-12" class="ident">krb5OID</a>))</code></span>
+<span class="codeline" id="line-639"><code>	<span class="keyword">if</span> <label for="r226" class="ident">err</label> := <label for="r222" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(<label for="r225" class="ident">m</label>)); <label for="r226" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-640"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r226" class="ident">err</label></code></span>
+<span class="codeline" id="line-641"><code>	}</code></span>
+<span class="codeline" id="line-642"><code>	<span class="comment">// The server responds to the SSH_MSG_USERAUTH_REQUEST with either an</span></code></span>
+<span class="codeline" id="line-643"><code><span class="comment">	// SSH_MSG_USERAUTH_FAILURE if none of the mechanisms are supported or</span></code></span>
+<span class="codeline" id="line-644"><code><span class="comment">	// with an SSH_MSG_USERAUTH_GSSAPI_RESPONSE.</span></code></span>
+<span class="codeline" id="line-645"><code><span class="comment">	// See RFC 4462 section 3.3.</span></code></span>
+<span class="codeline" id="line-646"><code><span class="comment">	// OpenSSH supports Kerberos V5 mechanism only for GSS-API authentication,so I don't want to check</span></code></span>
+<span class="codeline" id="line-647"><code><span class="comment">	// selected mech if it is valid.</span></code></span>
+<span class="codeline" id="line-648"><code>	<label for="r227" class="ident">packet</label>, <label for="r228" class="ident">err</label> := <label for="r222" class="ident">c</label>.<a href="transport.go.html#line-34" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-649"><code>	<span class="keyword">if</span> <label for="r228" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-650"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r228" class="ident">err</label></code></span>
+<span class="codeline" id="line-651"><code>	}</code></span>
+<span class="codeline" id="line-652"><code>	<label for="r229" class="ident">userAuthGSSAPIResp</label> := &amp;<a href="messages.go.html#line-319" class="ident">userAuthGSSAPIResponse</a>{}</code></span>
+<span class="codeline" id="line-653"><code>	<span class="keyword">if</span> <label for="r230" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r227" class="ident">packet</label>, <label for="r229" class="ident">userAuthGSSAPIResp</label>); <label for="r230" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-654"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r230" class="ident">err</label></code></span>
+<span class="codeline" id="line-655"><code>	}</code></span>
+<span class="codeline" id="line-656"><code>	<span class="comment">// Start the loop into the exchange token.</span></code></span>
+<span class="codeline" id="line-657"><code><span class="comment">	// See RFC 4462 section 3.4.</span></code></span>
+<span class="codeline" id="line-658"><code>	<span class="keyword">var</span> <label for="r231" class="ident">token</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-659"><code>	<span class="keyword">defer</span> <label for="r218" class="ident">g</label>.<a href="#line-625" class="ident">gssAPIClient</a>.<a href="ssh_gss.go.html#line-54" class="ident">DeleteSecContext</a>()</code></span>
+<span class="codeline" id="line-660"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-661"><code>		<span class="comment">// Initiates the establishment of a security context between the application and a remote peer.</span></code></span>
+<span class="codeline" id="line-662"><code>		<label for="r232" class="ident">nextToken</label>, <label for="r233" class="ident">needContinue</label>, <label for="r234" class="ident">err</label> := <label for="r218" class="ident">g</label>.<a href="#line-625" class="ident">gssAPIClient</a>.<a href="ssh_gss.go.html#line-32" class="ident">InitSecContext</a>(<span class="lit-string">"host@"</span>+<label for="r218" class="ident">g</label>.<a href="#line-626" class="ident">target</a>, <label for="r231" class="ident">token</label>, <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
+<span class="codeline" id="line-663"><code>		<span class="keyword">if</span> <label for="r234" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-664"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r234" class="ident">err</label></code></span>
+<span class="codeline" id="line-665"><code>		}</code></span>
+<span class="codeline" id="line-666"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r232" class="ident">nextToken</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-667"><code>			<span class="keyword">if</span> <label for="r235" class="ident">err</label> := <label for="r222" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<a href="messages.go.html#line-325" class="ident">userAuthGSSAPIToken</a>{</code></span>
+<span class="codeline" id="line-668"><code>				<a href="messages.go.html#line-326" class="ident">Token</a>: <label for="r232" class="ident">nextToken</label>,</code></span>
+<span class="codeline" id="line-669"><code>			})); <label for="r235" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-670"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r235" class="ident">err</label></code></span>
+<span class="codeline" id="line-671"><code>			}</code></span>
+<span class="codeline" id="line-672"><code>		}</code></span>
+<span class="codeline" id="line-673"><code>		<span class="keyword">if</span> !<label for="r233" class="ident">needContinue</label> {</code></span>
+<span class="codeline" id="line-674"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-675"><code>		}</code></span>
+<span class="codeline" id="line-676"><code>		<label for="r227" class="ident">packet</label>, <label for="r234" class="ident">err</label> = <label for="r222" class="ident">c</label>.<a href="transport.go.html#line-34" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-677"><code>		<span class="keyword">if</span> <label for="r234" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-678"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r234" class="ident">err</label></code></span>
+<span class="codeline" id="line-679"><code>		}</code></span>
+<span class="codeline" id="line-680"><code>		<span class="keyword">switch</span> <label for="r227" class="ident">packet</label>[<span class="lit-number">0</span>] {</code></span>
+<span class="codeline" id="line-681"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-167" class="ident">msgUserAuthFailure</a>:</code></span>
+<span class="codeline" id="line-682"><code>			<span class="keyword">var</span> <label for="r236" class="ident">msg</label> <a href="messages.go.html#line-169" class="ident">userAuthFailureMsg</a></code></span>
+<span class="codeline" id="line-683"><code>			<span class="keyword">if</span> <label for="r237" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r227" class="ident">packet</label>, &amp;<label for="r236" class="ident">msg</label>); <label for="r237" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-684"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r237" class="ident">err</label></code></span>
+<span class="codeline" id="line-685"><code>			}</code></span>
+<span class="codeline" id="line-686"><code>			<span class="keyword">if</span> <label for="r236" class="ident">msg</label>.<a href="messages.go.html#line-171" class="ident">PartialSuccess</a> {</code></span>
+<span class="codeline" id="line-687"><code>				<span class="keyword">return</span> <a href="#line-19" class="ident">authPartialSuccess</a>, <label for="r236" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-688"><code>			}</code></span>
+<span class="codeline" id="line-689"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <label for="r236" class="ident">msg</label>.<a href="messages.go.html#line-170" class="ident">Methods</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-690"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-343" class="ident">msgUserAuthGSSAPIError</a>:</code></span>
+<span class="codeline" id="line-691"><code>			<label for="r238" class="ident">userAuthGSSAPIErrorResp</label> := &amp;<a href="messages.go.html#line-345" class="ident">userAuthGSSAPIError</a>{}</code></span>
+<span class="codeline" id="line-692"><code>			<span class="keyword">if</span> <label for="r239" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r227" class="ident">packet</label>, <label for="r238" class="ident">userAuthGSSAPIErrorResp</label>); <label for="r239" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-693"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r239" class="ident">err</label></code></span>
+<span class="codeline" id="line-694"><code>			}</code></span>
+<span class="codeline" id="line-695"><code>			<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"GSS-API Error:\n"</span>+</code></span>
+<span class="codeline" id="line-696"><code>				<span class="lit-string">"Major Status: %d\n"</span>+</code></span>
+<span class="codeline" id="line-697"><code>				<span class="lit-string">"Minor Status: %d\n"</span>+</code></span>
+<span class="codeline" id="line-698"><code>				<span class="lit-string">"Error Message: %s\n"</span>, <label for="r238" class="ident">userAuthGSSAPIErrorResp</label>.<a href="messages.go.html#line-346" class="ident">MajorStatus</a>, <label for="r238" class="ident">userAuthGSSAPIErrorResp</label>.<a href="messages.go.html#line-347" class="ident">MinorStatus</a>,</code></span>
+<span class="codeline" id="line-699"><code>				<label for="r238" class="ident">userAuthGSSAPIErrorResp</label>.<a href="messages.go.html#line-348" class="ident">Message</a>)</code></span>
+<span class="codeline" id="line-700"><code>		<span class="keyword">case</span> <a href="messages.go.html#line-323" class="ident">msgUserAuthGSSAPIToken</a>:</code></span>
+<span class="codeline" id="line-701"><code>			<label for="r240" class="ident">userAuthGSSAPITokenReq</label> := &amp;<a href="messages.go.html#line-325" class="ident">userAuthGSSAPIToken</a>{}</code></span>
+<span class="codeline" id="line-702"><code>			<span class="keyword">if</span> <label for="r241" class="ident">err</label> := <a href="messages.go.html#line-382" class="ident">Unmarshal</a>(<label for="r227" class="ident">packet</label>, <label for="r240" class="ident">userAuthGSSAPITokenReq</label>); <label for="r241" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-703"><code>				<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r241" class="ident">err</label></code></span>
+<span class="codeline" id="line-704"><code>			}</code></span>
+<span class="codeline" id="line-705"><code>			<label for="r231" class="ident">token</label> = <label for="r240" class="ident">userAuthGSSAPITokenReq</label>.<a href="messages.go.html#line-326" class="ident">Token</a></code></span>
+<span class="codeline" id="line-706"><code>		}</code></span>
+<span class="codeline" id="line-707"><code>	}</code></span>
+<span class="codeline" id="line-708"><code>	<span class="comment">// Binding Encryption Keys.</span></code></span>
+<span class="codeline" id="line-709"><code><span class="comment">	// See RFC 4462 section 3.5.</span></code></span>
+<span class="codeline" id="line-710"><code>	<label for="r242" class="ident">micField</label> := <a href="ssh_gss.go.html#line-131" class="ident">buildMIC</a>(<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r220" class="ident">session</label>), <label for="r221" class="ident">user</label>, <span class="lit-string">"ssh-connection"</span>, <span class="lit-string">"gssapi-with-mic"</span>)</code></span>
+<span class="codeline" id="line-711"><code>	<label for="r243" class="ident">micToken</label>, <label for="r228" class="ident">err</label> := <label for="r218" class="ident">g</label>.<a href="#line-625" class="ident">gssAPIClient</a>.<a href="ssh_gss.go.html#line-44" class="ident">GetMIC</a>(<label for="r242" class="ident">micField</label>)</code></span>
+<span class="codeline" id="line-712"><code>	<span class="keyword">if</span> <label for="r228" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-713"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r228" class="ident">err</label></code></span>
+<span class="codeline" id="line-714"><code>	}</code></span>
+<span class="codeline" id="line-715"><code>	<span class="keyword">if</span> <label for="r244" class="ident">err</label> := <label for="r222" class="ident">c</label>.<a href="transport.go.html#line-29" class="ident">writePacket</a>(<a href="messages.go.html#line-505" class="ident">Marshal</a>(&amp;<a href="messages.go.html#line-331" class="ident">userAuthGSSAPIMIC</a>{</code></span>
+<span class="codeline" id="line-716"><code>		<a href="messages.go.html#line-332" class="ident">MIC</a>: <label for="r243" class="ident">micToken</label>,</code></span>
+<span class="codeline" id="line-717"><code>	})); <label for="r244" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-718"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">authFailure</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r244" class="ident">err</label></code></span>
+<span class="codeline" id="line-719"><code>	}</code></span>
+<span class="codeline" id="line-720"><code>	<span class="keyword">return</span> <a href="#line-401" class="ident">handleAuthResponse</a>(<label for="r222" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-721"><code>}</code></span>
+<span class="codeline" id="line-722"><code></code></span>
+<span class="codeline" id="line-723"><code><span class="keyword">func</span> (<label for="r245" class="ident">g</label> *<a href="#line-624" class="ident">gssAPIWithMICCallback</a>) <label for="r246" class="ident">method</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-724"><code>	<span class="keyword">return</span> <span class="lit-string">"gssapi-with-mic"</span></code></span>
+<span class="codeline" id="line-725"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

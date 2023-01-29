@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: entropy_encode.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	entropy_encode.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"math"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">/* Copyright 2010 Google Inc. All Rights Reserved.</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">   Distributed under MIT license.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">   See file LICENSE for detail or copy at https://opensource.org/licenses/MIT</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">/* Entropy encoding (Huffman) utilities. */</span></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">/* A node of a Huffman tree. */</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">type</span> huffmanTree <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-15"><code>	total_count_          <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-16"><code>	index_left_           <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-17"><code>	index_right_or_value_ <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-18"><code>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">func</span> initHuffmanTree(<label for="r1" class="ident">self</label> *<a href="#line-14" class="ident">huffmanTree</a>, <label for="r2" class="ident">count</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r3" class="ident">left</label> <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <label for="r4" class="ident">right</label> <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>) {</code></span>
+<span class="codeline" id="line-21"><code>	<label for="r1" class="ident">self</label>.<a href="#line-15" class="ident">total_count_</a> = <label for="r2" class="ident">count</label></code></span>
+<span class="codeline" id="line-22"><code>	<label for="r1" class="ident">self</label>.<a href="#line-16" class="ident">index_left_</a> = <label for="r3" class="ident">left</label></code></span>
+<span class="codeline" id="line-23"><code>	<label for="r1" class="ident">self</label>.<a href="#line-17" class="ident">index_right_or_value_</a> = <label for="r4" class="ident">right</label></code></span>
+<span class="codeline" id="line-24"><code>}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">/* Input size optimized Shell sort. */</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">type</span> huffmanTreeComparator <span class="keyword">func</span>(<a href="#line-14" class="ident">huffmanTree</a>, <a href="#line-14" class="ident">huffmanTree</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">var</span> sortHuffmanTreeItems_gaps = []<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{<span class="lit-number">132</span>, <span class="lit-number">57</span>, <span class="lit-number">23</span>, <span class="lit-number">10</span>, <span class="lit-number">4</span>, <span class="lit-number">1</span>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">func</span> sortHuffmanTreeItems(<label for="r6" class="ident">items</label> []<a href="#line-14" class="ident">huffmanTree</a>, <label for="r7" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r8" class="ident">comparator</label> <a href="#line-27" class="ident">huffmanTreeComparator</a>) {</code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">if</span> <label for="r7" class="ident">n</label> &lt; <span class="lit-number">13</span> {</code></span>
+<span class="codeline" id="line-33"><code>		<span class="comment">/* Insertion sort. */</span></code></span>
+<span class="codeline" id="line-34"><code>		<span class="keyword">var</span> <label for="r9" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-35"><code>		<span class="keyword">for</span> <label for="r9" class="ident">i</label> = <span class="lit-number">1</span>; <label for="r9" class="ident">i</label> &lt; <label for="r7" class="ident">n</label>; <label for="r9" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-36"><code>			<span class="keyword">var</span> <label for="r10" class="ident">tmp</label> <a href="#line-14" class="ident">huffmanTree</a> = <label for="r6" class="ident">items</label>[<label for="r9" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-37"><code>			<span class="keyword">var</span> <label for="r11" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <label for="r9" class="ident">i</label></code></span>
+<span class="codeline" id="line-38"><code>			<span class="keyword">var</span> <label for="r12" class="ident">j</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <label for="r9" class="ident">i</label> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-39"><code>			<span class="keyword">for</span> <label for="r8" class="ident">comparator</label>(<label for="r10" class="ident">tmp</label>, <label for="r6" class="ident">items</label>[<label for="r12" class="ident">j</label>]) {</code></span>
+<span class="codeline" id="line-40"><code>				<label for="r6" class="ident">items</label>[<label for="r11" class="ident">k</label>] = <label for="r6" class="ident">items</label>[<label for="r12" class="ident">j</label>]</code></span>
+<span class="codeline" id="line-41"><code>				<label for="r11" class="ident">k</label> = <label for="r12" class="ident">j</label></code></span>
+<span class="codeline" id="line-42"><code>				<span class="keyword">if</span> <label for="r12" class="ident">j</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-43"><code>					<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-44"><code>				}</code></span>
+<span class="codeline" id="line-45"><code>				<label for="r12" class="ident">j</label>--</code></span>
+<span class="codeline" id="line-46"><code>			}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>			<label for="r6" class="ident">items</label>[<label for="r11" class="ident">k</label>] = <label for="r10" class="ident">tmp</label></code></span>
+<span class="codeline" id="line-49"><code>		}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-52"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-53"><code>		<span class="keyword">var</span> <label for="r13" class="ident">g</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">if</span> <label for="r7" class="ident">n</label> &lt; <span class="lit-number">57</span> {</code></span>
+<span class="codeline" id="line-55"><code>			<label for="r13" class="ident">g</label> = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-56"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-57"><code>			<label for="r13" class="ident">g</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-58"><code>		}</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">for</span> ; <label for="r13" class="ident">g</label> &lt; <span class="lit-number">6</span>; <label for="r13" class="ident">g</label>++ {</code></span>
+<span class="codeline" id="line-60"><code>			<span class="keyword">var</span> <label for="r14" class="ident">gap</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="#line-29" class="ident">sortHuffmanTreeItems_gaps</a>[<label for="r13" class="ident">g</label>]</code></span>
+<span class="codeline" id="line-61"><code>			<span class="keyword">var</span> <label for="r15" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-62"><code>			<span class="keyword">for</span> <label for="r15" class="ident">i</label> = <label for="r14" class="ident">gap</label>; <label for="r15" class="ident">i</label> &lt; <label for="r7" class="ident">n</label>; <label for="r15" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-63"><code>				<span class="keyword">var</span> <label for="r16" class="ident">j</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <label for="r15" class="ident">i</label></code></span>
+<span class="codeline" id="line-64"><code>				<span class="keyword">var</span> <label for="r17" class="ident">tmp</label> <a href="#line-14" class="ident">huffmanTree</a> = <label for="r6" class="ident">items</label>[<label for="r15" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-65"><code>				<span class="keyword">for</span> ; <label for="r16" class="ident">j</label> &gt;= <label for="r14" class="ident">gap</label> &amp;&amp; <label for="r8" class="ident">comparator</label>(<label for="r17" class="ident">tmp</label>, <label for="r6" class="ident">items</label>[<label for="r16" class="ident">j</label>-<label for="r14" class="ident">gap</label>]); <label for="r16" class="ident">j</label> -= <label for="r14" class="ident">gap</label> {</code></span>
+<span class="codeline" id="line-66"><code>					<label for="r6" class="ident">items</label>[<label for="r16" class="ident">j</label>] = <label for="r6" class="ident">items</label>[<label for="r16" class="ident">j</label>-<label for="r14" class="ident">gap</label>]</code></span>
+<span class="codeline" id="line-67"><code>				}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>				<label for="r6" class="ident">items</label>[<label for="r16" class="ident">j</label>] = <label for="r17" class="ident">tmp</label></code></span>
+<span class="codeline" id="line-70"><code>			}</code></span>
+<span class="codeline" id="line-71"><code>		}</code></span>
+<span class="codeline" id="line-72"><code>	}</code></span>
+<span class="codeline" id="line-73"><code>}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">/* Returns 1 if assignment of depths succeeded, otherwise 0. */</span></code></span>
+<span class="codeline" id="line-76"><code><span class="keyword">func</span> setDepth(<label for="r19" class="ident">p0</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r20" class="ident">pool</label> []<a href="#line-14" class="ident">huffmanTree</a>, <label for="r21" class="ident">depth</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r22" class="ident">max_depth</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">var</span> <label for="r23" class="ident">stack</label> [<span class="lit-number">16</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-78"><code>	<span class="keyword">var</span> <label for="r24" class="ident">level</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">var</span> <label for="r25" class="ident">p</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <label for="r19" class="ident">p0</label></code></span>
+<span class="codeline" id="line-80"><code>	<a href="util.go.html#line-3" class="ident">assert</a>(<label for="r22" class="ident">max_depth</label> &lt;= <span class="lit-number">15</span>)</code></span>
+<span class="codeline" id="line-81"><code>	<label for="r23" class="ident">stack</label>[<span class="lit-number">0</span>] = -<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-83"><code>		<span class="keyword">if</span> <label for="r20" class="ident">pool</label>[<label for="r25" class="ident">p</label>].<a href="#line-16" class="ident">index_left_</a> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-84"><code>			<label for="r24" class="ident">level</label>++</code></span>
+<span class="codeline" id="line-85"><code>			<span class="keyword">if</span> <label for="r24" class="ident">level</label> &gt; <label for="r22" class="ident">max_depth</label> {</code></span>
+<span class="codeline" id="line-86"><code>				<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-87"><code>			}</code></span>
+<span class="codeline" id="line-88"><code>			<label for="r23" class="ident">stack</label>[<label for="r24" class="ident">level</label>] = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r20" class="ident">pool</label>[<label for="r25" class="ident">p</label>].<a href="#line-17" class="ident">index_right_or_value_</a>)</code></span>
+<span class="codeline" id="line-89"><code>			<label for="r25" class="ident">p</label> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r20" class="ident">pool</label>[<label for="r25" class="ident">p</label>].<a href="#line-16" class="ident">index_left_</a>)</code></span>
+<span class="codeline" id="line-90"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-91"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-92"><code>			<label for="r21" class="ident">depth</label>[<label for="r20" class="ident">pool</label>[<label for="r25" class="ident">p</label>].<a href="#line-17" class="ident">index_right_or_value_</a>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r24" class="ident">level</label>)</code></span>
+<span class="codeline" id="line-93"><code>		}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">for</span> <label for="r24" class="ident">level</label> &gt;= <span class="lit-number">0</span> &amp;&amp; <label for="r23" class="ident">stack</label>[<label for="r24" class="ident">level</label>] == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-96"><code>			<label for="r24" class="ident">level</label>--</code></span>
+<span class="codeline" id="line-97"><code>		}</code></span>
+<span class="codeline" id="line-98"><code>		<span class="keyword">if</span> <label for="r24" class="ident">level</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-99"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-100"><code>		}</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r25" class="ident">p</label> = <label for="r23" class="ident">stack</label>[<label for="r24" class="ident">level</label>]</code></span>
+<span class="codeline" id="line-102"><code>		<label for="r23" class="ident">stack</label>[<label for="r24" class="ident">level</label>] = -<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-103"><code>	}</code></span>
+<span class="codeline" id="line-104"><code>}</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">/* Sort the root nodes, least popular first. */</span></code></span>
+<span class="codeline" id="line-107"><code><span class="keyword">func</span> sortHuffmanTree(<label for="r27" class="ident">v0</label> <a href="#line-14" class="ident">huffmanTree</a>, <label for="r28" class="ident">v1</label> <a href="#line-14" class="ident">huffmanTree</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">if</span> <label for="r27" class="ident">v0</label>.<a href="#line-15" class="ident">total_count_</a> != <label for="r28" class="ident">v1</label>.<a href="#line-15" class="ident">total_count_</a> {</code></span>
+<span class="codeline" id="line-109"><code>		<span class="keyword">return</span> <label for="r27" class="ident">v0</label>.<a href="#line-15" class="ident">total_count_</a> &lt; <label for="r28" class="ident">v1</label>.<a href="#line-15" class="ident">total_count_</a></code></span>
+<span class="codeline" id="line-110"><code>	}</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>	<span class="keyword">return</span> <label for="r27" class="ident">v0</label>.<a href="#line-17" class="ident">index_right_or_value_</a> &gt; <label for="r28" class="ident">v1</label>.<a href="#line-17" class="ident">index_right_or_value_</a></code></span>
+<span class="codeline" id="line-113"><code>}</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">/* This function will create a Huffman tree.</span></code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">   The catch here is that the tree cannot be arbitrarily deep.</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">   Brotli specifies a maximum depth of 15 bits for "code trees"</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">   and 7 bits for "code length code trees."</span></code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">   count_limit is the value that is to be faked as the minimum value</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">   and this minimum value is raised until the tree matches the</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">   maximum length requirement.</span></code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">   This algorithm is not of excellent performance for very long data blocks,</span></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">   especially when population counts are longer than 2**tree_limit, but</span></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">   we are not planning to use this with extremely long blocks.</span></code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">   See http://en.wikipedia.org/wiki/Huffman_coding */</span></code></span>
+<span class="codeline" id="line-130"><code><span class="keyword">func</span> createHuffmanTree(<label for="r30" class="ident">data</label> []<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r31" class="ident">length</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r32" class="ident">tree_limit</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r33" class="ident">tree</label> []<a href="#line-14" class="ident">huffmanTree</a>, <label for="r34" class="ident">depth</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-131"><code>	<span class="keyword">var</span> <label for="r35" class="ident">count_limit</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">var</span> <label for="r36" class="ident">sentinel</label> <a href="#line-14" class="ident">huffmanTree</a></code></span>
+<span class="codeline" id="line-133"><code>	<a href="#line-20" class="ident">initHuffmanTree</a>(&amp;<label for="r36" class="ident">sentinel</label>, <a href="../../../../pkg/math.html" class="ident i0">math</a>.<a href="../../../math/const.go.html#line-55" class="ident">MaxUint32</a>, -<span class="lit-number">1</span>, -<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code>	<span class="comment">/* For block sizes below 64 kB, we never need to do a second iteration</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">	   of this loop. Probably all of our block sizes will be smaller than</span></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">	   that, so this loop is mostly of academic interest. If we actually</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">	   would need this, we would be better off with the Katajainen algorithm. */</span></code></span>
+<span class="codeline" id="line-139"><code>	<span class="keyword">for</span> <label for="r35" class="ident">count_limit</label> = <span class="lit-number">1</span>; ; <label for="r35" class="ident">count_limit</label> *= <span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-140"><code>		<span class="keyword">var</span> <label for="r37" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">var</span> <label for="r38" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-142"><code>		<span class="keyword">var</span> <label for="r39" class="ident">j</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">var</span> <label for="r40" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-144"><code>		<span class="keyword">for</span> <label for="r38" class="ident">i</label> = <label for="r31" class="ident">length</label>; <label for="r38" class="ident">i</label> != <span class="lit-number">0</span>; {</code></span>
+<span class="codeline" id="line-145"><code>			<label for="r38" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-146"><code>			<span class="keyword">if</span> <label for="r30" class="ident">data</label>[<label for="r38" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-147"><code>				<span class="keyword">var</span> <label for="r41" class="ident">count</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <a href="platform.go.html#line-81" class="ident">brotli_max_uint32_t</a>(<label for="r30" class="ident">data</label>[<label for="r38" class="ident">i</label>], <label for="r35" class="ident">count_limit</label>)</code></span>
+<span class="codeline" id="line-148"><code>				<a href="#line-20" class="ident">initHuffmanTree</a>(&amp;<label for="r33" class="ident">tree</label>[<label for="r37" class="ident">n</label>], <label for="r41" class="ident">count</label>, -<span class="lit-number">1</span>, <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>(<label for="r38" class="ident">i</label>))</code></span>
+<span class="codeline" id="line-149"><code>				<label for="r37" class="ident">n</label>++</code></span>
+<span class="codeline" id="line-150"><code>			}</code></span>
+<span class="codeline" id="line-151"><code>		}</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">if</span> <label for="r37" class="ident">n</label> == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-154"><code>			<label for="r34" class="ident">depth</label>[<label for="r33" class="ident">tree</label>[<span class="lit-number">0</span>].<a href="#line-17" class="ident">index_right_or_value_</a>] = <span class="lit-number">1</span> <span class="comment">/* Only one element. */</span></code></span>
+<span class="codeline" id="line-155"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-156"><code>		}</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code>		<a href="#line-31" class="ident">sortHuffmanTreeItems</a>(<label for="r33" class="ident">tree</label>, <label for="r37" class="ident">n</label>, <a href="#line-27" class="ident">huffmanTreeComparator</a>(<a href="#line-107" class="ident">sortHuffmanTree</a>))</code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code>		<span class="comment">/* The nodes are:</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">		   [0, n): the sorted leaf nodes that we start with.</span></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">		   [n]: we add a sentinel here.</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">		   [n + 1, 2n): new parent nodes are added here, starting from</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">		                (n+1). These are naturally in ascending order.</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">		   [2n]: we add a sentinel at the end as well.</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">		   There will be (2n+1) elements at the end. */</span></code></span>
+<span class="codeline" id="line-167"><code>		<label for="r33" class="ident">tree</label>[<label for="r37" class="ident">n</label>] = <label for="r36" class="ident">sentinel</label></code></span>
+<span class="codeline" id="line-168"><code></code></span>
+<span class="codeline" id="line-169"><code>		<label for="r33" class="ident">tree</label>[<label for="r37" class="ident">n</label>+<span class="lit-number">1</span>] = <label for="r36" class="ident">sentinel</label></code></span>
+<span class="codeline" id="line-170"><code></code></span>
+<span class="codeline" id="line-171"><code>		<label for="r38" class="ident">i</label> = <span class="lit-number">0</span>     <span class="comment">/* Points to the next leaf node. */</span></code></span>
+<span class="codeline" id="line-172"><code>		<label for="r39" class="ident">j</label> = <label for="r37" class="ident">n</label> + <span class="lit-number">1</span> <span class="comment">/* Points to the next non-leaf node. */</span></code></span>
+<span class="codeline" id="line-173"><code>		<span class="keyword">for</span> <label for="r40" class="ident">k</label> = <label for="r37" class="ident">n</label> - <span class="lit-number">1</span>; <label for="r40" class="ident">k</label> != <span class="lit-number">0</span>; <label for="r40" class="ident">k</label>-- {</code></span>
+<span class="codeline" id="line-174"><code>			<span class="keyword">var</span> <label for="r42" class="ident">left</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-175"><code>			<span class="keyword">var</span> <label for="r43" class="ident">right</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-176"><code>			<span class="keyword">if</span> <label for="r33" class="ident">tree</label>[<label for="r38" class="ident">i</label>].<a href="#line-15" class="ident">total_count_</a> &lt;= <label for="r33" class="ident">tree</label>[<label for="r39" class="ident">j</label>].<a href="#line-15" class="ident">total_count_</a> {</code></span>
+<span class="codeline" id="line-177"><code>				<label for="r42" class="ident">left</label> = <label for="r38" class="ident">i</label></code></span>
+<span class="codeline" id="line-178"><code>				<label for="r38" class="ident">i</label>++</code></span>
+<span class="codeline" id="line-179"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-180"><code>				<label for="r42" class="ident">left</label> = <label for="r39" class="ident">j</label></code></span>
+<span class="codeline" id="line-181"><code>				<label for="r39" class="ident">j</label>++</code></span>
+<span class="codeline" id="line-182"><code>			}</code></span>
+<span class="codeline" id="line-183"><code></code></span>
+<span class="codeline" id="line-184"><code>			<span class="keyword">if</span> <label for="r33" class="ident">tree</label>[<label for="r38" class="ident">i</label>].<a href="#line-15" class="ident">total_count_</a> &lt;= <label for="r33" class="ident">tree</label>[<label for="r39" class="ident">j</label>].<a href="#line-15" class="ident">total_count_</a> {</code></span>
+<span class="codeline" id="line-185"><code>				<label for="r43" class="ident">right</label> = <label for="r38" class="ident">i</label></code></span>
+<span class="codeline" id="line-186"><code>				<label for="r38" class="ident">i</label>++</code></span>
+<span class="codeline" id="line-187"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-188"><code>				<label for="r43" class="ident">right</label> = <label for="r39" class="ident">j</label></code></span>
+<span class="codeline" id="line-189"><code>				<label for="r39" class="ident">j</label>++</code></span>
+<span class="codeline" id="line-190"><code>			}</code></span>
+<span class="codeline" id="line-191"><code>			{</code></span>
+<span class="codeline" id="line-192"><code>				<span class="comment">/* The sentinel node becomes the parent node. */</span></code></span>
+<span class="codeline" id="line-193"><code>				<span class="keyword">var</span> <label for="r44" class="ident">j_end</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">2</span>*<label for="r37" class="ident">n</label> - <label for="r40" class="ident">k</label></code></span>
+<span class="codeline" id="line-194"><code>				<label for="r33" class="ident">tree</label>[<label for="r44" class="ident">j_end</label>].<a href="#line-15" class="ident">total_count_</a> = <label for="r33" class="ident">tree</label>[<label for="r42" class="ident">left</label>].<a href="#line-15" class="ident">total_count_</a> + <label for="r33" class="ident">tree</label>[<label for="r43" class="ident">right</label>].<a href="#line-15" class="ident">total_count_</a></code></span>
+<span class="codeline" id="line-195"><code>				<label for="r33" class="ident">tree</label>[<label for="r44" class="ident">j_end</label>].<a href="#line-16" class="ident">index_left_</a> = <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>(<label for="r42" class="ident">left</label>)</code></span>
+<span class="codeline" id="line-196"><code>				<label for="r33" class="ident">tree</label>[<label for="r44" class="ident">j_end</label>].<a href="#line-17" class="ident">index_right_or_value_</a> = <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>(<label for="r43" class="ident">right</label>)</code></span>
+<span class="codeline" id="line-197"><code></code></span>
+<span class="codeline" id="line-198"><code>				<span class="comment">/* Add back the last sentinel node. */</span></code></span>
+<span class="codeline" id="line-199"><code>				<label for="r33" class="ident">tree</label>[<label for="r44" class="ident">j_end</label>+<span class="lit-number">1</span>] = <label for="r36" class="ident">sentinel</label></code></span>
+<span class="codeline" id="line-200"><code>			}</code></span>
+<span class="codeline" id="line-201"><code>		}</code></span>
+<span class="codeline" id="line-202"><code></code></span>
+<span class="codeline" id="line-203"><code>		<span class="keyword">if</span> <a href="#line-76" class="ident">setDepth</a>(<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<span class="lit-number">2</span>*<label for="r37" class="ident">n</label>-<span class="lit-number">1</span>), <label for="r33" class="ident">tree</label>[<span class="lit-number">0</span>:], <label for="r34" class="ident">depth</label>, <label for="r32" class="ident">tree_limit</label>) {</code></span>
+<span class="codeline" id="line-204"><code>			<span class="comment">/* We need to pack the Huffman tree in tree_limit bits. If this was not</span></code></span>
+<span class="codeline" id="line-205"><code><span class="comment">			   successful, add fake entities to the lowest values and retry. */</span></code></span>
+<span class="codeline" id="line-206"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-207"><code>		}</code></span>
+<span class="codeline" id="line-208"><code>	}</code></span>
+<span class="codeline" id="line-209"><code>}</code></span>
+<span class="codeline" id="line-210"><code></code></span>
+<span class="codeline" id="line-211"><code><span class="keyword">func</span> reverse(<label for="r46" class="ident">v</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r47" class="ident">start</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r48" class="ident">end</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) {</code></span>
+<span class="codeline" id="line-212"><code>	<label for="r48" class="ident">end</label>--</code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">for</span> <label for="r47" class="ident">start</label> &lt; <label for="r48" class="ident">end</label> {</code></span>
+<span class="codeline" id="line-214"><code>		<span class="keyword">var</span> <label for="r49" class="ident">tmp</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <label for="r46" class="ident">v</label>[<label for="r47" class="ident">start</label>]</code></span>
+<span class="codeline" id="line-215"><code>		<label for="r46" class="ident">v</label>[<label for="r47" class="ident">start</label>] = <label for="r46" class="ident">v</label>[<label for="r48" class="ident">end</label>]</code></span>
+<span class="codeline" id="line-216"><code>		<label for="r46" class="ident">v</label>[<label for="r48" class="ident">end</label>] = <label for="r49" class="ident">tmp</label></code></span>
+<span class="codeline" id="line-217"><code>		<label for="r47" class="ident">start</label>++</code></span>
+<span class="codeline" id="line-218"><code>		<label for="r48" class="ident">end</label>--</code></span>
+<span class="codeline" id="line-219"><code>	}</code></span>
+<span class="codeline" id="line-220"><code>}</code></span>
+<span class="codeline" id="line-221"><code></code></span>
+<span class="codeline" id="line-222"><code><span class="keyword">func</span> writeHuffmanTreeRepetitions(<label for="r51" class="ident">previous_value</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r52" class="ident">value</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r53" class="ident">repetitions</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r54" class="ident">tree_size</label> *<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r55" class="ident">tree</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r56" class="ident">extra_bits_data</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-223"><code>	<a href="util.go.html#line-3" class="ident">assert</a>(<label for="r53" class="ident">repetitions</label> &gt; <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-224"><code>	<span class="keyword">if</span> <label for="r51" class="ident">previous_value</label> != <label for="r52" class="ident">value</label> {</code></span>
+<span class="codeline" id="line-225"><code>		<label for="r55" class="ident">tree</label>[*<label for="r54" class="ident">tree_size</label>] = <label for="r52" class="ident">value</label></code></span>
+<span class="codeline" id="line-226"><code>		<label for="r56" class="ident">extra_bits_data</label>[*<label for="r54" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-227"><code>		(*<label for="r54" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-228"><code>		<label for="r53" class="ident">repetitions</label>--</code></span>
+<span class="codeline" id="line-229"><code>	}</code></span>
+<span class="codeline" id="line-230"><code></code></span>
+<span class="codeline" id="line-231"><code>	<span class="keyword">if</span> <label for="r53" class="ident">repetitions</label> == <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-232"><code>		<label for="r55" class="ident">tree</label>[*<label for="r54" class="ident">tree_size</label>] = <label for="r52" class="ident">value</label></code></span>
+<span class="codeline" id="line-233"><code>		<label for="r56" class="ident">extra_bits_data</label>[*<label for="r54" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-234"><code>		(*<label for="r54" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-235"><code>		<label for="r53" class="ident">repetitions</label>--</code></span>
+<span class="codeline" id="line-236"><code>	}</code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code>	<span class="keyword">if</span> <label for="r53" class="ident">repetitions</label> &lt; <span class="lit-number">3</span> {</code></span>
+<span class="codeline" id="line-239"><code>		<span class="keyword">var</span> <label for="r57" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-240"><code>		<span class="keyword">for</span> <label for="r57" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r57" class="ident">i</label> &lt; <label for="r53" class="ident">repetitions</label>; <label for="r57" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-241"><code>			<label for="r55" class="ident">tree</label>[*<label for="r54" class="ident">tree_size</label>] = <label for="r52" class="ident">value</label></code></span>
+<span class="codeline" id="line-242"><code>			<label for="r56" class="ident">extra_bits_data</label>[*<label for="r54" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-243"><code>			(*<label for="r54" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-244"><code>		}</code></span>
+<span class="codeline" id="line-245"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-246"><code>		<span class="keyword">var</span> <label for="r58" class="ident">start</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = *<label for="r54" class="ident">tree_size</label></code></span>
+<span class="codeline" id="line-247"><code>		<label for="r53" class="ident">repetitions</label> -= <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-248"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-249"><code>			<label for="r55" class="ident">tree</label>[*<label for="r54" class="ident">tree_size</label>] = <a href="constants.go.html#line-27" class="ident">repeatPreviousCodeLength</a></code></span>
+<span class="codeline" id="line-250"><code>			<label for="r56" class="ident">extra_bits_data</label>[*<label for="r54" class="ident">tree_size</label>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r53" class="ident">repetitions</label> &amp; <span class="lit-number">0x3</span>)</code></span>
+<span class="codeline" id="line-251"><code>			(*<label for="r54" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-252"><code>			<label for="r53" class="ident">repetitions</label> &gt;&gt;= <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-253"><code>			<span class="keyword">if</span> <label for="r53" class="ident">repetitions</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-254"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-255"><code>			}</code></span>
+<span class="codeline" id="line-256"><code></code></span>
+<span class="codeline" id="line-257"><code>			<label for="r53" class="ident">repetitions</label>--</code></span>
+<span class="codeline" id="line-258"><code>		}</code></span>
+<span class="codeline" id="line-259"><code></code></span>
+<span class="codeline" id="line-260"><code>		<a href="#line-211" class="ident">reverse</a>(<label for="r55" class="ident">tree</label>, <label for="r58" class="ident">start</label>, *<label for="r54" class="ident">tree_size</label>)</code></span>
+<span class="codeline" id="line-261"><code>		<a href="#line-211" class="ident">reverse</a>(<label for="r56" class="ident">extra_bits_data</label>, <label for="r58" class="ident">start</label>, *<label for="r54" class="ident">tree_size</label>)</code></span>
+<span class="codeline" id="line-262"><code>	}</code></span>
+<span class="codeline" id="line-263"><code>}</code></span>
+<span class="codeline" id="line-264"><code></code></span>
+<span class="codeline" id="line-265"><code><span class="keyword">func</span> writeHuffmanTreeRepetitionsZeros(<label for="r60" class="ident">repetitions</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r61" class="ident">tree_size</label> *<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r62" class="ident">tree</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r63" class="ident">extra_bits_data</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-266"><code>	<span class="keyword">if</span> <label for="r60" class="ident">repetitions</label> == <span class="lit-number">11</span> {</code></span>
+<span class="codeline" id="line-267"><code>		<label for="r62" class="ident">tree</label>[*<label for="r61" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-268"><code>		<label for="r63" class="ident">extra_bits_data</label>[*<label for="r61" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-269"><code>		(*<label for="r61" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-270"><code>		<label for="r60" class="ident">repetitions</label>--</code></span>
+<span class="codeline" id="line-271"><code>	}</code></span>
+<span class="codeline" id="line-272"><code></code></span>
+<span class="codeline" id="line-273"><code>	<span class="keyword">if</span> <label for="r60" class="ident">repetitions</label> &lt; <span class="lit-number">3</span> {</code></span>
+<span class="codeline" id="line-274"><code>		<span class="keyword">var</span> <label for="r64" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-275"><code>		<span class="keyword">for</span> <label for="r64" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r64" class="ident">i</label> &lt; <label for="r60" class="ident">repetitions</label>; <label for="r64" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-276"><code>			<label for="r62" class="ident">tree</label>[*<label for="r61" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-277"><code>			<label for="r63" class="ident">extra_bits_data</label>[*<label for="r61" class="ident">tree_size</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-278"><code>			(*<label for="r61" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-279"><code>		}</code></span>
+<span class="codeline" id="line-280"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-281"><code>		<span class="keyword">var</span> <label for="r65" class="ident">start</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = *<label for="r61" class="ident">tree_size</label></code></span>
+<span class="codeline" id="line-282"><code>		<label for="r60" class="ident">repetitions</label> -= <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-283"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-284"><code>			<label for="r62" class="ident">tree</label>[*<label for="r61" class="ident">tree_size</label>] = <a href="constants.go.html#line-29" class="ident">repeatZeroCodeLength</a></code></span>
+<span class="codeline" id="line-285"><code>			<label for="r63" class="ident">extra_bits_data</label>[*<label for="r61" class="ident">tree_size</label>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r60" class="ident">repetitions</label> &amp; <span class="lit-number">0x7</span>)</code></span>
+<span class="codeline" id="line-286"><code>			(*<label for="r61" class="ident">tree_size</label>)++</code></span>
+<span class="codeline" id="line-287"><code>			<label for="r60" class="ident">repetitions</label> &gt;&gt;= <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-288"><code>			<span class="keyword">if</span> <label for="r60" class="ident">repetitions</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-289"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-290"><code>			}</code></span>
+<span class="codeline" id="line-291"><code></code></span>
+<span class="codeline" id="line-292"><code>			<label for="r60" class="ident">repetitions</label>--</code></span>
+<span class="codeline" id="line-293"><code>		}</code></span>
+<span class="codeline" id="line-294"><code></code></span>
+<span class="codeline" id="line-295"><code>		<a href="#line-211" class="ident">reverse</a>(<label for="r62" class="ident">tree</label>, <label for="r65" class="ident">start</label>, *<label for="r61" class="ident">tree_size</label>)</code></span>
+<span class="codeline" id="line-296"><code>		<a href="#line-211" class="ident">reverse</a>(<label for="r63" class="ident">extra_bits_data</label>, <label for="r65" class="ident">start</label>, *<label for="r61" class="ident">tree_size</label>)</code></span>
+<span class="codeline" id="line-297"><code>	}</code></span>
+<span class="codeline" id="line-298"><code>}</code></span>
+<span class="codeline" id="line-299"><code></code></span>
+<span class="codeline" id="line-300"><code><span class="comment">/* Change the population counts in a way that the consequent</span></code></span>
+<span class="codeline" id="line-301"><code><span class="comment">   Huffman tree compression, especially its RLE-part will be more</span></code></span>
+<span class="codeline" id="line-302"><code><span class="comment">   likely to compress this data more efficiently.</span></code></span>
+<span class="codeline" id="line-303"><code></code></span>
+<span class="codeline" id="line-304"><code><span class="comment">   length contains the size of the histogram.</span></code></span>
+<span class="codeline" id="line-305"><code><span class="comment">   counts contains the population counts.</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">   good_for_rle is a buffer of at least length size */</span></code></span>
+<span class="codeline" id="line-307"><code><span class="keyword">func</span> optimizeHuffmanCountsForRLE(<label for="r67" class="ident">length</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r68" class="ident">counts</label> []<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r69" class="ident">good_for_rle</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-308"><code>	<span class="keyword">var</span> <label for="r70" class="ident">nonzero_count</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-309"><code>	<span class="keyword">var</span> <label for="r71" class="ident">stride</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-310"><code>	<span class="keyword">var</span> <label for="r72" class="ident">limit</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-311"><code>	<span class="keyword">var</span> <label for="r73" class="ident">sum</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-312"><code>	<span class="keyword">var</span> <label for="r74" class="ident">streak_limit</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">1240</span></code></span>
+<span class="codeline" id="line-313"><code>	<span class="keyword">var</span> <label for="r75" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-314"><code>	<span class="comment">/* Let's make the Huffman code more compatible with RLE encoding. */</span></code></span>
+<span class="codeline" id="line-315"><code>	<span class="keyword">for</span> <label for="r75" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r75" class="ident">i</label> &lt; <label for="r67" class="ident">length</label>; <label for="r75" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-316"><code>		<span class="keyword">if</span> <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-317"><code>			<label for="r70" class="ident">nonzero_count</label>++</code></span>
+<span class="codeline" id="line-318"><code>		}</code></span>
+<span class="codeline" id="line-319"><code>	}</code></span>
+<span class="codeline" id="line-320"><code></code></span>
+<span class="codeline" id="line-321"><code>	<span class="keyword">if</span> <label for="r70" class="ident">nonzero_count</label> &lt; <span class="lit-number">16</span> {</code></span>
+<span class="codeline" id="line-322"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-323"><code>	}</code></span>
+<span class="codeline" id="line-324"><code></code></span>
+<span class="codeline" id="line-325"><code>	<span class="keyword">for</span> <label for="r67" class="ident">length</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r68" class="ident">counts</label>[<label for="r67" class="ident">length</label>-<span class="lit-number">1</span>] == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-326"><code>		<label for="r67" class="ident">length</label>--</code></span>
+<span class="codeline" id="line-327"><code>	}</code></span>
+<span class="codeline" id="line-328"><code></code></span>
+<span class="codeline" id="line-329"><code>	<span class="keyword">if</span> <label for="r67" class="ident">length</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-330"><code>		<span class="keyword">return</span> <span class="comment">/* All zeros. */</span></code></span>
+<span class="codeline" id="line-331"><code>	}</code></span>
+<span class="codeline" id="line-332"><code></code></span>
+<span class="codeline" id="line-333"><code>	<span class="comment">/* Now counts[0..length - 1] does not have trailing zeros. */</span></code></span>
+<span class="codeline" id="line-334"><code>	{</code></span>
+<span class="codeline" id="line-335"><code>		<span class="keyword">var</span> <label for="r76" class="ident">nonzeros</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-336"><code>		<span class="keyword">var</span> <label for="r77" class="ident">smallest_nonzero</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">30</span></code></span>
+<span class="codeline" id="line-337"><code>		<span class="keyword">for</span> <label for="r75" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r75" class="ident">i</label> &lt; <label for="r67" class="ident">length</label>; <label for="r75" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-338"><code>			<span class="keyword">if</span> <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-339"><code>				<label for="r76" class="ident">nonzeros</label>++</code></span>
+<span class="codeline" id="line-340"><code>				<span class="keyword">if</span> <label for="r77" class="ident">smallest_nonzero</label> &gt; <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] {</code></span>
+<span class="codeline" id="line-341"><code>					<label for="r77" class="ident">smallest_nonzero</label> = <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-342"><code>				}</code></span>
+<span class="codeline" id="line-343"><code>			}</code></span>
+<span class="codeline" id="line-344"><code>		}</code></span>
+<span class="codeline" id="line-345"><code></code></span>
+<span class="codeline" id="line-346"><code>		<span class="keyword">if</span> <label for="r76" class="ident">nonzeros</label> &lt; <span class="lit-number">5</span> {</code></span>
+<span class="codeline" id="line-347"><code>			<span class="comment">/* Small histogram will model it well. */</span></code></span>
+<span class="codeline" id="line-348"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-349"><code>		}</code></span>
+<span class="codeline" id="line-350"><code></code></span>
+<span class="codeline" id="line-351"><code>		<span class="keyword">if</span> <label for="r77" class="ident">smallest_nonzero</label> &lt; <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-352"><code>			<span class="keyword">var</span> <label for="r78" class="ident">zeros</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <label for="r67" class="ident">length</label> - <label for="r76" class="ident">nonzeros</label></code></span>
+<span class="codeline" id="line-353"><code>			<span class="keyword">if</span> <label for="r78" class="ident">zeros</label> &lt; <span class="lit-number">6</span> {</code></span>
+<span class="codeline" id="line-354"><code>				<span class="keyword">for</span> <label for="r75" class="ident">i</label> = <span class="lit-number">1</span>; <label for="r75" class="ident">i</label> &lt; <label for="r67" class="ident">length</label>-<span class="lit-number">1</span>; <label for="r75" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-355"><code>					<span class="keyword">if</span> <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>-<span class="lit-number">1</span>] != <span class="lit-number">0</span> &amp;&amp; <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] == <span class="lit-number">0</span> &amp;&amp; <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>+<span class="lit-number">1</span>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-356"><code>						<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-357"><code>					}</code></span>
+<span class="codeline" id="line-358"><code>				}</code></span>
+<span class="codeline" id="line-359"><code>			}</code></span>
+<span class="codeline" id="line-360"><code>		}</code></span>
+<span class="codeline" id="line-361"><code></code></span>
+<span class="codeline" id="line-362"><code>		<span class="keyword">if</span> <label for="r76" class="ident">nonzeros</label> &lt; <span class="lit-number">28</span> {</code></span>
+<span class="codeline" id="line-363"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-364"><code>		}</code></span>
+<span class="codeline" id="line-365"><code>	}</code></span>
+<span class="codeline" id="line-366"><code></code></span>
+<span class="codeline" id="line-367"><code>	<span class="comment">/* 2) Let's mark all population counts that already can be encoded</span></code></span>
+<span class="codeline" id="line-368"><code><span class="comment">	   with an RLE code. */</span></code></span>
+<span class="codeline" id="line-369"><code>	<span class="keyword">for</span> <label for="r79" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r79" class="ident">i</label> &lt; <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r67" class="ident">length</label>); <label for="r79" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-370"><code>		<label for="r69" class="ident">good_for_rle</label>[<label for="r79" class="ident">i</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-371"><code>	}</code></span>
+<span class="codeline" id="line-372"><code>	{</code></span>
+<span class="codeline" id="line-373"><code>		<span class="keyword">var</span> <label for="r80" class="ident">symbol</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <label for="r68" class="ident">counts</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-374"><code>		<span class="comment">/* Let's not spoil any of the existing good RLE codes.</span></code></span>
+<span class="codeline" id="line-375"><code><span class="comment">		   Mark any seq of 0's that is longer as 5 as a good_for_rle.</span></code></span>
+<span class="codeline" id="line-376"><code><span class="comment">		   Mark any seq of non-0's that is longer as 7 as a good_for_rle. */</span></code></span>
+<span class="codeline" id="line-377"><code></code></span>
+<span class="codeline" id="line-378"><code>		<span class="keyword">var</span> <label for="r81" class="ident">step</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-379"><code>		<span class="keyword">for</span> <label for="r75" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r75" class="ident">i</label> &lt;= <label for="r67" class="ident">length</label>; <label for="r75" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-380"><code>			<span class="keyword">if</span> <label for="r75" class="ident">i</label> == <label for="r67" class="ident">length</label> || <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>] != <label for="r80" class="ident">symbol</label> {</code></span>
+<span class="codeline" id="line-381"><code>				<span class="keyword">if</span> (<label for="r80" class="ident">symbol</label> == <span class="lit-number">0</span> &amp;&amp; <label for="r81" class="ident">step</label> &gt;= <span class="lit-number">5</span>) || (<label for="r80" class="ident">symbol</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r81" class="ident">step</label> &gt;= <span class="lit-number">7</span>) {</code></span>
+<span class="codeline" id="line-382"><code>					<span class="keyword">var</span> <label for="r82" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-383"><code>					<span class="keyword">for</span> <label for="r82" class="ident">k</label> = <span class="lit-number">0</span>; <label for="r82" class="ident">k</label> &lt; <label for="r81" class="ident">step</label>; <label for="r82" class="ident">k</label>++ {</code></span>
+<span class="codeline" id="line-384"><code>						<label for="r69" class="ident">good_for_rle</label>[<label for="r75" class="ident">i</label>-<label for="r82" class="ident">k</label>-<span class="lit-number">1</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-385"><code>					}</code></span>
+<span class="codeline" id="line-386"><code>				}</code></span>
+<span class="codeline" id="line-387"><code></code></span>
+<span class="codeline" id="line-388"><code>				<label for="r81" class="ident">step</label> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-389"><code>				<span class="keyword">if</span> <label for="r75" class="ident">i</label> != <label for="r67" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-390"><code>					<label for="r80" class="ident">symbol</label> = <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-391"><code>				}</code></span>
+<span class="codeline" id="line-392"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-393"><code>				<label for="r81" class="ident">step</label>++</code></span>
+<span class="codeline" id="line-394"><code>			}</code></span>
+<span class="codeline" id="line-395"><code>		}</code></span>
+<span class="codeline" id="line-396"><code>	}</code></span>
+<span class="codeline" id="line-397"><code></code></span>
+<span class="codeline" id="line-398"><code>	<span class="comment">/* 3) Let's replace those population counts that lead to more RLE codes.</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">	   Math here is in 24.8 fixed point representation. */</span></code></span>
+<span class="codeline" id="line-400"><code>	<label for="r71" class="ident">stride</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-401"><code></code></span>
+<span class="codeline" id="line-402"><code>	<label for="r72" class="ident">limit</label> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">256</span>*(<label for="r68" class="ident">counts</label>[<span class="lit-number">0</span>]+<label for="r68" class="ident">counts</label>[<span class="lit-number">1</span>]+<label for="r68" class="ident">counts</label>[<span class="lit-number">2</span>])/<span class="lit-number">3</span> + <span class="lit-number">420</span>)</code></span>
+<span class="codeline" id="line-403"><code>	<label for="r73" class="ident">sum</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-404"><code>	<span class="keyword">for</span> <label for="r75" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r75" class="ident">i</label> &lt;= <label for="r67" class="ident">length</label>; <label for="r75" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-405"><code>		<span class="keyword">if</span> <label for="r75" class="ident">i</label> == <label for="r67" class="ident">length</label> || <label for="r69" class="ident">good_for_rle</label>[<label for="r75" class="ident">i</label>] != <span class="lit-number">0</span> || (<label for="r75" class="ident">i</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r69" class="ident">good_for_rle</label>[<label for="r75" class="ident">i</label>-<span class="lit-number">1</span>] != <span class="lit-number">0</span>) || (<span class="lit-number">256</span>*<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>]-<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r72" class="ident">limit</label>)+<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r74" class="ident">streak_limit</label>)) &gt;= <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<span class="lit-number">2</span>*<label for="r74" class="ident">streak_limit</label>) {</code></span>
+<span class="codeline" id="line-406"><code>			<span class="keyword">if</span> <label for="r71" class="ident">stride</label> &gt;= <span class="lit-number">4</span> || (<label for="r71" class="ident">stride</label> &gt;= <span class="lit-number">3</span> &amp;&amp; <label for="r73" class="ident">sum</label> == <span class="lit-number">0</span>) {</code></span>
+<span class="codeline" id="line-407"><code>				<span class="keyword">var</span> <label for="r83" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-408"><code>				<span class="keyword">var</span> <label for="r84" class="ident">count</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = (<label for="r73" class="ident">sum</label> + <label for="r71" class="ident">stride</label>/<span class="lit-number">2</span>) / <label for="r71" class="ident">stride</label></code></span>
+<span class="codeline" id="line-409"><code>				<span class="comment">/* The stride must end, collapse what we have, if we have enough (4). */</span></code></span>
+<span class="codeline" id="line-410"><code>				<span class="keyword">if</span> <label for="r84" class="ident">count</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-411"><code>					<label for="r84" class="ident">count</label> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-412"><code>				}</code></span>
+<span class="codeline" id="line-413"><code></code></span>
+<span class="codeline" id="line-414"><code>				<span class="keyword">if</span> <label for="r73" class="ident">sum</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-415"><code>					<span class="comment">/* Don't make an all zeros stride to be upgraded to ones. */</span></code></span>
+<span class="codeline" id="line-416"><code>					<label for="r84" class="ident">count</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-417"><code>				}</code></span>
+<span class="codeline" id="line-418"><code></code></span>
+<span class="codeline" id="line-419"><code>				<span class="keyword">for</span> <label for="r83" class="ident">k</label> = <span class="lit-number">0</span>; <label for="r83" class="ident">k</label> &lt; <label for="r71" class="ident">stride</label>; <label for="r83" class="ident">k</label>++ {</code></span>
+<span class="codeline" id="line-420"><code>					<span class="comment">/* We don't want to change value at counts[i],</span></code></span>
+<span class="codeline" id="line-421"><code><span class="comment">					   that is already belonging to the next stride. Thus - 1. */</span></code></span>
+<span class="codeline" id="line-422"><code>					<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>-<label for="r83" class="ident">k</label>-<span class="lit-number">1</span>] = <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r84" class="ident">count</label>)</code></span>
+<span class="codeline" id="line-423"><code>				}</code></span>
+<span class="codeline" id="line-424"><code>			}</code></span>
+<span class="codeline" id="line-425"><code></code></span>
+<span class="codeline" id="line-426"><code>			<label for="r71" class="ident">stride</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-427"><code>			<label for="r73" class="ident">sum</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-428"><code>			<span class="keyword">if</span> <label for="r75" class="ident">i</label> &lt; <label for="r67" class="ident">length</label>-<span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-429"><code>				<span class="comment">/* All interesting strides have a count of at least 4, */</span></code></span>
+<span class="codeline" id="line-430"><code><span class="comment">				/* at least when non-zeros. */</span></code></span>
+<span class="codeline" id="line-431"><code>				<label for="r72" class="ident">limit</label> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">256</span>*(<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>]+<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>+<span class="lit-number">1</span>]+<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>+<span class="lit-number">2</span>])/<span class="lit-number">3</span> + <span class="lit-number">420</span>)</code></span>
+<span class="codeline" id="line-432"><code>			} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r75" class="ident">i</label> &lt; <label for="r67" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-433"><code>				<label for="r72" class="ident">limit</label> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">256</span> * <label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-434"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-435"><code>				<label for="r72" class="ident">limit</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-436"><code>			}</code></span>
+<span class="codeline" id="line-437"><code>		}</code></span>
+<span class="codeline" id="line-438"><code></code></span>
+<span class="codeline" id="line-439"><code>		<label for="r71" class="ident">stride</label>++</code></span>
+<span class="codeline" id="line-440"><code>		<span class="keyword">if</span> <label for="r75" class="ident">i</label> != <label for="r67" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-441"><code>			<label for="r73" class="ident">sum</label> += <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r68" class="ident">counts</label>[<label for="r75" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-442"><code>			<span class="keyword">if</span> <label for="r71" class="ident">stride</label> &gt;= <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-443"><code>				<label for="r72" class="ident">limit</label> = (<span class="lit-number">256</span>*<label for="r73" class="ident">sum</label> + <label for="r71" class="ident">stride</label>/<span class="lit-number">2</span>) / <label for="r71" class="ident">stride</label></code></span>
+<span class="codeline" id="line-444"><code>			}</code></span>
+<span class="codeline" id="line-445"><code></code></span>
+<span class="codeline" id="line-446"><code>			<span class="keyword">if</span> <label for="r71" class="ident">stride</label> == <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-447"><code>				<label for="r72" class="ident">limit</label> += <span class="lit-number">120</span></code></span>
+<span class="codeline" id="line-448"><code>			}</code></span>
+<span class="codeline" id="line-449"><code>		}</code></span>
+<span class="codeline" id="line-450"><code>	}</code></span>
+<span class="codeline" id="line-451"><code>}</code></span>
+<span class="codeline" id="line-452"><code></code></span>
+<span class="codeline" id="line-453"><code><span class="keyword">func</span> decideOverRLEUse(<label for="r86" class="ident">depth</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r87" class="ident">length</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r88" class="ident">use_rle_for_non_zero</label> *<a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r89" class="ident">use_rle_for_zero</label> *<a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-454"><code>	<span class="keyword">var</span> <label for="r90" class="ident">total_reps_zero</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-455"><code>	<span class="keyword">var</span> <label for="r91" class="ident">total_reps_non_zero</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-456"><code>	<span class="keyword">var</span> <label for="r92" class="ident">count_reps_zero</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-457"><code>	<span class="keyword">var</span> <label for="r93" class="ident">count_reps_non_zero</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-458"><code>	<span class="keyword">var</span> <label for="r94" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-459"><code>	<span class="keyword">for</span> <label for="r94" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r94" class="ident">i</label> &lt; <label for="r87" class="ident">length</label>; {</code></span>
+<span class="codeline" id="line-460"><code>		<span class="keyword">var</span> <label for="r95" class="ident">value</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <label for="r86" class="ident">depth</label>[<label for="r94" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-461"><code>		<span class="keyword">var</span> <label for="r96" class="ident">reps</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-462"><code>		<span class="keyword">var</span> <label for="r97" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-463"><code>		<span class="keyword">for</span> <label for="r97" class="ident">k</label> = <label for="r94" class="ident">i</label> + <span class="lit-number">1</span>; <label for="r97" class="ident">k</label> &lt; <label for="r87" class="ident">length</label> &amp;&amp; <label for="r86" class="ident">depth</label>[<label for="r97" class="ident">k</label>] == <label for="r95" class="ident">value</label>; <label for="r97" class="ident">k</label>++ {</code></span>
+<span class="codeline" id="line-464"><code>			<label for="r96" class="ident">reps</label>++</code></span>
+<span class="codeline" id="line-465"><code>		}</code></span>
+<span class="codeline" id="line-466"><code></code></span>
+<span class="codeline" id="line-467"><code>		<span class="keyword">if</span> <label for="r96" class="ident">reps</label> &gt;= <span class="lit-number">3</span> &amp;&amp; <label for="r95" class="ident">value</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-468"><code>			<label for="r90" class="ident">total_reps_zero</label> += <label for="r96" class="ident">reps</label></code></span>
+<span class="codeline" id="line-469"><code>			<label for="r92" class="ident">count_reps_zero</label>++</code></span>
+<span class="codeline" id="line-470"><code>		}</code></span>
+<span class="codeline" id="line-471"><code></code></span>
+<span class="codeline" id="line-472"><code>		<span class="keyword">if</span> <label for="r96" class="ident">reps</label> &gt;= <span class="lit-number">4</span> &amp;&amp; <label for="r95" class="ident">value</label> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-473"><code>			<label for="r91" class="ident">total_reps_non_zero</label> += <label for="r96" class="ident">reps</label></code></span>
+<span class="codeline" id="line-474"><code>			<label for="r93" class="ident">count_reps_non_zero</label>++</code></span>
+<span class="codeline" id="line-475"><code>		}</code></span>
+<span class="codeline" id="line-476"><code></code></span>
+<span class="codeline" id="line-477"><code>		<label for="r94" class="ident">i</label> += <label for="r96" class="ident">reps</label></code></span>
+<span class="codeline" id="line-478"><code>	}</code></span>
+<span class="codeline" id="line-479"><code></code></span>
+<span class="codeline" id="line-480"><code>	*<label for="r88" class="ident">use_rle_for_non_zero</label> = <label for="r91" class="ident">total_reps_non_zero</label> &gt; <label for="r93" class="ident">count_reps_non_zero</label>*<span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-481"><code>	*<label for="r89" class="ident">use_rle_for_zero</label> = <label for="r90" class="ident">total_reps_zero</label> &gt; <label for="r92" class="ident">count_reps_zero</label>*<span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-482"><code>}</code></span>
+<span class="codeline" id="line-483"><code></code></span>
+<span class="codeline" id="line-484"><code><span class="comment">/* Write a Huffman tree from bit depths into the bit-stream representation</span></code></span>
+<span class="codeline" id="line-485"><code><span class="comment">   of a Huffman tree. The generated Huffman tree is to be compressed once</span></code></span>
+<span class="codeline" id="line-486"><code><span class="comment">   more using a Huffman tree */</span></code></span>
+<span class="codeline" id="line-487"><code><span class="keyword">func</span> writeHuffmanTree(<label for="r99" class="ident">depth</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r100" class="ident">length</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r101" class="ident">tree_size</label> *<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r102" class="ident">tree</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r103" class="ident">extra_bits_data</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-488"><code>	<span class="keyword">var</span> <label for="r104" class="ident">previous_value</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <a href="constants.go.html#line-34" class="ident">initialRepeatedCodeLength</a></code></span>
+<span class="codeline" id="line-489"><code>	<span class="keyword">var</span> <label for="r105" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-490"><code>	<span class="keyword">var</span> <label for="r106" class="ident">use_rle_for_non_zero</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> = <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-491"><code>	<span class="keyword">var</span> <label for="r107" class="ident">use_rle_for_zero</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> = <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-492"><code>	<span class="keyword">var</span> <label for="r108" class="ident">new_length</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <label for="r100" class="ident">length</label></code></span>
+<span class="codeline" id="line-493"><code>	<span class="comment">/* Throw away trailing zeros. */</span></code></span>
+<span class="codeline" id="line-494"><code>	<span class="keyword">for</span> <label for="r105" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r105" class="ident">i</label> &lt; <label for="r100" class="ident">length</label>; <label for="r105" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-495"><code>		<span class="keyword">if</span> <label for="r99" class="ident">depth</label>[<label for="r100" class="ident">length</label>-<label for="r105" class="ident">i</label>-<span class="lit-number">1</span>] == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-496"><code>			<label for="r108" class="ident">new_length</label>--</code></span>
+<span class="codeline" id="line-497"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-498"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-499"><code>		}</code></span>
+<span class="codeline" id="line-500"><code>	}</code></span>
+<span class="codeline" id="line-501"><code></code></span>
+<span class="codeline" id="line-502"><code>	<span class="comment">/* First gather statistics on if it is a good idea to do RLE. */</span></code></span>
+<span class="codeline" id="line-503"><code>	<span class="keyword">if</span> <label for="r100" class="ident">length</label> &gt; <span class="lit-number">50</span> {</code></span>
+<span class="codeline" id="line-504"><code>		<span class="comment">/* Find RLE coding for longer codes.</span></code></span>
+<span class="codeline" id="line-505"><code><span class="comment">		   Shorter codes seem not to benefit from RLE. */</span></code></span>
+<span class="codeline" id="line-506"><code>		<a href="#line-453" class="ident">decideOverRLEUse</a>(<label for="r99" class="ident">depth</label>, <label for="r108" class="ident">new_length</label>, &amp;<label for="r106" class="ident">use_rle_for_non_zero</label>, &amp;<label for="r107" class="ident">use_rle_for_zero</label>)</code></span>
+<span class="codeline" id="line-507"><code>	}</code></span>
+<span class="codeline" id="line-508"><code></code></span>
+<span class="codeline" id="line-509"><code>	<span class="comment">/* Actual RLE coding. */</span></code></span>
+<span class="codeline" id="line-510"><code>	<span class="keyword">for</span> <label for="r105" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r105" class="ident">i</label> &lt; <label for="r108" class="ident">new_length</label>; {</code></span>
+<span class="codeline" id="line-511"><code>		<span class="keyword">var</span> <label for="r109" class="ident">value</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <label for="r99" class="ident">depth</label>[<label for="r105" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-512"><code>		<span class="keyword">var</span> <label for="r110" class="ident">reps</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-513"><code>		<span class="keyword">if</span> (<label for="r109" class="ident">value</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r106" class="ident">use_rle_for_non_zero</label>) || (<label for="r109" class="ident">value</label> == <span class="lit-number">0</span> &amp;&amp; <label for="r107" class="ident">use_rle_for_zero</label>) {</code></span>
+<span class="codeline" id="line-514"><code>			<span class="keyword">var</span> <label for="r111" class="ident">k</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-515"><code>			<span class="keyword">for</span> <label for="r111" class="ident">k</label> = <label for="r105" class="ident">i</label> + <span class="lit-number">1</span>; <label for="r111" class="ident">k</label> &lt; <label for="r108" class="ident">new_length</label> &amp;&amp; <label for="r99" class="ident">depth</label>[<label for="r111" class="ident">k</label>] == <label for="r109" class="ident">value</label>; <label for="r111" class="ident">k</label>++ {</code></span>
+<span class="codeline" id="line-516"><code>				<label for="r110" class="ident">reps</label>++</code></span>
+<span class="codeline" id="line-517"><code>			}</code></span>
+<span class="codeline" id="line-518"><code>		}</code></span>
+<span class="codeline" id="line-519"><code></code></span>
+<span class="codeline" id="line-520"><code>		<span class="keyword">if</span> <label for="r109" class="ident">value</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-521"><code>			<a href="#line-265" class="ident">writeHuffmanTreeRepetitionsZeros</a>(<label for="r110" class="ident">reps</label>, <label for="r101" class="ident">tree_size</label>, <label for="r102" class="ident">tree</label>, <label for="r103" class="ident">extra_bits_data</label>)</code></span>
+<span class="codeline" id="line-522"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-523"><code>			<a href="#line-222" class="ident">writeHuffmanTreeRepetitions</a>(<label for="r104" class="ident">previous_value</label>, <label for="r109" class="ident">value</label>, <label for="r110" class="ident">reps</label>, <label for="r101" class="ident">tree_size</label>, <label for="r102" class="ident">tree</label>, <label for="r103" class="ident">extra_bits_data</label>)</code></span>
+<span class="codeline" id="line-524"><code>			<label for="r104" class="ident">previous_value</label> = <label for="r109" class="ident">value</label></code></span>
+<span class="codeline" id="line-525"><code>		}</code></span>
+<span class="codeline" id="line-526"><code></code></span>
+<span class="codeline" id="line-527"><code>		<label for="r105" class="ident">i</label> += <label for="r110" class="ident">reps</label></code></span>
+<span class="codeline" id="line-528"><code>	}</code></span>
+<span class="codeline" id="line-529"><code>}</code></span>
+<span class="codeline" id="line-530"><code></code></span>
+<span class="codeline" id="line-531"><code><span class="keyword">var</span> reverseBits_kLut = [<span class="lit-number">16</span>]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-532"><code>	<span class="lit-number">0x00</span>,</code></span>
+<span class="codeline" id="line-533"><code>	<span class="lit-number">0x08</span>,</code></span>
+<span class="codeline" id="line-534"><code>	<span class="lit-number">0x04</span>,</code></span>
+<span class="codeline" id="line-535"><code>	<span class="lit-number">0x0C</span>,</code></span>
+<span class="codeline" id="line-536"><code>	<span class="lit-number">0x02</span>,</code></span>
+<span class="codeline" id="line-537"><code>	<span class="lit-number">0x0A</span>,</code></span>
+<span class="codeline" id="line-538"><code>	<span class="lit-number">0x06</span>,</code></span>
+<span class="codeline" id="line-539"><code>	<span class="lit-number">0x0E</span>,</code></span>
+<span class="codeline" id="line-540"><code>	<span class="lit-number">0x01</span>,</code></span>
+<span class="codeline" id="line-541"><code>	<span class="lit-number">0x09</span>,</code></span>
+<span class="codeline" id="line-542"><code>	<span class="lit-number">0x05</span>,</code></span>
+<span class="codeline" id="line-543"><code>	<span class="lit-number">0x0D</span>,</code></span>
+<span class="codeline" id="line-544"><code>	<span class="lit-number">0x03</span>,</code></span>
+<span class="codeline" id="line-545"><code>	<span class="lit-number">0x0B</span>,</code></span>
+<span class="codeline" id="line-546"><code>	<span class="lit-number">0x07</span>,</code></span>
+<span class="codeline" id="line-547"><code>	<span class="lit-number">0x0F</span>,</code></span>
+<span class="codeline" id="line-548"><code>}</code></span>
+<span class="codeline" id="line-549"><code></code></span>
+<span class="codeline" id="line-550"><code><span class="keyword">func</span> reverseBits(<label for="r113" class="ident">num_bits</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r114" class="ident">bits</label> <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>) <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a> {</code></span>
+<span class="codeline" id="line-551"><code>	<span class="keyword">var</span> <label for="r115" class="ident">retval</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="#line-531" class="ident">reverseBits_kLut</a>[<label for="r114" class="ident">bits</label>&amp;<span class="lit-number">0x0F</span>]</code></span>
+<span class="codeline" id="line-552"><code>	<span class="keyword">var</span> <label for="r116" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-553"><code>	<span class="keyword">for</span> <label for="r116" class="ident">i</label> = <span class="lit-number">4</span>; <label for="r116" class="ident">i</label> &lt; <label for="r113" class="ident">num_bits</label>; <label for="r116" class="ident">i</label> += <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-554"><code>		<label for="r115" class="ident">retval</label> &lt;&lt;= <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-555"><code>		<label for="r114" class="ident">bits</label> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r114" class="ident">bits</label> &gt;&gt; <span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-556"><code>		<label for="r115" class="ident">retval</label> |= <a href="#line-531" class="ident">reverseBits_kLut</a>[<label for="r114" class="ident">bits</label>&amp;<span class="lit-number">0x0F</span>]</code></span>
+<span class="codeline" id="line-557"><code>	}</code></span>
+<span class="codeline" id="line-558"><code></code></span>
+<span class="codeline" id="line-559"><code>	<label for="r115" class="ident">retval</label> &gt;&gt;= ((<span class="lit-number">0</span> - <label for="r113" class="ident">num_bits</label>) &amp; <span class="lit-number">0x03</span>)</code></span>
+<span class="codeline" id="line-560"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r115" class="ident">retval</label>)</code></span>
+<span class="codeline" id="line-561"><code>}</code></span>
+<span class="codeline" id="line-562"><code></code></span>
+<span class="codeline" id="line-563"><code><span class="comment">/* 0..15 are values for bits */</span></code></span>
+<span class="codeline" id="line-564"><code><span class="keyword">const</span> maxHuffmanBits = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-565"><code></code></span>
+<span class="codeline" id="line-566"><code><span class="comment">/* Get the actual bit values for a tree of bit depths. */</span></code></span>
+<span class="codeline" id="line-567"><code><span class="keyword">func</span> convertBitDepthsToSymbols(<label for="r118" class="ident">depth</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r119" class="ident">len</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r120" class="ident">bits</label> []<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>) {</code></span>
+<span class="codeline" id="line-568"><code>	<span class="keyword">var</span> <label for="r121" class="ident">bl_count</label> = [<a href="#line-564" class="ident">maxHuffmanBits</a>]<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>{<span class="lit-number">0</span>}</code></span>
+<span class="codeline" id="line-569"><code>	<span class="keyword">var</span> <label for="r122" class="ident">next_code</label> [<a href="#line-564" class="ident">maxHuffmanBits</a>]<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-570"><code>	<span class="keyword">var</span> <label for="r123" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-571"><code>	<span class="comment">/* In Brotli, all bit depths are [1..15]</span></code></span>
+<span class="codeline" id="line-572"><code><span class="comment">	   0 bit depth means that the symbol does not exist. */</span></code></span>
+<span class="codeline" id="line-573"><code></code></span>
+<span class="codeline" id="line-574"><code>	<span class="keyword">var</span> <label for="r124" class="ident">code</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-575"><code>	<span class="keyword">for</span> <label for="r123" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r123" class="ident">i</label> &lt; <label for="r119" class="ident">len</label>; <label for="r123" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-576"><code>		<label for="r121" class="ident">bl_count</label>[<label for="r118" class="ident">depth</label>[<label for="r123" class="ident">i</label>]]++</code></span>
+<span class="codeline" id="line-577"><code>	}</code></span>
+<span class="codeline" id="line-578"><code></code></span>
+<span class="codeline" id="line-579"><code>	<label for="r121" class="ident">bl_count</label>[<span class="lit-number">0</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-580"><code>	<label for="r122" class="ident">next_code</label>[<span class="lit-number">0</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-581"><code>	<span class="keyword">for</span> <label for="r123" class="ident">i</label> = <span class="lit-number">1</span>; <label for="r123" class="ident">i</label> &lt; <a href="#line-564" class="ident">maxHuffmanBits</a>; <label for="r123" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-582"><code>		<label for="r124" class="ident">code</label> = (<label for="r124" class="ident">code</label> + <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r121" class="ident">bl_count</label>[<label for="r123" class="ident">i</label>-<span class="lit-number">1</span>])) &lt;&lt; <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-583"><code>		<label for="r122" class="ident">next_code</label>[<label for="r123" class="ident">i</label>] = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r124" class="ident">code</label>)</code></span>
+<span class="codeline" id="line-584"><code>	}</code></span>
+<span class="codeline" id="line-585"><code></code></span>
+<span class="codeline" id="line-586"><code>	<span class="keyword">for</span> <label for="r123" class="ident">i</label> = <span class="lit-number">0</span>; <label for="r123" class="ident">i</label> &lt; <label for="r119" class="ident">len</label>; <label for="r123" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-587"><code>		<span class="keyword">if</span> <label for="r118" class="ident">depth</label>[<label for="r123" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-588"><code>			<label for="r120" class="ident">bits</label>[<label for="r123" class="ident">i</label>] = <a href="#line-550" class="ident">reverseBits</a>(<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r118" class="ident">depth</label>[<label for="r123" class="ident">i</label>]), <label for="r122" class="ident">next_code</label>[<label for="r118" class="ident">depth</label>[<label for="r123" class="ident">i</label>]])</code></span>
+<span class="codeline" id="line-589"><code>			<label for="r122" class="ident">next_code</label>[<label for="r118" class="ident">depth</label>[<label for="r123" class="ident">i</label>]]++</code></span>
+<span class="codeline" id="line-590"><code>		}</code></span>
+<span class="codeline" id="line-591"><code>	}</code></span>
+<span class="codeline" id="line-592"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

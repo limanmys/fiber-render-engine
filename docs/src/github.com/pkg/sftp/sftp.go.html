@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: sftp.go in package github.com/pkg/sftp</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	sftp.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/pkg/sftp.html">github.com/pkg/sftp</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package sftp implements the SSH File Transfer Protocol as described in</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02</span></code></span></div><span class="codeline" id="line-3"><code><span class="keyword">package</span> sftp</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-6"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-10"><code>	sshFxpInit          = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-11"><code>	sshFxpVersion       = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-12"><code>	sshFxpOpen          = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-13"><code>	sshFxpClose         = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-14"><code>	sshFxpRead          = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-15"><code>	sshFxpWrite         = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-16"><code>	sshFxpLstat         = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-17"><code>	sshFxpFstat         = <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-18"><code>	sshFxpSetstat       = <span class="lit-number">9</span></code></span>
+<span class="codeline" id="line-19"><code>	sshFxpFsetstat      = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-20"><code>	sshFxpOpendir       = <span class="lit-number">11</span></code></span>
+<span class="codeline" id="line-21"><code>	sshFxpReaddir       = <span class="lit-number">12</span></code></span>
+<span class="codeline" id="line-22"><code>	sshFxpRemove        = <span class="lit-number">13</span></code></span>
+<span class="codeline" id="line-23"><code>	sshFxpMkdir         = <span class="lit-number">14</span></code></span>
+<span class="codeline" id="line-24"><code>	sshFxpRmdir         = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-25"><code>	sshFxpRealpath      = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-26"><code>	sshFxpStat          = <span class="lit-number">17</span></code></span>
+<span class="codeline" id="line-27"><code>	sshFxpRename        = <span class="lit-number">18</span></code></span>
+<span class="codeline" id="line-28"><code>	sshFxpReadlink      = <span class="lit-number">19</span></code></span>
+<span class="codeline" id="line-29"><code>	sshFxpSymlink       = <span class="lit-number">20</span></code></span>
+<span class="codeline" id="line-30"><code>	sshFxpStatus        = <span class="lit-number">101</span></code></span>
+<span class="codeline" id="line-31"><code>	sshFxpHandle        = <span class="lit-number">102</span></code></span>
+<span class="codeline" id="line-32"><code>	sshFxpData          = <span class="lit-number">103</span></code></span>
+<span class="codeline" id="line-33"><code>	sshFxpName          = <span class="lit-number">104</span></code></span>
+<span class="codeline" id="line-34"><code>	sshFxpAttrs         = <span class="lit-number">105</span></code></span>
+<span class="codeline" id="line-35"><code>	sshFxpExtended      = <span class="lit-number">200</span></code></span>
+<span class="codeline" id="line-36"><code>	sshFxpExtendedReply = <span class="lit-number">201</span></code></span>
+<span class="codeline" id="line-37"><code>)</code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-40"><code>	sshFxOk               = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-41"><code>	sshFxEOF              = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-42"><code>	sshFxNoSuchFile       = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-43"><code>	sshFxPermissionDenied = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-44"><code>	sshFxFailure          = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-45"><code>	sshFxBadMessage       = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-46"><code>	sshFxNoConnection     = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-47"><code>	sshFxConnectionLost   = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-48"><code>	sshFxOPUnsupported    = <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<span class="comment">// see draft-ietf-secsh-filexfer-13</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">	// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-13#section-9.1</span></code></span>
+<span class="codeline" id="line-52"><code>	sshFxInvalidHandle           = <span class="lit-number">9</span></code></span>
+<span class="codeline" id="line-53"><code>	sshFxNoSuchPath              = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-54"><code>	sshFxFileAlreadyExists       = <span class="lit-number">11</span></code></span>
+<span class="codeline" id="line-55"><code>	sshFxWriteProtect            = <span class="lit-number">12</span></code></span>
+<span class="codeline" id="line-56"><code>	sshFxNoMedia                 = <span class="lit-number">13</span></code></span>
+<span class="codeline" id="line-57"><code>	sshFxNoSpaceOnFilesystem     = <span class="lit-number">14</span></code></span>
+<span class="codeline" id="line-58"><code>	sshFxQuotaExceeded           = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-59"><code>	sshFxUnknownPrincipal        = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-60"><code>	sshFxLockConflict            = <span class="lit-number">17</span></code></span>
+<span class="codeline" id="line-61"><code>	sshFxDirNotEmpty             = <span class="lit-number">18</span></code></span>
+<span class="codeline" id="line-62"><code>	sshFxNotADirectory           = <span class="lit-number">19</span></code></span>
+<span class="codeline" id="line-63"><code>	sshFxInvalidFilename         = <span class="lit-number">20</span></code></span>
+<span class="codeline" id="line-64"><code>	sshFxLinkLoop                = <span class="lit-number">21</span></code></span>
+<span class="codeline" id="line-65"><code>	sshFxCannotDelete            = <span class="lit-number">22</span></code></span>
+<span class="codeline" id="line-66"><code>	sshFxInvalidParameter        = <span class="lit-number">23</span></code></span>
+<span class="codeline" id="line-67"><code>	sshFxFileIsADirectory        = <span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-68"><code>	sshFxByteRangeLockConflict   = <span class="lit-number">25</span></code></span>
+<span class="codeline" id="line-69"><code>	sshFxByteRangeLockRefused    = <span class="lit-number">26</span></code></span>
+<span class="codeline" id="line-70"><code>	sshFxDeletePending           = <span class="lit-number">27</span></code></span>
+<span class="codeline" id="line-71"><code>	sshFxFileCorrupt             = <span class="lit-number">28</span></code></span>
+<span class="codeline" id="line-72"><code>	sshFxOwnerInvalid            = <span class="lit-number">29</span></code></span>
+<span class="codeline" id="line-73"><code>	sshFxGroupInvalid            = <span class="lit-number">30</span></code></span>
+<span class="codeline" id="line-74"><code>	sshFxNoMatchingByteRangeLock = <span class="lit-number">31</span></code></span>
+<span class="codeline" id="line-75"><code>)</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-78"><code>	sshFxfRead   = <span class="lit-number">0x00000001</span></code></span>
+<span class="codeline" id="line-79"><code>	sshFxfWrite  = <span class="lit-number">0x00000002</span></code></span>
+<span class="codeline" id="line-80"><code>	sshFxfAppend = <span class="lit-number">0x00000004</span></code></span>
+<span class="codeline" id="line-81"><code>	sshFxfCreat  = <span class="lit-number">0x00000008</span></code></span>
+<span class="codeline" id="line-82"><code>	sshFxfTrunc  = <span class="lit-number">0x00000010</span></code></span>
+<span class="codeline" id="line-83"><code>	sshFxfExcl   = <span class="lit-number">0x00000020</span></code></span>
+<span class="codeline" id="line-84"><code>)</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-87"><code>	<span class="comment">// supportedSFTPExtensions defines the supported extensions</span></code></span>
+<span class="codeline" id="line-88"><code>	supportedSFTPExtensions = []<a href="packet.go.html#line-360" class="ident">sshExtensionPair</a>{</code></span>
+<span class="codeline" id="line-89"><code>		{<span class="lit-string">"hardlink@openssh.com"</span>, <span class="lit-string">"1"</span>},</code></span>
+<span class="codeline" id="line-90"><code>		{<span class="lit-string">"posix-rename@openssh.com"</span>, <span class="lit-string">"1"</span>},</code></span>
+<span class="codeline" id="line-91"><code>		{<span class="lit-string">"statvfs@openssh.com"</span>, <span class="lit-string">"2"</span>},</code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code>	sftpExtensions = <a href="#line-88" class="ident">supportedSFTPExtensions</a></code></span>
+<span class="codeline" id="line-94"><code>)</code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code><span class="keyword">type</span> fxp <a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code><span class="keyword">func</span> (<label for="r0" class="ident">f</label> <a href="#line-96" class="ident">fxp</a>) <label for="r1" class="ident">String</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">switch</span> <label for="r0" class="ident">f</label> {</code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">case</span> <a href="#line-10" class="ident">sshFxpInit</a>:</code></span>
+<span class="codeline" id="line-101"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_INIT"</span></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">case</span> <a href="#line-11" class="ident">sshFxpVersion</a>:</code></span>
+<span class="codeline" id="line-103"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_VERSION"</span></code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">case</span> <a href="#line-12" class="ident">sshFxpOpen</a>:</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_OPEN"</span></code></span>
+<span class="codeline" id="line-106"><code>	<span class="keyword">case</span> <a href="#line-13" class="ident">sshFxpClose</a>:</code></span>
+<span class="codeline" id="line-107"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_CLOSE"</span></code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">sshFxpRead</a>:</code></span>
+<span class="codeline" id="line-109"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READ"</span></code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">case</span> <a href="#line-15" class="ident">sshFxpWrite</a>:</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_WRITE"</span></code></span>
+<span class="codeline" id="line-112"><code>	<span class="keyword">case</span> <a href="#line-16" class="ident">sshFxpLstat</a>:</code></span>
+<span class="codeline" id="line-113"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_LSTAT"</span></code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">case</span> <a href="#line-17" class="ident">sshFxpFstat</a>:</code></span>
+<span class="codeline" id="line-115"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_FSTAT"</span></code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">case</span> <a href="#line-18" class="ident">sshFxpSetstat</a>:</code></span>
+<span class="codeline" id="line-117"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_SETSTAT"</span></code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">case</span> <a href="#line-19" class="ident">sshFxpFsetstat</a>:</code></span>
+<span class="codeline" id="line-119"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_FSETSTAT"</span></code></span>
+<span class="codeline" id="line-120"><code>	<span class="keyword">case</span> <a href="#line-20" class="ident">sshFxpOpendir</a>:</code></span>
+<span class="codeline" id="line-121"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_OPENDIR"</span></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">case</span> <a href="#line-21" class="ident">sshFxpReaddir</a>:</code></span>
+<span class="codeline" id="line-123"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READDIR"</span></code></span>
+<span class="codeline" id="line-124"><code>	<span class="keyword">case</span> <a href="#line-22" class="ident">sshFxpRemove</a>:</code></span>
+<span class="codeline" id="line-125"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_REMOVE"</span></code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">case</span> <a href="#line-23" class="ident">sshFxpMkdir</a>:</code></span>
+<span class="codeline" id="line-127"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_MKDIR"</span></code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">case</span> <a href="#line-24" class="ident">sshFxpRmdir</a>:</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_RMDIR"</span></code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">case</span> <a href="#line-25" class="ident">sshFxpRealpath</a>:</code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_REALPATH"</span></code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">case</span> <a href="#line-26" class="ident">sshFxpStat</a>:</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_STAT"</span></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">case</span> <a href="#line-27" class="ident">sshFxpRename</a>:</code></span>
+<span class="codeline" id="line-135"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_RENAME"</span></code></span>
+<span class="codeline" id="line-136"><code>	<span class="keyword">case</span> <a href="#line-28" class="ident">sshFxpReadlink</a>:</code></span>
+<span class="codeline" id="line-137"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READLINK"</span></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">case</span> <a href="#line-29" class="ident">sshFxpSymlink</a>:</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_SYMLINK"</span></code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">case</span> <a href="#line-30" class="ident">sshFxpStatus</a>:</code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_STATUS"</span></code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">case</span> <a href="#line-31" class="ident">sshFxpHandle</a>:</code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_HANDLE"</span></code></span>
+<span class="codeline" id="line-144"><code>	<span class="keyword">case</span> <a href="#line-32" class="ident">sshFxpData</a>:</code></span>
+<span class="codeline" id="line-145"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_DATA"</span></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">case</span> <a href="#line-33" class="ident">sshFxpName</a>:</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_NAME"</span></code></span>
+<span class="codeline" id="line-148"><code>	<span class="keyword">case</span> <a href="#line-34" class="ident">sshFxpAttrs</a>:</code></span>
+<span class="codeline" id="line-149"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_ATTRS"</span></code></span>
+<span class="codeline" id="line-150"><code>	<span class="keyword">case</span> <a href="#line-35" class="ident">sshFxpExtended</a>:</code></span>
+<span class="codeline" id="line-151"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_EXTENDED"</span></code></span>
+<span class="codeline" id="line-152"><code>	<span class="keyword">case</span> <a href="#line-36" class="ident">sshFxpExtendedReply</a>:</code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_EXTENDED_REPLY"</span></code></span>
+<span class="codeline" id="line-154"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-155"><code>		<span class="keyword">return</span> <span class="lit-string">"unknown"</span></code></span>
+<span class="codeline" id="line-156"><code>	}</code></span>
+<span class="codeline" id="line-157"><code>}</code></span>
+<span class="codeline" id="line-158"><code></code></span>
+<span class="codeline" id="line-159"><code><span class="keyword">type</span> fx <a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-160"><code></code></span>
+<span class="codeline" id="line-161"><code><span class="keyword">func</span> (<label for="r2" class="ident">f</label> <a href="#line-159" class="ident">fx</a>) <label for="r3" class="ident">String</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-162"><code>	<span class="keyword">switch</span> <label for="r2" class="ident">f</label> {</code></span>
+<span class="codeline" id="line-163"><code>	<span class="keyword">case</span> <a href="#line-40" class="ident">sshFxOk</a>:</code></span>
+<span class="codeline" id="line-164"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_OK"</span></code></span>
+<span class="codeline" id="line-165"><code>	<span class="keyword">case</span> <a href="#line-41" class="ident">sshFxEOF</a>:</code></span>
+<span class="codeline" id="line-166"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_EOF"</span></code></span>
+<span class="codeline" id="line-167"><code>	<span class="keyword">case</span> <a href="#line-42" class="ident">sshFxNoSuchFile</a>:</code></span>
+<span class="codeline" id="line-168"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_SUCH_FILE"</span></code></span>
+<span class="codeline" id="line-169"><code>	<span class="keyword">case</span> <a href="#line-43" class="ident">sshFxPermissionDenied</a>:</code></span>
+<span class="codeline" id="line-170"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_PERMISSION_DENIED"</span></code></span>
+<span class="codeline" id="line-171"><code>	<span class="keyword">case</span> <a href="#line-44" class="ident">sshFxFailure</a>:</code></span>
+<span class="codeline" id="line-172"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_FAILURE"</span></code></span>
+<span class="codeline" id="line-173"><code>	<span class="keyword">case</span> <a href="#line-45" class="ident">sshFxBadMessage</a>:</code></span>
+<span class="codeline" id="line-174"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_BAD_MESSAGE"</span></code></span>
+<span class="codeline" id="line-175"><code>	<span class="keyword">case</span> <a href="#line-46" class="ident">sshFxNoConnection</a>:</code></span>
+<span class="codeline" id="line-176"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_NO_CONNECTION"</span></code></span>
+<span class="codeline" id="line-177"><code>	<span class="keyword">case</span> <a href="#line-47" class="ident">sshFxConnectionLost</a>:</code></span>
+<span class="codeline" id="line-178"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_CONNECTION_LOST"</span></code></span>
+<span class="codeline" id="line-179"><code>	<span class="keyword">case</span> <a href="#line-48" class="ident">sshFxOPUnsupported</a>:</code></span>
+<span class="codeline" id="line-180"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FX_OP_UNSUPPORTED"</span></code></span>
+<span class="codeline" id="line-181"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-182"><code>		<span class="keyword">return</span> <span class="lit-string">"unknown"</span></code></span>
+<span class="codeline" id="line-183"><code>	}</code></span>
+<span class="codeline" id="line-184"><code>}</code></span>
+<span class="codeline" id="line-185"><code></code></span>
+<span class="codeline" id="line-186"><code><span class="keyword">type</span> unexpectedPacketErr <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-187"><code>	want, got <a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-188"><code>}</code></span>
+<span class="codeline" id="line-189"><code></code></span>
+<span class="codeline" id="line-190"><code><span class="keyword">func</span> (<label for="r4" class="ident">u</label> *<a href="#line-186" class="ident">unexpectedPacketErr</a>) <label for="r5" class="ident">Error</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-191"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"sftp: unexpected packet: want %v, got %v"</span>, <a href="#line-96" class="ident">fxp</a>(<label for="r4" class="ident">u</label>.<a href="#line-187" class="ident">want</a>), <a href="#line-96" class="ident">fxp</a>(<label for="r4" class="ident">u</label>.<a href="#line-187" class="ident">got</a>))</code></span>
+<span class="codeline" id="line-192"><code>}</code></span>
+<span class="codeline" id="line-193"><code></code></span>
+<span class="codeline" id="line-194"><code><span class="keyword">func</span> unimplementedPacketErr(<label for="r7" class="ident">u</label> <a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-195"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"sftp: unimplemented packet type: got %v"</span>, <a href="#line-96" class="ident">fxp</a>(<label for="r7" class="ident">u</label>))</code></span>
+<span class="codeline" id="line-196"><code>}</code></span>
+<span class="codeline" id="line-197"><code></code></span>
+<span class="codeline" id="line-198"><code><span class="keyword">type</span> unexpectedIDErr <span class="keyword">struct</span>{ want, got <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> }</code></span>
+<span class="codeline" id="line-199"><code></code></span>
+<span class="codeline" id="line-200"><code><span class="keyword">func</span> (<label for="r8" class="ident">u</label> *<a href="#line-198" class="ident">unexpectedIDErr</a>) <label for="r9" class="ident">Error</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-201"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"sftp: unexpected id: want %d, got %d"</span>, <label for="r8" class="ident">u</label>.<a href="#line-198" class="ident">want</a>, <label for="r8" class="ident">u</label>.<a href="#line-198" class="ident">got</a>)</code></span>
+<span class="codeline" id="line-202"><code>}</code></span>
+<span class="codeline" id="line-203"><code></code></span>
+<span class="codeline" id="line-204"><code><span class="keyword">func</span> unimplementedSeekWhence(<label for="r11" class="ident">whence</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-205"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"sftp: unimplemented seek whence %d"</span>, <label for="r11" class="ident">whence</label>)</code></span>
+<span class="codeline" id="line-206"><code>}</code></span>
+<span class="codeline" id="line-207"><code></code></span>
+<span class="codeline" id="line-208"><code><span class="keyword">func</span> unexpectedCount(<label for="r13" class="ident">want</label>, <label for="r14" class="ident">got</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-209"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"sftp: unexpected count: want %d, got %d"</span>, <label for="r13" class="ident">want</label>, <label for="r14" class="ident">got</label>)</code></span>
+<span class="codeline" id="line-210"><code>}</code></span>
+<span class="codeline" id="line-211"><code></code></span>
+<span class="codeline" id="line-212"><code><span class="keyword">type</span> unexpectedVersionErr <span class="keyword">struct</span>{ want, got <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> }</code></span>
+<span class="codeline" id="line-213"><code></code></span>
+<span class="codeline" id="line-214"><code><span class="keyword">func</span> (<label for="r15" class="ident">u</label> *<a href="#line-212" class="ident">unexpectedVersionErr</a>) <label for="r16" class="ident">Error</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-215"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"sftp: unexpected server version: want %v, got %v"</span>, <label for="r15" class="ident">u</label>.<a href="#line-212" class="ident">want</a>, <label for="r15" class="ident">u</label>.<a href="#line-212" class="ident">got</a>)</code></span>
+<span class="codeline" id="line-216"><code>}</code></span>
+<span class="codeline" id="line-217"><code></code></span>
+<span class="codeline" id="line-218"><code><span class="comment">// A StatusError is returned when an SFTP operation fails, and provides</span></code></span>
+<span class="codeline" id="line-219"><code><span class="comment">// additional information about the failure.</span></code></span>
+<span class="codeline" id="line-220"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-StatusError" class="ident">StatusError</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-221"><code>	Code      <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-222"><code>	msg, lang <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-223"><code>}</code></span>
+<span class="codeline" id="line-224"><code></code></span>
+<span class="codeline" id="line-225"><code><span class="keyword">func</span> (<label for="r17" class="ident">s</label> *<a href="#line-220" class="ident">StatusError</a>) <label for="r18" class="ident">Error</label>() <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-226"><code>	<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"sftp: %q (%v)"</span>, <label for="r17" class="ident">s</label>.<a href="#line-222" class="ident">msg</a>, <a href="#line-159" class="ident">fx</a>(<label for="r17" class="ident">s</label>.<a href="#line-221" class="ident">Code</a>))</code></span>
+<span class="codeline" id="line-227"><code>}</code></span>
+<span class="codeline" id="line-228"><code></code></span>
+<span class="codeline" id="line-229"><code><span class="comment">// FxCode returns the error code typed to match against the exported codes</span></code></span>
+<span class="codeline" id="line-230"><code><span class="keyword">func</span> (<label for="r19" class="ident">s</label> *<a href="#line-220" class="ident">StatusError</a>) <label for="r20" class="ident">FxCode</label>() <a href="request-errors.go.html#line-3" class="ident">fxerr</a> {</code></span>
+<span class="codeline" id="line-231"><code>	<span class="keyword">return</span> <a href="request-errors.go.html#line-3" class="ident">fxerr</a>(<label for="r19" class="ident">s</label>.<a href="#line-221" class="ident">Code</a>)</code></span>
+<span class="codeline" id="line-232"><code>}</code></span>
+<span class="codeline" id="line-233"><code></code></span>
+<span class="codeline" id="line-234"><code><span class="keyword">func</span> getSupportedExtensionByName(<label for="r22" class="ident">extensionName</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="packet.go.html#line-360" class="ident">sshExtensionPair</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-235"><code>	<span class="keyword">for</span> <label for="r23" class="ident">_</label>, <label for="r24" class="ident">supportedExtension</label> := <span class="keyword">range</span> <a href="#line-88" class="ident">supportedSFTPExtensions</a> {</code></span>
+<span class="codeline" id="line-236"><code>		<span class="keyword">if</span> <label for="r24" class="ident">supportedExtension</label>.<a href="packet.go.html#line-361" class="ident">Name</a> == <label for="r22" class="ident">extensionName</label> {</code></span>
+<span class="codeline" id="line-237"><code>			<span class="keyword">return</span> <label for="r24" class="ident">supportedExtension</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-238"><code>		}</code></span>
+<span class="codeline" id="line-239"><code>	}</code></span>
+<span class="codeline" id="line-240"><code>	<span class="keyword">return</span> <a href="packet.go.html#line-360" class="ident">sshExtensionPair</a>{}, <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"unsupported extension: %s"</span>, <label for="r22" class="ident">extensionName</label>)</code></span>
+<span class="codeline" id="line-241"><code>}</code></span>
+<span class="codeline" id="line-242"><code></code></span>
+<span class="codeline" id="line-243"><code><span class="comment">// SetSFTPExtensions allows to customize the supported server extensions.</span></code></span>
+<span class="codeline" id="line-244"><code><span class="comment">// See the variable supportedSFTPExtensions for supported extensions.</span></code></span>
+<span class="codeline" id="line-245"><code><span class="comment">// This method accepts a slice of sshExtensionPair names for example 'hardlink@openssh.com'.</span></code></span>
+<span class="codeline" id="line-246"><code><span class="comment">// If an invalid extension is given an error will be returned and nothing will be changed</span></code></span>
+<span class="codeline" id="line-247"><code><span class="keyword">func</span> <label for="r25" class="ident"><a href="../../../../pkg/github.com/pkg/sftp.html#name-SetSFTPExtensions" class="ident">SetSFTPExtensions</a></label>(<label for="r26" class="ident">extensions</label> ...<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-248"><code>	<label for="r27" class="ident">tempExtensions</label> := []<a href="packet.go.html#line-360" class="ident">sshExtensionPair</a>{}</code></span>
+<span class="codeline" id="line-249"><code>	<span class="keyword">for</span> <label for="r28" class="ident">_</label>, <label for="r29" class="ident">extension</label> := <span class="keyword">range</span> <label for="r26" class="ident">extensions</label> {</code></span>
+<span class="codeline" id="line-250"><code>		<label for="r30" class="ident">sftpExtension</label>, <label for="r31" class="ident">err</label> := <a href="#line-234" class="ident">getSupportedExtensionByName</a>(<label for="r29" class="ident">extension</label>)</code></span>
+<span class="codeline" id="line-251"><code>		<span class="keyword">if</span> <label for="r31" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-252"><code>			<span class="keyword">return</span> <label for="r31" class="ident">err</label></code></span>
+<span class="codeline" id="line-253"><code>		}</code></span>
+<span class="codeline" id="line-254"><code>		<label for="r27" class="ident">tempExtensions</label> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r27" class="ident">tempExtensions</label>, <label for="r30" class="ident">sftpExtension</label>)</code></span>
+<span class="codeline" id="line-255"><code>	}</code></span>
+<span class="codeline" id="line-256"><code>	<a href="#line-93" class="ident">sftpExtensions</a> = <label for="r27" class="ident">tempExtensions</label></code></span>
+<span class="codeline" id="line-257"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-258"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

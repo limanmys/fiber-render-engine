@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: fxp.go in package github.com/pkg/sftp/internal/encoding/ssh/filexfer</title>
+<link href="../../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	fxp.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html">github.com/pkg/sftp/internal/encoding/ssh/filexfer</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> filexfer</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-5"><code>)</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// PacketType defines the various SFTP packet types.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketType" class="ident">PacketType</a> <a href="../../../../../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Request packet types.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-12"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-13"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeInit" class="ident">PacketTypeInit</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeVersion" class="ident">PacketTypeVersion</a></code></span>
+<span class="codeline" id="line-15"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeOpen" class="ident">PacketTypeOpen</a></code></span>
+<span class="codeline" id="line-16"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeClose" class="ident">PacketTypeClose</a></code></span>
+<span class="codeline" id="line-17"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeRead" class="ident">PacketTypeRead</a></code></span>
+<span class="codeline" id="line-18"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeWrite" class="ident">PacketTypeWrite</a></code></span>
+<span class="codeline" id="line-19"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeLStat" class="ident">PacketTypeLStat</a></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeFStat" class="ident">PacketTypeFStat</a></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeSetstat" class="ident">PacketTypeSetstat</a></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeFSetstat" class="ident">PacketTypeFSetstat</a></code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeOpenDir" class="ident">PacketTypeOpenDir</a></code></span>
+<span class="codeline" id="line-24"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeReadDir" class="ident">PacketTypeReadDir</a></code></span>
+<span class="codeline" id="line-25"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeRemove" class="ident">PacketTypeRemove</a></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeMkdir" class="ident">PacketTypeMkdir</a></code></span>
+<span class="codeline" id="line-27"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeRmdir" class="ident">PacketTypeRmdir</a></code></span>
+<span class="codeline" id="line-28"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeRealPath" class="ident">PacketTypeRealPath</a></code></span>
+<span class="codeline" id="line-29"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeStat" class="ident">PacketTypeStat</a></code></span>
+<span class="codeline" id="line-30"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeRename" class="ident">PacketTypeRename</a></code></span>
+<span class="codeline" id="line-31"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeReadLink" class="ident">PacketTypeReadLink</a></code></span>
+<span class="codeline" id="line-32"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeSymlink" class="ident">PacketTypeSymlink</a></code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-07#section-3.3</span></code></span>
+<span class="codeline" id="line-35"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Link" class="ident">PacketTypeV6Link</a></code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-08#section-3.3</span></code></span>
+<span class="codeline" id="line-38"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Block" class="ident">PacketTypeV6Block</a></code></span>
+<span class="codeline" id="line-39"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Unblock" class="ident">PacketTypeV6Unblock</a></code></span>
+<span class="codeline" id="line-40"><code>)</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// Response packet types.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-44"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeStatus" class="ident">PacketTypeStatus</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">101</span>)</code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeHandle" class="ident">PacketTypeHandle</a></code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeData" class="ident">PacketTypeData</a></code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeName" class="ident">PacketTypeName</a></code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeAttrs" class="ident">PacketTypeAttrs</a></code></span>
+<span class="codeline" id="line-50"><code>)</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// Extended packet types.</span></code></span>
+<span class="codeline" id="line-53"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-54"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeExtended" class="ident">PacketTypeExtended</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">200</span>)</code></span>
+<span class="codeline" id="line-56"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeExtendedReply" class="ident">PacketTypeExtendedReply</a></code></span>
+<span class="codeline" id="line-57"><code>)</code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code><span class="keyword">func</span> (<label for="r0" class="ident">f</label> <a href="#line-8" class="ident">PacketType</a>) <label for="r1" class="ident">String</label>() <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">switch</span> <label for="r0" class="ident">f</label> {</code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">case</span> <a href="#line-13" class="ident">PacketTypeInit</a>:</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_INIT"</span></code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">PacketTypeVersion</a>:</code></span>
+<span class="codeline" id="line-64"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_VERSION"</span></code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">case</span> <a href="#line-15" class="ident">PacketTypeOpen</a>:</code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_OPEN"</span></code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">case</span> <a href="#line-16" class="ident">PacketTypeClose</a>:</code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_CLOSE"</span></code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">case</span> <a href="#line-17" class="ident">PacketTypeRead</a>:</code></span>
+<span class="codeline" id="line-70"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READ"</span></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">case</span> <a href="#line-18" class="ident">PacketTypeWrite</a>:</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_WRITE"</span></code></span>
+<span class="codeline" id="line-73"><code>	<span class="keyword">case</span> <a href="#line-19" class="ident">PacketTypeLStat</a>:</code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_LSTAT"</span></code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">case</span> <a href="#line-20" class="ident">PacketTypeFStat</a>:</code></span>
+<span class="codeline" id="line-76"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_FSTAT"</span></code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">case</span> <a href="#line-21" class="ident">PacketTypeSetstat</a>:</code></span>
+<span class="codeline" id="line-78"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_SETSTAT"</span></code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">case</span> <a href="#line-22" class="ident">PacketTypeFSetstat</a>:</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_FSETSTAT"</span></code></span>
+<span class="codeline" id="line-81"><code>	<span class="keyword">case</span> <a href="#line-23" class="ident">PacketTypeOpenDir</a>:</code></span>
+<span class="codeline" id="line-82"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_OPENDIR"</span></code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">case</span> <a href="#line-24" class="ident">PacketTypeReadDir</a>:</code></span>
+<span class="codeline" id="line-84"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READDIR"</span></code></span>
+<span class="codeline" id="line-85"><code>	<span class="keyword">case</span> <a href="#line-25" class="ident">PacketTypeRemove</a>:</code></span>
+<span class="codeline" id="line-86"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_REMOVE"</span></code></span>
+<span class="codeline" id="line-87"><code>	<span class="keyword">case</span> <a href="#line-26" class="ident">PacketTypeMkdir</a>:</code></span>
+<span class="codeline" id="line-88"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_MKDIR"</span></code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">case</span> <a href="#line-27" class="ident">PacketTypeRmdir</a>:</code></span>
+<span class="codeline" id="line-90"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_RMDIR"</span></code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">case</span> <a href="#line-28" class="ident">PacketTypeRealPath</a>:</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_REALPATH"</span></code></span>
+<span class="codeline" id="line-93"><code>	<span class="keyword">case</span> <a href="#line-29" class="ident">PacketTypeStat</a>:</code></span>
+<span class="codeline" id="line-94"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_STAT"</span></code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">case</span> <a href="#line-30" class="ident">PacketTypeRename</a>:</code></span>
+<span class="codeline" id="line-96"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_RENAME"</span></code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">case</span> <a href="#line-31" class="ident">PacketTypeReadLink</a>:</code></span>
+<span class="codeline" id="line-98"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_READLINK"</span></code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">case</span> <a href="#line-32" class="ident">PacketTypeSymlink</a>:</code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_SYMLINK"</span></code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">case</span> <a href="#line-35" class="ident">PacketTypeV6Link</a>:</code></span>
+<span class="codeline" id="line-102"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_LINK"</span></code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">case</span> <a href="#line-38" class="ident">PacketTypeV6Block</a>:</code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_BLOCK"</span></code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">case</span> <a href="#line-39" class="ident">PacketTypeV6Unblock</a>:</code></span>
+<span class="codeline" id="line-106"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_UNBLOCK"</span></code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">case</span> <a href="#line-45" class="ident">PacketTypeStatus</a>:</code></span>
+<span class="codeline" id="line-108"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_STATUS"</span></code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">case</span> <a href="#line-46" class="ident">PacketTypeHandle</a>:</code></span>
+<span class="codeline" id="line-110"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_HANDLE"</span></code></span>
+<span class="codeline" id="line-111"><code>	<span class="keyword">case</span> <a href="#line-47" class="ident">PacketTypeData</a>:</code></span>
+<span class="codeline" id="line-112"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_DATA"</span></code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">case</span> <a href="#line-48" class="ident">PacketTypeName</a>:</code></span>
+<span class="codeline" id="line-114"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_NAME"</span></code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">case</span> <a href="#line-49" class="ident">PacketTypeAttrs</a>:</code></span>
+<span class="codeline" id="line-116"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_ATTRS"</span></code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">case</span> <a href="#line-55" class="ident">PacketTypeExtended</a>:</code></span>
+<span class="codeline" id="line-118"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_EXTENDED"</span></code></span>
+<span class="codeline" id="line-119"><code>	<span class="keyword">case</span> <a href="#line-56" class="ident">PacketTypeExtendedReply</a>:</code></span>
+<span class="codeline" id="line-120"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_EXTENDED_REPLY"</span></code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-122"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"SSH_FXP_UNKNOWN(%d)"</span>, <label for="r0" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-123"><code>	}</code></span>
+<span class="codeline" id="line-124"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

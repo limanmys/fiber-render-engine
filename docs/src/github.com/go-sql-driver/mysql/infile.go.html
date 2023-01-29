@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: infile.go in package github.com/go-sql-driver/mysql</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	infile.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/go-sql-driver/mysql.html">github.com/go-sql-driver/mysql</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Go MySQL Driver - A MySQL-Driver for Go's database/sql package</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// Copyright 2013 The Go-MySQL-Driver Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// This Source Code Form is subject to the terms of the Mozilla Public</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// License, v. 2.0. If a copy of the MPL was not distributed with this file,</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// You can obtain one at http://mozilla.org/MPL/2.0/.</span></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">package</span> mysql</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-12"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i1"><span class="lit-string i1">"io"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i2"><span class="lit-string i2">"os"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i3"><span class="lit-string i3">"strings"</span></label></code></span>
+<span class="codeline" id="line-16"><code>	<label for="i4"><span class="lit-string i4">"sync"</span></label></code></span>
+<span class="codeline" id="line-17"><code>)</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-20"><code>	fileRegister       <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-21"><code>	fileRegisterLock   <a href="../../../../pkg/sync.html" class="ident i4">sync</a>.<a href="../../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a></code></span>
+<span class="codeline" id="line-22"><code>	readerRegister     <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">func</span>() <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-23"><code>	readerRegisterLock <a href="../../../../pkg/sync.html" class="ident i4">sync</a>.<a href="../../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a></code></span>
+<span class="codeline" id="line-24"><code>)</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// RegisterLocalFile adds the given file to the file allowlist,</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// so that it can be used by "LOAD DATA LOCAL INFILE &lt;filepath&gt;".</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// Alternatively you can allow the use of all local files with</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// the DSN parameter 'allowAllFiles=true'</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//	filePath := "/home/gopher/data.csv"</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">//	mysql.RegisterLocalFile(filePath)</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">//	err := db.Exec("LOAD DATA LOCAL INFILE '" + filePath + "' INTO TABLE foo")</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//	if err != nil {</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//	...</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/go-sql-driver/mysql.html#name-RegisterLocalFile" class="ident">RegisterLocalFile</a></label>(<label for="r1" class="ident">filePath</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-37"><code>	<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-38"><code>	<span class="comment">// lazy map init</span></code></span>
+<span class="codeline" id="line-39"><code>	<span class="keyword">if</span> <a href="#line-20" class="ident">fileRegister</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-40"><code>		<a href="#line-20" class="ident">fileRegister</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-41"><code>	}</code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code>	<a href="#line-20" class="ident">fileRegister</a>[<a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-834" class="ident">Trim</a>(<label for="r1" class="ident">filePath</label>, <span class="lit-string">`"`</span>)] = <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-44"><code>	<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// DeregisterLocalFile removes the given filepath from the allowlist.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../../pkg/github.com/go-sql-driver/mysql.html#name-DeregisterLocalFile" class="ident">DeregisterLocalFile</a></label>(<label for="r3" class="ident">filePath</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-49"><code>	<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-50"><code>	<a href="../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<a href="#line-20" class="ident">fileRegister</a>, <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-834" class="ident">Trim</a>(<label for="r3" class="ident">filePath</label>, <span class="lit-string">`"`</span>))</code></span>
+<span class="codeline" id="line-51"><code>	<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// RegisterReaderHandler registers a handler function which is used</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// to receive a io.Reader.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// The Reader can be used by "LOAD DATA LOCAL INFILE Reader::&lt;name&gt;".</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// If the handler returns a io.ReadCloser Close() is called when the</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">// request is finished.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">//	mysql.RegisterReaderHandler("data", func() io.Reader {</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">//		var csvReader io.Reader // Some Reader that returns CSV data</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">//		... // Open Reader here</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">//		return csvReader</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">//	})</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">//	err := db.Exec("LOAD DATA LOCAL INFILE 'Reader::data' INTO TABLE foo")</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">//	if err != nil {</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">//	...</span></code></span>
+<span class="codeline" id="line-68"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../pkg/github.com/go-sql-driver/mysql.html#name-RegisterReaderHandler" class="ident">RegisterReaderHandler</a></label>(<label for="r5" class="ident">name</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r6" class="ident">handler</label> <span class="keyword">func</span>() <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a>) {</code></span>
+<span class="codeline" id="line-69"><code>	<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-70"><code>	<span class="comment">// lazy map init</span></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <a href="#line-22" class="ident">readerRegister</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-72"><code>		<a href="#line-22" class="ident">readerRegister</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">func</span>() <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a>)</code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<a href="#line-22" class="ident">readerRegister</a>[<label for="r5" class="ident">name</label>] = <label for="r6" class="ident">handler</label></code></span>
+<span class="codeline" id="line-76"><code>	<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-77"><code>}</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">// DeregisterReaderHandler removes the ReaderHandler function with</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// the given name from the registry.</span></code></span>
+<span class="codeline" id="line-81"><code><span class="keyword">func</span> <label for="r7" class="ident"><a href="../../../../pkg/github.com/go-sql-driver/mysql.html#name-DeregisterReaderHandler" class="ident">DeregisterReaderHandler</a></label>(<label for="r8" class="ident">name</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-82"><code>	<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-83"><code>	<a href="../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<a href="#line-22" class="ident">readerRegister</a>, <label for="r8" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-84"><code>	<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-85"><code>}</code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code><span class="keyword">func</span> deferredClose(<label for="r10" class="ident">err</label> *<a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r11" class="ident">closer</label> <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-104" class="ident">Closer</a>) {</code></span>
+<span class="codeline" id="line-88"><code>	<label for="r12" class="ident">closeErr</label> := <label for="r11" class="ident">closer</label>.<a href="../../../io/io.go.html#line-105" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">if</span> *<label for="r10" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-90"><code>		*<label for="r10" class="ident">err</label> = <label for="r12" class="ident">closeErr</label></code></span>
+<span class="codeline" id="line-91"><code>	}</code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="keyword">const</span> defaultPacketSize = <span class="lit-number">16</span> * <span class="lit-number">1024</span> <span class="comment">// 16KB is small enough for disk readahead and large enough for TCP</span></code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code><span class="keyword">func</span> (<label for="r13" class="ident">mc</label> *<a href="connection.go.html#line-23" class="ident">mysqlConn</a>) <label for="r14" class="ident">handleInFileRequest</label>(<label for="r15" class="ident">name</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r16" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">var</span> <label for="r17" class="ident">rdr</label> <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">var</span> <label for="r18" class="ident">data</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-99"><code>	<label for="r19" class="ident">packetSize</label> := <a href="#line-94" class="ident">defaultPacketSize</a></code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">if</span> <label for="r13" class="ident">mc</label>.<a href="connection.go.html#line-31" class="ident">maxWriteSize</a> &lt; <label for="r19" class="ident">packetSize</label> {</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r19" class="ident">packetSize</label> = <label for="r13" class="ident">mc</label>.<a href="connection.go.html#line-31" class="ident">maxWriteSize</a></code></span>
+<span class="codeline" id="line-102"><code>	}</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">if</span> <label for="r20" class="ident">idx</label> := <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-1103" class="ident">Index</a>(<label for="r15" class="ident">name</label>, <span class="lit-string">"Reader::"</span>); <label for="r20" class="ident">idx</label> == <span class="lit-number">0</span> || (<label for="r20" class="ident">idx</label> &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r15" class="ident">name</label>[<label for="r20" class="ident">idx</label>-<span class="lit-number">1</span>] == <span class="lit-number">'/'</span>) { <span class="comment">// io.Reader</span></code></span>
+<span class="codeline" id="line-105"><code>		<span class="comment">// The server might return an an absolute path. See issue #355.</span></code></span>
+<span class="codeline" id="line-106"><code>		<label for="r15" class="ident">name</label> = <label for="r15" class="ident">name</label>[<label for="r20" class="ident">idx</label>+<span class="lit-number">8</span>:]</code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code>		<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-109"><code>		<label for="r21" class="ident">handler</label>, <label for="r22" class="ident">inMap</label> := <a href="#line-22" class="ident">readerRegister</a>[<label for="r15" class="ident">name</label>]</code></span>
+<span class="codeline" id="line-110"><code>		<a href="#line-23" class="ident">readerRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>		<span class="keyword">if</span> <label for="r22" class="ident">inMap</label> {</code></span>
+<span class="codeline" id="line-113"><code>			<label for="r17" class="ident">rdr</label> = <label for="r21" class="ident">handler</label>()</code></span>
+<span class="codeline" id="line-114"><code>			<span class="keyword">if</span> <label for="r17" class="ident">rdr</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-115"><code>				<span class="keyword">if</span> <label for="r23" class="ident">cl</label>, <label for="r24" class="ident">ok</label> := <label for="r17" class="ident">rdr</label>.(<a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-104" class="ident">Closer</a>); <label for="r24" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-116"><code>					<span class="keyword">defer</span> <a href="#line-87" class="ident">deferredClose</a>(&amp;<label for="r16" class="ident">err</label>, <label for="r23" class="ident">cl</label>)</code></span>
+<span class="codeline" id="line-117"><code>				}</code></span>
+<span class="codeline" id="line-118"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-119"><code>				<label for="r16" class="ident">err</label> = <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"Reader '%s' is &lt;nil&gt;"</span>, <label for="r15" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-120"><code>			}</code></span>
+<span class="codeline" id="line-121"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-122"><code>			<label for="r16" class="ident">err</label> = <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"Reader '%s' is not registered"</span>, <label for="r15" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-123"><code>		}</code></span>
+<span class="codeline" id="line-124"><code>	} <span class="keyword">else</span> { <span class="comment">// File</span></code></span>
+<span class="codeline" id="line-125"><code>		<label for="r15" class="ident">name</label> = <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-834" class="ident">Trim</a>(<label for="r15" class="ident">name</label>, <span class="lit-string">`"`</span>)</code></span>
+<span class="codeline" id="line-126"><code>		<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-127"><code>		<label for="r25" class="ident">fr</label> := <a href="#line-20" class="ident">fileRegister</a>[<label for="r15" class="ident">name</label>]</code></span>
+<span class="codeline" id="line-128"><code>		<a href="#line-21" class="ident">fileRegisterLock</a>.<a href="../../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">if</span> <label for="r13" class="ident">mc</label>.<a href="connection.go.html#line-29" class="ident">cfg</a>.<a href="dsn.go.html#line-54" class="ident">AllowAllFiles</a> || <label for="r25" class="ident">fr</label> {</code></span>
+<span class="codeline" id="line-130"><code>			<span class="keyword">var</span> <label for="r26" class="ident">file</label> *<a href="../../../../pkg/os.html" class="ident i2">os</a>.<a href="../../../os/types.go.html#line-16" class="ident">File</a></code></span>
+<span class="codeline" id="line-131"><code>			<span class="keyword">var</span> <label for="r27" class="ident">fi</label> <a href="../../../../pkg/os.html" class="ident i2">os</a>.<a href="../../../os/types.go.html#line-21" class="ident">FileInfo</a></code></span>
+<span class="codeline" id="line-132"><code></code></span>
+<span class="codeline" id="line-133"><code>			<span class="keyword">if</span> <label for="r26" class="ident">file</label>, <label for="r16" class="ident">err</label> = <a href="../../../../pkg/os.html" class="ident i2">os</a>.<a href="../../../os/file.go.html#line-316" class="ident">Open</a>(<label for="r15" class="ident">name</label>); <label for="r16" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-134"><code>				<span class="keyword">defer</span> <a href="#line-87" class="ident">deferredClose</a>(&amp;<label for="r16" class="ident">err</label>, <label for="r26" class="ident">file</label>)</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code>				<span class="comment">// get file size</span></code></span>
+<span class="codeline" id="line-137"><code>				<span class="keyword">if</span> <label for="r27" class="ident">fi</label>, <label for="r16" class="ident">err</label> = <label for="r26" class="ident">file</label>.<a href="../../../os/stat_unix.go.html#line-15" class="ident">Stat</a>(); <label for="r16" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-138"><code>					<label for="r17" class="ident">rdr</label> = <label for="r26" class="ident">file</label></code></span>
+<span class="codeline" id="line-139"><code>					<span class="keyword">if</span> <label for="r28" class="ident">fileSize</label> := <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r27" class="ident">fi</label>.<a href="../../../io/fs/fs.go.html#line-153" class="ident">Size</a>()); <label for="r28" class="ident">fileSize</label> &lt; <label for="r19" class="ident">packetSize</label> {</code></span>
+<span class="codeline" id="line-140"><code>						<label for="r19" class="ident">packetSize</label> = <label for="r28" class="ident">fileSize</label></code></span>
+<span class="codeline" id="line-141"><code>					}</code></span>
+<span class="codeline" id="line-142"><code>				}</code></span>
+<span class="codeline" id="line-143"><code>			}</code></span>
+<span class="codeline" id="line-144"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-145"><code>			<label for="r16" class="ident">err</label> = <a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"local file '%s' is not registered"</span>, <label for="r15" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-146"><code>		}</code></span>
+<span class="codeline" id="line-147"><code>	}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code>	<span class="comment">// send content packets</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">	// if packetSize == 0, the Reader contains no data</span></code></span>
+<span class="codeline" id="line-151"><code>	<span class="keyword">if</span> <label for="r16" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r19" class="ident">packetSize</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-152"><code>		<label for="r29" class="ident">data</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">4</span>+<label for="r19" class="ident">packetSize</label>)</code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">var</span> <label for="r30" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-154"><code>		<span class="keyword">for</span> <label for="r16" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-155"><code>			<label for="r30" class="ident">n</label>, <label for="r16" class="ident">err</label> = <label for="r17" class="ident">rdr</label>.<a href="../../../io/io.go.html#line-84" class="ident">Read</a>(<label for="r29" class="ident">data</label>[<span class="lit-number">4</span>:])</code></span>
+<span class="codeline" id="line-156"><code>			<span class="keyword">if</span> <label for="r30" class="ident">n</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-157"><code>				<span class="keyword">if</span> <label for="r31" class="ident">ioErr</label> := <label for="r13" class="ident">mc</label>.<a href="packets.go.html#line-93" class="ident">writePacket</a>(<label for="r29" class="ident">data</label>[:<span class="lit-number">4</span>+<label for="r30" class="ident">n</label>]); <label for="r31" class="ident">ioErr</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-158"><code>					<span class="keyword">return</span> <label for="r31" class="ident">ioErr</label></code></span>
+<span class="codeline" id="line-159"><code>				}</code></span>
+<span class="codeline" id="line-160"><code>			}</code></span>
+<span class="codeline" id="line-161"><code>		}</code></span>
+<span class="codeline" id="line-162"><code>		<span class="keyword">if</span> <label for="r16" class="ident">err</label> == <a href="../../../../pkg/io.html" class="ident i1">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-163"><code>			<label for="r16" class="ident">err</label> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-164"><code>		}</code></span>
+<span class="codeline" id="line-165"><code>	}</code></span>
+<span class="codeline" id="line-166"><code></code></span>
+<span class="codeline" id="line-167"><code>	<span class="comment">// send empty packet (termination)</span></code></span>
+<span class="codeline" id="line-168"><code>	<span class="keyword">if</span> <label for="r18" class="ident">data</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-169"><code>		<label for="r18" class="ident">data</label> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-170"><code>	}</code></span>
+<span class="codeline" id="line-171"><code>	<span class="keyword">if</span> <label for="r32" class="ident">ioErr</label> := <label for="r13" class="ident">mc</label>.<a href="packets.go.html#line-93" class="ident">writePacket</a>(<label for="r18" class="ident">data</label>[:<span class="lit-number">4</span>]); <label for="r32" class="ident">ioErr</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-172"><code>		<span class="keyword">return</span> <label for="r32" class="ident">ioErr</label></code></span>
+<span class="codeline" id="line-173"><code>	}</code></span>
+<span class="codeline" id="line-174"><code></code></span>
+<span class="codeline" id="line-175"><code>	<span class="comment">// read OK packet</span></code></span>
+<span class="codeline" id="line-176"><code>	<span class="keyword">if</span> <label for="r16" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-177"><code>		<span class="keyword">return</span> <label for="r13" class="ident">mc</label>.<a href="packets.go.html#line-522" class="ident">readResultOK</a>()</code></span>
+<span class="codeline" id="line-178"><code>	}</code></span>
+<span class="codeline" id="line-179"><code></code></span>
+<span class="codeline" id="line-180"><code>	<label for="r13" class="ident">mc</label>.<a href="packets.go.html#line-28" class="ident">readPacket</a>()</code></span>
+<span class="codeline" id="line-181"><code>	<span class="keyword">return</span> <label for="r16" class="ident">err</label></code></span>
+<span class="codeline" id="line-182"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: session.go in package github.com/hirochachacha/go-smb2/internal/ntlm</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	session.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/ntlm.html">github.com/hirochachacha/go-smb2/internal/ntlm</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> ntlm</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"crypto/rc4"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"errors"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i3"><span class="lit-string i3">"github.com/hirochachacha/go-smb2/internal/utf16le"</span></label></code></span>
+<span class="codeline" id="line-9"><code>)</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/ntlm.html#name-Session" class="ident">Session</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-12"><code>	isClientSide <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code>	user <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code>	negotiateFlags     <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-17"><code>	exportedSessionKey []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-18"><code>	clientSigningKey   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-19"><code>	serverSigningKey   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code>	clientHandle *<a href="../../../../../../pkg/crypto/rc4.html" class="ident i1">rc4</a>.<a href="../../../../../crypto/rc4/rc4.go.html#line-18" class="ident">Cipher</a></code></span>
+<span class="codeline" id="line-22"><code>	serverHandle *<a href="../../../../../../pkg/crypto/rc4.html" class="ident i1">rc4</a>.<a href="../../../../../crypto/rc4/rc4.go.html#line-18" class="ident">Cipher</a></code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code>	infoMap <span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>][]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-25"><code>}</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">func</span> (<label for="r0" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r1" class="ident">User</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">return</span> <label for="r0" class="ident">s</label>.<a href="#line-14" class="ident">user</a></code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">func</span> (<label for="r2" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r3" class="ident">SessionKey</label>() []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">return</span> <label for="r2" class="ident">s</label>.<a href="#line-17" class="ident">exportedSessionKey</a></code></span>
+<span class="codeline" id="line-33"><code>}</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/ntlm.html#name-InfoMap" class="ident">InfoMap</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-36"><code>	NbComputerName  <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-37"><code>	NbDomainName    <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-38"><code>	DnsComputerName <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-39"><code>	DnsDomainName   <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-40"><code>	DnsTreeName     <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-41"><code>	<span class="comment">// Flags           uint32</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">	// Timestamp       time.Time</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">	// SingleHost</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">	// TargetName string</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">	// ChannelBindings</span></code></span>
+<span class="codeline" id="line-46"><code>}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// TODO export to somewhere</span></code></span>
+<span class="codeline" id="line-49"><code><span class="keyword">func</span> (<label for="r4" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r5" class="ident">InfoMap</label>() *<a href="#line-35" class="ident">InfoMap</a> {</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">return</span> &amp;<a href="#line-35" class="ident">InfoMap</a>{</code></span>
+<span class="codeline" id="line-51"><code>		<a href="#line-36" class="ident">NbComputerName</a>:  <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/utf16le.html" class="ident i3">utf16le</a>.<a href="../utf16le/utf16le.go.html#line-44" class="ident">DecodeToString</a>(<label for="r4" class="ident">s</label>.<a href="#line-24" class="ident">infoMap</a>[<a href="ntlm.go.html#line-69" class="ident">MsvAvNbComputerName</a>]),</code></span>
+<span class="codeline" id="line-52"><code>		<a href="#line-37" class="ident">NbDomainName</a>:    <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/utf16le.html" class="ident i3">utf16le</a>.<a href="../utf16le/utf16le.go.html#line-44" class="ident">DecodeToString</a>(<label for="r4" class="ident">s</label>.<a href="#line-24" class="ident">infoMap</a>[<a href="ntlm.go.html#line-70" class="ident">MsvAvNbDomainName</a>]),</code></span>
+<span class="codeline" id="line-53"><code>		<a href="#line-38" class="ident">DnsComputerName</a>: <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/utf16le.html" class="ident i3">utf16le</a>.<a href="../utf16le/utf16le.go.html#line-44" class="ident">DecodeToString</a>(<label for="r4" class="ident">s</label>.<a href="#line-24" class="ident">infoMap</a>[<a href="ntlm.go.html#line-71" class="ident">MsvAvDnsComputerName</a>]),</code></span>
+<span class="codeline" id="line-54"><code>		<a href="#line-39" class="ident">DnsDomainName</a>:   <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/utf16le.html" class="ident i3">utf16le</a>.<a href="../utf16le/utf16le.go.html#line-44" class="ident">DecodeToString</a>(<label for="r4" class="ident">s</label>.<a href="#line-24" class="ident">infoMap</a>[<a href="ntlm.go.html#line-72" class="ident">MsvAvDnsDomainName</a>]),</code></span>
+<span class="codeline" id="line-55"><code>		<a href="#line-40" class="ident">DnsTreeName</a>:     <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/utf16le.html" class="ident i3">utf16le</a>.<a href="../utf16le/utf16le.go.html#line-44" class="ident">DecodeToString</a>(<label for="r4" class="ident">s</label>.<a href="#line-24" class="ident">infoMap</a>[<a href="ntlm.go.html#line-73" class="ident">MsvAvDnsTreeName</a>]),</code></span>
+<span class="codeline" id="line-56"><code>		<span class="comment">// Flags:           le.Uint32(s.infoMap[MsvAvFlags]),</span></code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code>}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code><span class="keyword">func</span> (<label for="r6" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r7" class="ident">Overhead</label>() <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">return</span> <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-62"><code>}</code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r8" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r9" class="ident">Sum</label>(<label for="r10" class="ident">plaintext</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r11" class="ident">seqNum</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">if</span> <label for="r8" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-37" class="ident">NTLMSSP_NEGOTIATE_SIGN</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">if</span> <label for="r8" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-70"><code>		<span class="keyword">return</span> <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r8" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r8" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r11" class="ident">seqNum</label>, <label for="r10" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-71"><code>	}</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">return</span> <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r8" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r8" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r11" class="ident">seqNum</label>, <label for="r10" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-73"><code>}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="keyword">func</span> (<label for="r12" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r13" class="ident">CheckSum</label>(<label for="r14" class="ident">sum</label>, <label for="r15" class="ident">plaintext</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r16" class="ident">seqNum</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r12" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-37" class="ident">NTLMSSP_NEGOTIATE_SIGN</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">if</span> <label for="r14" class="ident">sum</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-78"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-79"><code>		}</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-81"><code>	}</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <label for="r12" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r17" class="ident">ret</label>, <label for="r18" class="ident">seqNum</label> := <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r12" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r12" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r16" class="ident">seqNum</label>, <label for="r15" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r14" class="ident">sum</label>, <label for="r17" class="ident">ret</label>) {</code></span>
+<span class="codeline" id="line-86"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-87"><code>		}</code></span>
+<span class="codeline" id="line-88"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <label for="r18" class="ident">seqNum</label></code></span>
+<span class="codeline" id="line-89"><code>	}</code></span>
+<span class="codeline" id="line-90"><code>	<label for="r19" class="ident">ret</label>, <label for="r16" class="ident">seqNum</label> := <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r12" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r12" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r16" class="ident">seqNum</label>, <label for="r15" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r14" class="ident">sum</label>, <label for="r19" class="ident">ret</label>) {</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a>, <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-93"><code>	}</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>, <label for="r16" class="ident">seqNum</label></code></span>
+<span class="codeline" id="line-95"><code>}</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code><span class="keyword">func</span> (<label for="r20" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r21" class="ident">Seal</label>(<label for="r22" class="ident">dst</label>, <label for="r23" class="ident">plaintext</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r24" class="ident">seqNum</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-98"><code>	<label for="r25" class="ident">ret</label>, <label for="r26" class="ident">ciphertext</label> := <a href="ntlm.go.html#line-380" class="ident">sliceForAppend</a>(<label for="r22" class="ident">dst</label>, <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r23" class="ident">plaintext</label>)+<span class="lit-number">16</span>)</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">switch</span> {</code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">case</span> <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-38" class="ident">NTLMSSP_NEGOTIATE_SEAL</a> != <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-102"><code>		<label for="r20" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>.<a href="../../../../../crypto/rc4/rc4.go.html#line-61" class="ident">XORKeyStream</a>(<label for="r26" class="ident">ciphertext</label>[<span class="lit-number">16</span>:], <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">if</span> <label for="r20" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-105"><code>			_, <label for="r24" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<label for="r26" class="ident">ciphertext</label>[:<span class="lit-number">0</span>], <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r20" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r20" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r24" class="ident">seqNum</label>, <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-106"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-107"><code>			_, <label for="r24" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<label for="r26" class="ident">ciphertext</label>[:<span class="lit-number">0</span>], <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r20" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r20" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r24" class="ident">seqNum</label>, <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-108"><code>		}</code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">case</span> <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-37" class="ident">NTLMSSP_NEGOTIATE_SIGN</a> != <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-110"><code>		<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r26" class="ident">ciphertext</label>[<span class="lit-number">16</span>:], <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>		<span class="keyword">if</span> <label for="r20" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-113"><code>			_, <label for="r24" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<label for="r26" class="ident">ciphertext</label>[:<span class="lit-number">0</span>], <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r20" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r20" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r24" class="ident">seqNum</label>, <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-114"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-115"><code>			_, <label for="r24" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<label for="r26" class="ident">ciphertext</label>[:<span class="lit-number">0</span>], <label for="r20" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r20" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r20" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r24" class="ident">seqNum</label>, <label for="r23" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-116"><code>		}</code></span>
+<span class="codeline" id="line-117"><code>	}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code>	<span class="keyword">return</span> <label for="r25" class="ident">ret</label>, <label for="r24" class="ident">seqNum</label></code></span>
+<span class="codeline" id="line-120"><code>}</code></span>
+<span class="codeline" id="line-121"><code></code></span>
+<span class="codeline" id="line-122"><code><span class="keyword">func</span> (<label for="r27" class="ident">s</label> *<a href="#line-11" class="ident">Session</a>) <label for="r28" class="ident">Unseal</label>(<label for="r29" class="ident">dst</label>, <label for="r30" class="ident">ciphertext</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r31" class="ident">seqNum</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-123"><code>	<label for="r32" class="ident">ret</label>, <label for="r33" class="ident">plaintext</label> := <a href="ntlm.go.html#line-380" class="ident">sliceForAppend</a>(<label for="r29" class="ident">dst</label>, <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r30" class="ident">ciphertext</label>)-<span class="lit-number">16</span>)</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">switch</span> {</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">case</span> <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-38" class="ident">NTLMSSP_NEGOTIATE_SEAL</a> != <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-127"><code>		<label for="r27" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>.<a href="../../../../../crypto/rc4/rc4.go.html#line-61" class="ident">XORKeyStream</a>(<label for="r33" class="ident">plaintext</label>, <label for="r30" class="ident">ciphertext</label>[<span class="lit-number">16</span>:])</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">var</span> <label for="r34" class="ident">sum</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">if</span> <label for="r27" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-132"><code>			<label for="r34" class="ident">sum</label>, <label for="r31" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r27" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r27" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r31" class="ident">seqNum</label>, <label for="r33" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-133"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-134"><code>			<label for="r34" class="ident">sum</label>, <label for="r31" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r27" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r27" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r31" class="ident">seqNum</label>, <label for="r33" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-135"><code>		}</code></span>
+<span class="codeline" id="line-136"><code>		<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r30" class="ident">ciphertext</label>[:<span class="lit-number">16</span>], <label for="r34" class="ident">sum</label>) {</code></span>
+<span class="codeline" id="line-137"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="lit-number">0</span>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"signature mismatch"</span>)</code></span>
+<span class="codeline" id="line-138"><code>		}</code></span>
+<span class="codeline" id="line-139"><code>	<span class="keyword">case</span> <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>&amp;<a href="ntlm.go.html#line-37" class="ident">NTLMSSP_NEGOTIATE_SIGN</a> != <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-140"><code>		<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r33" class="ident">plaintext</label>, <label for="r30" class="ident">ciphertext</label>[<span class="lit-number">16</span>:])</code></span>
+<span class="codeline" id="line-141"><code></code></span>
+<span class="codeline" id="line-142"><code>		<span class="keyword">var</span> <label for="r35" class="ident">sum</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-143"><code></code></span>
+<span class="codeline" id="line-144"><code>		<span class="keyword">if</span> <label for="r27" class="ident">s</label>.<a href="#line-12" class="ident">isClientSide</a> {</code></span>
+<span class="codeline" id="line-145"><code>			<label for="r35" class="ident">sum</label>, <label for="r31" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r27" class="ident">s</label>.<a href="#line-22" class="ident">serverHandle</a>, <label for="r27" class="ident">s</label>.<a href="#line-19" class="ident">serverSigningKey</a>, <label for="r31" class="ident">seqNum</label>, <label for="r33" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-146"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-147"><code>			<label for="r35" class="ident">sum</label>, <label for="r31" class="ident">seqNum</label> = <a href="ntlm.go.html#line-242" class="ident">mac</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r27" class="ident">s</label>.<a href="#line-16" class="ident">negotiateFlags</a>, <label for="r27" class="ident">s</label>.<a href="#line-21" class="ident">clientHandle</a>, <label for="r27" class="ident">s</label>.<a href="#line-18" class="ident">clientSigningKey</a>, <label for="r31" class="ident">seqNum</label>, <label for="r33" class="ident">plaintext</label>)</code></span>
+<span class="codeline" id="line-148"><code>		}</code></span>
+<span class="codeline" id="line-149"><code>		<span class="keyword">if</span> !<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/bytes.go.html#line-18" class="ident">Equal</a>(<label for="r30" class="ident">ciphertext</label>[:<span class="lit-number">16</span>], <label for="r35" class="ident">sum</label>) {</code></span>
+<span class="codeline" id="line-150"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="lit-number">0</span>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"signature mismatch"</span>)</code></span>
+<span class="codeline" id="line-151"><code>		}</code></span>
+<span class="codeline" id="line-152"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-153"><code>		<a href="../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r33" class="ident">plaintext</label>, <label for="r30" class="ident">ciphertext</label>[<span class="lit-number">16</span>:])</code></span>
+<span class="codeline" id="line-154"><code>		<span class="keyword">for</span> <label for="r36" class="ident">_</label>, <label for="r37" class="ident">s</label> := <span class="keyword">range</span> <label for="r30" class="ident">ciphertext</label>[:<span class="lit-number">16</span>] {</code></span>
+<span class="codeline" id="line-155"><code>			<span class="keyword">if</span> <label for="r37" class="ident">s</label> != <span class="lit-number">0x0</span> {</code></span>
+<span class="codeline" id="line-156"><code>				<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="lit-number">0</span>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"signature mismatch"</span>)</code></span>
+<span class="codeline" id="line-157"><code>			}</code></span>
+<span class="codeline" id="line-158"><code>		}</code></span>
+<span class="codeline" id="line-159"><code>	}</code></span>
+<span class="codeline" id="line-160"><code></code></span>
+<span class="codeline" id="line-161"><code>	<span class="keyword">return</span> <label for="r32" class="ident">ret</label>, <label for="r31" class="ident">seqNum</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-162"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

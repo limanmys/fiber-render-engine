@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: prefork.go in package github.com/gofiber/fiber/v2</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	prefork.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/gofiber/fiber/v2.html">github.com/gofiber/fiber/v2</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8,
+input[id=i9]:checked ~pre .i9
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+<input id="i9" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> fiber</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"crypto/tls"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"net"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"os"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"os/exec"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i5"><span class="lit-string i5">"runtime"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i6"><span class="lit-string i6">"strconv"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i7"><span class="lit-string i7">"strings"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i8"><span class="lit-string i8">"time"</span></label></code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i9"><span class="lit-string i9">"github.com/valyala/fasthttp/reuseport"</span></label></code></span>
+<span class="codeline" id="line-15"><code>)</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-18"><code>	envPreforkChildKey = <span class="lit-string">"FIBER_PREFORK_CHILD"</span></code></span>
+<span class="codeline" id="line-19"><code>	envPreforkChildVal = <span class="lit-string">"1"</span></code></span>
+<span class="codeline" id="line-20"><code>)</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">var</span> testPreforkMaster = <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">var</span> testOnPrefork = <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// IsChild determines if the current process is a child of Prefork</span></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/github.com/gofiber/fiber/v2.html#name-IsChild" class="ident">IsChild</a></label>() <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/env.go.html#line-101" class="ident">Getenv</a>(<a href="#line-18" class="ident">envPreforkChildKey</a>) == <a href="#line-19" class="ident">envPreforkChildVal</a></code></span>
+<span class="codeline" id="line-28"><code>}</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// prefork manages child processes to make use of the OS REUSEPORT or REUSEADDR feature</span></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">func</span> (<label for="r1" class="ident">app</label> *<a href="app.go.html#line-86" class="ident">App</a>) <label for="r2" class="ident">prefork</label>(<label for="r3" class="ident">network</label>, <label for="r4" class="ident">addr</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r5" class="ident">tlsConfig</label> *<a href="../../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../../crypto/tls/common.go.html#line-517" class="ident">Config</a>) (<label for="r6" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-32"><code>	<span class="comment">// 👶 child process 👶</span></code></span>
+<span class="codeline" id="line-33"><code>	<span class="keyword">if</span> <a href="#line-26" class="ident">IsChild</a>() {</code></span>
+<span class="codeline" id="line-34"><code>		<span class="comment">// use 1 cpu core per child process</span></code></span>
+<span class="codeline" id="line-35"><code>		<a href="../../../../../pkg/runtime.html" class="ident i5">runtime</a>.<a href="../../../../runtime/debug.go.html#line-16" class="ident">GOMAXPROCS</a>(<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-36"><code>		<span class="keyword">var</span> <label for="r7" class="ident">ln</label> <a href="../../../../../pkg/net.html" class="ident i2">net</a>.<a href="../../../../net/net.go.html#line-384" class="ident">Listener</a></code></span>
+<span class="codeline" id="line-37"><code>		<span class="comment">// Linux will use SO_REUSEPORT and Windows falls back to SO_REUSEADDR</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">		// Only tcp4 or tcp6 is supported when preforking, both are not supported</span></code></span>
+<span class="codeline" id="line-39"><code>		<span class="keyword">if</span> <label for="r7" class="ident">ln</label>, <label for="r6" class="ident">err</label> = <a href="../../../../../pkg/github.com/valyala/fasthttp/reuseport.html" class="ident i9">reuseport</a>.<a href="../../../valyala/fasthttp/reuseport/reuseport.go.html#line-35" class="ident">Listen</a>(<label for="r3" class="ident">network</label>, <label for="r4" class="ident">addr</label>); <label for="r6" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-40"><code>			<span class="keyword">if</span> !<label for="r1" class="ident">app</label>.<a href="app.go.html#line-103" class="ident">config</a>.<a href="app.go.html#line-277" class="ident">DisableStartupMessage</a> {</code></span>
+<span class="codeline" id="line-41"><code>				<a href="../../../../../pkg/time.html" class="ident i8">time</a>.<a href="../../../../time/sleep.go.html#line-9" class="ident">Sleep</a>(<span class="lit-number">100</span> * <a href="../../../../../pkg/time.html" class="ident i8">time</a>.<a href="../../../../time/time.go.html#line-613" class="ident">Millisecond</a>) <span class="comment">// avoid colliding with startup message</span></code></span>
+<span class="codeline" id="line-42"><code>			}</code></span>
+<span class="codeline" id="line-43"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"prefork: %v"</span>, <label for="r6" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-44"><code>		}</code></span>
+<span class="codeline" id="line-45"><code>		<span class="comment">// wrap a tls config around the listener if provided</span></code></span>
+<span class="codeline" id="line-46"><code>		<span class="keyword">if</span> <label for="r5" class="ident">tlsConfig</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-47"><code>			<label for="r7" class="ident">ln</label> = <a href="../../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../../crypto/tls/tls.go.html#line-77" class="ident">NewListener</a>(<label for="r7" class="ident">ln</label>, <label for="r5" class="ident">tlsConfig</label>)</code></span>
+<span class="codeline" id="line-48"><code>		}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>		<span class="comment">// kill current child proc when master exits</span></code></span>
+<span class="codeline" id="line-51"><code>		<span class="keyword">go</span> <a href="#line-131" class="ident">watchMaster</a>()</code></span>
+<span class="codeline" id="line-52"><code></code></span>
+<span class="codeline" id="line-53"><code>		<span class="comment">// prepare the server for the start</span></code></span>
+<span class="codeline" id="line-54"><code>		<label for="r1" class="ident">app</label>.<a href="app.go.html#line-1064" class="ident">startupProcess</a>()</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>		<span class="comment">// listen for incoming connections</span></code></span>
+<span class="codeline" id="line-57"><code>		<span class="keyword">return</span> <label for="r1" class="ident">app</label>.<a href="app.go.html#line-101" class="ident">server</a>.<a href="../../../valyala/fasthttp/server.go.html#line-1785" class="ident">Serve</a>(<label for="r7" class="ident">ln</label>)</code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// 👮 master process 👮</span></code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">type</span> <label for="r8" class="ident">child</label> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-62"><code>		<label for="r9" class="ident">pid</label> <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-63"><code>		<label for="r10" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-64"><code>	}</code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// create variables</span></code></span>
+<span class="codeline" id="line-66"><code>	<label for="r11" class="ident">max</label> := <a href="../../../../../pkg/runtime.html" class="ident i5">runtime</a>.<a href="../../../../runtime/debug.go.html#line-16" class="ident">GOMAXPROCS</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-67"><code>	<label for="r12" class="ident">childs</label> := <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>]*<a href="../../../../../pkg/os/exec.html" class="ident i4">exec</a>.<a href="../../../../os/exec/exec.go.html#line-141" class="ident">Cmd</a>)</code></span>
+<span class="codeline" id="line-68"><code>	<label for="r13" class="ident">channel</label> := <a href="../../../../runtime/chan.go.html#line-72">make</a>(<span class="keyword">chan</span> <label for="r8" class="ident">child</label>, <label for="r11" class="ident">max</label>)</code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code>	<span class="comment">// kill child procs when master exits</span></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">for</span> <label for="r14" class="ident">_</label>, <label for="r15" class="ident">proc</label> := <span class="keyword">range</span> <label for="r12" class="ident">childs</label> {</code></span>
+<span class="codeline" id="line-73"><code>			_ = <label for="r15" class="ident">proc</label>.<a href="../../../../os/exec/exec.go.html#line-214" class="ident">Process</a>.<a href="../../../../os/exec.go.html#line-122" class="ident">Kill</a>()</code></span>
+<span class="codeline" id="line-74"><code>		}</code></span>
+<span class="codeline" id="line-75"><code>	}()</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code>	<span class="comment">// collect child pids</span></code></span>
+<span class="codeline" id="line-78"><code>	<span class="keyword">var</span> <label for="r16" class="ident">pids</label> []<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code>	<span class="comment">// launch child procs</span></code></span>
+<span class="codeline" id="line-81"><code>	<span class="keyword">for</span> <label for="r17" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r17" class="ident">i</label> &lt; <label for="r11" class="ident">max</label>; <label for="r17" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-82"><code>		<span class="comment">/* #nosec G204 */</span></code></span>
+<span class="codeline" id="line-83"><code>		<label for="r18" class="ident">cmd</label> := <a href="../../../../../pkg/os/exec.html" class="ident i4">exec</a>.<a href="../../../../os/exec/exec.go.html#line-271" class="ident">Command</a>(<a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/proc.go.html#line-16" class="ident">Args</a>[<span class="lit-number">0</span>], <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/proc.go.html#line-16" class="ident">Args</a>[<span class="lit-number">1</span>:]...) <span class="comment">// #nosec G204</span></code></span>
+<span class="codeline" id="line-84"><code>		<span class="keyword">if</span> <a href="#line-22" class="ident">testPreforkMaster</a> {</code></span>
+<span class="codeline" id="line-85"><code>			<span class="comment">// When test prefork master,</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">			// just start the child process with a dummy cmd,</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">			// which will exit soon</span></code></span>
+<span class="codeline" id="line-88"><code>			<label for="r18" class="ident">cmd</label> = <a href="#line-153" class="ident">dummyCmd</a>()</code></span>
+<span class="codeline" id="line-89"><code>		}</code></span>
+<span class="codeline" id="line-90"><code>		<label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-199" class="ident">Stdout</a> = <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/file.go.html#line-66" class="ident">Stdout</a></code></span>
+<span class="codeline" id="line-91"><code>		<label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-200" class="ident">Stderr</a> = <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/file.go.html#line-67" class="ident">Stderr</a></code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>		<span class="comment">// add fiber prefork child flag into child proc env</span></code></span>
+<span class="codeline" id="line-94"><code>		<label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-163" class="ident">Env</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/env.go.html#line-139" class="ident">Environ</a>(),</code></span>
+<span class="codeline" id="line-95"><code>			<a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s=%s"</span>, <a href="#line-18" class="ident">envPreforkChildKey</a>, <a href="#line-19" class="ident">envPreforkChildVal</a>),</code></span>
+<span class="codeline" id="line-96"><code>		)</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">if</span> <label for="r6" class="ident">err</label> = <label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-472" class="ident">Start</a>(); <label for="r6" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-98"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"failed to start a child prefork process, error: %v"</span>, <label for="r6" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-99"><code>		}</code></span>
+<span class="codeline" id="line-100"><code></code></span>
+<span class="codeline" id="line-101"><code>		<span class="comment">// store child process</span></code></span>
+<span class="codeline" id="line-102"><code>		<label for="r19" class="ident">pid</label> := <label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-214" class="ident">Process</a>.<a href="../../../../os/exec.go.html#line-22" class="ident">Pid</a></code></span>
+<span class="codeline" id="line-103"><code>		<label for="r12" class="ident">childs</label>[<label for="r19" class="ident">pid</label>] = <label for="r18" class="ident">cmd</label></code></span>
+<span class="codeline" id="line-104"><code>		<label for="r16" class="ident">pids</label> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r16" class="ident">pids</label>, <a href="../../../../../pkg/strconv.html" class="ident i6">strconv</a>.<a href="../../../../strconv/itoa.go.html#line-34" class="ident">Itoa</a>(<label for="r19" class="ident">pid</label>))</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code>		<span class="comment">// execute fork hook</span></code></span>
+<span class="codeline" id="line-107"><code>		<span class="keyword">if</span> <label for="r1" class="ident">app</label>.<a href="app.go.html#line-109" class="ident">hooks</a> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-108"><code>			<span class="keyword">if</span> <a href="#line-23" class="ident">testOnPrefork</a> {</code></span>
+<span class="codeline" id="line-109"><code>				<label for="r1" class="ident">app</label>.<a href="app.go.html#line-109" class="ident">hooks</a>.<a href="hooks.go.html#line-187" class="ident">executeOnForkHooks</a>(<a href="#line-160" class="ident">dummyPid</a>)</code></span>
+<span class="codeline" id="line-110"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-111"><code>				<label for="r1" class="ident">app</label>.<a href="app.go.html#line-109" class="ident">hooks</a>.<a href="hooks.go.html#line-187" class="ident">executeOnForkHooks</a>(<label for="r19" class="ident">pid</label>)</code></span>
+<span class="codeline" id="line-112"><code>			}</code></span>
+<span class="codeline" id="line-113"><code>		}</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code>		<span class="comment">// notify master if child crashes</span></code></span>
+<span class="codeline" id="line-116"><code>		<span class="keyword">go</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-117"><code>			<label for="r13" class="ident">channel</label> &lt;- <label for="r8" class="ident">child</label>{<label for="r19" class="ident">pid</label>, <label for="r18" class="ident">cmd</label>.<a href="../../../../os/exec/exec.go.html#line-592" class="ident">Wait</a>()}</code></span>
+<span class="codeline" id="line-118"><code>		}()</code></span>
+<span class="codeline" id="line-119"><code>	}</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	<span class="comment">// Print startup message</span></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">if</span> !<label for="r1" class="ident">app</label>.<a href="app.go.html#line-103" class="ident">config</a>.<a href="app.go.html#line-277" class="ident">DisableStartupMessage</a> {</code></span>
+<span class="codeline" id="line-123"><code>		<label for="r1" class="ident">app</label>.<a href="listen.go.html#line-206" class="ident">startupMessage</a>(<label for="r4" class="ident">addr</label>, <label for="r5" class="ident">tlsConfig</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="lit-string">","</span>+<a href="../../../../../pkg/strings.html" class="ident i7">strings</a>.<a href="../../../../strings/strings.go.html#line-430" class="ident">Join</a>(<label for="r16" class="ident">pids</label>, <span class="lit-string">","</span>))</code></span>
+<span class="codeline" id="line-124"><code>	}</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code>	<span class="comment">// return error if child crashes</span></code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">return</span> (&lt;-<label for="r13" class="ident">channel</label>).<label for="r10" class="ident">err</label></code></span>
+<span class="codeline" id="line-128"><code>}</code></span>
+<span class="codeline" id="line-129"><code></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// watchMaster watches child procs</span></code></span>
+<span class="codeline" id="line-131"><code><span class="keyword">func</span> watchMaster() {</code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/runtime.html" class="ident i5">runtime</a>.<a href="../../../../runtime/extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"windows"</span> {</code></span>
+<span class="codeline" id="line-133"><code>		<span class="comment">// finds parent process,</span></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">		// and waits for it to exit</span></code></span>
+<span class="codeline" id="line-135"><code>		<label for="r21" class="ident">p</label>, <label for="r22" class="ident">err</label> := <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/exec.go.html#line-90" class="ident">FindProcess</a>(<a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/exec.go.html#line-81" class="ident">Getppid</a>())</code></span>
+<span class="codeline" id="line-136"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-137"><code>			_, _ = <label for="r21" class="ident">p</label>.<a href="../../../../os/exec.go.html#line-131" class="ident">Wait</a>()</code></span>
+<span class="codeline" id="line-138"><code>		}</code></span>
+<span class="codeline" id="line-139"><code>		<a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/proc.go.html#line-62" class="ident">Exit</a>(<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-140"><code>	}</code></span>
+<span class="codeline" id="line-141"><code>	<span class="comment">// if it is equal to 1 (init process ID),</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">	// it indicates that the master process has exited</span></code></span>
+<span class="codeline" id="line-143"><code>	<span class="keyword">for</span> <span class="keyword">range</span> <a href="../../../../../pkg/time.html" class="ident i8">time</a>.<a href="../../../../time/tick.go.html#line-22" class="ident">NewTicker</a>(<a href="../../../../../pkg/time.html" class="ident i8">time</a>.<a href="../../../../time/time.go.html#line-613" class="ident">Millisecond</a> * <span class="lit-number">500</span>).<a href="../../../../time/tick.go.html#line-12" class="ident">C</a> {</code></span>
+<span class="codeline" id="line-144"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/exec.go.html#line-81" class="ident">Getppid</a>() == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-145"><code>			<a href="../../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../../os/proc.go.html#line-62" class="ident">Exit</a>(<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-146"><code>		}</code></span>
+<span class="codeline" id="line-147"><code>	}</code></span>
+<span class="codeline" id="line-148"><code>}</code></span>
+<span class="codeline" id="line-149"><code></code></span>
+<span class="codeline" id="line-150"><code><span class="keyword">var</span> dummyChildCmd = <span class="lit-string">"go"</span></code></span>
+<span class="codeline" id="line-151"><code></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">// dummyCmd is for internal prefork testing</span></code></span>
+<span class="codeline" id="line-153"><code><span class="keyword">func</span> dummyCmd() *<a href="../../../../../pkg/os/exec.html" class="ident i4">exec</a>.<a href="../../../../os/exec/exec.go.html#line-141" class="ident">Cmd</a> {</code></span>
+<span class="codeline" id="line-154"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/runtime.html" class="ident i5">runtime</a>.<a href="../../../../runtime/extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"windows"</span> {</code></span>
+<span class="codeline" id="line-155"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/os/exec.html" class="ident i4">exec</a>.<a href="../../../../os/exec/exec.go.html#line-271" class="ident">Command</a>(<span class="lit-string">"cmd"</span>, <span class="lit-string">"/C"</span>, <a href="#line-150" class="ident">dummyChildCmd</a>, <span class="lit-string">"version"</span>)</code></span>
+<span class="codeline" id="line-156"><code>	}</code></span>
+<span class="codeline" id="line-157"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/os/exec.html" class="ident i4">exec</a>.<a href="../../../../os/exec/exec.go.html#line-271" class="ident">Command</a>(<a href="#line-150" class="ident">dummyChildCmd</a>, <span class="lit-string">"version"</span>)</code></span>
+<span class="codeline" id="line-158"><code>}</code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code><span class="keyword">var</span> dummyPid = <span class="lit-number">1</span></code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

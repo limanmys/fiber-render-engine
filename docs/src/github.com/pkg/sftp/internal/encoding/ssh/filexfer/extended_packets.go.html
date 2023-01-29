@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: extended_packets.go in package github.com/pkg/sftp/internal/encoding/ssh/filexfer</title>
+<link href="../../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	extended_packets.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html">github.com/pkg/sftp/internal/encoding/ssh/filexfer</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> filexfer</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"sync"</span></label></code></span>
+<span class="codeline" id="line-6"><code>)</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// ExtendedData aliases the untyped interface composition of encoding.BinaryMarshaler and encoding.BinaryUnmarshaler.</span></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-ExtendedData" class="ident">ExtendedData</a> = <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-10"><code>	<a href="../../../../../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../../../../../encoding/encoding.go.html#line-18" class="ident">BinaryMarshaler</a></code></span>
+<span class="codeline" id="line-11"><code>	<a href="../../../../../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../../../../../encoding/encoding.go.html#line-28" class="ident">BinaryUnmarshaler</a></code></span>
+<span class="codeline" id="line-12"><code>}</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// ExtendedDataConstructor defines a function that returns a new(ArbitraryExtendedPacket).</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-ExtendedDataConstructor" class="ident">ExtendedDataConstructor</a> <span class="keyword">func</span>() <a href="#line-9" class="ident">ExtendedData</a></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">var</span> extendedPacketTypes = <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-18"><code>	mu           <a href="../../../../../../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../../../../../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a></code></span>
+<span class="codeline" id="line-19"><code>	constructors <span class="keyword">map</span>[<a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-15" class="ident">ExtendedDataConstructor</a></code></span>
+<span class="codeline" id="line-20"><code>}{</code></span>
+<span class="codeline" id="line-21"><code>	<a href="#line-19" class="ident">constructors</a>: <a href="../../../../../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-15" class="ident">ExtendedDataConstructor</a>),</code></span>
+<span class="codeline" id="line-22"><code>}</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// RegisterExtendedPacketType defines a specific ExtendedDataConstructor for the given extension string.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-RegisterExtendedPacketType" class="ident">RegisterExtendedPacketType</a></label>(<label for="r1" class="ident">extension</label> <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r2" class="ident">constructor</label> <a href="#line-15" class="ident">ExtendedDataConstructor</a>) {</code></span>
+<span class="codeline" id="line-26"><code>	<a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-18" class="ident">mu</a>.<a href="../../../../../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">defer</span> <a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-18" class="ident">mu</a>.<a href="../../../../../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code>	<span class="keyword">if</span> <label for="r3" class="ident">_</label>, <label for="r4" class="ident">exist</label> := <a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-19" class="ident">constructors</a>[<label for="r1" class="ident">extension</label>]; <label for="r4" class="ident">exist</label> {</code></span>
+<span class="codeline" id="line-30"><code>		<a href="../../../../../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"encoding/ssh/filexfer: multiple registration of extended packet type "</span> + <label for="r1" class="ident">extension</label>)</code></span>
+<span class="codeline" id="line-31"><code>	}</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>	<a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-19" class="ident">constructors</a>[<label for="r1" class="ident">extension</label>] = <label for="r2" class="ident">constructor</label></code></span>
+<span class="codeline" id="line-34"><code>}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> newExtendedPacket(<label for="r6" class="ident">extension</label> <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-9" class="ident">ExtendedData</a> {</code></span>
+<span class="codeline" id="line-37"><code>	<a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-18" class="ident">mu</a>.<a href="../../../../../../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">defer</span> <a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-18" class="ident">mu</a>.<a href="../../../../../../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">if</span> <label for="r7" class="ident">f</label> := <a href="#line-17" class="ident">extendedPacketTypes</a>.<a href="#line-19" class="ident">constructors</a>[<label for="r6" class="ident">extension</label>]; <label for="r7" class="ident">f</label> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-41"><code>		<span class="keyword">return</span> <label for="r7" class="ident">f</label>()</code></span>
+<span class="codeline" id="line-42"><code>	}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="buffer.go.html#line-17" class="ident">Buffer</a>)</code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// ExtendedPacket defines the SSH_FXP_CLOSE packet.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-ExtendedPacket" class="ident">ExtendedPacket</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-49"><code>	ExtendedRequest <a href="../../../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>	Data <a href="#line-9" class="ident">ExtendedData</a></code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// Type returns the SSH_FXP_xy value associated with this packet type.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">func</span> (<label for="r8" class="ident">p</label> *<a href="#line-48" class="ident">ExtendedPacket</a>) <label for="r9" class="ident">Type</label>() <a href="fxp.go.html#line-8" class="ident">PacketType</a> {</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">return</span> <a href="fxp.go.html#line-55" class="ident">PacketTypeExtended</a></code></span>
+<span class="codeline" id="line-57"><code>}</code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">// MarshalPacket returns p as a two-part binary encoding of p.</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// The Data is marshaled into binary, and returned as the payload.</span></code></span>
+<span class="codeline" id="line-62"><code><span class="keyword">func</span> (<label for="r10" class="ident">p</label> *<a href="#line-48" class="ident">ExtendedPacket</a>) <label for="r11" class="ident">MarshalPacket</label>(<label for="r12" class="ident">reqid</label> <a href="../../../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r13" class="ident">b</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r14" class="ident">header</label>, <label for="r15" class="ident">payload</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r16" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-63"><code>	<label for="r17" class="ident">buf</label> := <a href="buffer.go.html#line-26" class="ident">NewBuffer</a>(<label for="r13" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">if</span> <label for="r17" class="ident">buf</label>.<a href="buffer.go.html#line-50" class="ident">Cap</a>() &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r18" class="ident">size</label> := <span class="lit-number">4</span> + <a href="../../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">p</label>.<a href="#line-49" class="ident">ExtendedRequest</a>) <span class="comment">// string(extended-request)</span></code></span>
+<span class="codeline" id="line-66"><code>		<label for="r17" class="ident">buf</label> = <a href="buffer.go.html#line-34" class="ident">NewMarshalBuffer</a>(<label for="r18" class="ident">size</label>)</code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>	<label for="r17" class="ident">buf</label>.<a href="buffer.go.html#line-60" class="ident">StartPacket</a>(<a href="fxp.go.html#line-55" class="ident">PacketTypeExtended</a>, <label for="r12" class="ident">reqid</label>)</code></span>
+<span class="codeline" id="line-70"><code>	<label for="r17" class="ident">buf</label>.<a href="buffer.go.html#line-263" class="ident">AppendString</a>(<label for="r10" class="ident">p</label>.<a href="#line-49" class="ident">ExtendedRequest</a>)</code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">if</span> <label for="r10" class="ident">p</label>.<a href="#line-51" class="ident">Data</a> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-73"><code>		<label for="r15" class="ident">payload</label>, <label for="r16" class="ident">err</label> = <label for="r10" class="ident">p</label>.<a href="#line-51" class="ident">Data</a>.<a href="../../../../../../../encoding/encoding.go.html#line-19" class="ident">MarshalBinary</a>()</code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">if</span> <label for="r16" class="ident">err</label> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-75"><code>			<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r16" class="ident">err</label></code></span>
+<span class="codeline" id="line-76"><code>		}</code></span>
+<span class="codeline" id="line-77"><code>	}</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">return</span> <label for="r17" class="ident">buf</label>.<a href="buffer.go.html#line-77" class="ident">Packet</a>(<label for="r15" class="ident">payload</label>)</code></span>
+<span class="codeline" id="line-80"><code>}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// UnmarshalPacketBody unmarshals the packet body from the given Buffer.</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">// It is assumed that the uint32(request-id) has already been consumed.</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">// If p.Data is nil, and the extension has been registered, a new type will be made from the registration.</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// If the extension has not been registered, then a new Buffer will be allocated.</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// Then the request-specific-data will be unmarshaled from the rest of the buffer.</span></code></span>
+<span class="codeline" id="line-88"><code><span class="keyword">func</span> (<label for="r19" class="ident">p</label> *<a href="#line-48" class="ident">ExtendedPacket</a>) <label for="r20" class="ident">UnmarshalPacketBody</label>(<label for="r21" class="ident">buf</label> *<a href="buffer.go.html#line-17" class="ident">Buffer</a>) (<label for="r22" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">if</span> <label for="r19" class="ident">p</label>.<a href="#line-49" class="ident">ExtendedRequest</a>, <label for="r22" class="ident">err</label> = <label for="r21" class="ident">buf</label>.<a href="buffer.go.html#line-252" class="ident">ConsumeString</a>(); <label for="r22" class="ident">err</label> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-90"><code>		<span class="keyword">return</span> <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-91"><code>	}</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>	<span class="keyword">if</span> <label for="r19" class="ident">p</label>.<a href="#line-51" class="ident">Data</a> == <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-94"><code>		<label for="r19" class="ident">p</label>.<a href="#line-51" class="ident">Data</a> = <a href="#line-36" class="ident">newExtendedPacket</a>(<label for="r19" class="ident">p</label>.<a href="#line-49" class="ident">ExtendedRequest</a>)</code></span>
+<span class="codeline" id="line-95"><code>	}</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">return</span> <label for="r19" class="ident">p</label>.<a href="#line-51" class="ident">Data</a>.<a href="../../../../../../../encoding/encoding.go.html#line-29" class="ident">UnmarshalBinary</a>(<label for="r21" class="ident">buf</label>.<a href="buffer.go.html#line-41" class="ident">Bytes</a>())</code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// ExtendedReplyPacket defines the SSH_FXP_CLOSE packet.</span></code></span>
+<span class="codeline" id="line-101"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-ExtendedReplyPacket" class="ident">ExtendedReplyPacket</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-102"><code>	Data <a href="#line-9" class="ident">ExtendedData</a></code></span>
+<span class="codeline" id="line-103"><code>}</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">// Type returns the SSH_FXP_xy value associated with this packet type.</span></code></span>
+<span class="codeline" id="line-106"><code><span class="keyword">func</span> (<label for="r23" class="ident">p</label> *<a href="#line-101" class="ident">ExtendedReplyPacket</a>) <label for="r24" class="ident">Type</label>() <a href="fxp.go.html#line-8" class="ident">PacketType</a> {</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> <a href="fxp.go.html#line-56" class="ident">PacketTypeExtendedReply</a></code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// MarshalPacket returns p as a two-part binary encoding of p.</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// The Data is marshaled into binary, and returned as the payload.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="keyword">func</span> (<label for="r25" class="ident">p</label> *<a href="#line-101" class="ident">ExtendedReplyPacket</a>) <label for="r26" class="ident">MarshalPacket</label>(<label for="r27" class="ident">reqid</label> <a href="../../../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r28" class="ident">b</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r29" class="ident">header</label>, <label for="r30" class="ident">payload</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r31" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-114"><code>	<label for="r32" class="ident">buf</label> := <a href="buffer.go.html#line-26" class="ident">NewBuffer</a>(<label for="r28" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">if</span> <label for="r32" class="ident">buf</label>.<a href="buffer.go.html#line-50" class="ident">Cap</a>() &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-116"><code>		<label for="r32" class="ident">buf</label> = <a href="buffer.go.html#line-34" class="ident">NewMarshalBuffer</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-117"><code>	}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code>	<label for="r32" class="ident">buf</label>.<a href="buffer.go.html#line-60" class="ident">StartPacket</a>(<a href="fxp.go.html#line-56" class="ident">PacketTypeExtendedReply</a>, <label for="r27" class="ident">reqid</label>)</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">if</span> <label for="r25" class="ident">p</label>.<a href="#line-102" class="ident">Data</a> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-122"><code>		<label for="r30" class="ident">payload</label>, <label for="r31" class="ident">err</label> = <label for="r25" class="ident">p</label>.<a href="#line-102" class="ident">Data</a>.<a href="../../../../../../../encoding/encoding.go.html#line-19" class="ident">MarshalBinary</a>()</code></span>
+<span class="codeline" id="line-123"><code>		<span class="keyword">if</span> <label for="r31" class="ident">err</label> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-124"><code>			<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r31" class="ident">err</label></code></span>
+<span class="codeline" id="line-125"><code>		}</code></span>
+<span class="codeline" id="line-126"><code>	}</code></span>
+<span class="codeline" id="line-127"><code></code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">return</span> <label for="r32" class="ident">buf</label>.<a href="buffer.go.html#line-77" class="ident">Packet</a>(<label for="r30" class="ident">payload</label>)</code></span>
+<span class="codeline" id="line-129"><code>}</code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">// UnmarshalPacketBody unmarshals the packet body from the given Buffer.</span></code></span>
+<span class="codeline" id="line-132"><code><span class="comment">// It is assumed that the uint32(request-id) has already been consumed.</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">// If p.Data is nil, and there is request-specific-data,</span></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">// then the request-specific-data will be wrapped in a Buffer and assigned to p.Data.</span></code></span>
+<span class="codeline" id="line-136"><code><span class="keyword">func</span> (<label for="r33" class="ident">p</label> *<a href="#line-101" class="ident">ExtendedReplyPacket</a>) <label for="r34" class="ident">UnmarshalPacketBody</label>(<label for="r35" class="ident">buf</label> *<a href="buffer.go.html#line-17" class="ident">Buffer</a>) (<label for="r36" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">if</span> <label for="r33" class="ident">p</label>.<a href="#line-102" class="ident">Data</a> == <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-138"><code>		<label for="r33" class="ident">p</label>.<a href="#line-102" class="ident">Data</a> = <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="buffer.go.html#line-17" class="ident">Buffer</a>)</code></span>
+<span class="codeline" id="line-139"><code>	}</code></span>
+<span class="codeline" id="line-140"><code></code></span>
+<span class="codeline" id="line-141"><code>	<span class="keyword">return</span> <label for="r33" class="ident">p</label>.<a href="#line-102" class="ident">Data</a>.<a href="../../../../../../../encoding/encoding.go.html#line-29" class="ident">UnmarshalBinary</a>(<label for="r35" class="ident">buf</label>.<a href="buffer.go.html#line-41" class="ident">Bytes</a>())</code></span>
+<span class="codeline" id="line-142"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

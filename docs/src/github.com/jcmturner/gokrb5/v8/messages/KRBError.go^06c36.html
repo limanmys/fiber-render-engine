@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: KRBError.go in package github.com/jcmturner/gokrb5/v8/messages</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	KRBError.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html">github.com/jcmturner/gokrb5/v8/messages</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8,
+input[id=i9]:checked ~pre .i9
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+<input id="i9" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package messages implements Kerberos 5 message types and methods.</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> messages</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-5"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"time"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i2"><span class="lit-string i2">"github.com/jcmturner/gofork/encoding/asn1"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i3"><span class="lit-string i3">"github.com/jcmturner/gokrb5/v8/asn1tools"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i4"><span class="lit-string i4">"github.com/jcmturner/gokrb5/v8/iana"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i5"><span class="lit-string i5">"github.com/jcmturner/gokrb5/v8/iana/asnAppTag"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i6"><span class="lit-string i6">"github.com/jcmturner/gokrb5/v8/iana/errorcode"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i7"><span class="lit-string i7">"github.com/jcmturner/gokrb5/v8/iana/msgtype"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i8"><span class="lit-string i8">"github.com/jcmturner/gokrb5/v8/krberror"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i9"><span class="lit-string i9">"github.com/jcmturner/gokrb5/v8/types"</span></label></code></span>
+<span class="codeline" id="line-16"><code>)</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// KRBError implements RFC 4120 KRB_ERROR: https://tools.ietf.org/html/rfc4120#section-5.9.1.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html#name-KRBError" class="ident">KRBError</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-20"><code>	PVNO      <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>                 <span class="lit-string">`asn1:"explicit,tag:0"`</span></code></span>
+<span class="codeline" id="line-21"><code>	MsgType   <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>                 <span class="lit-string">`asn1:"explicit,tag:1"`</span></code></span>
+<span class="codeline" id="line-22"><code>	CTime     <a href="../../../../../../pkg/time.html" class="ident i1">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a>           <span class="lit-string">`asn1:"generalized,optional,explicit,tag:2"`</span></code></span>
+<span class="codeline" id="line-23"><code>	Cusec     <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>                 <span class="lit-string">`asn1:"optional,explicit,tag:3"`</span></code></span>
+<span class="codeline" id="line-24"><code>	STime     <a href="../../../../../../pkg/time.html" class="ident i1">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a>           <span class="lit-string">`asn1:"generalized,explicit,tag:4"`</span></code></span>
+<span class="codeline" id="line-25"><code>	Susec     <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>                 <span class="lit-string">`asn1:"explicit,tag:5"`</span></code></span>
+<span class="codeline" id="line-26"><code>	ErrorCode <a href="../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>               <span class="lit-string">`asn1:"explicit,tag:6"`</span></code></span>
+<span class="codeline" id="line-27"><code>	CRealm    <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>              <span class="lit-string">`asn1:"generalstring,optional,explicit,tag:7"`</span></code></span>
+<span class="codeline" id="line-28"><code>	CName     <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i9">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a> <span class="lit-string">`asn1:"optional,explicit,tag:8"`</span></code></span>
+<span class="codeline" id="line-29"><code>	Realm     <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>              <span class="lit-string">`asn1:"generalstring,explicit,tag:9"`</span></code></span>
+<span class="codeline" id="line-30"><code>	SName     <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i9">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a> <span class="lit-string">`asn1:"explicit,tag:10"`</span></code></span>
+<span class="codeline" id="line-31"><code>	EText     <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>              <span class="lit-string">`asn1:"generalstring,optional,explicit,tag:11"`</span></code></span>
+<span class="codeline" id="line-32"><code>	EData     []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>              <span class="lit-string">`asn1:"optional,explicit,tag:12"`</span></code></span>
+<span class="codeline" id="line-33"><code>}</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// NewKRBError creates a new KRBError.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html#name-NewKRBError" class="ident">NewKRBError</a></label>(<label for="r1" class="ident">sname</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i9">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a>, <label for="r2" class="ident">realm</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r3" class="ident">code</label> <a href="../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>, <label for="r4" class="ident">etext</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-19" class="ident">KRBError</a> {</code></span>
+<span class="codeline" id="line-37"><code>	<label for="r5" class="ident">t</label> := <a href="../../../../../../pkg/time.html" class="ident i1">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>()</code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">return</span> <a href="#line-19" class="ident">KRBError</a>{</code></span>
+<span class="codeline" id="line-39"><code>		<a href="#line-20" class="ident">PVNO</a>:      <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana.html" class="ident i4">iana</a>.<a href="../iana/constants.go.html#line-5" class="ident">PVNO</a>,</code></span>
+<span class="codeline" id="line-40"><code>		<a href="#line-21" class="ident">MsgType</a>:   <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/msgtype.html" class="ident i7">msgtype</a>.<a href="../iana/msgtype/constants.go.html#line-17" class="ident">KRB_ERROR</a>,</code></span>
+<span class="codeline" id="line-41"><code>		<a href="#line-24" class="ident">STime</a>:     <label for="r5" class="ident">t</label>,</code></span>
+<span class="codeline" id="line-42"><code>		<a href="#line-25" class="ident">Susec</a>:     <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>((<label for="r5" class="ident">t</label>.<a href="../../../../../time/time.go.html#line-1196" class="ident">UnixNano</a>() / <a href="../../../../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<a href="../../../../../../pkg/time.html" class="ident i1">time</a>.<a href="../../../../../time/time.go.html#line-612" class="ident">Microsecond</a>)) - (<label for="r5" class="ident">t</label>.<a href="../../../../../time/time.go.html#line-1168" class="ident">Unix</a>() * <span class="lit-number">1e6</span>)),</code></span>
+<span class="codeline" id="line-43"><code>		<a href="#line-26" class="ident">ErrorCode</a>: <label for="r3" class="ident">code</label>,</code></span>
+<span class="codeline" id="line-44"><code>		<a href="#line-30" class="ident">SName</a>:     <label for="r1" class="ident">sname</label>,</code></span>
+<span class="codeline" id="line-45"><code>		<a href="#line-29" class="ident">Realm</a>:     <label for="r2" class="ident">realm</label>,</code></span>
+<span class="codeline" id="line-46"><code>		<a href="#line-31" class="ident">EText</a>:     <label for="r4" class="ident">etext</label>,</code></span>
+<span class="codeline" id="line-47"><code>	}</code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// Unmarshal bytes b into the KRBError struct.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> (<label for="r6" class="ident">k</label> *<a href="#line-19" class="ident">KRBError</a>) <label for="r7" class="ident">Unmarshal</label>(<label for="r8" class="ident">b</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-52"><code>	<label for="r9" class="ident">_</label>, <label for="r10" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-996" class="ident">UnmarshalWithParams</a>(<label for="r8" class="ident">b</label>, <label for="r6" class="ident">k</label>, <a href="../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"application,explicit,tag:%v"</span>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/asnAppTag^84a0e.html" class="ident i5">asnAppTag</a>.<a href="../iana/asnAppTag^84a0e/constants.go.html#line-23" class="ident">KRBError</a>))</code></span>
+<span class="codeline" id="line-53"><code>	<span class="keyword">if</span> <label for="r10" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-47" class="ident">Errorf</a>(<label for="r10" class="ident">err</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-12" class="ident">EncodingError</a>, <span class="lit-string">"KRB_ERROR unmarshal error"</span>)</code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>	<label for="r11" class="ident">expectedMsgType</label> := <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/msgtype.html" class="ident i7">msgtype</a>.<a href="../iana/msgtype/constants.go.html#line-17" class="ident">KRB_ERROR</a></code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">if</span> <label for="r6" class="ident">k</label>.<a href="#line-21" class="ident">MsgType</a> != <label for="r11" class="ident">expectedMsgType</label> {</code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-56" class="ident">NewErrorf</a>(<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-17" class="ident">KRBMsgError</a>, <span class="lit-string">"message ID does not indicate a KRB_ERROR. Expected: %v; Actual: %v"</span>, <label for="r11" class="ident">expectedMsgType</label>, <label for="r6" class="ident">k</label>.<a href="#line-21" class="ident">MsgType</a>)</code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-61"><code>}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// Marshal a KRBError into bytes.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r12" class="ident">k</label> *<a href="#line-19" class="ident">KRBError</a>) <label for="r13" class="ident">Marshal</label>() ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-65"><code>	<label for="r14" class="ident">b</label>, <label for="r15" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/marshal.go.html#line-649" class="ident">Marshal</a>(*<label for="r12" class="ident">k</label>)</code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">if</span> <label for="r15" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-67"><code>		<span class="keyword">return</span> <label for="r14" class="ident">b</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-47" class="ident">Errorf</a>(<label for="r15" class="ident">err</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-12" class="ident">EncodingError</a>, <span class="lit-string">"error marshaling KRBError"</span>)</code></span>
+<span class="codeline" id="line-68"><code>	}</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r14" class="ident">b</label> = <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/asn1tools.html" class="ident i3">asn1tools</a>.<a href="../asn1tools/tools.go.html#line-58" class="ident">AddASNAppTag</a>(<label for="r14" class="ident">b</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/asnAppTag^84a0e.html" class="ident i5">asnAppTag</a>.<a href="../iana/asnAppTag^84a0e/constants.go.html#line-23" class="ident">KRBError</a>)</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">return</span> <label for="r14" class="ident">b</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-71"><code>}</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">// Error method implementing error interface on KRBError struct.</span></code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r16" class="ident">k</label> <a href="#line-19" class="ident">KRBError</a>) <label for="r17" class="ident">Error</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-75"><code>	<label for="r18" class="ident">etxt</label> := <a href="../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"KRB Error: %s"</span>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/errorcode.html" class="ident i6">errorcode</a>.<a href="../iana/errorcode/constants.go.html#line-79" class="ident">Lookup</a>(<label for="r16" class="ident">k</label>.<a href="#line-26" class="ident">ErrorCode</a>))</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r16" class="ident">k</label>.<a href="#line-31" class="ident">EText</a> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-77"><code>		<label for="r18" class="ident">etxt</label> = <a href="../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s - %s"</span>, <label for="r18" class="ident">etxt</label>, <label for="r16" class="ident">k</label>.<a href="#line-31" class="ident">EText</a>)</code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">return</span> <label for="r18" class="ident">etxt</label></code></span>
+<span class="codeline" id="line-80"><code>}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> processUnmarshalReplyError(<label for="r20" class="ident">b</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r21" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">switch</span> <label for="r21" class="ident">err</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">case</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-34" class="ident">StructuralError</a>:</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">var</span> <label for="r22" class="ident">krberr</label> <a href="#line-19" class="ident">KRBError</a></code></span>
+<span class="codeline" id="line-86"><code>		<label for="r23" class="ident">tmperr</label> := <label for="r22" class="ident">krberr</label>.<a href="#line-51" class="ident">Unmarshal</a>(<label for="r20" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-87"><code>		<span class="keyword">if</span> <label for="r23" class="ident">tmperr</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-88"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-47" class="ident">Errorf</a>(<label for="r21" class="ident">err</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-12" class="ident">EncodingError</a>, <span class="lit-string">"failed to unmarshal KDC's reply"</span>)</code></span>
+<span class="codeline" id="line-89"><code>		}</code></span>
+<span class="codeline" id="line-90"><code>		<span class="keyword">return</span> <label for="r22" class="ident">krberr</label></code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-47" class="ident">Errorf</a>(<label for="r21" class="ident">err</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i8">krberror</a>.<a href="../krberror/error.go.html#line-12" class="ident">EncodingError</a>, <span class="lit-string">"failed to unmarshal KDC's reply"</span>)</code></span>
+<span class="codeline" id="line-93"><code>	}</code></span>
+<span class="codeline" id="line-94"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

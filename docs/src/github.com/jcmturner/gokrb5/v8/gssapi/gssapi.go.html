@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: gssapi.go in package github.com/jcmturner/gokrb5/v8/gssapi</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	gssapi.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html">github.com/jcmturner/gokrb5/v8/gssapi</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package gssapi implements Generic Security Services Application Program Interface required for SPNEGO kerberos authentication.</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> gssapi</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-5"><code>	<label for="i0"><span class="lit-string i0">"context"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i2"><span class="lit-string i2">"github.com/jcmturner/gofork/encoding/asn1"</span></label></code></span>
+<span class="codeline" id="line-9"><code>)</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// GSS-API OID names</span></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-13"><code>	<span class="comment">// GSS-API OID names</span></code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-OIDKRB5" class="ident">OIDKRB5</a>         <a href="#line-118" class="ident">OIDName</a> = <span class="lit-string">"KRB5"</span>         <span class="comment">// MechType OID for Kerberos 5</span></code></span>
+<span class="codeline" id="line-15"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-OIDMSLegacyKRB5" class="ident">OIDMSLegacyKRB5</a> <a href="#line-118" class="ident">OIDName</a> = <span class="lit-string">"MSLegacyKRB5"</span> <span class="comment">// MechType OID for Kerberos 5</span></code></span>
+<span class="codeline" id="line-16"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-OIDSPNEGO" class="ident">OIDSPNEGO</a>       <a href="#line-118" class="ident">OIDName</a> = <span class="lit-string">"SPNEGO"</span></code></span>
+<span class="codeline" id="line-17"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-OIDGSSIAKerb" class="ident">OIDGSSIAKerb</a>    <a href="#line-118" class="ident">OIDName</a> = <span class="lit-string">"GSSIAKerb"</span> <span class="comment">// Indicates the client cannot get a service ticket and asks the server to serve as an intermediate to the target KDC. http://k5wiki.kerberos.org/wiki/Projects/IAKERB#IAKERB_mech</span></code></span>
+<span class="codeline" id="line-18"><code>)</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// GSS-API status values</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadBindings" class="ident">StatusBadBindings</a> = <span class="lit-number">1</span> &lt;&lt; <a href="../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadMech" class="ident">StatusBadMech</a></code></span>
+<span class="codeline" id="line-24"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadName" class="ident">StatusBadName</a></code></span>
+<span class="codeline" id="line-25"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadNameType" class="ident">StatusBadNameType</a></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadStatus" class="ident">StatusBadStatus</a></code></span>
+<span class="codeline" id="line-27"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadSig" class="ident">StatusBadSig</a></code></span>
+<span class="codeline" id="line-28"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadMIC" class="ident">StatusBadMIC</a></code></span>
+<span class="codeline" id="line-29"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusContextExpired" class="ident">StatusContextExpired</a></code></span>
+<span class="codeline" id="line-30"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusCredentialsExpired" class="ident">StatusCredentialsExpired</a></code></span>
+<span class="codeline" id="line-31"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusDefectiveCredential" class="ident">StatusDefectiveCredential</a></code></span>
+<span class="codeline" id="line-32"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusDefectiveToken" class="ident">StatusDefectiveToken</a></code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusFailure" class="ident">StatusFailure</a></code></span>
+<span class="codeline" id="line-34"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusNoContext" class="ident">StatusNoContext</a></code></span>
+<span class="codeline" id="line-35"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusNoCred" class="ident">StatusNoCred</a></code></span>
+<span class="codeline" id="line-36"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusBadQOP" class="ident">StatusBadQOP</a></code></span>
+<span class="codeline" id="line-37"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusUnauthorized" class="ident">StatusUnauthorized</a></code></span>
+<span class="codeline" id="line-38"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusUnavailable" class="ident">StatusUnavailable</a></code></span>
+<span class="codeline" id="line-39"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusDuplicateElement" class="ident">StatusDuplicateElement</a></code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusNameNotMN" class="ident">StatusNameNotMN</a></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusComplete" class="ident">StatusComplete</a></code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusContinueNeeded" class="ident">StatusContinueNeeded</a></code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusDuplicateToken" class="ident">StatusDuplicateToken</a></code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusOldToken" class="ident">StatusOldToken</a></code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusUnseqToken" class="ident">StatusUnseqToken</a></code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-StatusGapToken" class="ident">StatusGapToken</a></code></span>
+<span class="codeline" id="line-47"><code>)</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// ContextToken is an interface for a GSS-API context token.</span></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-ContextToken" class="ident">ContextToken</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.ContextToken.html#name-Marshal" class="ident">Marshal</a>() ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.ContextToken.html#name-Unmarshal" class="ident">Unmarshal</a>(b []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.ContextToken.html#name-Verify" class="ident">Verify</a>() (<a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="#line-136" class="ident">Status</a>)</code></span>
+<span class="codeline" id="line-54"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.ContextToken.html#name-Context" class="ident">Context</a>() <a href="../../../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../../../context/context.go.html#line-62" class="ident">Context</a></code></span>
+<span class="codeline" id="line-55"><code>}</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">CREDENTIAL MANAGEMENT</span></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">GSS_Acquire_cred             acquire credentials for use</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">GSS_Release_cred             release credentials after use</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">GSS_Inquire_cred             display information about credentials</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">GSS_Add_cred                 construct credentials incrementally</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">GSS_Inquire_cred_by_mech     display per-mechanism credential information</span></code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">CONTEXT-LEVEL CALLS</span></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">GSS_Init_sec_context         initiate outbound security context</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">GSS_Accept_sec_context       accept inbound security context</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">GSS_Delete_sec_context       flush context when no longer needed</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">GSS_Process_context_token    process received control token on context</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">GSS_Context_time             indicate validity time remaining on context</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">GSS_Inquire_context          display information about context</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">GSS_Wrap_size_limit          determine GSS_Wrap token size limit</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">GSS_Export_sec_context       transfer context to other process</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">GSS_Import_sec_context       import transferred context</span></code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">PER-MESSAGE CALLS</span></code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">GSS_GetMIC                   apply integrity check, receive as token separate from message</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">GSS_VerifyMIC                validate integrity check token along with message</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">GSS_Wrap                     sign, optionally encrypt, encapsulate</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">GSS_Unwrap                   decapsulate, decrypt if needed, validate integrity check</span></code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">SUPPORT CALLS</span></code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">GSS_Display_status           translate status codes to printable form</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">GSS_Indicate_mechs           indicate mech_types supported on local system</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">GSS_Compare_name             compare two names for equality</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">GSS_Display_name             translate name to printable form</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">GSS_Import_name              convert printable name to normalized form</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">GSS_Release_name             free storage of normalized-form name</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">GSS_Release_buffer           free storage of general GSS-allocated object</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">GSS_Release_OID_set          free storage of OID set object</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">GSS_Create_empty_OID_set     create empty OID set</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">GSS_Add_OID_set_member       add member to OID set</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">GSS_Test_OID_set_member      test if OID is member of OID set</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">GSS_Inquire_names_for_mech   indicate name types supported by mechanism</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">GSS_Inquire_mechs_for_name   indicates mechanisms supporting name type</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">GSS_Canonicalize_name        translate name to per-mechanism form</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">GSS_Export_name              externalize per-mechanism name</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">GSS_Duplicate_name           duplicate name object</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">// Mechanism is the GSS-API interface for authentication mechanisms.</span></code></span>
+<span class="codeline" id="line-106"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-Mechanism" class="ident">Mechanism</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-107"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-OID" class="ident">OID</a>() <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a></code></span>
+<span class="codeline" id="line-108"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-AcquireCred" class="ident">AcquireCred</a>() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>                                               <span class="comment">// acquire credentials for use (eg. AS exchange for KRB5)</span></code></span>
+<span class="codeline" id="line-109"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-InitSecContext" class="ident">InitSecContext</a>() (<a href="#line-50" class="ident">ContextToken</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>)                            <span class="comment">// initiate outbound security context (eg TGS exchange builds AP_REQ to go into ContextToken to send to service)</span></code></span>
+<span class="codeline" id="line-110"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-AcceptSecContext" class="ident">AcceptSecContext</a>(ct <a href="#line-50" class="ident">ContextToken</a>) (<a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../../../context/context.go.html#line-62" class="ident">Context</a>, <a href="#line-136" class="ident">Status</a>) <span class="comment">// service verifies the token server side to establish a context</span></code></span>
+<span class="codeline" id="line-111"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-MIC" class="ident">MIC</a>() <a href="MICToken.go^8ac3f.html#line-35" class="ident">MICToken</a>                                                    <span class="comment">// apply integrity check, receive as token separate from message</span></code></span>
+<span class="codeline" id="line-112"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-VerifyMIC" class="ident">VerifyMIC</a>(mt <a href="MICToken.go^8ac3f.html#line-35" class="ident">MICToken</a>) (<a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>)                              <span class="comment">// validate integrity check token along with message</span></code></span>
+<span class="codeline" id="line-113"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-Wrap" class="ident">Wrap</a>(msg []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="wrapToken.go^c359d.html#line-28" class="ident">WrapToken</a>                                        <span class="comment">// sign, optionally encrypt, encapsulate</span></code></span>
+<span class="codeline" id="line-114"><code>	<a href="../../../../../../imp/github.com/jcmturner/gokrb5/v8/gssapi.Mechanism.html#name-Unwrap" class="ident">Unwrap</a>(wt <a href="wrapToken.go^c359d.html#line-28" class="ident">WrapToken</a>) []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                                       <span class="comment">// decapsulate, decrypt if needed, validate integrity check</span></code></span>
+<span class="codeline" id="line-115"><code>}</code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// OIDName is the type for defined GSS-API OIDs.</span></code></span>
+<span class="codeline" id="line-118"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-OIDName" class="ident">OIDName</a> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// OID returns the OID for the provided OID name.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">func</span> (<label for="r0" class="ident">o</label> <a href="#line-118" class="ident">OIDName</a>) <label for="r1" class="ident">OID</label>() <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a> {</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">switch</span> <label for="r0" class="ident">o</label> {</code></span>
+<span class="codeline" id="line-123"><code>	<span class="keyword">case</span> <a href="#line-16" class="ident">OIDSPNEGO</a>:</code></span>
+<span class="codeline" id="line-124"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{<span class="lit-number">1</span>, <span class="lit-number">3</span>, <span class="lit-number">6</span>, <span class="lit-number">1</span>, <span class="lit-number">5</span>, <span class="lit-number">5</span>, <span class="lit-number">2</span>}</code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">OIDKRB5</a>:</code></span>
+<span class="codeline" id="line-126"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{<span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">840</span>, <span class="lit-number">113554</span>, <span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">2</span>}</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">case</span> <a href="#line-15" class="ident">OIDMSLegacyKRB5</a>:</code></span>
+<span class="codeline" id="line-128"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{<span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">840</span>, <span class="lit-number">48018</span>, <span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">2</span>}</code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">case</span> <a href="#line-17" class="ident">OIDGSSIAKerb</a>:</code></span>
+<span class="codeline" id="line-130"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{<span class="lit-number">1</span>, <span class="lit-number">3</span>, <span class="lit-number">6</span>, <span class="lit-number">1</span>, <span class="lit-number">5</span>, <span class="lit-number">2</span>, <span class="lit-number">5</span>}</code></span>
+<span class="codeline" id="line-131"><code>	}</code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i2">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{}</code></span>
+<span class="codeline" id="line-133"><code>}</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">// Status is the GSS-API status and implements the error interface.</span></code></span>
+<span class="codeline" id="line-136"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html#name-Status" class="ident">Status</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-137"><code>	Code    <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-138"><code>	Message <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-139"><code>}</code></span>
+<span class="codeline" id="line-140"><code></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// Error returns the Status description.</span></code></span>
+<span class="codeline" id="line-142"><code><span class="keyword">func</span> (<label for="r2" class="ident">s</label> <a href="#line-136" class="ident">Status</a>) <label for="r3" class="ident">Error</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-143"><code>	<span class="keyword">var</span> <label for="r4" class="ident">str</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-144"><code>	<span class="keyword">switch</span> <label for="r2" class="ident">s</label>.<a href="#line-137" class="ident">Code</a> {</code></span>
+<span class="codeline" id="line-145"><code>	<span class="keyword">case</span> <a href="#line-22" class="ident">StatusBadBindings</a>:</code></span>
+<span class="codeline" id="line-146"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"channel binding mismatch"</span></code></span>
+<span class="codeline" id="line-147"><code>	<span class="keyword">case</span> <a href="#line-23" class="ident">StatusBadMech</a>:</code></span>
+<span class="codeline" id="line-148"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"unsupported mechanism requested"</span></code></span>
+<span class="codeline" id="line-149"><code>	<span class="keyword">case</span> <a href="#line-24" class="ident">StatusBadName</a>:</code></span>
+<span class="codeline" id="line-150"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"invalid name provided"</span></code></span>
+<span class="codeline" id="line-151"><code>	<span class="keyword">case</span> <a href="#line-25" class="ident">StatusBadNameType</a>:</code></span>
+<span class="codeline" id="line-152"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"name of unsupported type provided"</span></code></span>
+<span class="codeline" id="line-153"><code>	<span class="keyword">case</span> <a href="#line-26" class="ident">StatusBadStatus</a>:</code></span>
+<span class="codeline" id="line-154"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"invalid input status selector"</span></code></span>
+<span class="codeline" id="line-155"><code>	<span class="keyword">case</span> <a href="#line-27" class="ident">StatusBadSig</a>:</code></span>
+<span class="codeline" id="line-156"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"token had invalid integrity check"</span></code></span>
+<span class="codeline" id="line-157"><code>	<span class="keyword">case</span> <a href="#line-28" class="ident">StatusBadMIC</a>:</code></span>
+<span class="codeline" id="line-158"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"preferred alias for GSS_S_BAD_SIG"</span></code></span>
+<span class="codeline" id="line-159"><code>	<span class="keyword">case</span> <a href="#line-29" class="ident">StatusContextExpired</a>:</code></span>
+<span class="codeline" id="line-160"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"specified security context expired"</span></code></span>
+<span class="codeline" id="line-161"><code>	<span class="keyword">case</span> <a href="#line-30" class="ident">StatusCredentialsExpired</a>:</code></span>
+<span class="codeline" id="line-162"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"expired credentials detected"</span></code></span>
+<span class="codeline" id="line-163"><code>	<span class="keyword">case</span> <a href="#line-31" class="ident">StatusDefectiveCredential</a>:</code></span>
+<span class="codeline" id="line-164"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"defective credential detected"</span></code></span>
+<span class="codeline" id="line-165"><code>	<span class="keyword">case</span> <a href="#line-32" class="ident">StatusDefectiveToken</a>:</code></span>
+<span class="codeline" id="line-166"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"defective token detected"</span></code></span>
+<span class="codeline" id="line-167"><code>	<span class="keyword">case</span> <a href="#line-33" class="ident">StatusFailure</a>:</code></span>
+<span class="codeline" id="line-168"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"failure, unspecified at GSS-API level"</span></code></span>
+<span class="codeline" id="line-169"><code>	<span class="keyword">case</span> <a href="#line-34" class="ident">StatusNoContext</a>:</code></span>
+<span class="codeline" id="line-170"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"no valid security context specified"</span></code></span>
+<span class="codeline" id="line-171"><code>	<span class="keyword">case</span> <a href="#line-35" class="ident">StatusNoCred</a>:</code></span>
+<span class="codeline" id="line-172"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"no valid credentials provided"</span></code></span>
+<span class="codeline" id="line-173"><code>	<span class="keyword">case</span> <a href="#line-36" class="ident">StatusBadQOP</a>:</code></span>
+<span class="codeline" id="line-174"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"unsupported QOP valu"</span></code></span>
+<span class="codeline" id="line-175"><code>	<span class="keyword">case</span> <a href="#line-37" class="ident">StatusUnauthorized</a>:</code></span>
+<span class="codeline" id="line-176"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"operation unauthorized"</span></code></span>
+<span class="codeline" id="line-177"><code>	<span class="keyword">case</span> <a href="#line-38" class="ident">StatusUnavailable</a>:</code></span>
+<span class="codeline" id="line-178"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"operation unavailable"</span></code></span>
+<span class="codeline" id="line-179"><code>	<span class="keyword">case</span> <a href="#line-39" class="ident">StatusDuplicateElement</a>:</code></span>
+<span class="codeline" id="line-180"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"duplicate credential element requested"</span></code></span>
+<span class="codeline" id="line-181"><code>	<span class="keyword">case</span> <a href="#line-40" class="ident">StatusNameNotMN</a>:</code></span>
+<span class="codeline" id="line-182"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"name contains multi-mechanism elements"</span></code></span>
+<span class="codeline" id="line-183"><code>	<span class="keyword">case</span> <a href="#line-41" class="ident">StatusComplete</a>:</code></span>
+<span class="codeline" id="line-184"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"normal completion"</span></code></span>
+<span class="codeline" id="line-185"><code>	<span class="keyword">case</span> <a href="#line-42" class="ident">StatusContinueNeeded</a>:</code></span>
+<span class="codeline" id="line-186"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"continuation call to routine required"</span></code></span>
+<span class="codeline" id="line-187"><code>	<span class="keyword">case</span> <a href="#line-43" class="ident">StatusDuplicateToken</a>:</code></span>
+<span class="codeline" id="line-188"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"duplicate per-message token detected"</span></code></span>
+<span class="codeline" id="line-189"><code>	<span class="keyword">case</span> <a href="#line-44" class="ident">StatusOldToken</a>:</code></span>
+<span class="codeline" id="line-190"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"timed-out per-message token detected"</span></code></span>
+<span class="codeline" id="line-191"><code>	<span class="keyword">case</span> <a href="#line-45" class="ident">StatusUnseqToken</a>:</code></span>
+<span class="codeline" id="line-192"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"reordered (early) per-message token detected"</span></code></span>
+<span class="codeline" id="line-193"><code>	<span class="keyword">case</span> <a href="#line-46" class="ident">StatusGapToken</a>:</code></span>
+<span class="codeline" id="line-194"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"skipped predecessor token(s) detected"</span></code></span>
+<span class="codeline" id="line-195"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-196"><code>		<label for="r4" class="ident">str</label> = <span class="lit-string">"unknown GSS-API error status"</span></code></span>
+<span class="codeline" id="line-197"><code>	}</code></span>
+<span class="codeline" id="line-198"><code>	<span class="keyword">if</span> <label for="r2" class="ident">s</label>.<a href="#line-138" class="ident">Message</a> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-199"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s: %s"</span>, <label for="r4" class="ident">str</label>, <label for="r2" class="ident">s</label>.<a href="#line-138" class="ident">Message</a>)</code></span>
+<span class="codeline" id="line-200"><code>	}</code></span>
+<span class="codeline" id="line-201"><code>	<span class="keyword">return</span> <label for="r4" class="ident">str</label></code></span>
+<span class="codeline" id="line-202"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

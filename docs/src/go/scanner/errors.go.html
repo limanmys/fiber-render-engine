@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: errors.go in package go/scanner</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	errors.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/go/scanner.html">go/scanner</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> scanner</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"go/token"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"io"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"sort"</span></label></code></span>
+<span class="codeline" id="line-12"><code>)</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// In an ErrorList, an error is represented by an *Error.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// The position Pos, if valid, points to the beginning of</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// the offending token, and the error condition is described</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// by Msg.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">type</span> <a href="../../../pkg/go/scanner.html#name-Error" class="ident">Error</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-19"><code>	Pos <a href="../../../pkg/go/token.html" class="ident i1">token</a>.<a href="../token/position.go.html#line-20" class="ident">Position</a></code></span>
+<span class="codeline" id="line-20"><code>	Msg <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-21"><code>}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// Error implements the error interface.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">func</span> (<label for="r0" class="ident">e</label> <a href="#line-18" class="ident">Error</a>) <label for="r1" class="ident">Error</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-25"><code>	<span class="keyword">if</span> <label for="r0" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> != <span class="lit-string">""</span> || <label for="r0" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a>.<a href="../token/position.go.html#line-28" class="ident">IsValid</a>() {</code></span>
+<span class="codeline" id="line-26"><code>		<span class="comment">// don't print "&lt;unknown position&gt;"</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">		// TODO(gri) reconsider the semantics of Position.IsValid</span></code></span>
+<span class="codeline" id="line-28"><code>		<span class="keyword">return</span> <label for="r0" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a>.<a href="../token/position.go.html#line-38" class="ident">String</a>() + <span class="lit-string">": "</span> + <label for="r0" class="ident">e</label>.<a href="#line-20" class="ident">Msg</a></code></span>
+<span class="codeline" id="line-29"><code>	}</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">return</span> <label for="r0" class="ident">e</label>.<a href="#line-20" class="ident">Msg</a></code></span>
+<span class="codeline" id="line-31"><code>}</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// ErrorList is a list of *Errors.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// The zero value for an ErrorList is an empty ErrorList ready to use.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">type</span> <a href="../../../pkg/go/scanner.html#name-ErrorList" class="ident">ErrorList</a> []*<a href="#line-18" class="ident">Error</a></code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Add adds an Error with given position and error message to an ErrorList.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">func</span> (<label for="r2" class="ident">p</label> *<a href="#line-35" class="ident">ErrorList</a>) <label for="r3" class="ident">Add</label>(<label for="r4" class="ident">pos</label> <a href="../../../pkg/go/token.html" class="ident i1">token</a>.<a href="../token/position.go.html#line-20" class="ident">Position</a>, <label for="r5" class="ident">msg</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-39"><code>	*<label for="r2" class="ident">p</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(*<label for="r2" class="ident">p</label>, &amp;<a href="#line-18" class="ident">Error</a>{<label for="r4" class="ident">pos</label>, <label for="r5" class="ident">msg</label>})</code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// Reset resets an ErrorList to no errors.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">func</span> (<label for="r6" class="ident">p</label> *<a href="#line-35" class="ident">ErrorList</a>) <label for="r7" class="ident">Reset</label>() { *<label for="r6" class="ident">p</label> = (*<label for="r6" class="ident">p</label>)[<span class="lit-number">0</span>:<span class="lit-number">0</span>] }</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// ErrorList implements the sort Interface.</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> (<label for="r8" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r9" class="ident">Len</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>      { <span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r8" class="ident">p</label>) }</code></span>
+<span class="codeline" id="line-47"><code><span class="keyword">func</span> (<label for="r10" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r11" class="ident">Swap</label>(<label for="r12" class="ident">i</label>, <label for="r13" class="ident">j</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) { <label for="r10" class="ident">p</label>[<label for="r12" class="ident">i</label>], <label for="r10" class="ident">p</label>[<label for="r13" class="ident">j</label>] = <label for="r10" class="ident">p</label>[<label for="r13" class="ident">j</label>], <label for="r10" class="ident">p</label>[<label for="r12" class="ident">i</label>] }</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="keyword">func</span> (<label for="r14" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r15" class="ident">Less</label>(<label for="r16" class="ident">i</label>, <label for="r17" class="ident">j</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-50"><code>	<label for="r18" class="ident">e</label> := &amp;<label for="r14" class="ident">p</label>[<label for="r16" class="ident">i</label>].<a href="#line-19" class="ident">Pos</a></code></span>
+<span class="codeline" id="line-51"><code>	<label for="r19" class="ident">f</label> := &amp;<label for="r14" class="ident">p</label>[<label for="r17" class="ident">j</label>].<a href="#line-19" class="ident">Pos</a></code></span>
+<span class="codeline" id="line-52"><code>	<span class="comment">// Note that it is not sufficient to simply compare file offsets because</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">	// the offsets do not reflect modified line information (through //line</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">	// comments).</span></code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">if</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> != <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> {</code></span>
+<span class="codeline" id="line-56"><code>		<span class="keyword">return</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> &lt; <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-21" class="ident">Filename</a></code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">if</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-23" class="ident">Line</a> != <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-23" class="ident">Line</a> {</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">return</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-23" class="ident">Line</a> &lt; <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-23" class="ident">Line</a></code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">if</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-24" class="ident">Column</a> != <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-24" class="ident">Column</a> {</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">return</span> <label for="r18" class="ident">e</label>.<a href="../token/position.go.html#line-24" class="ident">Column</a> &lt; <label for="r19" class="ident">f</label>.<a href="../token/position.go.html#line-24" class="ident">Column</a></code></span>
+<span class="codeline" id="line-63"><code>	}</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">return</span> <label for="r14" class="ident">p</label>[<label for="r16" class="ident">i</label>].<a href="#line-20" class="ident">Msg</a> &lt; <label for="r14" class="ident">p</label>[<label for="r17" class="ident">j</label>].<a href="#line-20" class="ident">Msg</a></code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// Sort sorts an ErrorList. *Error entries are sorted by position,</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// other errors are sorted by error message, and before any *Error</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// entry.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="keyword">func</span> (<label for="r20" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r21" class="ident">Sort</label>() {</code></span>
+<span class="codeline" id="line-71"><code>	<a href="../../../pkg/sort.html" class="ident i3">sort</a>.<a href="../../sort/sort.go.html#line-42" class="ident">Sort</a>(<label for="r20" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-72"><code>}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// RemoveMultiples sorts an ErrorList and removes all but the first error per line.</span></code></span>
+<span class="codeline" id="line-75"><code><span class="keyword">func</span> (<label for="r22" class="ident">p</label> *<a href="#line-35" class="ident">ErrorList</a>) <label for="r23" class="ident">RemoveMultiples</label>() {</code></span>
+<span class="codeline" id="line-76"><code>	<a href="../../../pkg/sort.html" class="ident i3">sort</a>.<a href="../../sort/sort.go.html#line-42" class="ident">Sort</a>(<label for="r22" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">var</span> <label for="r24" class="ident">last</label> <a href="../../../pkg/go/token.html" class="ident i1">token</a>.<a href="../token/position.go.html#line-20" class="ident">Position</a> <span class="comment">// initial last.Line is != any legal error line</span></code></span>
+<span class="codeline" id="line-78"><code>	<label for="r25" class="ident">i</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">for</span> <label for="r26" class="ident">_</label>, <label for="r27" class="ident">e</label> := <span class="keyword">range</span> *<label for="r22" class="ident">p</label> {</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">if</span> <label for="r27" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> != <label for="r24" class="ident">last</label>.<a href="../token/position.go.html#line-21" class="ident">Filename</a> || <label for="r27" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a>.<a href="../token/position.go.html#line-23" class="ident">Line</a> != <label for="r24" class="ident">last</label>.<a href="../token/position.go.html#line-23" class="ident">Line</a> {</code></span>
+<span class="codeline" id="line-81"><code>			<label for="r24" class="ident">last</label> = <label for="r27" class="ident">e</label>.<a href="#line-19" class="ident">Pos</a></code></span>
+<span class="codeline" id="line-82"><code>			(*<label for="r22" class="ident">p</label>)[<label for="r25" class="ident">i</label>] = <label for="r27" class="ident">e</label></code></span>
+<span class="codeline" id="line-83"><code>			<label for="r25" class="ident">i</label>++</code></span>
+<span class="codeline" id="line-84"><code>		}</code></span>
+<span class="codeline" id="line-85"><code>	}</code></span>
+<span class="codeline" id="line-86"><code>	*<label for="r22" class="ident">p</label> = (*<label for="r22" class="ident">p</label>)[<span class="lit-number">0</span>:<label for="r25" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// An ErrorList implements the error interface.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="keyword">func</span> (<label for="r28" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r29" class="ident">Error</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">switch</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r28" class="ident">p</label>) {</code></span>
+<span class="codeline" id="line-92"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-93"><code>		<span class="keyword">return</span> <span class="lit-string">"no errors"</span></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">case</span> <span class="lit-number">1</span>:</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <label for="r28" class="ident">p</label>[<span class="lit-number">0</span>].<a href="#line-24" class="ident">Error</a>()</code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">return</span> <a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s (and %d more errors)"</span>, <label for="r28" class="ident">p</label>[<span class="lit-number">0</span>], <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r28" class="ident">p</label>)-<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// Err returns an error equivalent to this error list.</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// If the list is empty, Err returns nil.</span></code></span>
+<span class="codeline" id="line-102"><code><span class="keyword">func</span> (<label for="r30" class="ident">p</label> <a href="#line-35" class="ident">ErrorList</a>) <label for="r31" class="ident">Err</label>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r30" class="ident">p</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-105"><code>	}</code></span>
+<span class="codeline" id="line-106"><code>	<span class="keyword">return</span> <label for="r30" class="ident">p</label></code></span>
+<span class="codeline" id="line-107"><code>}</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">// PrintError is a utility function that prints a list of errors to w,</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// one error per line, if the err parameter is an ErrorList. Otherwise</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// it prints the err string.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="keyword">func</span> <label for="r32" class="ident"><a href="../../../pkg/go/scanner.html#name-PrintError" class="ident">PrintError</a></label>(<label for="r33" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r34" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">if</span> <label for="r35" class="ident">list</label>, <label for="r36" class="ident">ok</label> := <label for="r34" class="ident">err</label>.(<a href="#line-35" class="ident">ErrorList</a>); <label for="r36" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-114"><code>		<span class="keyword">for</span> <label for="r37" class="ident">_</label>, <label for="r38" class="ident">e</label> := <span class="keyword">range</span> <label for="r35" class="ident">list</label> {</code></span>
+<span class="codeline" id="line-115"><code>			<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-202" class="ident">Fprintf</a>(<label for="r33" class="ident">w</label>, <span class="lit-string">"%s\n"</span>, <label for="r38" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-116"><code>		}</code></span>
+<span class="codeline" id="line-117"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r34" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-118"><code>		<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-202" class="ident">Fprintf</a>(<label for="r33" class="ident">w</label>, <span class="lit-string">"%s\n"</span>, <label for="r34" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-119"><code>	}</code></span>
+<span class="codeline" id="line-120"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

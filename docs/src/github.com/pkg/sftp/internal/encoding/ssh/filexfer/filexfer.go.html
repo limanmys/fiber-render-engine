@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: filexfer.go in package github.com/pkg/sftp/internal/encoding/ssh/filexfer</title>
+<link href="../../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	filexfer.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html">github.com/pkg/sftp/internal/encoding/ssh/filexfer</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package filexfer implements the wire encoding for secsh-filexfer as described in https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> filexfer</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// PacketMarshaller narrowly defines packets that will only be transmitted.</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// ExtendedPacket types will often only implement this interface,</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// since decoding the whole packet body of an ExtendedPacket can only be done dependent on the ExtendedRequest field.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketMarshaller" class="ident">PacketMarshaller</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-9"><code>	<span class="comment">// MarshalPacket is the primary intended way to encode a packet.</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">	// The request-id for the packet is set from reqid.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">	// An optional buffer may be given in b.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">	// If the buffer has a minimum capacity, it shall be truncated and used to marshal the header into.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">	// The minimum capacity for the packet must be a constant expression, and should be at least 9.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">	// It shall return the main body of the encoded packet in header,</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">	// and may optionally return an additional payload to be written immediately after the header.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">	// It shall encode in the first 4-bytes of the header the proper length of the rest of the header+payload.</span></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../../../imp/github.com/pkg/sftp/internal/encoding/ssh/filexfer.PacketMarshaller.html#name-MarshalPacket" class="ident">MarshalPacket</a>(reqid <a href="../../../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, b []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (header, payload []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, err <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-21"><code>}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// Packet defines the behavior of a full generic SFTP packet.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// InitPacket, and VersionPacket are not generic SFTP packets, and instead implement (Un)MarshalBinary.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// ExtendedPacket types should not iplement this interface,</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// since decoding the whole packet body of an ExtendedPacket can only be done dependent on the ExtendedRequest field.</span></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-Packet" class="ident">Packet</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-30"><code>	<a href="#line-8" class="ident">PacketMarshaller</a></code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code>	<span class="comment">// Type returns the SSH_FXP_xy value associated with the specific packet.</span></code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../../../../../../imp/github.com/pkg/sftp/internal/encoding/ssh/filexfer.Packet.html#name-Type" class="ident">Type</a>() <a href="fxp.go.html#line-8" class="ident">PacketType</a></code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code>	<span class="comment">// UnmarshalPacketBody decodes a packet body from the given Buffer.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">	// It is assumed that the common header values of the length, type and request-id have already been consumed.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">	// Implementations should not alias the given Buffer,</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">	// instead they can consider prepopulating an internal buffer as a hint,</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">	// and copying into that buffer if it has sufficient length.</span></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../../../../../imp/github.com/pkg/sftp/internal/encoding/ssh/filexfer.Packet.html#name-UnmarshalPacketBody" class="ident">UnmarshalPacketBody</a>(buf *<a href="buffer.go.html#line-17" class="ident">Buffer</a>) <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-42"><code>}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// ComposePacket converts returns from MarshalPacket into an equivalent call to MarshalBinary.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-ComposePacket" class="ident">ComposePacket</a></label>(<label for="r1" class="ident">header</label>, <label for="r2" class="ident">payload</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r3" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) ([]<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r1" class="ident">header</label>, <label for="r2" class="ident">payload</label>...), <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-47"><code>}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// Default length values,</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// Defined in draft-ietf-secsh-filexfer-02 section 3.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-DefaultMaxPacketLength" class="ident">DefaultMaxPacketLength</a> = <span class="lit-number">34000</span></code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-DefaultMaxDataLength" class="ident">DefaultMaxDataLength</a>   = <span class="lit-number">32768</span></code></span>
+<span class="codeline" id="line-54"><code>)</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

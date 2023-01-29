@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: smb2.go in package github.com/hirochachacha/go-smb2</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	smb2.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/hirochachacha/go-smb2.html">github.com/hirochachacha/go-smb2</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package smb2 implements the SMB2/3 client in [MS-SMB2].</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// https://msdn.microsoft.com/en-us/library/cc246482.aspx</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// This package doesn't support CAP_UNIX extension.</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// Symlink is supported by FSCTL_SET_REPARSE_POINT and FSCTL_GET_REPARSE_POINT.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// The symlink-following algorithm is explained in 2.2.2.2.1 and 2.2.2.2.1.1.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// https://msdn.microsoft.com/en-us/library/cc246542.aspx</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// Supported features and protocol versions are declared in feature.go.</span></code></span></div><span class="codeline" id="line-12"><code><span class="keyword">package</span> smb2</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-15"><code>	<label for="i0"><span class="lit-string i0">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-16"><code>	<label for="i1"><span class="lit-string i1">"io/ioutil"</span></label></code></span>
+<span class="codeline" id="line-17"><code>	<label for="i2"><span class="lit-string i2">"log"</span></label></code></span>
+<span class="codeline" id="line-18"><code>	<label for="i3"><span class="lit-string i3">"os"</span></label></code></span>
+<span class="codeline" id="line-19"><code>)</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">var</span> debug = <a href="../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../os/env.go.html#line-101" class="ident">Getenv</a>(<span class="lit-string">"DEBUG"</span>) != <span class="lit-string">""</span></code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">var</span> zero [<span class="lit-number">16</span>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">var</span> be = <a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a></code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">var</span> logger *<a href="../../../../pkg/log.html" class="ident i2">log</a>.<a href="../../../log/log.go.html#line-56" class="ident">Logger</a></code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">if</span> <a href="#line-21" class="ident">debug</a> {</code></span>
+<span class="codeline" id="line-31"><code>		<a href="#line-27" class="ident">logger</a> = <a href="../../../../pkg/log.html" class="ident i2">log</a>.<a href="../../../log/log.go.html#line-70" class="ident">New</a>(<a href="../../../../pkg/os.html" class="ident i3">os</a>.<a href="../../../os/file.go.html#line-67" class="ident">Stderr</a>, <span class="lit-string">"smb2: "</span>, <a href="../../../../pkg/log.html" class="ident i2">log</a>.<a href="../../../log/log.go.html#line-49" class="ident">LstdFlags</a>)</code></span>
+<span class="codeline" id="line-32"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-33"><code>		<a href="#line-27" class="ident">logger</a> = <a href="../../../../pkg/log.html" class="ident i2">log</a>.<a href="../../../log/log.go.html#line-70" class="ident">New</a>(<a href="../../../../pkg/io/ioutil.html" class="ident i1">ioutil</a>.<a href="../../../io/ioutil/ioutil.go.html#line-95" class="ident">Discard</a>, <span class="lit-string">"smb2: "</span>, <a href="../../../../pkg/log.html" class="ident i2">log</a>.<a href="../../../log/log.go.html#line-49" class="ident">LstdFlags</a>)</code></span>
+<span class="codeline" id="line-34"><code>	}</code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

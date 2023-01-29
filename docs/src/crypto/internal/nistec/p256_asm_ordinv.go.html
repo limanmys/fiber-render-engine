@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: p256_asm_ordinv.go in package crypto/internal/nistec</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	p256_asm_ordinv.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/crypto/internal/nistec.html">crypto/internal/nistec</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2022 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//go:build amd64 || arm64</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">package</span> nistec</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// Montgomery multiplication modulo org(G). Sets res = in1 * in2 * R⁻¹.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">//go:noescape</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">func</span> p256OrdMul(<label for="r1" class="ident">res</label>, <label for="r2" class="ident">in1</label>, <label for="r3" class="ident">in2</label> *<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// Montgomery square modulo org(G), repeated n times (n &gt;= 1).</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">//go:noescape</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">func</span> p256OrdSqr(<label for="r5" class="ident">res</label>, <label for="r6" class="ident">in</label> *<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>, <label for="r7" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>)</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">func</span> <label for="r8" class="ident"><a href="../../../../pkg/crypto/internal/nistec.html#name-P256OrdInverse" class="ident">P256OrdInverse</a></label>(<label for="r9" class="ident">k</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-22"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r9" class="ident">k</label>) != <span class="lit-number">32</span> {</code></span>
+<span class="codeline" id="line-23"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"invalid scalar length"</span>)</code></span>
+<span class="codeline" id="line-24"><code>	}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code>	<label for="r10" class="ident">x</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-27"><code>	<a href="p256_asm.go.html#line-288" class="ident">p256OrdBigToLittle</a>(<label for="r10" class="ident">x</label>, (*[<span class="lit-number">32</span>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>)(<label for="r9" class="ident">k</label>))</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code>	<span class="comment">// Inversion is implemented as exponentiation by n - 2, per Fermat's little theorem.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">	// The sequence of 38 multiplications and 254 squarings is derived from</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">	// https://briansmith.org/ecc-inversion-addition-chains-01#p256_scalar_inversion</span></code></span>
+<span class="codeline" id="line-33"><code>	<label for="r11" class="ident">_1</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-34"><code>	<label for="r12" class="ident">_11</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-35"><code>	<label for="r13" class="ident">_101</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-36"><code>	<label for="r14" class="ident">_111</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-37"><code>	<label for="r15" class="ident">_1111</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-38"><code>	<label for="r16" class="ident">_10101</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-39"><code>	<label for="r17" class="ident">_101111</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-40"><code>	<label for="r18" class="ident">t</label> := <a href="../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>)</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>	<span class="comment">// This code operates in the Montgomery domain where R = 2²⁵⁶ mod n and n is</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">	// the order of the scalar field. Elements in the Montgomery domain take the</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">	// form a×R and p256OrdMul calculates (a × b × R⁻¹) mod n. RR is R in the</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">	// domain, or R×R mod n, thus p256OrdMul(x, RR) gives x×R, i.e. converts x</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">	// into the Montgomery domain.</span></code></span>
+<span class="codeline" id="line-47"><code>	<label for="r19" class="ident">RR</label> := &amp;<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>{<span class="lit-number">0x83244c95be79eea2</span>, <span class="lit-number">0x4699799c49bd6fa6</span>,</code></span>
+<span class="codeline" id="line-48"><code>		<span class="lit-number">0x2845b2392b6bec59</span>, <span class="lit-number">0x66e12d94f3d95620</span>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r11" class="ident">_1</label>, <label for="r10" class="ident">x</label>, <label for="r19" class="ident">RR</label>)      <span class="comment">// _1</span></code></span>
+<span class="codeline" id="line-51"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r11" class="ident">_1</label>, <span class="lit-number">1</span>)       <span class="comment">// _10</span></code></span>
+<span class="codeline" id="line-52"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r12" class="ident">_11</label>, <label for="r10" class="ident">x</label>, <label for="r11" class="ident">_1</label>)     <span class="comment">// _11</span></code></span>
+<span class="codeline" id="line-53"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r13" class="ident">_101</label>, <label for="r10" class="ident">x</label>, <label for="r12" class="ident">_11</label>)   <span class="comment">// _101</span></code></span>
+<span class="codeline" id="line-54"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r14" class="ident">_111</label>, <label for="r10" class="ident">x</label>, <label for="r13" class="ident">_101</label>)  <span class="comment">// _111</span></code></span>
+<span class="codeline" id="line-55"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r13" class="ident">_101</label>, <span class="lit-number">1</span>)     <span class="comment">// _1010</span></code></span>
+<span class="codeline" id="line-56"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r15" class="ident">_1111</label>, <label for="r13" class="ident">_101</label>, <label for="r10" class="ident">x</label>) <span class="comment">// _1111</span></code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r18" class="ident">t</label>, <label for="r10" class="ident">x</label>, <span class="lit-number">1</span>)          <span class="comment">// _10100</span></code></span>
+<span class="codeline" id="line-59"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r16" class="ident">_10101</label>, <label for="r18" class="ident">t</label>, <label for="r11" class="ident">_1</label>)    <span class="comment">// _10101</span></code></span>
+<span class="codeline" id="line-60"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r16" class="ident">_10101</label>, <span class="lit-number">1</span>)     <span class="comment">// _101010</span></code></span>
+<span class="codeline" id="line-61"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r17" class="ident">_101111</label>, <label for="r13" class="ident">_101</label>, <label for="r10" class="ident">x</label>) <span class="comment">// _101111</span></code></span>
+<span class="codeline" id="line-62"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r16" class="ident">_10101</label>, <label for="r10" class="ident">x</label>)     <span class="comment">// _111111 = x6</span></code></span>
+<span class="codeline" id="line-63"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r18" class="ident">t</label>, <label for="r10" class="ident">x</label>, <span class="lit-number">2</span>)          <span class="comment">// _11111100</span></code></span>
+<span class="codeline" id="line-64"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r18" class="ident">t</label>, <label for="r18" class="ident">t</label>, <label for="r12" class="ident">_11</label>)        <span class="comment">// _11111111 = x8</span></code></span>
+<span class="codeline" id="line-65"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r18" class="ident">t</label>, <span class="lit-number">8</span>)          <span class="comment">// _ff00</span></code></span>
+<span class="codeline" id="line-66"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r18" class="ident">t</label>)          <span class="comment">// _ffff = x16</span></code></span>
+<span class="codeline" id="line-67"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r18" class="ident">t</label>, <label for="r10" class="ident">x</label>, <span class="lit-number">16</span>)         <span class="comment">// _ffff0000</span></code></span>
+<span class="codeline" id="line-68"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r18" class="ident">t</label>, <label for="r18" class="ident">t</label>, <label for="r10" class="ident">x</label>)          <span class="comment">// _ffffffff = x32</span></code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r18" class="ident">t</label>, <span class="lit-number">64</span>)</code></span>
+<span class="codeline" id="line-71"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r18" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-72"><code>	<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <span class="lit-number">32</span>)</code></span>
+<span class="codeline" id="line-73"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r18" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<label for="r20" class="ident">sqrs</label> := []<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{</code></span>
+<span class="codeline" id="line-76"><code>		<span class="lit-number">6</span>, <span class="lit-number">5</span>, <span class="lit-number">4</span>, <span class="lit-number">5</span>, <span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-77"><code>		<span class="lit-number">4</span>, <span class="lit-number">3</span>, <span class="lit-number">3</span>, <span class="lit-number">5</span>, <span class="lit-number">9</span>,</code></span>
+<span class="codeline" id="line-78"><code>		<span class="lit-number">6</span>, <span class="lit-number">2</span>, <span class="lit-number">5</span>, <span class="lit-number">6</span>, <span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-79"><code>		<span class="lit-number">4</span>, <span class="lit-number">5</span>, <span class="lit-number">5</span>, <span class="lit-number">3</span>, <span class="lit-number">10</span>,</code></span>
+<span class="codeline" id="line-80"><code>		<span class="lit-number">2</span>, <span class="lit-number">5</span>, <span class="lit-number">5</span>, <span class="lit-number">3</span>, <span class="lit-number">7</span>, <span class="lit-number">6</span>}</code></span>
+<span class="codeline" id="line-81"><code>	<label for="r21" class="ident">muls</label> := []*<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>{</code></span>
+<span class="codeline" id="line-82"><code>		<label for="r17" class="ident">_101111</label>, <label for="r14" class="ident">_111</label>, <label for="r12" class="ident">_11</label>, <label for="r15" class="ident">_1111</label>, <label for="r16" class="ident">_10101</label>,</code></span>
+<span class="codeline" id="line-83"><code>		<label for="r13" class="ident">_101</label>, <label for="r13" class="ident">_101</label>, <label for="r13" class="ident">_101</label>, <label for="r14" class="ident">_111</label>, <label for="r17" class="ident">_101111</label>,</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r15" class="ident">_1111</label>, <label for="r11" class="ident">_1</label>, <label for="r11" class="ident">_1</label>, <label for="r15" class="ident">_1111</label>, <label for="r14" class="ident">_111</label>,</code></span>
+<span class="codeline" id="line-85"><code>		<label for="r14" class="ident">_111</label>, <label for="r14" class="ident">_111</label>, <label for="r13" class="ident">_101</label>, <label for="r12" class="ident">_11</label>, <label for="r17" class="ident">_101111</label>,</code></span>
+<span class="codeline" id="line-86"><code>		<label for="r12" class="ident">_11</label>, <label for="r12" class="ident">_11</label>, <label for="r12" class="ident">_11</label>, <label for="r11" class="ident">_1</label>, <label for="r16" class="ident">_10101</label>, <label for="r15" class="ident">_1111</label>}</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>	<span class="keyword">for</span> <label for="r22" class="ident">i</label>, <label for="r23" class="ident">s</label> := <span class="keyword">range</span> <label for="r20" class="ident">sqrs</label> {</code></span>
+<span class="codeline" id="line-89"><code>		<a href="#line-19" class="ident">p256OrdSqr</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r23" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-90"><code>		<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r21" class="ident">muls</label>[<label for="r22" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-91"><code>	}</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>	<span class="comment">// Montgomery multiplication by R⁻¹, or 1 outside the domain as R⁻¹×R = 1,</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">	// converts a Montgomery value out of the domain.</span></code></span>
+<span class="codeline" id="line-95"><code>	<label for="r24" class="ident">one</label> := &amp;<a href="p256_asm.go.html#line-366" class="ident">p256OrdElement</a>{<span class="lit-number">1</span>}</code></span>
+<span class="codeline" id="line-96"><code>	<a href="#line-14" class="ident">p256OrdMul</a>(<label for="r10" class="ident">x</label>, <label for="r10" class="ident">x</label>, <label for="r24" class="ident">one</label>)</code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">var</span> <label for="r25" class="ident">xOut</label> [<span class="lit-number">32</span>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-99"><code>	<a href="p256_asm.go.html#line-291" class="ident">p256OrdLittleToBig</a>(&amp;<label for="r25" class="ident">xOut</label>, <label for="r10" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">return</span> <label for="r25" class="ident">xOut</label>[:], <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-101"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

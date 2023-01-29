@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: md4block.go in package golang.org/x/crypto/md4</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	md4block.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/golang.org/x/crypto/md4.html">golang.org/x/crypto/md4</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// MD4 block step.</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// In its own file so that a faster assembly or C version</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// can be substituted easily.</span></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">package</span> md4</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"math/bits"</span></label></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">var</span> shift1 = []<a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">3</span>, <span class="lit-number">7</span>, <span class="lit-number">11</span>, <span class="lit-number">19</span>}</code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">var</span> shift2 = []<a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">3</span>, <span class="lit-number">5</span>, <span class="lit-number">9</span>, <span class="lit-number">13</span>}</code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">var</span> shift3 = []<a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">3</span>, <span class="lit-number">9</span>, <span class="lit-number">11</span>, <span class="lit-number">15</span>}</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">var</span> xIndex2 = []<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{<span class="lit-number">0</span>, <span class="lit-number">4</span>, <span class="lit-number">8</span>, <span class="lit-number">12</span>, <span class="lit-number">1</span>, <span class="lit-number">5</span>, <span class="lit-number">9</span>, <span class="lit-number">13</span>, <span class="lit-number">2</span>, <span class="lit-number">6</span>, <span class="lit-number">10</span>, <span class="lit-number">14</span>, <span class="lit-number">3</span>, <span class="lit-number">7</span>, <span class="lit-number">11</span>, <span class="lit-number">15</span>}</code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">var</span> xIndex3 = []<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{<span class="lit-number">0</span>, <span class="lit-number">8</span>, <span class="lit-number">4</span>, <span class="lit-number">12</span>, <span class="lit-number">2</span>, <span class="lit-number">10</span>, <span class="lit-number">6</span>, <span class="lit-number">14</span>, <span class="lit-number">1</span>, <span class="lit-number">9</span>, <span class="lit-number">5</span>, <span class="lit-number">13</span>, <span class="lit-number">3</span>, <span class="lit-number">11</span>, <span class="lit-number">7</span>, <span class="lit-number">15</span>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">func</span> _Block(<label for="r1" class="ident">dig</label> *<a href="md4.go.html#line-36" class="ident">digest</a>, <label for="r2" class="ident">p</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-21"><code>	<label for="r3" class="ident">a</label> := <label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-22"><code>	<label for="r4" class="ident">b</label> := <label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-23"><code>	<label for="r5" class="ident">c</label> := <label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-24"><code>	<label for="r6" class="ident">d</label> := <label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">3</span>]</code></span>
+<span class="codeline" id="line-25"><code>	<label for="r7" class="ident">n</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">var</span> <label for="r8" class="ident">X</label> [<span class="lit-number">16</span>]<a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">for</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) &gt;= <a href="md4.go.html#line-28" class="ident">_Chunk</a> {</code></span>
+<span class="codeline" id="line-28"><code>		<label for="r9" class="ident">aa</label>, <label for="r10" class="ident">bb</label>, <label for="r11" class="ident">cc</label>, <label for="r12" class="ident">dd</label> := <label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label>, <label for="r6" class="ident">d</label></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code>		<label for="r13" class="ident">j</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-31"><code>		<span class="keyword">for</span> <label for="r14" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r14" class="ident">i</label> &lt; <span class="lit-number">16</span>; <label for="r14" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-32"><code>			<label for="r8" class="ident">X</label>[<label for="r14" class="ident">i</label>] = <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r2" class="ident">p</label>[<label for="r13" class="ident">j</label>]) | <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r2" class="ident">p</label>[<label for="r13" class="ident">j</label>+<span class="lit-number">1</span>])&lt;&lt;<span class="lit-number">8</span> | <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r2" class="ident">p</label>[<label for="r13" class="ident">j</label>+<span class="lit-number">2</span>])&lt;&lt;<span class="lit-number">16</span> | <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r2" class="ident">p</label>[<label for="r13" class="ident">j</label>+<span class="lit-number">3</span>])&lt;&lt;<span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-33"><code>			<label for="r13" class="ident">j</label> += <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-34"><code>		}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code>		<span class="comment">// If this needs to be made faster in the future,</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">		// the usual trick is to unroll each of these</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">		// loops by a factor of 4; that lets you replace</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">		// the shift[] lookups with constants and,</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">		// with suitable variable renaming in each</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">		// unrolled body, delete the a, b, c, d = d, a, b, c</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">		// (or you can let the optimizer do the renaming).</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">		// The index variables are uint so that % by a power</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">		// of two can be optimized easily by a compiler.</span></code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code>		<span class="comment">// Round 1.</span></code></span>
+<span class="codeline" id="line-48"><code>		<span class="keyword">for</span> <label for="r15" class="ident">i</label> := <a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">0</span>); <label for="r15" class="ident">i</label> &lt; <span class="lit-number">16</span>; <label for="r15" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-49"><code>			<label for="r16" class="ident">x</label> := <label for="r15" class="ident">i</label></code></span>
+<span class="codeline" id="line-50"><code>			<label for="r17" class="ident">s</label> := <a href="#line-13" class="ident">shift1</a>[<label for="r15" class="ident">i</label>%<span class="lit-number">4</span>]</code></span>
+<span class="codeline" id="line-51"><code>			<label for="r18" class="ident">f</label> := ((<label for="r5" class="ident">c</label> ^ <label for="r6" class="ident">d</label>) &amp; <label for="r4" class="ident">b</label>) ^ <label for="r6" class="ident">d</label></code></span>
+<span class="codeline" id="line-52"><code>			<label for="r3" class="ident">a</label> += <label for="r18" class="ident">f</label> + <label for="r8" class="ident">X</label>[<label for="r16" class="ident">x</label>]</code></span>
+<span class="codeline" id="line-53"><code>			<label for="r3" class="ident">a</label> = <a href="../../../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../../../../math/bits/bits.go.html#line-201" class="ident">RotateLeft32</a>(<label for="r3" class="ident">a</label>, <label for="r17" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-54"><code>			<label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label>, <label for="r6" class="ident">d</label> = <label for="r6" class="ident">d</label>, <label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label></code></span>
+<span class="codeline" id="line-55"><code>		}</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>		<span class="comment">// Round 2.</span></code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">for</span> <label for="r19" class="ident">i</label> := <a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">0</span>); <label for="r19" class="ident">i</label> &lt; <span class="lit-number">16</span>; <label for="r19" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-59"><code>			<label for="r20" class="ident">x</label> := <a href="#line-17" class="ident">xIndex2</a>[<label for="r19" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-60"><code>			<label for="r21" class="ident">s</label> := <a href="#line-14" class="ident">shift2</a>[<label for="r19" class="ident">i</label>%<span class="lit-number">4</span>]</code></span>
+<span class="codeline" id="line-61"><code>			<label for="r22" class="ident">g</label> := (<label for="r4" class="ident">b</label> &amp; <label for="r5" class="ident">c</label>) | (<label for="r4" class="ident">b</label> &amp; <label for="r6" class="ident">d</label>) | (<label for="r5" class="ident">c</label> &amp; <label for="r6" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-62"><code>			<label for="r3" class="ident">a</label> += <label for="r22" class="ident">g</label> + <label for="r8" class="ident">X</label>[<label for="r20" class="ident">x</label>] + <span class="lit-number">0x5a827999</span></code></span>
+<span class="codeline" id="line-63"><code>			<label for="r3" class="ident">a</label> = <a href="../../../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../../../../math/bits/bits.go.html#line-201" class="ident">RotateLeft32</a>(<label for="r3" class="ident">a</label>, <label for="r21" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-64"><code>			<label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label>, <label for="r6" class="ident">d</label> = <label for="r6" class="ident">d</label>, <label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label></code></span>
+<span class="codeline" id="line-65"><code>		}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code>		<span class="comment">// Round 3.</span></code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">for</span> <label for="r23" class="ident">i</label> := <a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">0</span>); <label for="r23" class="ident">i</label> &lt; <span class="lit-number">16</span>; <label for="r23" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-69"><code>			<label for="r24" class="ident">x</label> := <a href="#line-18" class="ident">xIndex3</a>[<label for="r23" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-70"><code>			<label for="r25" class="ident">s</label> := <a href="#line-15" class="ident">shift3</a>[<label for="r23" class="ident">i</label>%<span class="lit-number">4</span>]</code></span>
+<span class="codeline" id="line-71"><code>			<label for="r26" class="ident">h</label> := <label for="r4" class="ident">b</label> ^ <label for="r5" class="ident">c</label> ^ <label for="r6" class="ident">d</label></code></span>
+<span class="codeline" id="line-72"><code>			<label for="r3" class="ident">a</label> += <label for="r26" class="ident">h</label> + <label for="r8" class="ident">X</label>[<label for="r24" class="ident">x</label>] + <span class="lit-number">0x6ed9eba1</span></code></span>
+<span class="codeline" id="line-73"><code>			<label for="r3" class="ident">a</label> = <a href="../../../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../../../../math/bits/bits.go.html#line-201" class="ident">RotateLeft32</a>(<label for="r3" class="ident">a</label>, <label for="r25" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-74"><code>			<label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label>, <label for="r6" class="ident">d</label> = <label for="r6" class="ident">d</label>, <label for="r3" class="ident">a</label>, <label for="r4" class="ident">b</label>, <label for="r5" class="ident">c</label></code></span>
+<span class="codeline" id="line-75"><code>		}</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code>		<label for="r3" class="ident">a</label> += <label for="r9" class="ident">aa</label></code></span>
+<span class="codeline" id="line-78"><code>		<label for="r4" class="ident">b</label> += <label for="r10" class="ident">bb</label></code></span>
+<span class="codeline" id="line-79"><code>		<label for="r5" class="ident">c</label> += <label for="r11" class="ident">cc</label></code></span>
+<span class="codeline" id="line-80"><code>		<label for="r6" class="ident">d</label> += <label for="r12" class="ident">dd</label></code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>		<label for="r2" class="ident">p</label> = <label for="r2" class="ident">p</label>[<a href="md4.go.html#line-28" class="ident">_Chunk</a>:]</code></span>
+<span class="codeline" id="line-83"><code>		<label for="r7" class="ident">n</label> += <a href="md4.go.html#line-28" class="ident">_Chunk</a></code></span>
+<span class="codeline" id="line-84"><code>	}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code>	<label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">0</span>] = <label for="r3" class="ident">a</label></code></span>
+<span class="codeline" id="line-87"><code>	<label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">1</span>] = <label for="r4" class="ident">b</label></code></span>
+<span class="codeline" id="line-88"><code>	<label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">2</span>] = <label for="r5" class="ident">c</label></code></span>
+<span class="codeline" id="line-89"><code>	<label for="r1" class="ident">dig</label>.<a href="md4.go.html#line-37" class="ident">s</a>[<span class="lit-number">3</span>] = <label for="r6" class="ident">d</label></code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">return</span> <label for="r7" class="ident">n</label></code></span>
+<span class="codeline" id="line-91"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

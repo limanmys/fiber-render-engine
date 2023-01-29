@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: kerb_validation_info.go in package github.com/jcmturner/gokrb5/v8/pac</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	kerb_validation_info.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html">github.com/jcmturner/gokrb5/v8/pac</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package pac implements Microsoft Privilege Attribute Certificate (PAC) processing.</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> pac</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-5"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i2"><span class="lit-string i2">"github.com/jcmturner/rpc/v2/mstypes"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i3"><span class="lit-string i3">"github.com/jcmturner/rpc/v2/ndr"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// KERB_VALIDATION_INFO flags.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_GUEST" class="ident">USERFLAG_GUEST</a>                                    = <span class="lit-number">31</span> <span class="comment">// Authentication was done via the GUEST account; no password was used.</span></code></span>
+<span class="codeline" id="line-15"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_NO_ENCRYPTION_AVAILABLE" class="ident">USERFLAG_NO_ENCRYPTION_AVAILABLE</a>                  = <span class="lit-number">30</span> <span class="comment">// No encryption is available.</span></code></span>
+<span class="codeline" id="line-16"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_LAN_MANAGER_KEY" class="ident">USERFLAG_LAN_MANAGER_KEY</a>                          = <span class="lit-number">28</span> <span class="comment">// LAN Manager key was used for authentication.</span></code></span>
+<span class="codeline" id="line-17"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_SUB_AUTH" class="ident">USERFLAG_SUB_AUTH</a>                                 = <span class="lit-number">25</span> <span class="comment">// Sub-authentication used; session key came from the sub-authentication package.</span></code></span>
+<span class="codeline" id="line-18"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_EXTRA_SIDS" class="ident">USERFLAG_EXTRA_SIDS</a>                               = <span class="lit-number">26</span> <span class="comment">// Indicates that the ExtraSids field is populated and contains additional SIDs.</span></code></span>
+<span class="codeline" id="line-19"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_MACHINE_ACCOUNT" class="ident">USERFLAG_MACHINE_ACCOUNT</a>                          = <span class="lit-number">24</span> <span class="comment">// Indicates that the account is a machine account.</span></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_DC_NTLM2" class="ident">USERFLAG_DC_NTLM2</a>                                 = <span class="lit-number">23</span> <span class="comment">// Indicates that the domain controller understands NTLMv2.</span></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_RESOURCE_GROUPIDS" class="ident">USERFLAG_RESOURCE_GROUPIDS</a>                        = <span class="lit-number">22</span> <span class="comment">// Indicates that the ResourceGroupIds field is populated.</span></code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_PROFILEPATH" class="ident">USERFLAG_PROFILEPATH</a>                              = <span class="lit-number">21</span> <span class="comment">// Indicates that ProfilePath is populated.</span></code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_NTLM2_NTCHALLENGERESP" class="ident">USERFLAG_NTLM2_NTCHALLENGERESP</a>                    = <span class="lit-number">20</span> <span class="comment">// The NTLMv2 response from the NtChallengeResponseFields ([MS-NLMP] section 2.2.1.3) was used for authentication and session key generation.</span></code></span>
+<span class="codeline" id="line-24"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_LM2_LMCHALLENGERESP" class="ident">USERFLAG_LM2_LMCHALLENGERESP</a>                      = <span class="lit-number">19</span> <span class="comment">// The LMv2 response from the LmChallengeResponseFields ([MS-NLMP] section 2.2.1.3) was used for authentication and session key generation.</span></code></span>
+<span class="codeline" id="line-25"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-USERFLAG_AUTH_LMCHALLENGERESP_KEY_NTCHALLENGERESP" class="ident">USERFLAG_AUTH_LMCHALLENGERESP_KEY_NTCHALLENGERESP</a> = <span class="lit-number">18</span> <span class="comment">// The LMv2 response from the LmChallengeResponseFields ([MS-NLMP] section 2.2.1.3) was used for authentication and the NTLMv2 response from the NtChallengeResponseFields ([MS-NLMP] section 2.2.1.3) was used session key generation.</span></code></span>
+<span class="codeline" id="line-26"><code>)</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// KerbValidationInfo implement https://msdn.microsoft.com/en-us/library/cc237948.aspx</span></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/pac.html#name-KerbValidationInfo" class="ident">KerbValidationInfo</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-30"><code>	LogOnTime              <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-31"><code>	LogOffTime             <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-32"><code>	KickOffTime            <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-33"><code>	PasswordLastSet        <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-34"><code>	PasswordCanChange      <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-35"><code>	PasswordMustChange     <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-36"><code>	EffectiveName          <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-37"><code>	FullName               <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-38"><code>	LogonScript            <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-39"><code>	ProfilePath            <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-40"><code>	HomeDirectory          <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-41"><code>	HomeDirectoryDrive     <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-42"><code>	LogonCount             <a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-43"><code>	BadPasswordCount       <a href="../../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-44"><code>	UserID                 <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-45"><code>	PrimaryGroupID         <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-46"><code>	GroupCount             <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-47"><code>	GroupIDs               []<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/group_membership.go.html#line-6" class="ident">GroupMembership</a> <span class="lit-string">`ndr:"pointer,conformant"`</span></code></span>
+<span class="codeline" id="line-48"><code>	UserFlags              <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-49"><code>	UserSessionKey         <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/user_session_key.go.html#line-9" class="ident">UserSessionKey</a></code></span>
+<span class="codeline" id="line-50"><code>	LogonServer            <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-51"><code>	LogonDomainName        <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/rpc_unicode_string.go.html#line-4" class="ident">RPCUnicodeString</a></code></span>
+<span class="codeline" id="line-52"><code>	LogonDomainID          <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-12" class="ident">RPCSID</a> <span class="lit-string">`ndr:"pointer"`</span></code></span>
+<span class="codeline" id="line-53"><code>	Reserved1              [<span class="lit-number">2</span>]<a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>      <span class="comment">// Has 2 elements</span></code></span>
+<span class="codeline" id="line-54"><code>	UserAccountControl     <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-55"><code>	SubAuthStatus          <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-56"><code>	LastSuccessfulILogon   <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-57"><code>	LastFailedILogon       <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/filetime.go.html#line-21" class="ident">FileTime</a></code></span>
+<span class="codeline" id="line-58"><code>	FailedILogonCount      <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-59"><code>	Reserved3              <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-60"><code>	SIDCount               <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-61"><code>	ExtraSIDs              []<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/kerb_sid_and_attributes.go.html#line-15" class="ident">KerbSidAndAttributes</a> <span class="lit-string">`ndr:"pointer,conformant"`</span></code></span>
+<span class="codeline" id="line-62"><code>	ResourceGroupDomainSID <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-12" class="ident">RPCSID</a>                 <span class="lit-string">`ndr:"pointer"`</span></code></span>
+<span class="codeline" id="line-63"><code>	ResourceGroupCount     <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-64"><code>	ResourceGroupIDs       []<a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/mstypes.html" class="ident i2">mstypes</a>.<a href="../../../rpc/v2/mstypes/group_membership.go.html#line-6" class="ident">GroupMembership</a> <span class="lit-string">`ndr:"pointer,conformant"`</span></code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// Unmarshal bytes into the DeviceInfo struct</span></code></span>
+<span class="codeline" id="line-68"><code><span class="keyword">func</span> (<label for="r0" class="ident">k</label> *<a href="#line-29" class="ident">KerbValidationInfo</a>) <label for="r1" class="ident">Unmarshal</label>(<label for="r2" class="ident">b</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r3" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r4" class="ident">dec</label> := <a href="../../../../../../pkg/github.com/jcmturner/rpc/v2/ndr.html" class="ident i3">ndr</a>.<a href="../../../rpc/v2/ndr/decoder.go.html#line-37" class="ident">NewDecoder</a>(<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/reader.go.html#line-159" class="ident">NewReader</a>(<label for="r2" class="ident">b</label>))</code></span>
+<span class="codeline" id="line-70"><code>	<label for="r3" class="ident">err</label> = <label for="r4" class="ident">dec</label>.<a href="../../../rpc/v2/ndr/decoder.go.html#line-46" class="ident">Decode</a>(<label for="r0" class="ident">k</label>)</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-72"><code>		<label for="r3" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error unmarshaling KerbValidationInfo: %v"</span>, <label for="r3" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-75"><code>}</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">// GetGroupMembershipSIDs returns a slice of strings containing the group membership SIDs found in the PAC.</span></code></span>
+<span class="codeline" id="line-78"><code><span class="keyword">func</span> (<label for="r5" class="ident">k</label> *<a href="#line-29" class="ident">KerbValidationInfo</a>) <label for="r6" class="ident">GetGroupMembershipSIDs</label>() []<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">var</span> <label for="r7" class="ident">g</label> []<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-80"><code>	<label for="r8" class="ident">lSID</label> := <label for="r5" class="ident">k</label>.<a href="#line-52" class="ident">LogonDomainID</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-20" class="ident">String</a>()</code></span>
+<span class="codeline" id="line-81"><code>	<span class="keyword">for</span> <label for="r9" class="ident">i</label> := <span class="keyword">range</span> <label for="r5" class="ident">k</label>.<a href="#line-47" class="ident">GroupIDs</a> {</code></span>
+<span class="codeline" id="line-82"><code>		<label for="r7" class="ident">g</label> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r7" class="ident">g</label>, <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s-%d"</span>, <label for="r8" class="ident">lSID</label>, <label for="r5" class="ident">k</label>.<a href="#line-47" class="ident">GroupIDs</a>[<label for="r9" class="ident">i</label>].<a href="../../../rpc/v2/mstypes/group_membership.go.html#line-7" class="ident">RelativeID</a>))</code></span>
+<span class="codeline" id="line-83"><code>	}</code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">for</span> <label for="r10" class="ident">_</label>, <label for="r11" class="ident">s</label> := <span class="keyword">range</span> <label for="r5" class="ident">k</label>.<a href="#line-61" class="ident">ExtraSIDs</a> {</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">var</span> <label for="r12" class="ident">exists</label> = <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-86"><code>		<span class="keyword">for</span> <label for="r13" class="ident">_</label>, <label for="r14" class="ident">es</label> := <span class="keyword">range</span> <label for="r7" class="ident">g</label> {</code></span>
+<span class="codeline" id="line-87"><code>			<span class="keyword">if</span> <label for="r14" class="ident">es</label> == <label for="r11" class="ident">s</label>.<a href="../../../rpc/v2/mstypes/kerb_sid_and_attributes.go.html#line-16" class="ident">SID</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-20" class="ident">String</a>() {</code></span>
+<span class="codeline" id="line-88"><code>				<label for="r12" class="ident">exists</label> = <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-89"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-90"><code>			}</code></span>
+<span class="codeline" id="line-91"><code>		}</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">if</span> !<label for="r12" class="ident">exists</label> {</code></span>
+<span class="codeline" id="line-93"><code>			<label for="r7" class="ident">g</label> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r7" class="ident">g</label>, <label for="r11" class="ident">s</label>.<a href="../../../rpc/v2/mstypes/kerb_sid_and_attributes.go.html#line-16" class="ident">SID</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-20" class="ident">String</a>())</code></span>
+<span class="codeline" id="line-94"><code>		}</code></span>
+<span class="codeline" id="line-95"><code>	}</code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">for</span> <label for="r15" class="ident">_</label>, <label for="r16" class="ident">r</label> := <span class="keyword">range</span> <label for="r5" class="ident">k</label>.<a href="#line-64" class="ident">ResourceGroupIDs</a> {</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">var</span> <label for="r17" class="ident">exists</label> = <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-98"><code>		<label for="r18" class="ident">s</label> := <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s-%d"</span>, <label for="r5" class="ident">k</label>.<a href="#line-62" class="ident">ResourceGroupDomainSID</a>.<a href="../../../rpc/v2/mstypes/sid.go.html#line-20" class="ident">String</a>(), <label for="r16" class="ident">r</label>.<a href="../../../rpc/v2/mstypes/group_membership.go.html#line-7" class="ident">RelativeID</a>)</code></span>
+<span class="codeline" id="line-99"><code>		<span class="keyword">for</span> <label for="r19" class="ident">_</label>, <label for="r20" class="ident">es</label> := <span class="keyword">range</span> <label for="r7" class="ident">g</label> {</code></span>
+<span class="codeline" id="line-100"><code>			<span class="keyword">if</span> <label for="r20" class="ident">es</label> == <label for="r18" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-101"><code>				<label for="r17" class="ident">exists</label> = <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-102"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-103"><code>			}</code></span>
+<span class="codeline" id="line-104"><code>		}</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">if</span> !<label for="r17" class="ident">exists</label> {</code></span>
+<span class="codeline" id="line-106"><code>			<label for="r7" class="ident">g</label> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r7" class="ident">g</label>, <label for="r18" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-107"><code>		}</code></span>
+<span class="codeline" id="line-108"><code>	}</code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">return</span> <label for="r7" class="ident">g</label></code></span>
+<span class="codeline" id="line-110"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: graphemerules.go in package github.com/rivo/uniseg</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	graphemerules.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/rivo/uniseg.html">github.com/rivo/uniseg</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> uniseg</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// The states of the grapheme cluster parser.</span></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-5"><code>	grAny = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-6"><code>	grCR</code></span>
+<span class="codeline" id="line-7"><code>	grControlLF</code></span>
+<span class="codeline" id="line-8"><code>	grL</code></span>
+<span class="codeline" id="line-9"><code>	grLVV</code></span>
+<span class="codeline" id="line-10"><code>	grLVTT</code></span>
+<span class="codeline" id="line-11"><code>	grPrepend</code></span>
+<span class="codeline" id="line-12"><code>	grExtendedPictographic</code></span>
+<span class="codeline" id="line-13"><code>	grExtendedPictographicZWJ</code></span>
+<span class="codeline" id="line-14"><code>	grRIOdd</code></span>
+<span class="codeline" id="line-15"><code>	grRIEven</code></span>
+<span class="codeline" id="line-16"><code>)</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// The grapheme cluster parser's breaking instructions.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-20"><code>	grNoBoundary = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-21"><code>	grBoundary</code></span>
+<span class="codeline" id="line-22"><code>)</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// The grapheme cluster parser's state transitions. Maps (state, property) to</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// (new state, breaking instruction, rule number). The breaking instruction</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// always refers to the boundary between the last and next code point.</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// This map is queried as follows:</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">//  1. Find specific state + specific property. Stop if found.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//  2. Find specific state + any property.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">//  3. Find any state + specific property.</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">//  4. If only (2) or (3) (but not both) was found, stop.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//  5. If both (2) and (3) were found, use state from (3) and breaking instruction</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//     from the transition with the lower rule number, prefer (3) if rule numbers</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//     are equal. Stop.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//  6. Assume grAny and grBoundary.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// Unicode version 14.0.0.</span></code></span>
+<span class="codeline" id="line-40"><code><span class="keyword">var</span> grTransitions = <span class="keyword">map</span>[[<span class="lit-number">2</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>][<span class="lit-number">3</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{</code></span>
+<span class="codeline" id="line-41"><code>	<span class="comment">// GB5</span></code></span>
+<span class="codeline" id="line-42"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-9" class="ident">prCR</a>}:      {<a href="#line-6" class="ident">grCR</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">50</span>},</code></span>
+<span class="codeline" id="line-43"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-10" class="ident">prLF</a>}:      {<a href="#line-7" class="ident">grControlLF</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">50</span>},</code></span>
+<span class="codeline" id="line-44"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-11" class="ident">prControl</a>}: {<a href="#line-7" class="ident">grControlLF</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">50</span>},</code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code>	<span class="comment">// GB4</span></code></span>
+<span class="codeline" id="line-47"><code>	{<a href="#line-6" class="ident">grCR</a>, <a href="properties.go.html#line-7" class="ident">prAny</a>}:        {<a href="#line-5" class="ident">grAny</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">40</span>},</code></span>
+<span class="codeline" id="line-48"><code>	{<a href="#line-7" class="ident">grControlLF</a>, <a href="properties.go.html#line-7" class="ident">prAny</a>}: {<a href="#line-5" class="ident">grAny</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">40</span>},</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<span class="comment">// GB3.</span></code></span>
+<span class="codeline" id="line-51"><code>	{<a href="#line-6" class="ident">grCR</a>, <a href="properties.go.html#line-10" class="ident">prLF</a>}: {<a href="#line-5" class="ident">grAny</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">30</span>},</code></span>
+<span class="codeline" id="line-52"><code></code></span>
+<span class="codeline" id="line-53"><code>	<span class="comment">// GB6.</span></code></span>
+<span class="codeline" id="line-54"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-15" class="ident">prL</a>}: {<a href="#line-8" class="ident">grL</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-55"><code>	{<a href="#line-8" class="ident">grL</a>, <a href="properties.go.html#line-15" class="ident">prL</a>}:   {<a href="#line-8" class="ident">grL</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">60</span>},</code></span>
+<span class="codeline" id="line-56"><code>	{<a href="#line-8" class="ident">grL</a>, <a href="properties.go.html#line-16" class="ident">prV</a>}:   {<a href="#line-9" class="ident">grLVV</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">60</span>},</code></span>
+<span class="codeline" id="line-57"><code>	{<a href="#line-8" class="ident">grL</a>, <a href="properties.go.html#line-18" class="ident">prLV</a>}:  {<a href="#line-9" class="ident">grLVV</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">60</span>},</code></span>
+<span class="codeline" id="line-58"><code>	{<a href="#line-8" class="ident">grL</a>, <a href="properties.go.html#line-19" class="ident">prLVT</a>}: {<a href="#line-10" class="ident">grLVTT</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">60</span>},</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// GB7.</span></code></span>
+<span class="codeline" id="line-61"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-18" class="ident">prLV</a>}: {<a href="#line-9" class="ident">grLVV</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-62"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-16" class="ident">prV</a>}:  {<a href="#line-9" class="ident">grLVV</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-63"><code>	{<a href="#line-9" class="ident">grLVV</a>, <a href="properties.go.html#line-16" class="ident">prV</a>}:  {<a href="#line-9" class="ident">grLVV</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">70</span>},</code></span>
+<span class="codeline" id="line-64"><code>	{<a href="#line-9" class="ident">grLVV</a>, <a href="properties.go.html#line-17" class="ident">prT</a>}:  {<a href="#line-10" class="ident">grLVTT</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">70</span>},</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>	<span class="comment">// GB8.</span></code></span>
+<span class="codeline" id="line-67"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-19" class="ident">prLVT</a>}: {<a href="#line-10" class="ident">grLVTT</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-68"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-17" class="ident">prT</a>}:   {<a href="#line-10" class="ident">grLVTT</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-69"><code>	{<a href="#line-10" class="ident">grLVTT</a>, <a href="properties.go.html#line-17" class="ident">prT</a>}:  {<a href="#line-10" class="ident">grLVTT</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">80</span>},</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code>	<span class="comment">// GB9.</span></code></span>
+<span class="codeline" id="line-72"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-12" class="ident">prExtend</a>}: {<a href="#line-5" class="ident">grAny</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">90</span>},</code></span>
+<span class="codeline" id="line-73"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-20" class="ident">prZWJ</a>}:    {<a href="#line-5" class="ident">grAny</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">90</span>},</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code>	<span class="comment">// GB9a.</span></code></span>
+<span class="codeline" id="line-76"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-14" class="ident">prSpacingMark</a>}: {<a href="#line-5" class="ident">grAny</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">91</span>},</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code>	<span class="comment">// GB9b.</span></code></span>
+<span class="codeline" id="line-79"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-8" class="ident">prPrepend</a>}: {<a href="#line-11" class="ident">grPrepend</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-80"><code>	{<a href="#line-11" class="ident">grPrepend</a>, <a href="properties.go.html#line-7" class="ident">prAny</a>}: {<a href="#line-5" class="ident">grAny</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">92</span>},</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	<span class="comment">// GB11.</span></code></span>
+<span class="codeline" id="line-83"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-21" class="ident">prExtendedPictographic</a>}:                     {<a href="#line-12" class="ident">grExtendedPictographic</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-84"><code>	{<a href="#line-12" class="ident">grExtendedPictographic</a>, <a href="properties.go.html#line-12" class="ident">prExtend</a>}:                  {<a href="#line-12" class="ident">grExtendedPictographic</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">110</span>},</code></span>
+<span class="codeline" id="line-85"><code>	{<a href="#line-12" class="ident">grExtendedPictographic</a>, <a href="properties.go.html#line-20" class="ident">prZWJ</a>}:                     {<a href="#line-13" class="ident">grExtendedPictographicZWJ</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">110</span>},</code></span>
+<span class="codeline" id="line-86"><code>	{<a href="#line-13" class="ident">grExtendedPictographicZWJ</a>, <a href="properties.go.html#line-21" class="ident">prExtendedPictographic</a>}: {<a href="#line-12" class="ident">grExtendedPictographic</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">110</span>},</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>	<span class="comment">// GB12 / GB13.</span></code></span>
+<span class="codeline" id="line-89"><code>	{<a href="#line-5" class="ident">grAny</a>, <a href="properties.go.html#line-13" class="ident">prRegionalIndicator</a>}:    {<a href="#line-14" class="ident">grRIOdd</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">9990</span>},</code></span>
+<span class="codeline" id="line-90"><code>	{<a href="#line-14" class="ident">grRIOdd</a>, <a href="properties.go.html#line-13" class="ident">prRegionalIndicator</a>}:  {<a href="#line-15" class="ident">grRIEven</a>, <a href="#line-20" class="ident">grNoBoundary</a>, <span class="lit-number">120</span>},</code></span>
+<span class="codeline" id="line-91"><code>	{<a href="#line-15" class="ident">grRIEven</a>, <a href="properties.go.html#line-13" class="ident">prRegionalIndicator</a>}: {<a href="#line-14" class="ident">grRIOdd</a>, <a href="#line-21" class="ident">grBoundary</a>, <span class="lit-number">120</span>},</code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// transitionGraphemeState determines the new state of the grapheme cluster</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// parser given the current state and the next code point. It also returns the</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">// code point's grapheme property (the value mapped by the [graphemeCodePoints]</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">// table) and whether a cluster boundary was detected.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="keyword">func</span> transitionGraphemeState(<label for="r1" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r2" class="ident">r</label> <a href="../../../../pkg/builtin.html#name-rune" class="ident">rune</a>) (<label for="r3" class="ident">newState</label>, <label for="r4" class="ident">prop</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r5" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-99"><code>	<span class="comment">// Determine the property of the next character.</span></code></span>
+<span class="codeline" id="line-100"><code>	<label for="r4" class="ident">prop</label> = <a href="properties.go.html#line-159" class="ident">property</a>(<a href="graphemeproperties.go.html#line-12" class="ident">graphemeCodePoints</a>, <label for="r2" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>	<span class="comment">// Find the applicable transition.</span></code></span>
+<span class="codeline" id="line-103"><code>	<label for="r6" class="ident">transition</label>, <label for="r7" class="ident">ok</label> := <a href="#line-40" class="ident">grTransitions</a>[[<span class="lit-number">2</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{<label for="r1" class="ident">state</label>, <label for="r4" class="ident">prop</label>}]</code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">if</span> <label for="r7" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-105"><code>		<span class="comment">// We have a specific transition. We'll use it.</span></code></span>
+<span class="codeline" id="line-106"><code>		<span class="keyword">return</span> <label for="r6" class="ident">transition</label>[<span class="lit-number">0</span>], <label for="r4" class="ident">prop</label>, <label for="r6" class="ident">transition</label>[<span class="lit-number">1</span>] == <a href="#line-21" class="ident">grBoundary</a></code></span>
+<span class="codeline" id="line-107"><code>	}</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code>	<span class="comment">// No specific transition found. Try the less specific ones.</span></code></span>
+<span class="codeline" id="line-110"><code>	<label for="r8" class="ident">transAnyProp</label>, <label for="r9" class="ident">okAnyProp</label> := <a href="#line-40" class="ident">grTransitions</a>[[<span class="lit-number">2</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{<label for="r1" class="ident">state</label>, <a href="properties.go.html#line-7" class="ident">prAny</a>}]</code></span>
+<span class="codeline" id="line-111"><code>	<label for="r10" class="ident">transAnyState</label>, <label for="r11" class="ident">okAnyState</label> := <a href="#line-40" class="ident">grTransitions</a>[[<span class="lit-number">2</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{<a href="#line-5" class="ident">grAny</a>, <label for="r4" class="ident">prop</label>}]</code></span>
+<span class="codeline" id="line-112"><code>	<span class="keyword">if</span> <label for="r9" class="ident">okAnyProp</label> &amp;&amp; <label for="r11" class="ident">okAnyState</label> {</code></span>
+<span class="codeline" id="line-113"><code>		<span class="comment">// Both apply. We'll use a mix (see comments for grTransitions).</span></code></span>
+<span class="codeline" id="line-114"><code>		<label for="r3" class="ident">newState</label> = <label for="r10" class="ident">transAnyState</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-115"><code>		<label for="r5" class="ident">boundary</label> = <label for="r10" class="ident">transAnyState</label>[<span class="lit-number">1</span>] == <a href="#line-21" class="ident">grBoundary</a></code></span>
+<span class="codeline" id="line-116"><code>		<span class="keyword">if</span> <label for="r8" class="ident">transAnyProp</label>[<span class="lit-number">2</span>] &lt; <label for="r10" class="ident">transAnyState</label>[<span class="lit-number">2</span>] {</code></span>
+<span class="codeline" id="line-117"><code>			<label for="r5" class="ident">boundary</label> = <label for="r8" class="ident">transAnyProp</label>[<span class="lit-number">1</span>] == <a href="#line-21" class="ident">grBoundary</a></code></span>
+<span class="codeline" id="line-118"><code>		}</code></span>
+<span class="codeline" id="line-119"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-120"><code>	}</code></span>
+<span class="codeline" id="line-121"><code></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">if</span> <label for="r9" class="ident">okAnyProp</label> {</code></span>
+<span class="codeline" id="line-123"><code>		<span class="comment">// We only have a specific state.</span></code></span>
+<span class="codeline" id="line-124"><code>		<span class="keyword">return</span> <label for="r8" class="ident">transAnyProp</label>[<span class="lit-number">0</span>], <label for="r4" class="ident">prop</label>, <label for="r8" class="ident">transAnyProp</label>[<span class="lit-number">1</span>] == <a href="#line-21" class="ident">grBoundary</a></code></span>
+<span class="codeline" id="line-125"><code>		<span class="comment">// This branch will probably never be reached because okAnyState will</span></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">		// always be true given the current transition map. But we keep it here</span></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">		// for future modifications to the transition map where this may not be</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">		// true anymore.</span></code></span>
+<span class="codeline" id="line-129"><code>	}</code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code>	<span class="keyword">if</span> <label for="r11" class="ident">okAnyState</label> {</code></span>
+<span class="codeline" id="line-132"><code>		<span class="comment">// We only have a specific property.</span></code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> <label for="r10" class="ident">transAnyState</label>[<span class="lit-number">0</span>], <label for="r4" class="ident">prop</label>, <label for="r10" class="ident">transAnyState</label>[<span class="lit-number">1</span>] == <a href="#line-21" class="ident">grBoundary</a></code></span>
+<span class="codeline" id="line-134"><code>	}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code>	<span class="comment">// No known transition. GB999: Any ÷ Any.</span></code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">return</span> <a href="#line-5" class="ident">grAny</a>, <label for="r4" class="ident">prop</label>, <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-138"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

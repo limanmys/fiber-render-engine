@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: handle.go in package runtime/cgo</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	handle.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/runtime/cgo.html">runtime/cgo</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2021 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> cgo</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"sync"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// Handle provides a way to pass values that contain Go pointers</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// (pointers to memory allocated by Go) between Go and C without</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// breaking the cgo pointer passing rules. A Handle is an integer</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// value that can represent any Go value. A Handle can be passed</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// through C and back to Go, and Go code can use the Handle to</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// retrieve the original Go value.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// The underlying type of Handle is guaranteed to fit in an integer type</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// that is large enough to hold the bit pattern of any pointer. The zero</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// value of a Handle is not valid, and thus is safe to use as a sentinel</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// in C APIs.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// For instance, on the Go side:</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">//	package main</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">//	/*</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">//	#include &lt;stdint.h&gt; // for uintptr_t</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//	extern void MyGoPrint(uintptr_t handle);</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">//	void myprint(uintptr_t handle);</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">//	*/</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//	import "C"</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//	import "runtime/cgo"</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//	//export MyGoPrint</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">//	func MyGoPrint(handle C.uintptr_t) {</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">//		h := cgo.Handle(handle)</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">//		val := h.Value().(string)</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">//		println(val)</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//		h.Delete()</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">//	func main() {</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">//		val := "hello Go"</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">//		C.myprint(C.uintptr_t(cgo.NewHandle(val)))</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">//		// Output: hello Go</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// and on the C side:</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">//	#include &lt;stdint.h&gt; // for uintptr_t</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">//	// A Go function</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">//	extern void MyGoPrint(uintptr_t handle);</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">//	// A C function</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">//	void myprint(uintptr_t handle) {</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">//	    MyGoPrint(handle);</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// Some C functions accept a void* argument that points to an arbitrary</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">// data value supplied by the caller. It is not safe to coerce a cgo.Handle</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">// (an integer) to a Go unsafe.Pointer, but instead we can pass the address</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// of the cgo.Handle to the void* parameter, as in this variant of the</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// previous example:</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">//	package main</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">//	/*</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">//	extern void MyGoPrint(void *context);</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">//	static inline void myprint(void *context) {</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">//	    MyGoPrint(context);</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">//	*/</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">//	import "C"</span></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">//	import (</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">//		"runtime/cgo"</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">//		"unsafe"</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">//	)</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">//	//export MyGoPrint</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">//	func MyGoPrint(context unsafe.Pointer) {</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">//		h := *(*cgo.Handle)(context)</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">//		val := h.Value().(string)</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">//		println(val)</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">//		h.Delete()</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">//	func main() {</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">//		val := "hello Go"</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">//		h := cgo.NewHandle(val)</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">//		C.myprint(unsafe.Pointer(&amp;h))</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">//		// Output: hello Go</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-97"><code><span class="keyword">type</span> <a href="../../../pkg/runtime/cgo.html#name-Handle" class="ident">Handle</a> <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a></code></span>
+<span class="codeline" id="line-98"><code></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">// NewHandle returns a handle for a given value.</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// The handle is valid until the program calls Delete on it. The handle</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">// uses resources, and this package assumes that C code may hold on to</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">// the handle, so a program must explicitly call Delete when the handle</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">// is no longer needed.</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">// The intended use is to pass the returned handle to C code, which</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">// passes it back to Go, which calls Value.</span></code></span>
+<span class="codeline" id="line-108"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/runtime/cgo.html#name-NewHandle" class="ident">NewHandle</a></label>(<label for="r1" class="ident">v</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="#line-97" class="ident">Handle</a> {</code></span>
+<span class="codeline" id="line-109"><code>	<label for="r2" class="ident">h</label> := <a href="../../../pkg/sync/atomic.html" class="ident i1">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-117" class="ident">AddUintptr</a>(&amp;<a href="#line-143" class="ident">handleIdx</a>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">if</span> <label for="r2" class="ident">h</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-111"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"runtime/cgo: ran out of handle space"</span>)</code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code>	<a href="#line-142" class="ident">handles</a>.<a href="../../sync/map.go.html#line-144" class="ident">Store</a>(<label for="r2" class="ident">h</label>, <label for="r1" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">return</span> <a href="#line-97" class="ident">Handle</a>(<label for="r2" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">// Value returns the associated Go value for a valid handle.</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// The method panics if the handle is invalid.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">func</span> (<label for="r3" class="ident">h</label> <a href="#line-97" class="ident">Handle</a>) <label for="r4" class="ident">Value</label>() <a href="../../../pkg/builtin.html#name-any" class="ident">any</a> {</code></span>
+<span class="codeline" id="line-122"><code>	<label for="r5" class="ident">v</label>, <label for="r6" class="ident">ok</label> := <a href="#line-142" class="ident">handles</a>.<a href="../../sync/map.go.html#line-110" class="ident">Load</a>(<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r3" class="ident">h</label>))</code></span>
+<span class="codeline" id="line-123"><code>	<span class="keyword">if</span> !<label for="r6" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-124"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"runtime/cgo: misuse of an invalid Handle"</span>)</code></span>
+<span class="codeline" id="line-125"><code>	}</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">return</span> <label for="r5" class="ident">v</label></code></span>
+<span class="codeline" id="line-127"><code>}</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">// Delete invalidates a handle. This method should only be called once</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// the program no longer needs to pass the handle to C and the C code</span></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">// no longer has a copy of the handle value.</span></code></span>
+<span class="codeline" id="line-132"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">// The method panics if the handle is invalid.</span></code></span>
+<span class="codeline" id="line-134"><code><span class="keyword">func</span> (<label for="r7" class="ident">h</label> <a href="#line-97" class="ident">Handle</a>) <label for="r8" class="ident">Delete</label>() {</code></span>
+<span class="codeline" id="line-135"><code>	<label for="r9" class="ident">_</label>, <label for="r10" class="ident">ok</label> := <a href="#line-142" class="ident">handles</a>.<a href="../../sync/map.go.html#line-276" class="ident">LoadAndDelete</a>(<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r7" class="ident">h</label>))</code></span>
+<span class="codeline" id="line-136"><code>	<span class="keyword">if</span> !<label for="r10" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-137"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"runtime/cgo: misuse of an invalid Handle"</span>)</code></span>
+<span class="codeline" id="line-138"><code>	}</code></span>
+<span class="codeline" id="line-139"><code>}</code></span>
+<span class="codeline" id="line-140"><code></code></span>
+<span class="codeline" id="line-141"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-142"><code>	handles   = <a href="../../../pkg/sync.html" class="ident i0">sync</a>.<a href="../../sync/map.go.html#line-34" class="ident">Map</a>{} <span class="comment">// map[Handle]interface{}</span></code></span>
+<span class="codeline" id="line-143"><code>	handleIdx <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>      <span class="comment">// atomic</span></code></span>
+<span class="codeline" id="line-144"><code>)</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

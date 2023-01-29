@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: spnego.go in package github.com/hirochachacha/go-smb2/internal/spnego</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	spnego.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html">github.com/hirochachacha/go-smb2/internal/spnego</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> spnego</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding/asn1"</span></label></code></span>
+<span class="codeline" id="line-5"><code></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"github.com/geoffgarside/ber"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-10"><code>	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-SpnegoOid" class="ident">SpnegoOid</a>     = <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>([]<a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">1</span>, <span class="lit-number">3</span>, <span class="lit-number">6</span>, <span class="lit-number">1</span>, <span class="lit-number">5</span>, <span class="lit-number">5</span>, <span class="lit-number">2</span>})</code></span>
+<span class="codeline" id="line-11"><code>	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-MsKerberosOid" class="ident">MsKerberosOid</a> = <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>([]<a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">840</span>, <span class="lit-number">48018</span>, <span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">2</span>})</code></span>
+<span class="codeline" id="line-12"><code>	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-KerberosOid" class="ident">KerberosOid</a>   = <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>([]<a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">840</span>, <span class="lit-number">113554</span>, <span class="lit-number">1</span>, <span class="lit-number">2</span>, <span class="lit-number">2</span>})</code></span>
+<span class="codeline" id="line-13"><code>	<a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-NlmpOid" class="ident">NlmpOid</a>       = <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>([]<a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">1</span>, <span class="lit-number">3</span>, <span class="lit-number">6</span>, <span class="lit-number">1</span>, <span class="lit-number">4</span>, <span class="lit-number">1</span>, <span class="lit-number">311</span>, <span class="lit-number">2</span>, <span class="lit-number">2</span>, <span class="lit-number">10</span>})</code></span>
+<span class="codeline" id="line-14"><code>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">type</span> initialContextToken <span class="keyword">struct</span> { <span class="comment">// `asn1:"application,tag:0"`</span></code></span>
+<span class="codeline" id="line-17"><code>	ThisMech <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a> <span class="lit-string">`asn1:"optional"`</span></code></span>
+<span class="codeline" id="line-18"><code>	Init     []<a href="#line-38" class="ident">NegTokenInit</a>        <span class="lit-string">`asn1:"optional,explict,tag:0"`</span></code></span>
+<span class="codeline" id="line-19"><code>	Resp     []<a href="#line-67" class="ident">NegTokenResp</a>        <span class="lit-string">`asn1:"optional,explict,tag:1"`</span></code></span>
+<span class="codeline" id="line-20"><code>}</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">type</span> initialContextToken2 <span class="keyword">struct</span> { <span class="comment">// `asn1:"application,tag:0"`</span></code></span>
+<span class="codeline" id="line-23"><code>	ThisMech <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a> <span class="lit-string">`asn1:"optional"`</span></code></span>
+<span class="codeline" id="line-24"><code>	Init2    []<a href="#line-59" class="ident">NegTokenInit2</a>       <span class="lit-string">`asn1:"optional,explict,tag:0"`</span></code></span>
+<span class="codeline" id="line-25"><code>	Resp     []<a href="#line-67" class="ident">NegTokenResp</a>        <span class="lit-string">`asn1:"optional,explict,tag:1"`</span></code></span>
+<span class="codeline" id="line-26"><code>}</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// initialContextToken ::= [APPLICATION 0] IMPLICIT SEQUENCE {</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">//   ThisMech          MechType</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">//   InnerContextToken negotiateToken</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// }</span></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// negotiateToken ::= CHOICE {</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//   NegTokenInit [0] NegTokenInit</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//   NegTokenResp [1] NegTokenResp</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// }</span></code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-NegTokenInit" class="ident">NegTokenInit</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-39"><code>	MechTypes   []<a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a> <span class="lit-string">`asn1:"explicit,optional,tag:0"`</span></code></span>
+<span class="codeline" id="line-40"><code>	ReqFlags    <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-159" class="ident">BitString</a>          <span class="lit-string">`asn1:"explicit,optional,tag:1"`</span></code></span>
+<span class="codeline" id="line-41"><code>	MechToken   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                  <span class="lit-string">`asn1:"explicit,optional,tag:2"`</span></code></span>
+<span class="codeline" id="line-42"><code>	MechListMIC []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                  <span class="lit-string">`asn1:"explicit,optional,tag:3"`</span></code></span>
+<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// "not_defined_in_RFC4178@please_ignore"</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">var</span> negHints = <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-509" class="ident">RawValue</a>{</code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../../../encoding/asn1/asn1.go.html#line-513" class="ident">FullBytes</a>: []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{</code></span>
+<span class="codeline" id="line-48"><code>		<span class="lit-number">0xa3</span>, <span class="lit-number">0x2a</span>, <span class="lit-number">0x30</span>, <span class="lit-number">0x28</span>, <span class="lit-number">0xa0</span>, <span class="lit-number">0x26</span>, <span class="lit-number">0x1b</span>, <span class="lit-number">0x24</span>, <span class="lit-number">0x6e</span>, <span class="lit-number">0x6f</span>, <span class="lit-number">0x74</span>, <span class="lit-number">0x5f</span>, <span class="lit-number">0x64</span>, <span class="lit-number">0x65</span>, <span class="lit-number">0x66</span>, <span class="lit-number">0x69</span>, <span class="lit-number">0x6e</span>, <span class="lit-number">0x65</span>, <span class="lit-number">0x64</span>, <span class="lit-number">0x5f</span>,</code></span>
+<span class="codeline" id="line-49"><code>		<span class="lit-number">0x69</span>, <span class="lit-number">0x6e</span>, <span class="lit-number">0x5f</span>, <span class="lit-number">0x52</span>, <span class="lit-number">0x46</span>, <span class="lit-number">0x43</span>, <span class="lit-number">0x34</span>, <span class="lit-number">0x31</span>, <span class="lit-number">0x37</span>, <span class="lit-number">0x38</span>, <span class="lit-number">0x40</span>, <span class="lit-number">0x70</span>, <span class="lit-number">0x6c</span>, <span class="lit-number">0x65</span>, <span class="lit-number">0x61</span>, <span class="lit-number">0x73</span>,</code></span>
+<span class="codeline" id="line-50"><code>		<span class="lit-number">0x65</span>, <span class="lit-number">0x5f</span>, <span class="lit-number">0x69</span>, <span class="lit-number">0x67</span>, <span class="lit-number">0x6e</span>, <span class="lit-number">0x6f</span>, <span class="lit-number">0x72</span>, <span class="lit-number">0x65</span>,</code></span>
+<span class="codeline" id="line-51"><code>	},</code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// type NegHint struct {</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// HintName    string `asn1:"optional,explicit,tag:0"` // GeneralString = 27</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// HintAddress []byte `asn1:"optional,explicit,tag:1"`</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// }</span></code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-NegTokenInit2" class="ident">NegTokenInit2</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-60"><code>	MechTypes   []<a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a> <span class="lit-string">`asn1:"explicit,optional,tag:0"`</span></code></span>
+<span class="codeline" id="line-61"><code>	ReqFlags    <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-159" class="ident">BitString</a>          <span class="lit-string">`asn1:"explicit,optional,tag:1"`</span></code></span>
+<span class="codeline" id="line-62"><code>	MechToken   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                  <span class="lit-string">`asn1:"explicit,optional,tag:2"`</span></code></span>
+<span class="codeline" id="line-63"><code>	NegHints    <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-509" class="ident">RawValue</a>           <span class="lit-string">`asn1:"explicit,optional,tag:3"`</span></code></span>
+<span class="codeline" id="line-64"><code>	MechListMIC []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                  <span class="lit-string">`asn1:"explicit,optional,tag:4"`</span></code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-NegTokenResp" class="ident">NegTokenResp</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-68"><code>	NegState      <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-295" class="ident">Enumerated</a>       <span class="lit-string">`asn1:"optional,explicit,tag:0"`</span></code></span>
+<span class="codeline" id="line-69"><code>	SupportedMech <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a> <span class="lit-string">`asn1:"optional,explicit,tag:1"`</span></code></span>
+<span class="codeline" id="line-70"><code>	ResponseToken []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                <span class="lit-string">`asn1:"optional,explicit,tag:2"`</span></code></span>
+<span class="codeline" id="line-71"><code>	MechListMIC   []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>                <span class="lit-string">`asn1:"optional,explicit,tag:3"`</span></code></span>
+<span class="codeline" id="line-72"><code>}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-DecodeNegTokenInit2" class="ident">DecodeNegTokenInit2</a></label>(<label for="r1" class="ident">bs</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (*<a href="#line-59" class="ident">NegTokenInit2</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">var</span> <label for="r2" class="ident">init</label> <a href="#line-22" class="ident">initialContextToken2</a></code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code>	<label for="r3" class="ident">_</label>, <label for="r4" class="ident">err</label> := <a href="../../../../../../pkg/github.com/geoffgarside/ber.html" class="ident i1">ber</a>.<a href="../../../../geoffgarside/ber/ber.go.html#line-982" class="ident">UnmarshalWithParams</a>(<label for="r1" class="ident">bs</label>, &amp;<label for="r2" class="ident">init</label>, <span class="lit-string">"application,tag:0"</span>)</code></span>
+<span class="codeline" id="line-78"><code>	<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-79"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-80"><code>	}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">return</span> &amp;<label for="r2" class="ident">init</label>.<a href="#line-24" class="ident">Init2</a>[<span class="lit-number">0</span>], <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-83"><code>}</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="keyword">func</span> <label for="r5" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-EncodeNegTokenInit2" class="ident">EncodeNegTokenInit2</a></label>(<label for="r6" class="ident">types</label> []<a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-86"><code>	<label for="r7" class="ident">bs</label>, <label for="r8" class="ident">err</label> := <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/marshal.go.html#line-733" class="ident">Marshal</a>(</code></span>
+<span class="codeline" id="line-87"><code>		<a href="#line-22" class="ident">initialContextToken2</a>{</code></span>
+<span class="codeline" id="line-88"><code>			<a href="#line-23" class="ident">ThisMech</a>: <a href="#line-10" class="ident">SpnegoOid</a>,</code></span>
+<span class="codeline" id="line-89"><code>			<a href="#line-24" class="ident">Init2</a>: []<a href="#line-59" class="ident">NegTokenInit2</a>{</code></span>
+<span class="codeline" id="line-90"><code>				{</code></span>
+<span class="codeline" id="line-91"><code>					<a href="#line-60" class="ident">MechTypes</a>: <label for="r6" class="ident">types</label>,</code></span>
+<span class="codeline" id="line-92"><code>					<a href="#line-63" class="ident">NegHints</a>:  <a href="#line-46" class="ident">negHints</a>,</code></span>
+<span class="codeline" id="line-93"><code>				},</code></span>
+<span class="codeline" id="line-94"><code>			},</code></span>
+<span class="codeline" id="line-95"><code>		})</code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">if</span> <label for="r8" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-98"><code>	}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code>	<label for="r7" class="ident">bs</label>[<span class="lit-number">0</span>] = <span class="lit-number">0x60</span> <span class="comment">// `asn1:"application,tag:0"`</span></code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">return</span> <label for="r7" class="ident">bs</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-103"><code>}</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code><span class="keyword">func</span> <label for="r9" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-EncodeNegTokenInit" class="ident">EncodeNegTokenInit</a></label>(<label for="r10" class="ident">types</label> []<a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>, <label for="r11" class="ident">token</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-106"><code>	<label for="r12" class="ident">bs</label>, <label for="r13" class="ident">err</label> := <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/marshal.go.html#line-733" class="ident">Marshal</a>(</code></span>
+<span class="codeline" id="line-107"><code>		<a href="#line-16" class="ident">initialContextToken</a>{</code></span>
+<span class="codeline" id="line-108"><code>			<a href="#line-17" class="ident">ThisMech</a>: <a href="#line-10" class="ident">SpnegoOid</a>,</code></span>
+<span class="codeline" id="line-109"><code>			<a href="#line-18" class="ident">Init</a>: []<a href="#line-38" class="ident">NegTokenInit</a>{</code></span>
+<span class="codeline" id="line-110"><code>				{</code></span>
+<span class="codeline" id="line-111"><code>					<a href="#line-39" class="ident">MechTypes</a>: <label for="r10" class="ident">types</label>,</code></span>
+<span class="codeline" id="line-112"><code>					<a href="#line-41" class="ident">MechToken</a>: <label for="r11" class="ident">token</label>,</code></span>
+<span class="codeline" id="line-113"><code>				},</code></span>
+<span class="codeline" id="line-114"><code>			},</code></span>
+<span class="codeline" id="line-115"><code>		})</code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">if</span> <label for="r13" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-117"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r13" class="ident">err</label></code></span>
+<span class="codeline" id="line-118"><code>	}</code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code>	<label for="r12" class="ident">bs</label>[<span class="lit-number">0</span>] = <span class="lit-number">0x60</span> <span class="comment">// `asn1:"application,tag:0"`</span></code></span>
+<span class="codeline" id="line-121"><code></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <label for="r12" class="ident">bs</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="keyword">func</span> <label for="r14" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-DecodeNegTokenInit" class="ident">DecodeNegTokenInit</a></label>(<label for="r15" class="ident">bs</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (*<a href="#line-38" class="ident">NegTokenInit</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">var</span> <label for="r16" class="ident">init</label> <a href="#line-16" class="ident">initialContextToken</a></code></span>
+<span class="codeline" id="line-127"><code></code></span>
+<span class="codeline" id="line-128"><code>	<label for="r17" class="ident">_</label>, <label for="r18" class="ident">err</label> := <a href="../../../../../../pkg/github.com/geoffgarside/ber.html" class="ident i1">ber</a>.<a href="../../../../geoffgarside/ber/ber.go.html#line-982" class="ident">UnmarshalWithParams</a>(<label for="r15" class="ident">bs</label>, &amp;<label for="r16" class="ident">init</label>, <span class="lit-string">"application,tag:0"</span>)</code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">if</span> <label for="r18" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-130"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r18" class="ident">err</label></code></span>
+<span class="codeline" id="line-131"><code>	}</code></span>
+<span class="codeline" id="line-132"><code></code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">return</span> &amp;<label for="r16" class="ident">init</label>.<a href="#line-18" class="ident">Init</a>[<span class="lit-number">0</span>], <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-134"><code>}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code><span class="keyword">func</span> <label for="r19" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-EncodeNegTokenResp" class="ident">EncodeNegTokenResp</a></label>(<label for="r20" class="ident">state</label> <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-295" class="ident">Enumerated</a>, <label for="r21" class="ident">typ</label> <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/asn1.go.html#line-222" class="ident">ObjectIdentifier</a>, <label for="r22" class="ident">token</label>, <label for="r23" class="ident">mechListMIC</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-137"><code>	<label for="r24" class="ident">bs</label>, <label for="r25" class="ident">err</label> := <a href="../../../../../../pkg/encoding/asn1.html" class="ident i0">asn1</a>.<a href="../../../../../encoding/asn1/marshal.go.html#line-733" class="ident">Marshal</a>(</code></span>
+<span class="codeline" id="line-138"><code>		<a href="#line-16" class="ident">initialContextToken</a>{</code></span>
+<span class="codeline" id="line-139"><code>			<a href="#line-19" class="ident">Resp</a>: []<a href="#line-67" class="ident">NegTokenResp</a>{</code></span>
+<span class="codeline" id="line-140"><code>				{</code></span>
+<span class="codeline" id="line-141"><code>					<a href="#line-68" class="ident">NegState</a>:      <label for="r20" class="ident">state</label>,</code></span>
+<span class="codeline" id="line-142"><code>					<a href="#line-69" class="ident">SupportedMech</a>: <label for="r21" class="ident">typ</label>,</code></span>
+<span class="codeline" id="line-143"><code>					<a href="#line-70" class="ident">ResponseToken</a>: <label for="r22" class="ident">token</label>,</code></span>
+<span class="codeline" id="line-144"><code>					<a href="#line-71" class="ident">MechListMIC</a>:   <label for="r23" class="ident">mechListMIC</label>,</code></span>
+<span class="codeline" id="line-145"><code>				},</code></span>
+<span class="codeline" id="line-146"><code>			},</code></span>
+<span class="codeline" id="line-147"><code>		})</code></span>
+<span class="codeline" id="line-148"><code>	<span class="keyword">if</span> <label for="r25" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-149"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r25" class="ident">err</label></code></span>
+<span class="codeline" id="line-150"><code>	}</code></span>
+<span class="codeline" id="line-151"><code></code></span>
+<span class="codeline" id="line-152"><code>	<label for="r26" class="ident">skip</label> := <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-153"><code>	<span class="keyword">if</span> <label for="r24" class="ident">bs</label>[<label for="r26" class="ident">skip</label>] &lt; <span class="lit-number">128</span> {</code></span>
+<span class="codeline" id="line-154"><code>		<label for="r26" class="ident">skip</label> += <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-155"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-156"><code>		<label for="r26" class="ident">skip</label> += <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r24" class="ident">bs</label>[<label for="r26" class="ident">skip</label>]) - <span class="lit-number">128</span> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-157"><code>	}</code></span>
+<span class="codeline" id="line-158"><code></code></span>
+<span class="codeline" id="line-159"><code>	<span class="keyword">return</span> <label for="r24" class="ident">bs</label>[<label for="r26" class="ident">skip</label>:], <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-160"><code>}</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code><span class="keyword">func</span> <label for="r27" class="ident"><a href="../../../../../../pkg/github.com/hirochachacha/go-smb2/internal/spnego.html#name-DecodeNegTokenResp" class="ident">DecodeNegTokenResp</a></label>(<label for="r28" class="ident">bs</label> []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (*<a href="#line-67" class="ident">NegTokenResp</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-163"><code>	<span class="keyword">var</span> <label for="r29" class="ident">resp</label> <a href="#line-67" class="ident">NegTokenResp</a></code></span>
+<span class="codeline" id="line-164"><code></code></span>
+<span class="codeline" id="line-165"><code>	<label for="r30" class="ident">_</label>, <label for="r31" class="ident">err</label> := <a href="../../../../../../pkg/github.com/geoffgarside/ber.html" class="ident i1">ber</a>.<a href="../../../../geoffgarside/ber/ber.go.html#line-982" class="ident">UnmarshalWithParams</a>(<label for="r28" class="ident">bs</label>, &amp;<label for="r29" class="ident">resp</label>, <span class="lit-string">"explicit,tag:1"</span>)</code></span>
+<span class="codeline" id="line-166"><code>	<span class="keyword">if</span> <label for="r31" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r31" class="ident">err</label></code></span>
+<span class="codeline" id="line-168"><code>	}</code></span>
+<span class="codeline" id="line-169"><code></code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">return</span> &amp;<label for="r29" class="ident">resp</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-171"><code>}</code></span>
+<span class="codeline" id="line-172"><code></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">// real world example</span></code></span>
+<span class="codeline" id="line-174"><code></code></span>
+<span class="codeline" id="line-175"><code><span class="comment">// structured:</span></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">// 0x00: non-structured</span></code></span>
+<span class="codeline" id="line-177"><code><span class="comment">// 0x20: structured</span></code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code><span class="comment">// class:</span></code></span>
+<span class="codeline" id="line-180"><code><span class="comment">// 0x00: general</span></code></span>
+<span class="codeline" id="line-181"><code><span class="comment">// 0x40: application</span></code></span>
+<span class="codeline" id="line-182"><code><span class="comment">// 0x80: context specific</span></code></span>
+<span class="codeline" id="line-183"><code><span class="comment">// 0xc0: private</span></code></span>
+<span class="codeline" id="line-184"><code></code></span>
+<span class="codeline" id="line-185"><code><span class="comment">// 0x60 = 0x20 | 0x40</span></code></span>
+<span class="codeline" id="line-186"><code><span class="comment">// 0xa0 = 0x20 | 0x80</span></code></span>
+<span class="codeline" id="line-187"><code></code></span>
+<span class="codeline" id="line-188"><code><span class="comment">// Negotiate Message</span></code></span>
+<span class="codeline" id="line-189"><code><span class="comment">// 60 48 (initialContextToken)</span></code></span>
+<span class="codeline" id="line-190"><code><span class="comment">//    06 06 (type)</span></code></span>
+<span class="codeline" id="line-191"><code><span class="comment">//       2b 06 01 05 05 02</span></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">//    a0 3e (tag 0)</span></code></span>
+<span class="codeline" id="line-193"><code><span class="comment">//       30 3c (negTokenInit)</span></code></span>
+<span class="codeline" id="line-194"><code><span class="comment">//          a0 0e (tag 0)</span></code></span>
+<span class="codeline" id="line-195"><code><span class="comment">//             30 0c (mechTypes)</span></code></span>
+<span class="codeline" id="line-196"><code><span class="comment">//                06 0a (mechType)</span></code></span>
+<span class="codeline" id="line-197"><code><span class="comment">//                   2b 06 01 04 01 82 37 02 02 0a</span></code></span>
+<span class="codeline" id="line-198"><code><span class="comment">//          a2 2a (tag 2)</span></code></span>
+<span class="codeline" id="line-199"><code><span class="comment">//             04 28 (mechToken)</span></code></span>
+<span class="codeline" id="line-200"><code><span class="comment">//                4e 54 4c 4d 53 53 50 00 01 00 00 00 97 82 08 e2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 0a 00 5a 29 00 00 00 0f</span></code></span>
+<span class="codeline" id="line-201"><code></code></span>
+<span class="codeline" id="line-202"><code><span class="comment">// Challenge Message</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">//    a1 81 ca  (tag 1)</span></code></span>
+<span class="codeline" id="line-204"><code><span class="comment">//       30 81 c7 (negTokenResp)</span></code></span>
+<span class="codeline" id="line-205"><code><span class="comment">//          a0 03 (tag 0)</span></code></span>
+<span class="codeline" id="line-206"><code><span class="comment">//             0a 01 (negState)</span></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">//                01</span></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">//          a1 0c (tag 1)</span></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">//             06 0a (supportedMech)</span></code></span>
+<span class="codeline" id="line-210"><code><span class="comment">//                2b 06 01 04 01 82 37 02 02 0a</span></code></span>
+<span class="codeline" id="line-211"><code><span class="comment">//          a2 81 b1 (tag 2)</span></code></span>
+<span class="codeline" id="line-212"><code><span class="comment">//             04 81 ae (responseToken)</span></code></span>
+<span class="codeline" id="line-213"><code><span class="comment">//                4e 54 4c 4d 53 53 50 00 02 00 00 00 10 00 10 00 38 00 00 00 35 82 89 62 a9 d9 c9 2c f4 15 2e 98 00 00 00 00 00 00 00 00 66 00 66 00 48 00 00 00 06 01 b0 1d 0f 00 00 00 46 00 41 00 4b 00 45 00 52 00 55 00 4e 00 45 00 01 00 10 00 46 00 41 00 4b 00 45 00 52 00 55 00 4e 00 45 00 02 00 10 00 46 00 41 00 4b 00 45 00 52 00 55 00 4e 00 45 00 03 00 1c 00 66 00 61 00 6b 00 65 00 72 00 75 00 6e 00 65 00 2e 00 6c 00 6f 00 63 00 61 00 6c 00 04 00 0a 00 6c 00 6f 00 63 00 61 00 6c 00 07 00 08 00 00 76 b9 15 16 c2 d1 01 00 00 00 00</span></code></span>
+<span class="codeline" id="line-214"><code></code></span>
+<span class="codeline" id="line-215"><code><span class="comment">// Authenticate Message</span></code></span>
+<span class="codeline" id="line-216"><code><span class="comment">//    a1 82 02 07 (tag 1)</span></code></span>
+<span class="codeline" id="line-217"><code><span class="comment">//       30 82 02 03 (negTokenResp)</span></code></span>
+<span class="codeline" id="line-218"><code><span class="comment">//          a0 03 (tag 0)</span></code></span>
+<span class="codeline" id="line-219"><code><span class="comment">//             0a 01 (negState)</span></code></span>
+<span class="codeline" id="line-220"><code><span class="comment">//                01</span></code></span>
+<span class="codeline" id="line-221"><code><span class="comment">//          a2 82 01 e6 (tag 2)</span></code></span>
+<span class="codeline" id="line-222"><code><span class="comment">//             04 82 01 e2  (responseToken)</span></code></span>
+<span class="codeline" id="line-223"><code><span class="comment">//                4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00 ac 00 00 00 0e 01 0e 01 c4 00 00 00 20 00 20 00 58 00 00 00 26 00 26 00 78 00 00 00 0e 00 0e 00 9e 00 00 00 10 00 10 00 d2 01 00 00 15 82 88 62 0a 00 5a 29 00 00 00 0f 3e 3d 42 66 11 05 d1 43 9d ee 00 f8 36 ca d4 fa 4d 00 69 00 63 00 72 00 6f 00 73 00 6f 00 66 00 74 00 41 00 63 00 63 00 6f 00 75 00 6e 00 74 00 68 00 69 00 72 00 6f 00 65 00 69 00 6b 00 6f 00 40 00 6f 00 75 00 74 00 6c 00 6f 00 6f 00 6b 00 2e 00 6a 00 70 00 48 00 4f 00 4d 00 45 00 2d 00 50 00 43 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 bf 30 2e 94 f7 61 de 33 28 8f 11 86 6a 37 b2 9c 01 01 00 00 00 00 00 00 00 76 b9 15 16 c2 d1 01 27 53 c1 0d 33 3a 7b 10 00 00 00 00 01 00 10 00 46 00 41 00 4b 00 45 00 52 00 55 00 4e 00 45 00 02 00 10 00 46 00 41 00 4b 00 45 00 52 00 55 00 4e 00 45 00 03 00 1c 00 66 00 61 00 6b 00 65 00 72 00 75 00 6e 00 65 00 2e 00 6c 00 6f 00 63 00 61 00 6c 00 04 00 0a 00 6c 00 6f 00 63 00 61 00 6c 00 07 00 08 00 00 76 b9 15 16 c2 d1 01 06 00 04 00 02 00 00 00 08 00 30 00 30 00 00 00 00 00 00 00 01 00 00 00 00 20 00 00 05 2b 42 bd 2c fd f1 05 bc 03 8d e9 3d 80 37 5c 47 f4 33 66 bb 93 76 57 9c f2 e7 ff cf d0 6a af 0a 00 10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 09 00 20 00 63 00 69 00 66 00 73 00 2f 00 31 00 39 00 32 00 2e 00 31 00 36 00 38 00 2e 00 30 00 2e 00 37 00 00 00 00 00 00 00 00 00 00 00 00 00 84 9e e9 fc d7 0e a9 2c 0c 4f 60 e0 df aa f6 d2</span></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">//          a3 12 (tag 3)</span></code></span>
+<span class="codeline" id="line-225"><code><span class="comment">//             04 10 (mechList MIC)</span></code></span>
+<span class="codeline" id="line-226"><code><span class="comment">//                01 00 00 00 69 e2 49 81 b5 da c3 3f 00 00 00 00</span></code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

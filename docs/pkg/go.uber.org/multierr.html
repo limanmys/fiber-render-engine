@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: go.uber.org/multierr</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>multierr</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../index.html#pkg-go.uber.org/multierr">go.uber.org/multierr</a><i> (on <a href="https://pkg.go.dev/go.uber.org/multierr" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../dep/go.uber.org/multierr.html">7 packages</a>, and imported by <a href="../../dep/go.uber.org/multierr.html#imported-by">2 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">   <a href="../../src/go.uber.org/multierr/error.go.html#doc">#d</a> <a href="../../src/go.uber.org/multierr/error.go.html">error.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package multierr allows combining one or more errors together.
+		
+		# Overview
+		
+		Errors can be combined with the use of the Combine function.
+		
+			multierr.Combine(
+				reader.Close(),
+				writer.Close(),
+				conn.Close(),
+			)
+		
+		If only two errors are being combined, the Append function may be used
+		instead.
+		
+			err = multierr.Append(reader.Close(), writer.Close())
+		
+		The underlying list of errors for a returned error object may be retrieved
+		with the Errors function.
+		
+			errors := multierr.Errors(err)
+			if len(errors) &gt; 0 {
+				fmt.Println("The following errors occurred:", errors)
+			}
+		
+		# Appending from a loop
+		
+		You sometimes need to append into an error from a loop.
+		
+			var err error
+			for _, item := range items {
+				err = multierr.Append(err, process(item))
+			}
+		
+		Cases like this may require knowledge of whether an individual instance
+		failed. This usually requires introduction of a new variable.
+		
+			var err error
+			for _, item := range items {
+				if perr := process(item); perr != nil {
+					log.Warn("skipping item", item)
+					err = multierr.Append(err, perr)
+				}
+			}
+		
+		multierr includes AppendInto to simplify cases like this.
+		
+			var err error
+			for _, item := range items {
+				if multierr.AppendInto(&amp;err, process(item)) {
+					log.Warn("skipping item", item)
+				}
+			}
+		
+		This will append the error into the err variable, and return true if that
+		individual error was non-nil.
+		
+		See [AppendInto] for more information.
+		
+		# Deferred Functions
+		
+		Go makes it possible to modify the return value of a function in a defer
+		block if the function was using named returns. This makes it possible to
+		record resource cleanup failures from deferred blocks.
+		
+			func sendRequest(req Request) (err error) {
+				conn, err := openConnection()
+				if err != nil {
+					return err
+				}
+				defer func() {
+					err = multierr.Append(err, conn.Close())
+				}()
+				// ...
+			}
+		
+		multierr provides the Invoker type and AppendInvoke function to make cases
+		like the above simpler and obviate the need for a closure. The following is
+		roughly equivalent to the example above.
+		
+			func sendRequest(req Request) (err error) {
+				conn, err := openConnection()
+				if err != nil {
+					return err
+				}
+				defer multierr.AppendInvoke(&amp;err, multierr.Close(conn))
+				// ...
+			}
+		
+		See [AppendInvoke] and [Invoker] for more information.
+		
+		NOTE: If you're modifying an error from inside a defer, you MUST use a named
+		return value for that function.
+		
+		# Advanced Usage
+		
+		Errors returned by Combine and Append MAY implement the following
+		interface.
+		
+			type errorGroup interface {
+				// Returns a slice containing the underlying list of errors.
+				//
+				// This slice MUST NOT be modified by the caller.
+				Errors() []error
+			}
+		
+		Note that if you need access to list of errors behind a multierr error, you
+		should prefer using the Errors function. That said, if you need cheap
+		read-only access to the underlying errors slice, you can attempt to cast
+		the error to this interface. You MUST handle the failure case gracefully
+		because errors returned by Combine and Append are not guaranteed to
+		implement this interface.
+		
+			var errors []error
+			group, ok := err.(errorGroup)
+			if ok {
+				errors = group.Errors()
+			} else {
+				errors = []error{err}
+			}</span></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Append</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"errors"
+			"fmt"
+		
+			"go.uber.org/multierr"
+		)
+		
+		func main() {
+			var err error
+			err = multierr.Append(err, errors.New("call 1 failed"))
+			err = multierr.Append(err, errors.New("call 2 failed"))
+			fmt.Println(err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">AppendInto</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"errors"
+			"fmt"
+		
+			"go.uber.org/multierr"
+		)
+		
+		func main() {
+			var err error
+		
+			if multierr.AppendInto(&amp;err, errors.New("foo")) {
+				fmt.Println("call 1 failed")
+			}
+		
+			if multierr.AppendInto(&amp;err, nil) {
+				fmt.Println("call 2 failed")
+			}
+		
+			if multierr.AppendInto(&amp;err, errors.New("baz")) {
+				fmt.Println("call 3 failed")
+			}
+		
+			fmt.Println(err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">Close</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"errors"
+			"fmt"
+			"io"
+		
+			"go.uber.org/multierr"
+		)
+		
+		type fakeCloser func() error
+		
+		func (f fakeCloser) Close() error {
+			return f()
+		}
+		
+		func FakeCloser(err error) io.Closer {
+			return fakeCloser(func() error {
+				return err
+			})
+		}
+		
+		func main() {
+			var err error
+		
+			closer := FakeCloser(errors.New("foo"))
+		
+			defer func() {
+				fmt.Println(err)
+			}()
+			defer multierr.AppendInvoke(&amp;err, multierr.Close(closer))
+		
+			fmt.Println("Hello, World")
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">Combine</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"errors"
+			"fmt"
+		
+			"go.uber.org/multierr"
+		)
+		
+		func main() {
+			err := multierr.Combine(
+				errors.New("call 1 failed"),
+				nil, // successful request
+				errors.New("call 3 failed"),
+				nil, // successful request
+				errors.New("call 5 failed"),
+			)
+			fmt.Printf("%+v", err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-4-fold-content"><label for="example-4-fold-content">Errors</label><span id='example-4-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"errors"
+			"fmt"
+		
+			"go.uber.org/multierr"
+		)
+		
+		func main() {
+			err := multierr.Combine(
+				nil, // successful request
+				errors.New("call 2 failed"),
+				errors.New("call 3 failed"),
+			)
+			err = multierr.Append(err, nil) // successful request
+			err = multierr.Append(err, errors.New("call 5 failed"))
+		
+			errors := multierr.Errors(err)
+			for _, err := range errors {
+				fmt.Println(err)
+			}
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Invoke" data-popularity="100">	<input type='checkbox' class="fold" id="Invoke-fold-content"><label for="Invoke-fold-content"> type <a href="../../src/go.uber.org/multierr/error.go.html#line-577">Invoke</a> <i>(func)</i></label><span id='Invoke-fold-content-docs' class="fold-docs">
+<span class="md-text">		Invoke wraps a function which may fail with an error to match the Invoker
+		interface. Use it to supply functions matching this signature to
+		AppendInvoke.
+		
+		For example,
+		
+			func processReader(r io.Reader) (err error) {
+				scanner := bufio.NewScanner(r)
+				defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))
+				for scanner.Scan() {
+					// ...
+				}
+				// ...
+			}
+		
+		In this example, the following line will construct the Invoker right away,
+		but defer the invocation of scanner.Err() until the function returns.
+		
+			defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))
+		
+		Note that the error you're appending to from the defer statement MUST be a
+		named return.</span>
+
+		<input type='checkbox' class="fold" id="Invoke-fold-methods"><label for="Invoke-fold-methods">Methods (<i>only one</i>)</label><span id='Invoke-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Invoke-fold-method-Invoke"><label for="Invoke-fold-method-Invoke">( Invoke) <a href="../../src/go.uber.org/multierr/error.go.html#line-580">Invoke</a>() <a href="../builtin.html#name-error">error</a></label><span id='Invoke-fold-method-Invoke-docs' class="fold-docs">
+<span class="md-text">				Invoke calls the supplied function and returns its result.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Invoke-fold-impls"><label for="Invoke-fold-impls">Implements (<i>at least one exported</i>)</label><span id='Invoke-fold-impls-items' class="fold-items"><span>
+			 Invoke : <a href="#name-Invoker">Invoker</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Invoker" data-popularity="310">	<input type='checkbox' class="fold" id="Invoker-fold-content"><label for="Invoker-fold-content"> type <a href="../../src/go.uber.org/multierr/error.go.html#line-551">Invoker</a> <b><i>(interface)</i></b></label><span id='Invoker-fold-content-docs' class="fold-docs">
+<span class="md-text">		Invoker is an operation that may fail with an error. Use it with
+		AppendInvoke to append the result of calling the function into an error.
+		This allows you to conveniently defer capture of failing operations.
+		
+		See also, [Close] and [Invoke].</span>
+
+		<input type='checkbox' class="fold" id="Invoker-fold-methods"><label for="Invoker-fold-methods">Methods (<i>only one</i>)</label><span id='Invoker-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( Invoker) <a href="../../src/go.uber.org/multierr/error.go.html#line-552">Invoke</a>() <a href="../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="Invoker-fold-impledby"><label for="Invoker-fold-impledby">Implemented By (<i>at least one exported</i>)</label><span id='Invoker-fold-impledby-items' class="fold-items"><span>
+			 <a href="#name-Invoke">Invoke</a></span></span>
+		<input type='checkbox' class="fold" id="Invoker-fold-results"><label for="Invoker-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Invoker-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Close">Close</a>(closer <a href="../io.html">io</a>.<a href="../io.html#name-Closer">Closer</a>) <b>Invoker</b></span></span>
+		<input type='checkbox' class="fold" id="Invoker-fold-params"><label for="Invoker-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Invoker-fold-params-items' class="fold-items"><span>
+			func <a href="#name-AppendInvoke">AppendInvoke</a>(into *<a href="../builtin.html#name-error">error</a>, invoker <b>Invoker</b>)</span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 7)</i></span></span>
+
+<div class="anchor value-res" id="name-Append">	<input type='checkbox' class="fold" id="Append-fold-content"><label for="Append-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-470">Append</a>(left <a href="../builtin.html#name-error">error</a>, right <a href="../builtin.html#name-error">error</a>) <a href="../builtin.html#name-error">error</a></label><span id='Append-fold-content-docs' class="fold-docs">
+<span class="md-text">		Append appends the given errors together. Either value may be nil.
+		
+		This function is a specialization of Combine for the common case where
+		there are only two errors.
+		
+			err = multierr.Append(reader.Close(), writer.Close())
+		
+		The following pattern may also be used to record failure of deferred
+		operations without losing information about the original error.
+		
+			func doSomething(..) (err error) {
+				f := acquireResource()
+				defer func() {
+					err = multierr.Append(err, f.Close())
+				}()
+		
+		Note that the variable MUST be a named return to append an error to it from
+		the defer statement. See also [AppendInvoke].</span>
+
+</span></div><div class="anchor value-res" id="name-AppendFunc">	<input type='checkbox' class="fold" id="AppendFunc-fold-content"><label for="AppendFunc-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-679">AppendFunc</a>(into *<a href="../builtin.html#name-error">error</a>, fn func() <a href="../builtin.html#name-error">error</a>)</label><span id='AppendFunc-fold-content-docs' class="fold-docs">
+<span class="md-text">		AppendFunc is a shorthand for [AppendInvoke].
+		It allows using function or method value directly
+		without having to wrap it into an [Invoker] interface.
+		
+			func doSomething(...) (err error) {
+				w, err := startWorker(...)
+				if err != nil {
+					return err
+				}
+		
+				// multierr will call w.Stop() when this function returns and
+				// if the operation fails, it appends its error into the
+				// returned error.
+				defer multierr.AppendFunc(&amp;err, w.Stop)
+			}</span>
+
+</span></div><div class="anchor value-res" id="name-AppendInto">	<input type='checkbox' class="fold" id="AppendInto-fold-content"><label for="AppendInto-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-530">AppendInto</a>(into *<a href="../builtin.html#name-error">error</a>, err <a href="../builtin.html#name-error">error</a>) (errored <a href="../builtin.html#name-bool">bool</a>)</label><span id='AppendInto-fold-content-docs' class="fold-docs">
+<span class="md-text">		AppendInto appends an error into the destination of an error pointer and
+		returns whether the error being appended was non-nil.
+		
+			var err error
+			multierr.AppendInto(&amp;err, r.Close())
+			multierr.AppendInto(&amp;err, w.Close())
+		
+		The above is equivalent to,
+		
+			err := multierr.Append(r.Close(), w.Close())
+		
+		As AppendInto reports whether the provided error was non-nil, it may be
+		used to build a multierr error in a loop more ergonomically. For example:
+		
+			var err error
+			for line := range lines {
+				var item Item
+				if multierr.AppendInto(&amp;err, parse(line, &amp;item)) {
+					continue
+				}
+				items = append(items, item)
+			}
+		
+		Compare this with a version that relies solely on Append:
+		
+			var err error
+			for line := range lines {
+				var item Item
+				if parseErr := parse(line, &amp;item); parseErr != nil {
+					err = multierr.Append(err, parseErr)
+					continue
+				}
+				items = append(items, item)
+			}</span>
+
+</span></div><div class="anchor value-res" id="name-AppendInvoke">	<input type='checkbox' class="fold" id="AppendInvoke-fold-content"><label for="AppendInvoke-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-660">AppendInvoke</a>(into *<a href="../builtin.html#name-error">error</a>, invoker <a href="#name-Invoker">Invoker</a>)</label><span id='AppendInvoke-fold-content-docs' class="fold-docs">
+<span class="md-text">		AppendInvoke appends the result of calling the given Invoker into the
+		provided error pointer. Use it with named returns to safely defer
+		invocation of fallible operations until a function returns, and capture the
+		resulting errors.
+		
+			func doSomething(...) (err error) {
+				// ...
+				f, err := openFile(..)
+				if err != nil {
+					return err
+				}
+		
+				// multierr will call f.Close() when this function returns and
+				// if the operation fails, its append its error into the
+				// returned error.
+				defer multierr.AppendInvoke(&amp;err, multierr.Close(f))
+		
+				scanner := bufio.NewScanner(f)
+				// Similarly, this scheduled scanner.Err to be called and
+				// inspected when the function returns and append its error
+				// into the returned error.
+				defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))
+		
+				// ...
+			}
+		
+		NOTE: If used with a defer, the error variable MUST be a named return.
+		
+		Without defer, AppendInvoke behaves exactly like AppendInto.
+		
+			err := // ...
+			multierr.AppendInvoke(&amp;err, mutltierr.Invoke(foo))
+		
+			// ...is roughly equivalent to...
+		
+			err := // ...
+			multierr.AppendInto(&amp;err, foo())
+		
+		The advantage of the indirection introduced by Invoker is to make it easy
+		to defer the invocation of a function. Without this indirection, the
+		invoked function will be evaluated at the time of the defer block rather
+		than when the function returns.
+		
+			// BAD: This is likely not what the caller intended. This will evaluate
+			// foo() right away and append its result into the error when the
+			// function returns.
+			defer multierr.AppendInto(&amp;err, foo())
+		
+			// GOOD: This will defer invocation of foo unutil the function returns.
+			defer multierr.AppendInvoke(&amp;err, multierr.Invoke(foo))
+		
+		multierr provides a few Invoker implementations out of the box for
+		convenience. See [Invoker] for more information.</span>
+
+</span></div><div class="anchor value-res" id="name-Close">	<input type='checkbox' class="fold" id="Close-fold-content"><label for="Close-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-603">Close</a>(closer <a href="../io.html">io</a>.<a href="../io.html#name-Closer">Closer</a>) <a href="#name-Invoker">Invoker</a></label><span id='Close-fold-content-docs' class="fold-docs">
+<span class="md-text">		Close builds an Invoker that closes the provided io.Closer. Use it with
+		AppendInvoke to close io.Closers and append their results into an error.
+		
+		For example,
+		
+			func processFile(path string) (err error) {
+				f, err := os.Open(path)
+				if err != nil {
+					return err
+				}
+				defer multierr.AppendInvoke(&amp;err, multierr.Close(f))
+				return processReader(f)
+			}
+		
+		In this example, multierr.Close will construct the Invoker right away, but
+		defer the invocation of f.Close until the function returns.
+		
+			defer multierr.AppendInvoke(&amp;err, multierr.Close(f))
+		
+		Note that the error you're appending to from the defer statement MUST be a
+		named return.</span>
+
+</span></div><div class="anchor value-res" id="name-Combine">	<input type='checkbox' class="fold" id="Combine-fold-content"><label for="Combine-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-448">Combine</a>(errors ...<a href="../builtin.html#name-error">error</a>) <a href="../builtin.html#name-error">error</a></label><span id='Combine-fold-content-docs' class="fold-docs">
+<span class="md-text">		Combine combines the passed errors into a single error.
+		
+		If zero arguments were passed or if all items are nil, a nil error is
+		returned.
+		
+			Combine(nil, nil)  // == nil
+		
+		If only a single error was passed, it is returned as-is.
+		
+			Combine(err)  // == err
+		
+		Combine skips over nil arguments so this function may be used to combine
+		together errors from operations that fail independently of each other.
+		
+			multierr.Combine(
+				reader.Close(),
+				writer.Close(),
+				pipe.Close(),
+			)
+		
+		If any of the passed errors is a multierr error, it will be flattened along
+		with the other errors.
+		
+			multierr.Combine(multierr.Combine(err1, err2), err3)
+			// is the same as
+			multierr.Combine(err1, err2, err3)
+		
+		The returned error formats into a readable multi-line error message if
+		formatted with %+v.
+		
+			fmt.Sprintf("%+v", multierr.Combine(err1, err2))</span>
+
+</span></div><div class="anchor value-res" id="name-Errors">	<input type='checkbox' class="fold" id="Errors-fold-content"><label for="Errors-fold-content"> func <a href="../../src/go.uber.org/multierr/error.go.html#line-198">Errors</a>(err <a href="../builtin.html#name-error">error</a>) []<a href="../builtin.html#name-error">error</a></label><span id='Errors-fold-content-docs' class="fold-docs">
+<span class="md-text">		Errors returns a slice containing zero or more errors that the supplied
+		error is composed of. If the error is nil, a nil slice is returned.
+		
+			err := multierr.Append(r.Close(), w.Close())
+			errors := multierr.Errors(err)
+		
+		If the error is not composed of other errors, the returned slice contains
+		just the error that was passed in.
+		
+		Callers of this function are free to modify the returned slice.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

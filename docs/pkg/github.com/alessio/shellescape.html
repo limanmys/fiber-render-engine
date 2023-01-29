@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/alessio/shellescape</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>shellescape</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/alessio/shellescape">github.com/alessio/shellescape</a><i> (on <a href="https://pkg.go.dev/github.com/alessio/shellescape" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/alessio/shellescape.html">3 packages</a>, and imported by <a href="../../../dep/github.com/alessio/shellescape.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">   <a href="../../../src/github.com/alessio/shellescape/shellescape.go.html#doc">#d</a> <a href="../../../src/github.com/alessio/shellescape/shellescape.go.html">shellescape.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package shellescape provides the shellescape.Quote to escape arbitrary
+		strings for a safe use as command line arguments in the most common
+		POSIX shells.
+		
+		The original Python package which this work was inspired by can be found
+		at https://pypi.python.org/pypi/shellescape.</span></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Quote</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"strings"
+		
+			"github.com/alessio/shellescape"
+		)
+		
+		func main() {
+			filename := "myfile; rm -rf /"
+			prog := "/bin/ls -lh"
+			unsafe := strings.Join([]string{prog, filename}, " ")
+			safe := strings.Join([]string{prog, shellescape.Quote(filename)}, " ")
+		
+			fmt.Println("unsafe:", unsafe)
+			fmt.Println("safe:", safe)
+		
+			for i, part := range strings.Split(unsafe, " ") {
+				fmt.Printf("unsafe[%d] = %s\n", i, part)
+			}
+		
+			for i, part := range strings.Split(safe, " ") {
+				fmt.Printf("safe[%d] = %s\n", i, part)
+			}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">QuoteCommand</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"strings"
+		
+			"github.com/alessio/shellescape"
+		)
+		
+		func main() {
+			filename := "filename with space"
+			prog := "/usr/bin/ls"
+			args := "-lh"
+		
+			unsafe := strings.Join([]string{prog, args, filename}, " ")
+			safe := strings.Join([]string{prog, shellescape.QuoteCommand([]string{args, filename})}, " ")
+		
+			fmt.Println("unsafe:", unsafe)
+			fmt.Println("safe:", safe)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">StripUnsafe</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/alessio/shellescape"
+		)
+		
+		func main() {
+			safeString := `"printable!" #$%^characters '' 12321312"`
+			unsafeString := "these runes shall be removed: \u0000\u0081\u001f"
+		
+			fmt.Println("safe:", shellescape.StripUnsafe(safeString))
+			fmt.Println("unsafe:", shellescape.StripUnsafe(unsafeString))
+		}
+</span>
+</div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 3)</i></span></span>
+
+<div class="anchor value-res" id="name-Quote">	<input type='checkbox' class="fold" id="Quote-fold-content"><label for="Quote-fold-content"> func <a href="../../../src/github.com/alessio/shellescape/shellescape.go.html#line-31">Quote</a>(s <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='Quote-fold-content-docs' class="fold-docs">
+<span class="md-text">		Quote returns a shell-escaped version of the string s. The returned value
+		is a string that can safely be used as one token in a shell command line.</span>
+
+</span></div><div class="anchor value-res" id="name-QuoteCommand">	<input type='checkbox' class="fold" id="QuoteCommand-fold-content"><label for="QuoteCommand-fold-content"> func <a href="../../../src/github.com/alessio/shellescape/shellescape.go.html#line-45">QuoteCommand</a>(args []<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='QuoteCommand-fold-content-docs' class="fold-docs">
+<span class="md-text">		QuoteCommand returns a shell-escaped version of the slice of strings.
+		The returned value is a string that can safely be used as shell command arguments.</span>
+
+</span></div><div class="anchor value-res" id="name-StripUnsafe">	<input type='checkbox' class="fold" id="StripUnsafe-fold-content"><label for="StripUnsafe-fold-content"> func <a href="../../../src/github.com/alessio/shellescape/shellescape.go.html#line-58">StripUnsafe</a>(s <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='StripUnsafe-fold-content-docs' class="fold-docs">
+<span class="md-text">		StripUnsafe remove non-printable runes, e.g. control characters in
+		a string that is meant  for consumption by terminals that support
+		control characters.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

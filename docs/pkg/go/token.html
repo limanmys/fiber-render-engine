@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: go/token</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>token</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../index.html#pkg-go/token">go/token</a><i> (on <a href="https://pkg.go.dev/go/token" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../dep/go/token.html">7 packages</a>, and imported by <a href="../../dep/go/token.html#imported-by">2 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../src/go/token/position.go.html">position.go</a></span>
+	<span class="nodocs">      <a href="../../src/go/token/serialize.go.html">serialize.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-2-fold-content"><label for="file-2-fold-content">   <a href="../../src/go/token/token.go.html#doc">#d</a> <a href="../../src/go/token/token.go.html">token.go</a></label><span id='file-2-fold-content-items' class="fold-items">
+<span class="md-text">		Package token defines constants representing the lexical tokens of the Go
+		programming language and basic operations on tokens (printing, predicates).</span></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">_retrievePositionInfo</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"go/ast"
+			"go/parser"
+			"go/token"
+		)
+		
+		func main() {
+			fset := token.NewFileSet()
+		
+			const src = `package main
+		
+		import "fmt"
+		
+		import "go/token"
+		
+		//line :1:5
+		type p = token.Pos
+		
+		const bad = token.NoPos
+		
+		//line fake.go:42:11
+		func ok(pos p) bool {
+			return pos != bad
+		}
+		
+		/*line :7:9*/func main() {
+			fmt.Println(ok(bad) == bad.IsValid())
+		}
+		`
+		
+			f, err := parser.ParseFile(fset, "main.go", src, 0)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		
+			// Print the location and kind of each declaration in f.
+			for _, decl := range f.Decls {
+				// Get the filename, line, and column back via the file set.
+				// We get both the relative and absolute position.
+				// The relative position is relative to the last line directive.
+				// The absolute position is the exact position in the source.
+				pos := decl.Pos()
+				relPosition := fset.Position(pos)
+				absPosition := fset.PositionFor(pos, false)
+		
+				// Either a FuncDecl or GenDecl, since we exit on error.
+				kind := "func"
+				if gen, ok := decl.(*ast.GenDecl); ok {
+					kind = gen.Tok.String()
+				}
+		
+				// If the relative and absolute positions differ, show both.
+				fmtPosition := relPosition.String()
+				if relPosition != absPosition {
+					fmtPosition += "[" + absPosition.String() + "]"
+				}
+		
+				fmt.Printf("%s: %s\n", fmtPosition, kind)
+			}
+		
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 5)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-File" data-popularity="985">	<input type='checkbox' class="fold" id="File-fold-content"><label for="File-fold-content"> type <a href="../../src/go/token/position.go.html#line-95">File</a> <i>(struct)</i></label><span id='File-fold-content-docs' class="fold-docs">
+<span class="md-text">		A File is a handle for a file belonging to a FileSet.
+		A File has a name, size, and line offset table.</span>
+
+		<input type='checkbox' class="fold" id="File-fold-methods"><label for="File-fold-methods">Methods (<i>total 16</i>)</label><span id='File-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="File-fold-method-AddLine"><label for="File-fold-method-AddLine">(*File) <a href="../../src/go/token/position.go.html#line-132">AddLine</a>(offset <a href="../builtin.html#name-int">int</a>)</label><span id='File-fold-method-AddLine-docs' class="fold-docs">
+<span class="md-text">				AddLine adds the line offset for a new line.
+				The line offset must be larger than the offset for the previous line
+				and smaller than the file size; otherwise the line offset is ignored.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-AddLineColumnInfo"><label for="File-fold-method-AddLineColumnInfo">(*File) <a href="../../src/go/token/position.go.html#line-246">AddLineColumnInfo</a>(offset <a href="../builtin.html#name-int">int</a>, filename <a href="../builtin.html#name-string">string</a>, line, column <a href="../builtin.html#name-int">int</a>)</label><span id='File-fold-method-AddLineColumnInfo-docs' class="fold-docs">
+<span class="md-text">				AddLineColumnInfo adds alternative file, line, and column number
+				information for a given file offset. The offset must be larger
+				than the offset for the previously added alternative line info
+				and smaller than the file size; otherwise the information is
+				ignored.
+				
+				AddLineColumnInfo is typically used to register alternative position
+				information for line directives such as //line filename:line:column.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-AddLineInfo"><label for="File-fold-method-AddLineInfo">(*File) <a href="../../src/go/token/position.go.html#line-234">AddLineInfo</a>(offset <a href="../builtin.html#name-int">int</a>, filename <a href="../builtin.html#name-string">string</a>, line <a href="../builtin.html#name-int">int</a>)</label><span id='File-fold-method-AddLineInfo-docs' class="fold-docs">
+<span class="md-text">				AddLineInfo is like AddLineColumnInfo with a column = 1 argument.
+				It is here for backward-compatibility for code prior to Go 1.11.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Base"><label for="File-fold-method-Base">(*File) <a href="../../src/go/token/position.go.html#line-112">Base</a>() <a href="../builtin.html#name-int">int</a></label><span id='File-fold-method-Base-docs' class="fold-docs">
+<span class="md-text">				Base returns the base offset of file f as registered with AddFile.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Line"><label for="File-fold-method-Line">(*File) <a href="../../src/go/token/position.go.html#line-276">Line</a>(p <a href="#name-Pos">Pos</a>) <a href="../builtin.html#name-int">int</a></label><span id='File-fold-method-Line-docs' class="fold-docs">
+<span class="md-text">				Line returns the line number for the given file position p;
+				p must be a Pos value in that file or NoPos.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-LineCount"><label for="File-fold-method-LineCount">(*File) <a href="../../src/go/token/position.go.html#line-122">LineCount</a>() <a href="../builtin.html#name-int">int</a></label><span id='File-fold-method-LineCount-docs' class="fold-docs">
+<span class="md-text">				LineCount returns the number of lines in file f.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-LineStart"><label for="File-fold-method-LineStart">(*File) <a href="../../src/go/token/position.go.html#line-210">LineStart</a>(line <a href="../builtin.html#name-int">int</a>) <a href="#name-Pos">Pos</a></label><span id='File-fold-method-LineStart-docs' class="fold-docs">
+<span class="md-text">				LineStart returns the Pos value of the start of the specified line.
+				It ignores any alternative positions set using AddLineColumnInfo.
+				LineStart panics if the 1-based line number is invalid.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-MergeLine"><label for="File-fold-method-MergeLine">(*File) <a href="../../src/go/token/position.go.html#line-144">MergeLine</a>(line <a href="../builtin.html#name-int">int</a>)</label><span id='File-fold-method-MergeLine-docs' class="fold-docs">
+<span class="md-text">				MergeLine merges a line with the following line. It is akin to replacing
+				the newline character at the end of the line with a space (to not change the
+				remaining offsets). To obtain the line number, consult e.g. Position.Line.
+				MergeLine will panic if given an invalid line number.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Name"><label for="File-fold-method-Name">(*File) <a href="../../src/go/token/position.go.html#line-107">Name</a>() <a href="../builtin.html#name-string">string</a></label><span id='File-fold-method-Name-docs' class="fold-docs">
+<span class="md-text">				Name returns the file name of file f as registered with AddFile.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Offset"><label for="File-fold-method-Offset">(*File) <a href="../../src/go/token/position.go.html#line-267">Offset</a>(p <a href="#name-Pos">Pos</a>) <a href="../builtin.html#name-int">int</a></label><span id='File-fold-method-Offset-docs' class="fold-docs">
+<span class="md-text">				Offset returns the offset for the given file position p;
+				p must be a valid Pos value in that file.
+				f.Offset(f.Pos(offset)) == offset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Pos"><label for="File-fold-method-Pos">(*File) <a href="../../src/go/token/position.go.html#line-257">Pos</a>(offset <a href="../builtin.html#name-int">int</a>) <a href="#name-Pos">Pos</a></label><span id='File-fold-method-Pos-docs' class="fold-docs">
+<span class="md-text">				Pos returns the Pos value for the given file offset;
+				the offset must be &lt;= f.Size().
+				f.Pos(f.Offset(p)) == p.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Position"><label for="File-fold-method-Position">(*File) <a href="../../src/go/token/position.go.html#line-343">Position</a>(p <a href="#name-Pos">Pos</a>) (pos <a href="#name-Position">Position</a>)</label><span id='File-fold-method-Position-docs' class="fold-docs">
+<span class="md-text">				Position returns the Position value for the given file position p.
+				Calling f.Position(p) is equivalent to calling f.PositionFor(p, true).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-PositionFor"><label for="File-fold-method-PositionFor">(*File) <a href="../../src/go/token/position.go.html#line-331">PositionFor</a>(p <a href="#name-Pos">Pos</a>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <a href="#name-Position">Position</a>)</label><span id='File-fold-method-PositionFor-docs' class="fold-docs">
+<span class="md-text">				PositionFor returns the Position value for the given file position p.
+				If adjusted is set, the position may be adjusted by position-altering
+				//line comments; otherwise those comments are ignored.
+				p must be a Pos value in f or NoPos.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-SetLines"><label for="File-fold-method-SetLines">(*File) <a href="../../src/go/token/position.go.html#line-170">SetLines</a>(lines []<a href="../builtin.html#name-int">int</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='File-fold-method-SetLines-docs' class="fold-docs">
+<span class="md-text">				SetLines sets the line offsets for a file and reports whether it succeeded.
+				The line offsets are the offsets of the first character of each line;
+				for instance for the content "ab\nc\n" the line offsets are {0, 3}.
+				An empty file has an empty line offset table.
+				Each line offset must be larger than the offset for the previous line
+				and smaller than the file size; otherwise SetLines fails and returns
+				false.
+				Callers must not mutate the provided slice after SetLines returns.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-SetLinesForContent"><label for="File-fold-method-SetLinesForContent">(*File) <a href="../../src/go/token/position.go.html#line-188">SetLinesForContent</a>(content []<a href="../builtin.html#name-byte">byte</a>)</label><span id='File-fold-method-SetLinesForContent-docs' class="fold-docs">
+<span class="md-text">				SetLinesForContent sets the line offsets for the given file content.
+				It ignores position-altering //line comments.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Size"><label for="File-fold-method-Size">(*File) <a href="../../src/go/token/position.go.html#line-117">Size</a>() <a href="../builtin.html#name-int">int</a></label><span id='File-fold-method-Size-docs' class="fold-docs">
+<span class="md-text">				Size returns the size of file f as registered with AddFile.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="File-fold-results"><label for="File-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='File-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-408">AddFile</a>(filename <a href="../builtin.html#name-string">string</a>, base, size <a href="../builtin.html#name-int">int</a>) *<b>File</b></span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-482">File</a>(p <a href="#name-Pos">Pos</a>) (f *<b>File</b>)</span></span>
+		<input type='checkbox' class="fold" id="File-fold-params"><label for="File-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='File-fold-params-items' class="fold-items"><span>
+			func go/scanner.(*<a href="scanner.html#name-Scanner">Scanner</a>).<a href="../../src/go/scanner/scanner.go.html#line-122">Init</a>(file *<b>File</b>, src []<a href="../builtin.html#name-byte">byte</a>, err <a href="scanner.html">scanner</a>.<a href="scanner.html#name-ErrorHandler">ErrorHandler</a>, mode <a href="scanner.html">scanner</a>.<a href="scanner.html#name-Mode">Mode</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-FileSet" data-popularity="650">	<input type='checkbox' class="fold" id="FileSet-fold-content"><label for="FileSet-fold-content"> type <a href="../../src/go/token/position.go.html#line-369">FileSet</a> <i>(struct)</i></label><span id='FileSet-fold-content-docs' class="fold-docs">
+<span class="md-text">		A FileSet represents a set of source files.
+		Methods of file sets are synchronized; multiple goroutines
+		may invoke them concurrently.
+		
+		The byte offsets for each file in a file set are mapped into
+		distinct (integer) intervals, one interval [base, base+size]
+		per file. Base represents the first byte in the file, and size
+		is the corresponding file size. A Pos value is a value in such
+		an interval. By determining the interval a Pos value belongs
+		to, the file, its file base, and thus the byte offset (position)
+		the Pos value is representing can be computed.
+		
+		When adding a new file, a file base must be provided. That can
+		be any integer value that is past the end of any interval of any
+		file already in the file set. For convenience, FileSet.Base provides
+		such a value, which is simply the end of the Pos interval of the most
+		recently added file, plus one. Unless there is a need to extend an
+		interval later, using the FileSet.Base should be used as argument
+		for FileSet.AddFile.</span>
+
+		<input type='checkbox' class="fold" id="FileSet-fold-methods"><label for="FileSet-fold-methods">Methods (<i>total 8</i>)</label><span id='FileSet-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-AddFile"><label for="FileSet-fold-method-AddFile">(*FileSet) <a href="../../src/go/token/position.go.html#line-408">AddFile</a>(filename <a href="../builtin.html#name-string">string</a>, base, size <a href="../builtin.html#name-int">int</a>) *<a href="#name-File">File</a></label><span id='FileSet-fold-method-AddFile-docs' class="fold-docs">
+<span class="md-text">				AddFile adds a new file with a given filename, base offset, and file size
+				to the file set s and returns the file. Multiple files may have the same
+				name. The base offset must not be smaller than the FileSet's Base(), and
+				size must not be negative. As a special case, if a negative base is provided,
+				the current value of the FileSet's Base() is used instead.
+				
+				Adding the file will set the file set's Base() value to base + size + 1
+				as the minimum base value for the next file. The following relationship
+				exists between a Pos value p for a given file offset offs:
+				
+					int(p) = base + offs
+				
+				with offs in the range [0, size] and thus p in the range [base, base+size].
+				For convenience, File.Pos may be used to create file-specific position
+				values from a file offset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-Base"><label for="FileSet-fold-method-Base">(*FileSet) <a href="../../src/go/token/position.go.html#line-385">Base</a>() <a href="../builtin.html#name-int">int</a></label><span id='FileSet-fold-method-Base-docs' class="fold-docs">
+<span class="md-text">				Base returns the minimum base offset that must be provided to
+				AddFile when adding the next file.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-File"><label for="FileSet-fold-method-File">(*FileSet) <a href="../../src/go/token/position.go.html#line-482">File</a>(p <a href="#name-Pos">Pos</a>) (f *<a href="#name-File">File</a>)</label><span id='FileSet-fold-method-File-docs' class="fold-docs">
+<span class="md-text">				File returns the file that contains the position p.
+				If no such file is found (for instance for p == NoPos),
+				the result is nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-Iterate"><label for="FileSet-fold-method-Iterate">(*FileSet) <a href="../../src/go/token/position.go.html#line-438">Iterate</a>(f func(*<a href="#name-File">File</a>) <a href="../builtin.html#name-bool">bool</a>)</label><span id='FileSet-fold-method-Iterate-docs' class="fold-docs">
+<span class="md-text">				Iterate calls f for the files in the file set in the order they were added
+				until f returns false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-Position"><label for="FileSet-fold-method-Position">(*FileSet) <a href="../../src/go/token/position.go.html#line-504">Position</a>(p <a href="#name-Pos">Pos</a>) (pos <a href="#name-Position">Position</a>)</label><span id='FileSet-fold-method-Position-docs' class="fold-docs">
+<span class="md-text">				Position converts a Pos p in the fileset into a Position value.
+				Calling s.Position(p) is equivalent to calling s.PositionFor(p, true).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-PositionFor"><label for="FileSet-fold-method-PositionFor">(*FileSet) <a href="../../src/go/token/position.go.html#line-493">PositionFor</a>(p <a href="#name-Pos">Pos</a>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <a href="#name-Position">Position</a>)</label><span id='FileSet-fold-method-PositionFor-docs' class="fold-docs">
+<span class="md-text">				PositionFor converts a Pos p in the fileset into a Position value.
+				If adjusted is set, the position may be adjusted by position-altering
+				//line comments; otherwise those comments are ignored.
+				p must be a Pos value in s or NoPos.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-Read"><label for="FileSet-fold-method-Read">(*FileSet) <a href="../../src/go/token/serialize.go.html#line-22">Read</a>(decode func(<a href="../builtin.html#name-any">any</a>) <a href="../builtin.html#name-error">error</a>) <a href="../builtin.html#name-error">error</a></label><span id='FileSet-fold-method-Read-docs' class="fold-docs">
+<span class="md-text">				Read calls decode to deserialize a file set into s; s must not be nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FileSet-fold-method-Write"><label for="FileSet-fold-method-Write">(*FileSet) <a href="../../src/go/token/serialize.go.html#line-49">Write</a>(encode func(<a href="../builtin.html#name-any">any</a>) <a href="../builtin.html#name-error">error</a>) <a href="../builtin.html#name-error">error</a></label><span id='FileSet-fold-method-Write-docs' class="fold-docs">
+<span class="md-text">				Write calls encode to serialize the file set s.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="FileSet-fold-results"><label for="FileSet-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='FileSet-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewFileSet">NewFileSet</a>() *<b>FileSet</b></span></span>
+		<input type='checkbox' class="fold" id="FileSet-fold-params"><label for="FileSet-fold-params">As Inputs Of (<i>at least 5</i>)</label><span id='FileSet-fold-params-items' class="fold-items"><span>
+			func go/ast.<a href="ast.html#name-Fprint">Fprint</a>(w <a href="../io.html">io</a>.<a href="../io.html#name-Writer">Writer</a>, fset *<b>FileSet</b>, x <a href="../builtin.html#name-any">any</a>, f <a href="ast.html">ast</a>.<a href="ast.html#name-FieldFilter">FieldFilter</a>) <a href="../builtin.html#name-error">error</a></span><span>
+			func go/ast.<a href="ast.html#name-NewCommentMap">NewCommentMap</a>(fset *<b>FileSet</b>, node <a href="ast.html">ast</a>.<a href="ast.html#name-Node">Node</a>, comments []*<a href="ast.html">ast</a>.<a href="ast.html#name-CommentGroup">CommentGroup</a>) <a href="ast.html">ast</a>.<a href="ast.html#name-CommentMap">CommentMap</a></span><span>
+			func go/ast.<a href="ast.html#name-NewPackage">NewPackage</a>(fset *<b>FileSet</b>, files map[<a href="../builtin.html#name-string">string</a>]*<a href="ast.html">ast</a>.<a href="ast.html#name-File">File</a>, importer <a href="ast.html">ast</a>.<a href="ast.html#name-Importer">Importer</a>, universe *<a href="ast.html">ast</a>.<a href="ast.html#name-Scope">Scope</a>) (*<a href="ast.html">ast</a>.<a href="ast.html#name-Package">Package</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
+			func go/ast.<a href="ast.html#name-Print">Print</a>(fset *<b>FileSet</b>, x <a href="../builtin.html#name-any">any</a>) <a href="../builtin.html#name-error">error</a></span><span>
+			func go/ast.<a href="ast.html#name-SortImports">SortImports</a>(fset *<b>FileSet</b>, f *<a href="ast.html">ast</a>.<a href="ast.html#name-File">File</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Pos" data-popularity="9800">	<input type='checkbox' class="fold" id="Pos-fold-content"><label for="Pos-fold-content"> type <a href="../../src/go/token/position.go.html#line-77">Pos</a> <a href="../builtin.html#name-int">int</a> <i>(basic type)</i></label><span id='Pos-fold-content-docs' class="fold-docs">
+<span class="md-text">		Pos is a compact encoding of a source position within a file set.
+		It can be converted into a Position for a more convenient, but much
+		larger, representation.
+		
+		The Pos value for a given file is a number in the range [base, base+size],
+		where base and size are specified when a file is added to the file set.
+		The difference between a Pos value and the corresponding file base
+		corresponds to the byte offset of that position (represented by the Pos value)
+		from the beginning of the file. Thus, the file base offset is the Pos value
+		representing the first byte in the file.
+		
+		To create the Pos value for a specific source offset (measured in bytes),
+		first add the respective file to the current file set using FileSet.AddFile
+		and then call File.Pos(offset) for that file. Given a Pos value p
+		for a specific file set fset, the corresponding Position value is
+		obtained by calling fset.Position(p).
+		
+		Pos values can be compared directly with the usual comparison operators:
+		If two Pos values p and q are in the same file, comparing p and q is
+		equivalent to comparing the respective source file offsets. If p and q
+		are in different files, p &lt; q is true if the file implied by p was added
+		to the respective file set before the file implied by q.</span>
+
+		<input type='checkbox' class="fold" id="Pos-fold-methods"><label for="Pos-fold-methods">Methods (<i>only one</i>)</label><span id='Pos-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Pos-fold-method-IsValid"><label for="Pos-fold-method-IsValid">( Pos) <a href="../../src/go/token/position.go.html#line-86">IsValid</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='Pos-fold-method-IsValid-docs' class="fold-docs">
+<span class="md-text">				IsValid reports whether the position is valid.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Pos-fold-impls"><label for="Pos-fold-impls">Implements (<i>at least one exported</i>)</label><span id='Pos-fold-impls-items' class="fold-items"><span>
+			 Pos : database/sql/driver.<a href="../database/sql/driver.html#name-Validator">Validator</a></span></span>
+		<input type='checkbox' class="fold" id="Pos-fold-results"><label for="Pos-fold-results">As Outputs Of (<i>at least 126</i>)</label><span id='Pos-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-210">LineStart</a>(line <a href="../builtin.html#name-int">int</a>) <b>Pos</b></span><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-257">Pos</a>(offset <a href="../builtin.html#name-int">int</a>) <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ArrayType">ArrayType</a>).<a href="../../src/go/ast/ast.go.html#line-536">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ArrayType">ArrayType</a>).<a href="../../src/go/ast/ast.go.html#line-502">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-AssignStmt">AssignStmt</a>).<a href="../../src/go/ast/ast.go.html#line-800">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-AssignStmt">AssignStmt</a>).<a href="../../src/go/ast/ast.go.html#line-771">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadDecl">BadDecl</a>).<a href="../../src/go/ast/ast.go.html#line-996">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadDecl">BadDecl</a>).<a href="../../src/go/ast/ast.go.html#line-992">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadExpr">BadExpr</a>).<a href="../../src/go/ast/ast.go.html#line-514">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadExpr">BadExpr</a>).<a href="../../src/go/ast/ast.go.html#line-480">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadStmt">BadStmt</a>).<a href="../../src/go/ast/ast.go.html#line-786">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BadStmt">BadStmt</a>).<a href="../../src/go/ast/ast.go.html#line-764">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BasicLit">BasicLit</a>).<a href="../../src/go/ast/ast.go.html#line-522">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BasicLit">BasicLit</a>).<a href="../../src/go/ast/ast.go.html#line-483">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BinaryExpr">BinaryExpr</a>).<a href="../../src/go/ast/ast.go.html#line-534">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BinaryExpr">BinaryExpr</a>).<a href="../../src/go/ast/ast.go.html#line-500">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BlockStmt">BlockStmt</a>).<a href="../../src/go/ast/ast.go.html#line-815">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BlockStmt">BlockStmt</a>).<a href="../../src/go/ast/ast.go.html#line-776">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BranchStmt">BranchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-809">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-BranchStmt">BranchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-775">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CallExpr">CallExpr</a>).<a href="../../src/go/ast/ast.go.html#line-531">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CallExpr">CallExpr</a>).<a href="../../src/go/ast/ast.go.html#line-497">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CaseClause">CaseClause</a>).<a href="../../src/go/ast/ast.go.html#line-830">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CaseClause">CaseClause</a>).<a href="../../src/go/ast/ast.go.html#line-778">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ChanType">ChanType</a>).<a href="../../src/go/ast/ast.go.html#line-546">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ChanType">ChanType</a>).<a href="../../src/go/ast/ast.go.html#line-512">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CommClause">CommClause</a>).<a href="../../src/go/ast/ast.go.html#line-838">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CommClause">CommClause</a>).<a href="../../src/go/ast/ast.go.html#line-781">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Comment">Comment</a>).<a href="../../src/go/ast/ast.go.html#line-70">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Comment">Comment</a>).<a href="../../src/go/ast/ast.go.html#line-69">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CommentGroup">CommentGroup</a>).<a href="../../src/go/ast/ast.go.html#line-79">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CommentGroup">CommentGroup</a>).<a href="../../src/go/ast/ast.go.html#line-78">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CompositeLit">CompositeLit</a>).<a href="../../src/go/ast/ast.go.html#line-524">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-CompositeLit">CompositeLit</a>).<a href="../../src/go/ast/ast.go.html#line-485">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Decl">Decl</a>.<a href="../../src/go/ast/ast.go.html#line-34">End</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Decl">Decl</a>.<a href="../../src/go/ast/ast.go.html#line-33">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-DeclStmt">DeclStmt</a>).<a href="../../src/go/ast/ast.go.html#line-787">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-DeclStmt">DeclStmt</a>).<a href="../../src/go/ast/ast.go.html#line-765">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-DeferStmt">DeferStmt</a>).<a href="../../src/go/ast/ast.go.html#line-802">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-DeferStmt">DeferStmt</a>).<a href="../../src/go/ast/ast.go.html#line-773">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Ellipsis">Ellipsis</a>).<a href="../../src/go/ast/ast.go.html#line-516">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Ellipsis">Ellipsis</a>).<a href="../../src/go/ast/ast.go.html#line-482">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-EmptyStmt">EmptyStmt</a>).<a href="../../src/go/ast/ast.go.html#line-788">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-EmptyStmt">EmptyStmt</a>).<a href="../../src/go/ast/ast.go.html#line-766">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Expr">Expr</a>.<a href="../../src/go/ast/ast.go.html#line-34">End</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Expr">Expr</a>.<a href="../../src/go/ast/ast.go.html#line-33">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ExprStmt">ExprStmt</a>).<a href="../../src/go/ast/ast.go.html#line-795">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ExprStmt">ExprStmt</a>).<a href="../../src/go/ast/ast.go.html#line-768">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Field">Field</a>).<a href="../../src/go/ast/ast.go.html#line-215">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Field">Field</a>).<a href="../../src/go/ast/ast.go.html#line-205">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FieldList">FieldList</a>).<a href="../../src/go/ast/ast.go.html#line-248">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FieldList">FieldList</a>).<a href="../../src/go/ast/ast.go.html#line-236">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-File">File</a>).<a href="../../src/go/ast/ast.go.html#line-1049">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-File">File</a>).<a href="../../src/go/ast/ast.go.html#line-1048">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ForStmt">ForStmt</a>).<a href="../../src/go/ast/ast.go.html#line-845">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ForStmt">ForStmt</a>).<a href="../../src/go/ast/ast.go.html#line-783">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncDecl">FuncDecl</a>).<a href="../../src/go/ast/ast.go.html#line-1003">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncDecl">FuncDecl</a>).<a href="../../src/go/ast/ast.go.html#line-994">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncLit">FuncLit</a>).<a href="../../src/go/ast/ast.go.html#line-523">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncLit">FuncLit</a>).<a href="../../src/go/ast/ast.go.html#line-484">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncType">FuncType</a>).<a href="../../src/go/ast/ast.go.html#line-538">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-FuncType">FuncType</a>).<a href="../../src/go/ast/ast.go.html#line-504">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-GenDecl">GenDecl</a>).<a href="../../src/go/ast/ast.go.html#line-997">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-GenDecl">GenDecl</a>).<a href="../../src/go/ast/ast.go.html#line-993">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-GoStmt">GoStmt</a>).<a href="../../src/go/ast/ast.go.html#line-801">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-GoStmt">GoStmt</a>).<a href="../../src/go/ast/ast.go.html#line-772">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Ident">Ident</a>).<a href="../../src/go/ast/ast.go.html#line-515">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Ident">Ident</a>).<a href="../../src/go/ast/ast.go.html#line-481">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IfStmt">IfStmt</a>).<a href="../../src/go/ast/ast.go.html#line-824">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IfStmt">IfStmt</a>).<a href="../../src/go/ast/ast.go.html#line-777">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ImportSpec">ImportSpec</a>).<a href="../../src/go/ast/ast.go.html#line-926">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ImportSpec">ImportSpec</a>).<a href="../../src/go/ast/ast.go.html#line-917">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IncDecStmt">IncDecStmt</a>).<a href="../../src/go/ast/ast.go.html#line-797">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IncDecStmt">IncDecStmt</a>).<a href="../../src/go/ast/ast.go.html#line-770">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IndexExpr">IndexExpr</a>).<a href="../../src/go/ast/ast.go.html#line-527">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IndexExpr">IndexExpr</a>).<a href="../../src/go/ast/ast.go.html#line-493">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IndexListExpr">IndexListExpr</a>).<a href="../../src/go/ast/ast.go.html#line-528">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-IndexListExpr">IndexListExpr</a>).<a href="../../src/go/ast/ast.go.html#line-494">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-InterfaceType">InterfaceType</a>).<a href="../../src/go/ast/ast.go.html#line-544">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-InterfaceType">InterfaceType</a>).<a href="../../src/go/ast/ast.go.html#line-510">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-KeyValueExpr">KeyValueExpr</a>).<a href="../../src/go/ast/ast.go.html#line-535">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-KeyValueExpr">KeyValueExpr</a>).<a href="../../src/go/ast/ast.go.html#line-501">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-LabeledStmt">LabeledStmt</a>).<a href="../../src/go/ast/ast.go.html#line-794">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-LabeledStmt">LabeledStmt</a>).<a href="../../src/go/ast/ast.go.html#line-767">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-MapType">MapType</a>).<a href="../../src/go/ast/ast.go.html#line-545">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-MapType">MapType</a>).<a href="../../src/go/ast/ast.go.html#line-511">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Node">Node</a>.<a href="../../src/go/ast/ast.go.html#line-34">End</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Node">Node</a>.<a href="../../src/go/ast/ast.go.html#line-33">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Object">Object</a>).<a href="../../src/go/ast/scope.go.html#line-88">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Package">Package</a>).<a href="../../src/go/ast/ast.go.html#line-1066">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-Package">Package</a>).<a href="../../src/go/ast/ast.go.html#line-1065">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ParenExpr">ParenExpr</a>).<a href="../../src/go/ast/ast.go.html#line-525">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ParenExpr">ParenExpr</a>).<a href="../../src/go/ast/ast.go.html#line-491">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-RangeStmt">RangeStmt</a>).<a href="../../src/go/ast/ast.go.html#line-846">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-RangeStmt">RangeStmt</a>).<a href="../../src/go/ast/ast.go.html#line-784">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ReturnStmt">ReturnStmt</a>).<a href="../../src/go/ast/ast.go.html#line-803">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ReturnStmt">ReturnStmt</a>).<a href="../../src/go/ast/ast.go.html#line-774">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SelectorExpr">SelectorExpr</a>).<a href="../../src/go/ast/ast.go.html#line-526">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SelectorExpr">SelectorExpr</a>).<a href="../../src/go/ast/ast.go.html#line-492">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SelectStmt">SelectStmt</a>).<a href="../../src/go/ast/ast.go.html#line-844">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SelectStmt">SelectStmt</a>).<a href="../../src/go/ast/ast.go.html#line-782">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SendStmt">SendStmt</a>).<a href="../../src/go/ast/ast.go.html#line-796">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SendStmt">SendStmt</a>).<a href="../../src/go/ast/ast.go.html#line-769">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SliceExpr">SliceExpr</a>).<a href="../../src/go/ast/ast.go.html#line-529">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SliceExpr">SliceExpr</a>).<a href="../../src/go/ast/ast.go.html#line-495">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Spec">Spec</a>.<a href="../../src/go/ast/ast.go.html#line-34">End</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Spec">Spec</a>.<a href="../../src/go/ast/ast.go.html#line-33">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-StarExpr">StarExpr</a>).<a href="../../src/go/ast/ast.go.html#line-532">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-StarExpr">StarExpr</a>).<a href="../../src/go/ast/ast.go.html#line-498">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Stmt">Stmt</a>.<a href="../../src/go/ast/ast.go.html#line-34">End</a>() <b>Pos</b></span><span>
+			func go/ast.<a href="ast.html#name-Stmt">Stmt</a>.<a href="../../src/go/ast/ast.go.html#line-33">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-StructType">StructType</a>).<a href="../../src/go/ast/ast.go.html#line-537">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-StructType">StructType</a>).<a href="../../src/go/ast/ast.go.html#line-503">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SwitchStmt">SwitchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-836">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-SwitchStmt">SwitchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-779">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeAssertExpr">TypeAssertExpr</a>).<a href="../../src/go/ast/ast.go.html#line-530">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeAssertExpr">TypeAssertExpr</a>).<a href="../../src/go/ast/ast.go.html#line-496">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeSpec">TypeSpec</a>).<a href="../../src/go/ast/ast.go.html#line-942">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeSpec">TypeSpec</a>).<a href="../../src/go/ast/ast.go.html#line-924">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeSwitchStmt">TypeSwitchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-837">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-TypeSwitchStmt">TypeSwitchStmt</a>).<a href="../../src/go/ast/ast.go.html#line-780">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-UnaryExpr">UnaryExpr</a>).<a href="../../src/go/ast/ast.go.html#line-533">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-UnaryExpr">UnaryExpr</a>).<a href="../../src/go/ast/ast.go.html#line-499">Pos</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ValueSpec">ValueSpec</a>).<a href="../../src/go/ast/ast.go.html#line-933">End</a>() <b>Pos</b></span><span>
+			func go/ast.(*<a href="ast.html#name-ValueSpec">ValueSpec</a>).<a href="../../src/go/ast/ast.go.html#line-923">Pos</a>() <b>Pos</b></span><span>
+			func go/scanner.(*<a href="scanner.html#name-Scanner">Scanner</a>).<a href="../../src/go/scanner/scanner.go.html#line-823">Scan</a>() (pos <b>Pos</b>, tok <a href="#name-Token">Token</a>, lit <a href="../builtin.html#name-string">string</a>)</span></span>
+		<input type='checkbox' class="fold" id="Pos-fold-params"><label for="Pos-fold-params">As Inputs Of (<i>at least 7</i>)</label><span id='Pos-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-276">Line</a>(p <b>Pos</b>) <a href="../builtin.html#name-int">int</a></span><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-267">Offset</a>(p <b>Pos</b>) <a href="../builtin.html#name-int">int</a></span><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-343">Position</a>(p <b>Pos</b>) (pos <a href="#name-Position">Position</a>)</span><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-331">PositionFor</a>(p <b>Pos</b>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <a href="#name-Position">Position</a>)</span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-482">File</a>(p <b>Pos</b>) (f *<a href="#name-File">File</a>)</span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-504">Position</a>(p <b>Pos</b>) (pos <a href="#name-Position">Position</a>)</span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-493">PositionFor</a>(p <b>Pos</b>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <a href="#name-Position">Position</a>)</span></span>
+		<input type='checkbox' class="fold" id="Pos-fold-values"><label for="Pos-fold-values">As Types Of (<i>only one</i>)</label><span id='Pos-fold-values-items' class="fold-items"><span>
+			const <a href="#name-NoPos">NoPos</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Position" data-popularity="585">	<input type='checkbox' class="fold" id="Position-fold-content"><label for="Position-fold-content"> type <a href="../../src/go/token/position.go.html#line-20">Position</a> <i>(struct)</i></label><span id='Position-fold-content-docs' class="fold-docs">
+<span class="md-text">		Position describes an arbitrary source position
+		including the file, line, and column location.
+		A Position is valid if the line number is &gt; 0.</span>
+
+		<input type='checkbox' class="fold" id="Position-fold-fields"><label for="Position-fold-fields">Fields (<i>total 4</i>)</label><span id='Position-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Position-fold-field-Column"><label for="Position-fold-field-Column"><a href="../../src/go/token/position.go.html#line-24">Column</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='Position-fold-field-Column-docs' class="fold-docs">
+<span class="md-text">				// column number, starting at 1 (byte count)</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Position-fold-field-Filename"><label for="Position-fold-field-Filename"><a href="../../src/go/token/position.go.html#line-21">Filename</a> <i><a href="../builtin.html#name-string">string</a></i></label><span id='Position-fold-field-Filename-docs' class="fold-docs">
+<span class="md-text">				// filename, if any</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Position-fold-field-Line"><label for="Position-fold-field-Line"><a href="../../src/go/token/position.go.html#line-23">Line</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='Position-fold-field-Line-docs' class="fold-docs">
+<span class="md-text">				// line number, starting at 1</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Position-fold-field-Offset"><label for="Position-fold-field-Offset"><a href="../../src/go/token/position.go.html#line-22">Offset</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='Position-fold-field-Offset-docs' class="fold-docs">
+<span class="md-text">				// offset, starting at 0</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Position-fold-methods"><label for="Position-fold-methods">Methods (<i>total 2</i>)</label><span id='Position-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Position-fold-method-IsValid"><label for="Position-fold-method-IsValid">(*Position) <a href="../../src/go/token/position.go.html#line-28">IsValid</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='Position-fold-method-IsValid-docs' class="fold-docs">
+<span class="md-text">				IsValid reports whether the position is valid.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Position-fold-method-String"><label for="Position-fold-method-String">( Position) <a href="../../src/go/token/position.go.html#line-38">String</a>() <a href="../builtin.html#name-string">string</a></label><span id='Position-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns a string in one of several forms:
+				
+					file:line:column    valid position with file name
+					file:line           valid position with file name but no column (column == 0)
+					line:column         valid position without file name
+					line                valid position without file name and no column (column == 0)
+					file                invalid position with file name
+					-                   invalid position without file name</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Position-fold-impls"><label for="Position-fold-impls">Implements (<i>at least 3</i>)</label><span id='Position-fold-impls-items' class="fold-items"><span>
+			*Position : database/sql/driver.<a href="../database/sql/driver.html#name-Validator">Validator</a></span><span>
+			 Position : fmt.<a href="../fmt.html#name-Stringer">Stringer</a></span><span>
+			 Position : github.com/ChrisTrenkamp/goxpath/tree.<a href="../github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Position-fold-results"><label for="Position-fold-results">As Outputs Of (<i>at least 4</i>)</label><span id='Position-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-343">Position</a>(p <a href="#name-Pos">Pos</a>) (pos <b>Position</b>)</span><span>
+			func (*<a href="#name-File">File</a>).<a href="../../src/go/token/position.go.html#line-331">PositionFor</a>(p <a href="#name-Pos">Pos</a>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <b>Position</b>)</span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-504">Position</a>(p <a href="#name-Pos">Pos</a>) (pos <b>Position</b>)</span><span>
+			func (*<a href="#name-FileSet">FileSet</a>).<a href="../../src/go/token/position.go.html#line-493">PositionFor</a>(p <a href="#name-Pos">Pos</a>, adjusted <a href="../builtin.html#name-bool">bool</a>) (pos <b>Position</b>)</span></span>
+		<input type='checkbox' class="fold" id="Position-fold-params"><label for="Position-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Position-fold-params-items' class="fold-items"><span>
+			func go/scanner.(*<a href="scanner.html#name-ErrorList">ErrorList</a>).<a href="../../src/go/scanner/errors.go.html#line-38">Add</a>(pos <b>Position</b>, msg <a href="../builtin.html#name-string">string</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Token" data-popularity="515">	<input type='checkbox' class="fold" id="Token-fold-content"><label for="Token-fold-content"> type <a href="../../src/go/token/token.go.html#line-16">Token</a> <a href="../builtin.html#name-int">int</a> <i>(basic type)</i></label><span id='Token-fold-content-docs' class="fold-docs">
+<span class="md-text">		Token is the set of lexical tokens of the Go programming language.</span>
+
+		<input type='checkbox' class="fold" id="Token-fold-methods"><label for="Token-fold-methods">Methods (<i>total 5</i>)</label><span id='Token-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-IsKeyword"><label for="Token-fold-method-IsKeyword">( Token) <a href="../../src/go/token/token.go.html#line-313">IsKeyword</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='Token-fold-method-IsKeyword-docs' class="fold-docs">
+<span class="md-text">				IsKeyword returns true for tokens corresponding to keywords;
+				it returns false otherwise.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-IsLiteral"><label for="Token-fold-method-IsLiteral">( Token) <a href="../../src/go/token/token.go.html#line-303">IsLiteral</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='Token-fold-method-IsLiteral-docs' class="fold-docs">
+<span class="md-text">				IsLiteral returns true for tokens corresponding to identifiers
+				and basic type literals; it returns false otherwise.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-IsOperator"><label for="Token-fold-method-IsOperator">( Token) <a href="../../src/go/token/token.go.html#line-307">IsOperator</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='Token-fold-method-IsOperator-docs' class="fold-docs">
+<span class="md-text">				IsOperator returns true for tokens corresponding to operators and
+				delimiters; it returns false otherwise.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-Precedence"><label for="Token-fold-method-Precedence">( Token) <a href="../../src/go/token/token.go.html#line-266">Precedence</a>() <a href="../builtin.html#name-int">int</a></label><span id='Token-fold-method-Precedence-docs' class="fold-docs">
+<span class="md-text">				Precedence returns the operator precedence of the binary
+				operator op. If op is not a binary operator, the result
+				is LowestPrecedence.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-String"><label for="Token-fold-method-String">( Token) <a href="../../src/go/token/token.go.html#line-241">String</a>() <a href="../builtin.html#name-string">string</a></label><span id='Token-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns the string corresponding to the token tok.
+				For operators, delimiters, and keywords the string is the actual
+				token character sequence (e.g., for the token ADD, the string is
+				"+"). For all other tokens the string corresponds to the token
+				constant name (e.g. for the token IDENT, the string is "IDENT").</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Token-fold-impls"><label for="Token-fold-impls">Implements (<i>at least 2</i>)</label><span id='Token-fold-impls-items' class="fold-items"><span>
+			 Token : fmt.<a href="../fmt.html#name-Stringer">Stringer</a></span><span>
+			 Token : github.com/ChrisTrenkamp/goxpath/tree.<a href="../github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Token-fold-results"><label for="Token-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Token-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Lookup">Lookup</a>(ident <a href="../builtin.html#name-string">string</a>) <b>Token</b></span><span>
+			func go/scanner.(*<a href="scanner.html#name-Scanner">Scanner</a>).<a href="../../src/go/scanner/scanner.go.html#line-823">Scan</a>() (pos <a href="#name-Pos">Pos</a>, tok <b>Token</b>, lit <a href="../builtin.html#name-string">string</a>)</span></span>
+		<input type='checkbox' class="fold" id="Token-fold-values"><label for="Token-fold-values">As Types Of (<i>total 82</i>)</label><span id='Token-fold-values-items' class="fold-items"><span>
+			const <a href="#name-ADD">ADD</a></span><span>
+			const <a href="#name-ADD_ASSIGN">ADD_ASSIGN</a></span><span>
+			const <a href="#name-AND">AND</a></span><span>
+			const <a href="#name-AND_ASSIGN">AND_ASSIGN</a></span><span>
+			const <a href="#name-AND_NOT">AND_NOT</a></span><span>
+			const <a href="#name-AND_NOT_ASSIGN">AND_NOT_ASSIGN</a></span><span>
+			const <a href="#name-ARROW">ARROW</a></span><span>
+			const <a href="#name-ASSIGN">ASSIGN</a></span><span>
+			const <a href="#name-BREAK">BREAK</a></span><span>
+			const <a href="#name-CASE">CASE</a></span><span>
+			const <a href="#name-CHAN">CHAN</a></span><span>
+			const <a href="#name-CHAR">CHAR</a></span><span>
+			const <a href="#name-COLON">COLON</a></span><span>
+			const <a href="#name-COMMA">COMMA</a></span><span>
+			const <a href="#name-COMMENT">COMMENT</a></span><span>
+			const <a href="#name-CONST">CONST</a></span><span>
+			const <a href="#name-CONTINUE">CONTINUE</a></span><span>
+			const <a href="#name-DEC">DEC</a></span><span>
+			const <a href="#name-DEFAULT">DEFAULT</a></span><span>
+			const <a href="#name-DEFER">DEFER</a></span><span>
+			const <a href="#name-DEFINE">DEFINE</a></span><span>
+			const <a href="#name-ELLIPSIS">ELLIPSIS</a></span><span>
+			const <a href="#name-ELSE">ELSE</a></span><span>
+			const <a href="#name-EOF">EOF</a></span><span>
+			const <a href="#name-EQL">EQL</a></span><span>
+			const <a href="#name-FALLTHROUGH">FALLTHROUGH</a></span><span>
+			const <a href="#name-FLOAT">FLOAT</a></span><span>
+			const <a href="#name-FOR">FOR</a></span><span>
+			const <a href="#name-FUNC">FUNC</a></span><span>
+			const <a href="#name-GEQ">GEQ</a></span><span>
+			const <a href="#name-GO">GO</a></span><span>
+			const <a href="#name-GOTO">GOTO</a></span><span>
+			const <a href="#name-GTR">GTR</a></span><span>
+			const <a href="#name-IDENT">IDENT</a></span><span>
+			const <a href="#name-IF">IF</a></span><span>
+			const <a href="#name-ILLEGAL">ILLEGAL</a></span><span>
+			const <a href="#name-IMAG">IMAG</a></span><span>
+			const <a href="#name-IMPORT">IMPORT</a></span><span>
+			const <a href="#name-INC">INC</a></span><span>
+			const <a href="#name-INT">INT</a></span><span>
+			const <a href="#name-INTERFACE">INTERFACE</a></span><span>
+			const <a href="#name-LAND">LAND</a></span><span>
+			const <a href="#name-LBRACE">LBRACE</a></span><span>
+			const <a href="#name-LBRACK">LBRACK</a></span><span>
+			const <a href="#name-LEQ">LEQ</a></span><span>
+			const <a href="#name-LOR">LOR</a></span><span>
+			const <a href="#name-LPAREN">LPAREN</a></span><span>
+			const <a href="#name-LSS">LSS</a></span><span>
+			const <a href="#name-MAP">MAP</a></span><span>
+			const <a href="#name-MUL">MUL</a></span><span>
+			const <a href="#name-MUL_ASSIGN">MUL_ASSIGN</a></span><span>
+			const <a href="#name-NEQ">NEQ</a></span><span>
+			const <a href="#name-NOT">NOT</a></span><span>
+			const <a href="#name-OR">OR</a></span><span>
+			const <a href="#name-OR_ASSIGN">OR_ASSIGN</a></span><span>
+			const <a href="#name-PACKAGE">PACKAGE</a></span><span>
+			const <a href="#name-PERIOD">PERIOD</a></span><span>
+			const <a href="#name-QUO">QUO</a></span><span>
+			const <a href="#name-QUO_ASSIGN">QUO_ASSIGN</a></span><span>
+			const <a href="#name-RANGE">RANGE</a></span><span>
+			const <a href="#name-RBRACE">RBRACE</a></span><span>
+			const <a href="#name-RBRACK">RBRACK</a></span><span>
+			const <a href="#name-REM">REM</a></span><span>
+			const <a href="#name-REM_ASSIGN">REM_ASSIGN</a></span><span>
+			const <a href="#name-RETURN">RETURN</a></span><span>
+			const <a href="#name-RPAREN">RPAREN</a></span><span>
+			const <a href="#name-SELECT">SELECT</a></span><span>
+			const <a href="#name-SEMICOLON">SEMICOLON</a></span><span>
+			const <a href="#name-SHL">SHL</a></span><span>
+			const <a href="#name-SHL_ASSIGN">SHL_ASSIGN</a></span><span>
+			const <a href="#name-SHR">SHR</a></span><span>
+			const <a href="#name-SHR_ASSIGN">SHR_ASSIGN</a></span><span>
+			const <a href="#name-STRING">STRING</a></span><span>
+			const <a href="#name-STRUCT">STRUCT</a></span><span>
+			const <a href="#name-SUB">SUB</a></span><span>
+			const <a href="#name-SUB_ASSIGN">SUB_ASSIGN</a></span><span>
+			const <a href="#name-SWITCH">SWITCH</a></span><span>
+			const <a href="#name-TILDE">TILDE</a></span><span>
+			const <a href="#name-TYPE">TYPE</a></span><span>
+			const <a href="#name-VAR">VAR</a></span><span>
+			const <a href="#name-XOR">XOR</a></span><span>
+			const <a href="#name-XOR_ASSIGN">XOR_ASSIGN</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 5)</i></span></span>
+
+<div class="anchor value-res" id="name-IsExported">	<input type='checkbox' class="fold" id="IsExported-fold-content"><label for="IsExported-fold-content"> func <a href="../../src/go/token/token.go.html#line-316">IsExported</a>(name <a href="../builtin.html#name-string">string</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='IsExported-fold-content-docs' class="fold-docs">
+<span class="md-text">		IsExported reports whether name starts with an upper-case letter.</span>
+
+</span></div><div class="anchor value-res" id="name-IsIdentifier">	<input type='checkbox' class="fold" id="IsIdentifier-fold-content"><label for="IsIdentifier-fold-content"> func <a href="../../src/go/token/token.go.html#line-331">IsIdentifier</a>(name <a href="../builtin.html#name-string">string</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='IsIdentifier-fold-content-docs' class="fold-docs">
+<span class="md-text">		IsIdentifier reports whether name is a Go identifier, that is, a non-empty
+		string made up of letters, digits, and underscores, where the first character
+		is not a digit. Keywords are not identifiers.</span>
+
+</span></div><div class="anchor value-res" id="name-IsKeyword">	<input type='checkbox' class="fold" id="IsKeyword-fold-content"><label for="IsKeyword-fold-content"> func <a href="../../src/go/token/token.go.html#line-322">IsKeyword</a>(name <a href="../builtin.html#name-string">string</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='IsKeyword-fold-content-docs' class="fold-docs">
+<span class="md-text">		IsKeyword reports whether name is a Go keyword, such as "func" or "return".</span>
+
+</span></div><div class="anchor value-res" id="name-Lookup">	<input type='checkbox' class="fold" id="Lookup-fold-content"><label for="Lookup-fold-content"> func <a href="../../src/go/token/token.go.html#line-292">Lookup</a>(ident <a href="../builtin.html#name-string">string</a>) <a href="#name-Token">Token</a></label><span id='Lookup-fold-content-docs' class="fold-docs">
+<span class="md-text">		Lookup maps an identifier to its keyword token or IDENT (if not a keyword).</span>
+
+</span></div><div class="anchor value-res" id="name-NewFileSet">	<input type='checkbox' class="fold" id="NewFileSet-fold-content"><label for="NewFileSet-fold-content"> func <a href="../../src/go/token/position.go.html#line-377">NewFileSet</a>() *<a href="#name-FileSet">FileSet</a></label><span id='NewFileSet-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewFileSet creates a new file set.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 86)</i></span></span>
+
+<div class="anchor value-res" id="name-ADD">	<input type='checkbox' class="fold" id="ADD-fold-content"><label for="ADD-fold-content">const <a href="../../src/go/token/token.go.html#line-38">ADD</a> <a href="#name-Token">Token</a> = 12 // <span class="md-text">+</span></label><span id='ADD-fold-content-docs' class="fold-docs">
+<span class="md-text">		Operators and delimiters</span>
+
+</span></div><div class="anchor value-res" id="name-ADD_ASSIGN">	<input type='checkbox' class="fold" id="ADD_ASSIGN-fold-content"><label for="ADD_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-51">ADD_ASSIGN</a> <a href="#name-Token">Token</a> = 23 // <span class="md-text">+=</span></label><span id='ADD_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-AND">	<input type='checkbox' class="fold" id="AND-fold-content"><label for="AND-fold-content">const <a href="../../src/go/token/token.go.html#line-44">AND</a> <a href="#name-Token">Token</a> = 17 // <span class="md-text">&amp;</span></label><span id='AND-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-AND_ASSIGN">	<input type='checkbox' class="fold" id="AND_ASSIGN-fold-content"><label for="AND_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-57">AND_ASSIGN</a> <a href="#name-Token">Token</a> = 28 // <span class="md-text">&amp;=</span></label><span id='AND_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-AND_NOT">	<input type='checkbox' class="fold" id="AND_NOT-fold-content"><label for="AND_NOT-fold-content">const <a href="../../src/go/token/token.go.html#line-49">AND_NOT</a> <a href="#name-Token">Token</a> = 22 // <span class="md-text">&amp;^</span></label><span id='AND_NOT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-AND_NOT_ASSIGN">	<input type='checkbox' class="fold" id="AND_NOT_ASSIGN-fold-content"><label for="AND_NOT_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-62">AND_NOT_ASSIGN</a> <a href="#name-Token">Token</a> = 33 // <span class="md-text">&amp;^=</span></label><span id='AND_NOT_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-ARROW">	<input type='checkbox' class="fold" id="ARROW-fold-content"><label for="ARROW-fold-content">const <a href="../../src/go/token/token.go.html#line-66">ARROW</a> <a href="#name-Token">Token</a> = 36 // <span class="md-text">&lt;-</span></label><span id='ARROW-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-ASSIGN">	<input type='checkbox' class="fold" id="ASSIGN-fold-content"><label for="ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-73">ASSIGN</a> <a href="#name-Token">Token</a> = 42 // <span class="md-text">=</span></label><span id='ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-BREAK">	<input type='checkbox' class="fold" id="BREAK-fold-content"><label for="BREAK-fold-content">const <a href="../../src/go/token/token.go.html#line-97">BREAK</a> <a href="#name-Token">Token</a> = 61</label><span id='BREAK-fold-content-docs' class="fold-docs">
+<span class="md-text">		Keywords</span>
+
+</span></div><div class="anchor value-res" id="name-CASE">	<input type='checkbox' class="fold" id="CASE-fold-content"><label for="CASE-fold-content">const <a href="../../src/go/token/token.go.html#line-98">CASE</a> <a href="#name-Token">Token</a> = 62</label><span id='CASE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-CHAN">	<input type='checkbox' class="fold" id="CHAN-fold-content"><label for="CHAN-fold-content">const <a href="../../src/go/token/token.go.html#line-99">CHAN</a> <a href="#name-Token">Token</a> = 63</label><span id='CHAN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-CHAR">	<input type='checkbox' class="fold" id="CHAR-fold-content"><label for="CHAR-fold-content">const <a href="../../src/go/token/token.go.html#line-32">CHAR</a> <a href="#name-Token">Token</a> = 8 // <span class="md-text">'a'</span></label><span id='CHAR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-COLON">	<input type='checkbox' class="fold" id="COLON-fold-content"><label for="COLON-fold-content">const <a href="../../src/go/token/token.go.html#line-92">COLON</a> <a href="#name-Token">Token</a> = 58 // <span class="md-text">:</span></label><span id='COLON-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-COMMA">	<input type='checkbox' class="fold" id="COMMA-fold-content"><label for="COMMA-fold-content">const <a href="../../src/go/token/token.go.html#line-85">COMMA</a> <a href="#name-Token">Token</a> = 52 // <span class="md-text">,</span></label><span id='COMMA-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-COMMENT">	<input type='checkbox' class="fold" id="COMMENT-fold-content"><label for="COMMENT-fold-content">const <a href="../../src/go/token/token.go.html#line-23">COMMENT</a> <a href="#name-Token">Token</a> = 2</label><span id='COMMENT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-CONST">	<input type='checkbox' class="fold" id="CONST-fold-content"><label for="CONST-fold-content">const <a href="../../src/go/token/token.go.html#line-100">CONST</a> <a href="#name-Token">Token</a> = 64</label><span id='CONST-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-CONTINUE">	<input type='checkbox' class="fold" id="CONTINUE-fold-content"><label for="CONTINUE-fold-content">const <a href="../../src/go/token/token.go.html#line-101">CONTINUE</a> <a href="#name-Token">Token</a> = 65</label><span id='CONTINUE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-DEC">	<input type='checkbox' class="fold" id="DEC-fold-content"><label for="DEC-fold-content">const <a href="../../src/go/token/token.go.html#line-68">DEC</a> <a href="#name-Token">Token</a> = 38 // <span class="md-text">--</span></label><span id='DEC-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-DEFAULT">	<input type='checkbox' class="fold" id="DEFAULT-fold-content"><label for="DEFAULT-fold-content">const <a href="../../src/go/token/token.go.html#line-103">DEFAULT</a> <a href="#name-Token">Token</a> = 66</label><span id='DEFAULT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-DEFER">	<input type='checkbox' class="fold" id="DEFER-fold-content"><label for="DEFER-fold-content">const <a href="../../src/go/token/token.go.html#line-104">DEFER</a> <a href="#name-Token">Token</a> = 67</label><span id='DEFER-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-DEFINE">	<input type='checkbox' class="fold" id="DEFINE-fold-content"><label for="DEFINE-fold-content">const <a href="../../src/go/token/token.go.html#line-79">DEFINE</a> <a href="#name-Token">Token</a> = 47 // <span class="md-text">:=</span></label><span id='DEFINE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-ELLIPSIS">	<input type='checkbox' class="fold" id="ELLIPSIS-fold-content"><label for="ELLIPSIS-fold-content">const <a href="../../src/go/token/token.go.html#line-80">ELLIPSIS</a> <a href="#name-Token">Token</a> = 48 // <span class="md-text">...</span></label><span id='ELLIPSIS-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-ELSE">	<input type='checkbox' class="fold" id="ELSE-fold-content"><label for="ELSE-fold-content">const <a href="../../src/go/token/token.go.html#line-105">ELSE</a> <a href="#name-Token">Token</a> = 68</label><span id='ELSE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-EOF">	<input type='checkbox' class="fold" id="EOF-fold-content"><label for="EOF-fold-content">const <a href="../../src/go/token/token.go.html#line-22">EOF</a> <a href="#name-Token">Token</a> = 1</label><span id='EOF-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-EQL">	<input type='checkbox' class="fold" id="EQL-fold-content"><label for="EQL-fold-content">const <a href="../../src/go/token/token.go.html#line-70">EQL</a> <a href="#name-Token">Token</a> = 39 // <span class="md-text">==</span></label><span id='EQL-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-FALLTHROUGH">	<input type='checkbox' class="fold" id="FALLTHROUGH-fold-content"><label for="FALLTHROUGH-fold-content">const <a href="../../src/go/token/token.go.html#line-106">FALLTHROUGH</a> <a href="#name-Token">Token</a> = 69</label><span id='FALLTHROUGH-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-FLOAT">	<input type='checkbox' class="fold" id="FLOAT-fold-content"><label for="FLOAT-fold-content">const <a href="../../src/go/token/token.go.html#line-30">FLOAT</a> <a href="#name-Token">Token</a> = 6 // <span class="md-text">123.45</span></label><span id='FLOAT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-FOR">	<input type='checkbox' class="fold" id="FOR-fold-content"><label for="FOR-fold-content">const <a href="../../src/go/token/token.go.html#line-107">FOR</a> <a href="#name-Token">Token</a> = 70</label><span id='FOR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-FUNC">	<input type='checkbox' class="fold" id="FUNC-fold-content"><label for="FUNC-fold-content">const <a href="../../src/go/token/token.go.html#line-109">FUNC</a> <a href="#name-Token">Token</a> = 71</label><span id='FUNC-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-GEQ">	<input type='checkbox' class="fold" id="GEQ-fold-content"><label for="GEQ-fold-content">const <a href="../../src/go/token/token.go.html#line-78">GEQ</a> <a href="#name-Token">Token</a> = 46 // <span class="md-text">&gt;=</span></label><span id='GEQ-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-GO">	<input type='checkbox' class="fold" id="GO-fold-content"><label for="GO-fold-content">const <a href="../../src/go/token/token.go.html#line-110">GO</a> <a href="#name-Token">Token</a> = 72</label><span id='GO-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-GOTO">	<input type='checkbox' class="fold" id="GOTO-fold-content"><label for="GOTO-fold-content">const <a href="../../src/go/token/token.go.html#line-111">GOTO</a> <a href="#name-Token">Token</a> = 73</label><span id='GOTO-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-GTR">	<input type='checkbox' class="fold" id="GTR-fold-content"><label for="GTR-fold-content">const <a href="../../src/go/token/token.go.html#line-72">GTR</a> <a href="#name-Token">Token</a> = 41 // <span class="md-text">&gt;</span></label><span id='GTR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-HighestPrec">	<input type='checkbox' class="fold" id="HighestPrec-fold-content"><label for="HighestPrec-fold-content">const <a href="../../src/go/token/token.go.html#line-260">HighestPrec</a> = 7</label><span id='HighestPrec-fold-content-docs' class="fold-docs">
+<span class="md-text">		A set of constants for precedence-based expression parsing.
+		Non-operators have lowest precedence, followed by operators
+		starting with precedence 1 up to unary operators. The highest
+		precedence serves as "catch-all" precedence for selector,
+		indexing, and other operator and delimiter tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-IDENT">	<input type='checkbox' class="fold" id="IDENT-fold-content"><label for="IDENT-fold-content">const <a href="../../src/go/token/token.go.html#line-28">IDENT</a> <a href="#name-Token">Token</a> = 4 // <span class="md-text">main</span></label><span id='IDENT-fold-content-docs' class="fold-docs">
+<span class="md-text">		Identifiers and basic type literals
+		(these tokens stand for classes of literals)</span>
+
+</span></div><div class="anchor value-res" id="name-IF">	<input type='checkbox' class="fold" id="IF-fold-content"><label for="IF-fold-content">const <a href="../../src/go/token/token.go.html#line-112">IF</a> <a href="#name-Token">Token</a> = 74</label><span id='IF-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-ILLEGAL">	<input type='checkbox' class="fold" id="ILLEGAL-fold-content"><label for="ILLEGAL-fold-content">const <a href="../../src/go/token/token.go.html#line-21">ILLEGAL</a> <a href="#name-Token">Token</a> = 0</label><span id='ILLEGAL-fold-content-docs' class="fold-docs">
+<span class="md-text">		Special tokens</span>
+
+</span></div><div class="anchor value-res" id="name-IMAG">	<input type='checkbox' class="fold" id="IMAG-fold-content"><label for="IMAG-fold-content">const <a href="../../src/go/token/token.go.html#line-31">IMAG</a> <a href="#name-Token">Token</a> = 7 // <span class="md-text">123.45i</span></label><span id='IMAG-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-IMPORT">	<input type='checkbox' class="fold" id="IMPORT-fold-content"><label for="IMPORT-fold-content">const <a href="../../src/go/token/token.go.html#line-113">IMPORT</a> <a href="#name-Token">Token</a> = 75</label><span id='IMPORT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-INC">	<input type='checkbox' class="fold" id="INC-fold-content"><label for="INC-fold-content">const <a href="../../src/go/token/token.go.html#line-67">INC</a> <a href="#name-Token">Token</a> = 37 // <span class="md-text">++</span></label><span id='INC-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-INT">	<input type='checkbox' class="fold" id="INT-fold-content"><label for="INT-fold-content">const <a href="../../src/go/token/token.go.html#line-29">INT</a> <a href="#name-Token">Token</a> = 5 // <span class="md-text">12345</span></label><span id='INT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-INTERFACE">	<input type='checkbox' class="fold" id="INTERFACE-fold-content"><label for="INTERFACE-fold-content">const <a href="../../src/go/token/token.go.html#line-115">INTERFACE</a> <a href="#name-Token">Token</a> = 76</label><span id='INTERFACE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LAND">	<input type='checkbox' class="fold" id="LAND-fold-content"><label for="LAND-fold-content">const <a href="../../src/go/token/token.go.html#line-64">LAND</a> <a href="#name-Token">Token</a> = 34 // <span class="md-text">&amp;&amp;</span></label><span id='LAND-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LBRACE">	<input type='checkbox' class="fold" id="LBRACE-fold-content"><label for="LBRACE-fold-content">const <a href="../../src/go/token/token.go.html#line-84">LBRACE</a> <a href="#name-Token">Token</a> = 51 // <span class="md-text">{</span></label><span id='LBRACE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LBRACK">	<input type='checkbox' class="fold" id="LBRACK-fold-content"><label for="LBRACK-fold-content">const <a href="../../src/go/token/token.go.html#line-83">LBRACK</a> <a href="#name-Token">Token</a> = 50 // <span class="md-text">[</span></label><span id='LBRACK-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LEQ">	<input type='checkbox' class="fold" id="LEQ-fold-content"><label for="LEQ-fold-content">const <a href="../../src/go/token/token.go.html#line-77">LEQ</a> <a href="#name-Token">Token</a> = 45 // <span class="md-text">&lt;=</span></label><span id='LEQ-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LOR">	<input type='checkbox' class="fold" id="LOR-fold-content"><label for="LOR-fold-content">const <a href="../../src/go/token/token.go.html#line-65">LOR</a> <a href="#name-Token">Token</a> = 35 // <span class="md-text">||</span></label><span id='LOR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LowestPrec">	<input type='checkbox' class="fold" id="LowestPrec-fold-content"><label for="LowestPrec-fold-content">const <a href="../../src/go/token/token.go.html#line-258">LowestPrec</a> = 0 // <span class="md-text">non-operators</span></label><span id='LowestPrec-fold-content-docs' class="fold-docs">
+<span class="md-text">		A set of constants for precedence-based expression parsing.
+		Non-operators have lowest precedence, followed by operators
+		starting with precedence 1 up to unary operators. The highest
+		precedence serves as "catch-all" precedence for selector,
+		indexing, and other operator and delimiter tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LPAREN">	<input type='checkbox' class="fold" id="LPAREN-fold-content"><label for="LPAREN-fold-content">const <a href="../../src/go/token/token.go.html#line-82">LPAREN</a> <a href="#name-Token">Token</a> = 49 // <span class="md-text">(</span></label><span id='LPAREN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-LSS">	<input type='checkbox' class="fold" id="LSS-fold-content"><label for="LSS-fold-content">const <a href="../../src/go/token/token.go.html#line-71">LSS</a> <a href="#name-Token">Token</a> = 40 // <span class="md-text">&lt;</span></label><span id='LSS-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-MAP">	<input type='checkbox' class="fold" id="MAP-fold-content"><label for="MAP-fold-content">const <a href="../../src/go/token/token.go.html#line-116">MAP</a> <a href="#name-Token">Token</a> = 77</label><span id='MAP-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-MUL">	<input type='checkbox' class="fold" id="MUL-fold-content"><label for="MUL-fold-content">const <a href="../../src/go/token/token.go.html#line-40">MUL</a> <a href="#name-Token">Token</a> = 14 // <span class="md-text">*</span></label><span id='MUL-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-MUL_ASSIGN">	<input type='checkbox' class="fold" id="MUL_ASSIGN-fold-content"><label for="MUL_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-53">MUL_ASSIGN</a> <a href="#name-Token">Token</a> = 25 // <span class="md-text">*=</span></label><span id='MUL_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-NEQ">	<input type='checkbox' class="fold" id="NEQ-fold-content"><label for="NEQ-fold-content">const <a href="../../src/go/token/token.go.html#line-76">NEQ</a> <a href="#name-Token">Token</a> = 44 // <span class="md-text">!=</span></label><span id='NEQ-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-NoPos">	<input type='checkbox' class="fold" id="NoPos-fold-content"><label for="NoPos-fold-content">const <a href="../../src/go/token/position.go.html#line-83">NoPos</a> <a href="#name-Pos">Pos</a> = 0</label><span id='NoPos-fold-content-docs' class="fold-docs">
+<span class="md-text">		The zero value for Pos is NoPos; there is no file and line information
+		associated with it, and NoPos.IsValid() is false. NoPos is always
+		smaller than any other Pos value. The corresponding Position value
+		for NoPos is the zero value for Position.</span>
+
+</span></div><div class="anchor value-res" id="name-NOT">	<input type='checkbox' class="fold" id="NOT-fold-content"><label for="NOT-fold-content">const <a href="../../src/go/token/token.go.html#line-74">NOT</a> <a href="#name-Token">Token</a> = 43 // <span class="md-text">!</span></label><span id='NOT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-OR">	<input type='checkbox' class="fold" id="OR-fold-content"><label for="OR-fold-content">const <a href="../../src/go/token/token.go.html#line-45">OR</a> <a href="#name-Token">Token</a> = 18 // <span class="md-text">|</span></label><span id='OR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-OR_ASSIGN">	<input type='checkbox' class="fold" id="OR_ASSIGN-fold-content"><label for="OR_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-58">OR_ASSIGN</a> <a href="#name-Token">Token</a> = 29 // <span class="md-text">|=</span></label><span id='OR_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-PACKAGE">	<input type='checkbox' class="fold" id="PACKAGE-fold-content"><label for="PACKAGE-fold-content">const <a href="../../src/go/token/token.go.html#line-117">PACKAGE</a> <a href="#name-Token">Token</a> = 78</label><span id='PACKAGE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-PERIOD">	<input type='checkbox' class="fold" id="PERIOD-fold-content"><label for="PERIOD-fold-content">const <a href="../../src/go/token/token.go.html#line-86">PERIOD</a> <a href="#name-Token">Token</a> = 53 // <span class="md-text">.</span></label><span id='PERIOD-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-QUO">	<input type='checkbox' class="fold" id="QUO-fold-content"><label for="QUO-fold-content">const <a href="../../src/go/token/token.go.html#line-41">QUO</a> <a href="#name-Token">Token</a> = 15 // <span class="md-text">/</span></label><span id='QUO-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-QUO_ASSIGN">	<input type='checkbox' class="fold" id="QUO_ASSIGN-fold-content"><label for="QUO_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-54">QUO_ASSIGN</a> <a href="#name-Token">Token</a> = 26 // <span class="md-text">/=</span></label><span id='QUO_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-RANGE">	<input type='checkbox' class="fold" id="RANGE-fold-content"><label for="RANGE-fold-content">const <a href="../../src/go/token/token.go.html#line-118">RANGE</a> <a href="#name-Token">Token</a> = 79</label><span id='RANGE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-RBRACE">	<input type='checkbox' class="fold" id="RBRACE-fold-content"><label for="RBRACE-fold-content">const <a href="../../src/go/token/token.go.html#line-90">RBRACE</a> <a href="#name-Token">Token</a> = 56 // <span class="md-text">}</span></label><span id='RBRACE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-RBRACK">	<input type='checkbox' class="fold" id="RBRACK-fold-content"><label for="RBRACK-fold-content">const <a href="../../src/go/token/token.go.html#line-89">RBRACK</a> <a href="#name-Token">Token</a> = 55 // <span class="md-text">]</span></label><span id='RBRACK-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-REM">	<input type='checkbox' class="fold" id="REM-fold-content"><label for="REM-fold-content">const <a href="../../src/go/token/token.go.html#line-42">REM</a> <a href="#name-Token">Token</a> = 16 // <span class="md-text">%</span></label><span id='REM-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-REM_ASSIGN">	<input type='checkbox' class="fold" id="REM_ASSIGN-fold-content"><label for="REM_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-55">REM_ASSIGN</a> <a href="#name-Token">Token</a> = 27 // <span class="md-text">%=</span></label><span id='REM_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-RETURN">	<input type='checkbox' class="fold" id="RETURN-fold-content"><label for="RETURN-fold-content">const <a href="../../src/go/token/token.go.html#line-119">RETURN</a> <a href="#name-Token">Token</a> = 80</label><span id='RETURN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-RPAREN">	<input type='checkbox' class="fold" id="RPAREN-fold-content"><label for="RPAREN-fold-content">const <a href="../../src/go/token/token.go.html#line-88">RPAREN</a> <a href="#name-Token">Token</a> = 54 // <span class="md-text">)</span></label><span id='RPAREN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SELECT">	<input type='checkbox' class="fold" id="SELECT-fold-content"><label for="SELECT-fold-content">const <a href="../../src/go/token/token.go.html#line-121">SELECT</a> <a href="#name-Token">Token</a> = 81</label><span id='SELECT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SEMICOLON">	<input type='checkbox' class="fold" id="SEMICOLON-fold-content"><label for="SEMICOLON-fold-content">const <a href="../../src/go/token/token.go.html#line-91">SEMICOLON</a> <a href="#name-Token">Token</a> = 57 // <span class="md-text">;</span></label><span id='SEMICOLON-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SHL">	<input type='checkbox' class="fold" id="SHL-fold-content"><label for="SHL-fold-content">const <a href="../../src/go/token/token.go.html#line-47">SHL</a> <a href="#name-Token">Token</a> = 20 // <span class="md-text">&lt;&lt;</span></label><span id='SHL-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SHL_ASSIGN">	<input type='checkbox' class="fold" id="SHL_ASSIGN-fold-content"><label for="SHL_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-60">SHL_ASSIGN</a> <a href="#name-Token">Token</a> = 31 // <span class="md-text">&lt;&lt;=</span></label><span id='SHL_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SHR">	<input type='checkbox' class="fold" id="SHR-fold-content"><label for="SHR-fold-content">const <a href="../../src/go/token/token.go.html#line-48">SHR</a> <a href="#name-Token">Token</a> = 21 // <span class="md-text">&gt;&gt;</span></label><span id='SHR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SHR_ASSIGN">	<input type='checkbox' class="fold" id="SHR_ASSIGN-fold-content"><label for="SHR_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-61">SHR_ASSIGN</a> <a href="#name-Token">Token</a> = 32 // <span class="md-text">&gt;&gt;=</span></label><span id='SHR_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-STRING">	<input type='checkbox' class="fold" id="STRING-fold-content"><label for="STRING-fold-content">const <a href="../../src/go/token/token.go.html#line-33">STRING</a> <a href="#name-Token">Token</a> = 9 // <span class="md-text">"abc"</span></label><span id='STRING-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-STRUCT">	<input type='checkbox' class="fold" id="STRUCT-fold-content"><label for="STRUCT-fold-content">const <a href="../../src/go/token/token.go.html#line-122">STRUCT</a> <a href="#name-Token">Token</a> = 82</label><span id='STRUCT-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SUB">	<input type='checkbox' class="fold" id="SUB-fold-content"><label for="SUB-fold-content">const <a href="../../src/go/token/token.go.html#line-39">SUB</a> <a href="#name-Token">Token</a> = 13 // <span class="md-text">-</span></label><span id='SUB-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SUB_ASSIGN">	<input type='checkbox' class="fold" id="SUB_ASSIGN-fold-content"><label for="SUB_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-52">SUB_ASSIGN</a> <a href="#name-Token">Token</a> = 24 // <span class="md-text">-=</span></label><span id='SUB_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-SWITCH">	<input type='checkbox' class="fold" id="SWITCH-fold-content"><label for="SWITCH-fold-content">const <a href="../../src/go/token/token.go.html#line-123">SWITCH</a> <a href="#name-Token">Token</a> = 83</label><span id='SWITCH-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-TILDE">	<input type='checkbox' class="fold" id="TILDE-fold-content"><label for="TILDE-fold-content">const <a href="../../src/go/token/token.go.html#line-130">TILDE</a> <a href="#name-Token">Token</a> = 88</label><span id='TILDE-fold-content-docs' class="fold-docs">
+<span class="md-text">		additional tokens, handled in an ad-hoc manner</span>
+
+</span></div><div class="anchor value-res" id="name-TYPE">	<input type='checkbox' class="fold" id="TYPE-fold-content"><label for="TYPE-fold-content">const <a href="../../src/go/token/token.go.html#line-124">TYPE</a> <a href="#name-Token">Token</a> = 84</label><span id='TYPE-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-UnaryPrec">	<input type='checkbox' class="fold" id="UnaryPrec-fold-content"><label for="UnaryPrec-fold-content">const <a href="../../src/go/token/token.go.html#line-259">UnaryPrec</a> = 6</label><span id='UnaryPrec-fold-content-docs' class="fold-docs">
+<span class="md-text">		A set of constants for precedence-based expression parsing.
+		Non-operators have lowest precedence, followed by operators
+		starting with precedence 1 up to unary operators. The highest
+		precedence serves as "catch-all" precedence for selector,
+		indexing, and other operator and delimiter tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-VAR">	<input type='checkbox' class="fold" id="VAR-fold-content"><label for="VAR-fold-content">const <a href="../../src/go/token/token.go.html#line-125">VAR</a> <a href="#name-Token">Token</a> = 85</label><span id='VAR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-XOR">	<input type='checkbox' class="fold" id="XOR-fold-content"><label for="XOR-fold-content">const <a href="../../src/go/token/token.go.html#line-46">XOR</a> <a href="#name-Token">Token</a> = 19 // <span class="md-text">^</span></label><span id='XOR-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-XOR_ASSIGN">	<input type='checkbox' class="fold" id="XOR_ASSIGN-fold-content"><label for="XOR_ASSIGN-fold-content">const <a href="../../src/go/token/token.go.html#line-59">XOR_ASSIGN</a> <a href="#name-Token">Token</a> = 30 // <span class="md-text">^=</span></label><span id='XOR_ASSIGN-fold-content-docs' class="fold-docs">
+<span class="md-text">		The list of tokens.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

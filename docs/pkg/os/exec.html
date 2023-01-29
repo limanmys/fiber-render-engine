@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: os/exec</title>
+<link href="../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>exec</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../index.html#pkg-os/exec">os/exec</a><i> (on <a href="https://pkg.go.dev/os/exec" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../dep/os/exec.html">14 packages</a>, and imported by <a href="../../dep/os/exec.html#imported-by">4 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">   <a href="../../src/os/exec/exec.go.html#doc">#d</a> <a href="../../src/os/exec/exec.go.html">exec.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package exec runs external commands. It wraps os.StartProcess to make it
+		easier to remap stdin and stdout, connect I/O with pipes, and do other
+		adjustments.
+		
+		Unlike the "system" library call from C and other languages, the
+		os/exec package intentionally does not invoke the system shell and
+		does not expand any glob patterns or handle other expansions,
+		pipelines, or redirections typically done by shells. The package
+		behaves more like C's "exec" family of functions. To expand glob
+		patterns, either call the shell directly, taking care to escape any
+		dangerous input, or use the path/filepath package's Glob function.
+		To expand environment variables, use package os's ExpandEnv.
+		
+		Note that the examples in this package assume a Unix system.
+		They may not run on Windows, and they do not run in the Go Playground
+		used by golang.org and godoc.org.
+		
+		# Executables in the current directory
+		
+		The functions Command and LookPath look for a program
+		in the directories listed in the current path, following the
+		conventions of the host operating system.
+		Operating systems have for decades included the current
+		directory in this search, sometimes implicitly and sometimes
+		configured explicitly that way by default.
+		Modern practice is that including the current directory
+		is usually unexpected and often leads to security problems.
+		
+		To avoid those security problems, as of Go 1.19, this package will not resolve a program
+		using an implicit or explicit path entry relative to the current directory.
+		That is, if you run exec.LookPath("go"), it will not successfully return
+		./go on Unix nor .\go.exe on Windows, no matter how the path is configured.
+		Instead, if the usual path algorithms would result in that answer,
+		these functions return an error err satisfying errors.Is(err, ErrDot).
+		
+		For example, consider these two program snippets:
+		
+			path, err := exec.LookPath("prog")
+			if err != nil {
+				log.Fatal(err)
+			}
+			use(path)
+		
+		and
+		
+			cmd := exec.Command("prog")
+			if err := cmd.Run(); err != nil {
+				log.Fatal(err)
+			}
+		
+		These will not find and run ./prog or .\prog.exe,
+		no matter how the current path is configured.
+		
+		Code that always wants to run a program from the current directory
+		can be rewritten to say "./prog" instead of "prog".
+		
+		Code that insists on including results from relative path entries
+		can instead override the error using an errors.Is check:
+		
+			path, err := exec.LookPath("prog")
+			if errors.Is(err, exec.ErrDot) {
+				err = nil
+			}
+			if err != nil {
+				log.Fatal(err)
+			}
+			use(path)
+		
+		and
+		
+			cmd := exec.Command("prog")
+			if errors.Is(cmd.Err, exec.ErrDot) {
+				cmd.Err = nil
+			}
+			if err := cmd.Run(); err != nil {
+				log.Fatal(err)
+			}
+		
+		Setting the environment variable GODEBUG=execerrdot=0
+		disables generation of ErrDot entirely, temporarily restoring the pre-Go 1.19
+		behavior for programs that are unable to apply more targeted fixes.
+		A future version of Go may remove support for this variable.
+		
+		Before adding such overrides, make sure you understand the
+		security implications of doing so.
+		See https://go.dev/blog/path-security for more information.</span>
+</span>
+	<span class="nodocs">      <a href="../../src/os/exec/exec_unix.go.html">exec_unix.go</a></span>
+	<span class="nodocs">      <a href="../../src/os/exec/lp_unix.go.html">lp_unix.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Cmd_CombinedOutput</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("sh", "-c", "echo stdout; echo 1&gt;&amp;2 stderr")
+			stdoutStderr, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s\n", stdoutStderr)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">Cmd_Environ</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("pwd")
+		
+			// Set Dir before calling cmd.Environ so that it will include an
+			// updated PWD variable (on platforms where that is used).
+			cmd.Dir = ".."
+			cmd.Env = append(cmd.Environ(), "POSIXLY_CORRECT=1")
+		
+			out, err := cmd.Output()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s\n", out)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">Cmd_Output</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			out, err := exec.Command("date").Output()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("The date is %s\n", out)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">Cmd_Run</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("sleep", "1")
+			log.Printf("Running command and waiting for it to finish...")
+			err := cmd.Run()
+			log.Printf("Command finished with error: %v", err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-4-fold-content"><label for="example-4-fold-content">Cmd_Start</label><span id='example-4-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("sleep", "5")
+			err := cmd.Start()
+			if err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("Waiting for command to finish...")
+			err = cmd.Wait()
+			log.Printf("Command finished with error: %v", err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-5-fold-content"><label for="example-5-fold-content">Cmd_StderrPipe</label><span id='example-5-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"io"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("sh", "-c", "echo stdout; echo 1&gt;&amp;2 stderr")
+			stderr, err := cmd.StderrPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			if err := cmd.Start(); err != nil {
+				log.Fatal(err)
+			}
+		
+			slurp, _ := io.ReadAll(stderr)
+			fmt.Printf("%s\n", slurp)
+		
+			if err := cmd.Wait(); err != nil {
+				log.Fatal(err)
+			}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-6-fold-content"><label for="example-6-fold-content">Cmd_StdinPipe</label><span id='example-6-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"io"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("cat")
+			stdin, err := cmd.StdinPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			go func() {
+				defer stdin.Close()
+				io.WriteString(stdin, "values written to stdin are passed to cmd's standard input")
+			}()
+		
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				log.Fatal(err)
+			}
+		
+			fmt.Printf("%s\n", out)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-7-fold-content"><label for="example-7-fold-content">Cmd_StdoutPipe</label><span id='example-7-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"encoding/json"
+			"fmt"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("echo", "-n", `{"Name": "Bob", "Age": 32}`)
+			stdout, err := cmd.StdoutPipe()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if err := cmd.Start(); err != nil {
+				log.Fatal(err)
+			}
+			var person struct {
+				Name string
+				Age  int
+			}
+			if err := json.NewDecoder(stdout).Decode(&amp;person); err != nil {
+				log.Fatal(err)
+			}
+			if err := cmd.Wait(); err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("%s is %d years old\n", person.Name, person.Age)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-8-fold-content"><label for="example-8-fold-content">Command</label><span id='example-8-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"bytes"
+			"fmt"
+			"log"
+			"os/exec"
+			"strings"
+		)
+		
+		func main() {
+			cmd := exec.Command("tr", "a-z", "A-Z")
+			cmd.Stdin = strings.NewReader("some input")
+			var out bytes.Buffer
+			cmd.Stdout = &amp;out
+			err := cmd.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("in all caps: %q\n", out.String())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-9-fold-content"><label for="example-9-fold-content">CommandContext</label><span id='example-9-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"context"
+			"os/exec"
+			"time"
+		)
+		
+		func main() {
+			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			defer cancel()
+		
+			if err := exec.CommandContext(ctx, "sleep", "5").Run(); err != nil {
+				// This will fail after 100 milliseconds. The 5 second sleep
+				// will be interrupted.
+			}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-10-fold-content"><label for="example-10-fold-content">Command_environment</label><span id='example-10-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"log"
+			"os"
+			"os/exec"
+		)
+		
+		func main() {
+			cmd := exec.Command("prog")
+			cmd.Env = append(os.Environ(),
+				"FOO=duplicate_value", // ignored
+				"FOO=actual_value",    // this value is used
+			)
+			if err := cmd.Run(); err != nil {
+				log.Fatal(err)
+			}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-11-fold-content"><label for="example-11-fold-content">LookPath</label><span id='example-11-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"os/exec"
+		)
+		
+		func main() {
+			path, err := exec.LookPath("fortune")
+			if err != nil {
+				log.Fatal("installing fortune is in your future")
+			}
+			fmt.Printf("fortune is available at %s\n", path)
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 3)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Cmd" data-popularity="750">	<input type='checkbox' class="fold" id="Cmd-fold-content"><label for="Cmd-fold-content"> type <a href="../../src/os/exec/exec.go.html#line-141">Cmd</a> <i>(struct)</i></label><span id='Cmd-fold-content-docs' class="fold-docs">
+<span class="md-text">		Cmd represents an external command being prepared or run.
+		
+		A Cmd cannot be reused after calling its Run, Output or CombinedOutput
+		methods.</span>
+
+		<input type='checkbox' class="fold" id="Cmd-fold-fields"><label for="Cmd-fold-fields">Fields (<i>total 12</i>)</label><span id='Cmd-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Args"><label for="Cmd-fold-field-Args"><a href="../../src/os/exec/exec.go.html#line-153">Args</a> <i>[]<a href="../builtin.html#name-string">string</a></i></label><span id='Cmd-fold-field-Args-docs' class="fold-docs">
+<span class="md-text">				Args holds command line arguments, including the command as Args[0].
+				If the Args field is empty or nil, Run uses {Path}.
+				
+				In typical use, both Path and Args are set by calling Command.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Dir"><label for="Cmd-fold-field-Dir"><a href="../../src/os/exec/exec.go.html#line-168">Dir</a> <i><a href="../builtin.html#name-string">string</a></i></label><span id='Cmd-fold-field-Dir-docs' class="fold-docs">
+<span class="md-text">				Dir specifies the working directory of the command.
+				If Dir is the empty string, Run runs the command in the
+				calling process's current directory.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Env"><label for="Cmd-fold-field-Env"><a href="../../src/os/exec/exec.go.html#line-163">Env</a> <i>[]<a href="../builtin.html#name-string">string</a></i></label><span id='Cmd-fold-field-Env-docs' class="fold-docs">
+<span class="md-text">				Env specifies the environment of the process.
+				Each entry is of the form "key=value".
+				If Env is nil, the new process uses the current process's
+				environment.
+				If Env contains duplicate environment keys, only the last
+				value in the slice for each duplicate key is used.
+				As a special case on Windows, SYSTEMROOT is always added if
+				missing and not explicitly set to the empty string.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Err"><label for="Cmd-fold-field-Err"><a href="../../src/os/exec/exec.go.html#line-221">Err</a> <i><a href="../builtin.html#name-error">error</a></i></label><span id='Cmd-fold-field-Err-docs' class="fold-docs">
+<span class="md-text">				// LookPath error, if any.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-ExtraFiles"><label for="Cmd-fold-field-ExtraFiles"><a href="../../src/os/exec/exec.go.html#line-207">ExtraFiles</a> <i>[]*<a href="../os.html">os</a>.<a href="../os.html#name-File">File</a></i></label><span id='Cmd-fold-field-ExtraFiles-docs' class="fold-docs">
+<span class="md-text">				ExtraFiles specifies additional open files to be inherited by the
+				new process. It does not include standard input, standard output, or
+				standard error. If non-nil, entry i becomes file descriptor 3+i.
+				
+				ExtraFiles is not supported on Windows.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Path"><label for="Cmd-fold-field-Path"><a href="../../src/os/exec/exec.go.html#line-147">Path</a> <i><a href="../builtin.html#name-string">string</a></i></label><span id='Cmd-fold-field-Path-docs' class="fold-docs">
+<span class="md-text">				Path is the path of the command to run.
+				
+				This is the only field that must be set to a non-zero
+				value. If Path is relative, it is evaluated relative
+				to Dir.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Process"><label for="Cmd-fold-field-Process"><a href="../../src/os/exec/exec.go.html#line-214">Process</a> <i>*<a href="../os.html">os</a>.<a href="../os.html#name-Process">Process</a></i></label><span id='Cmd-fold-field-Process-docs' class="fold-docs">
+<span class="md-text">				Process is the underlying process, once started.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-ProcessState"><label for="Cmd-fold-field-ProcessState"><a href="../../src/os/exec/exec.go.html#line-218">ProcessState</a> <i>*<a href="../os.html">os</a>.<a href="../os.html#name-ProcessState">ProcessState</a></i></label><span id='Cmd-fold-field-ProcessState-docs' class="fold-docs">
+<span class="md-text">				ProcessState contains information about an exited process,
+				available after a call to Wait or Run.</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../src/os/exec/exec.go.html#line-200">Stderr</a> <i><a href="../io.html">io</a>.<a href="../io.html#name-Writer">Writer</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Stdin"><label for="Cmd-fold-field-Stdin"><a href="../../src/os/exec/exec.go.html#line-182">Stdin</a> <i><a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a></i></label><span id='Cmd-fold-field-Stdin-docs' class="fold-docs">
+<span class="md-text">				Stdin specifies the process's standard input.
+				
+				If Stdin is nil, the process reads from the null device (os.DevNull).
+				
+				If Stdin is an *os.File, the process's standard input is connected
+				directly to that file.
+				
+				Otherwise, during the execution of the command a separate
+				goroutine reads from Stdin and delivers that data to the command
+				over a pipe. In this case, Wait does not complete until the goroutine
+				stops copying, either because it has reached the end of Stdin
+				(EOF or a read error) or because writing to the pipe returned an error.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-Stdout"><label for="Cmd-fold-field-Stdout"><a href="../../src/os/exec/exec.go.html#line-199">Stdout</a> <i><a href="../io.html">io</a>.<a href="../io.html#name-Writer">Writer</a></i></label><span id='Cmd-fold-field-Stdout-docs' class="fold-docs">
+<span class="md-text">				Stdout and Stderr specify the process's standard output and error.
+				
+				If either is nil, Run connects the corresponding file descriptor
+				to the null device (os.DevNull).
+				
+				If either is an *os.File, the corresponding output from the process
+				is connected directly to that file.
+				
+				Otherwise, during the execution of the command a separate goroutine
+				reads from the process over a pipe and delivers that data to the
+				corresponding Writer. In this case, Wait does not complete until the
+				goroutine reaches EOF or encounters an error.
+				
+				If Stdout and Stderr are the same writer, and have a type that can
+				be compared with ==, at most one goroutine at a time will call Write.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-field-SysProcAttr"><label for="Cmd-fold-field-SysProcAttr"><a href="../../src/os/exec/exec.go.html#line-211">SysProcAttr</a> <i>*<a href="../syscall.html">syscall</a>.<a href="../syscall.html#name-SysProcAttr">SysProcAttr</a></i></label><span id='Cmd-fold-field-SysProcAttr-docs' class="fold-docs">
+<span class="md-text">				SysProcAttr holds optional, operating system-specific attributes.
+				Run passes it to os.StartProcess as the os.ProcAttr's Sys field.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Cmd-fold-methods"><label for="Cmd-fold-methods">Methods (<i>total 10</i>)</label><span id='Cmd-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-CombinedOutput"><label for="Cmd-fold-method-CombinedOutput">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-697">CombinedOutput</a>() ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='Cmd-fold-method-CombinedOutput-docs' class="fold-docs">
+<span class="md-text">				CombinedOutput runs the command and returns its combined standard
+				output and standard error.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-Environ"><label for="Cmd-fold-method-Environ">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-920">Environ</a>() []<a href="../builtin.html#name-string">string</a></label><span id='Cmd-fold-method-Environ-docs' class="fold-docs">
+<span class="md-text">				Environ returns a copy of the environment in which the command would be run
+				as it is currently configured.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-Output"><label for="Cmd-fold-method-Output">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-674">Output</a>() ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='Cmd-fold-method-Output-docs' class="fold-docs">
+<span class="md-text">				Output runs the command and returns its standard output.
+				Any returned error will usually be of type *ExitError.
+				If c.Stderr was nil, Output populates ExitError.Stderr.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-Run"><label for="Cmd-fold-method-Run">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-433">Run</a>() <a href="../builtin.html#name-error">error</a></label><span id='Cmd-fold-method-Run-docs' class="fold-docs">
+<span class="md-text">				Run starts the specified command and waits for it to complete.
+				
+				The returned error is nil if the command runs, has no problems
+				copying stdin, stdout, and stderr, and exits with a zero exit
+				status.
+				
+				If the command starts but does not complete successfully, the error is of
+				type *ExitError. Other error types may be returned for other situations.
+				
+				If the calling goroutine has locked the operating system thread
+				with runtime.LockOSThread and modified any inheritable OS-level
+				thread state (for example, Linux or Plan 9 name spaces), the new
+				process will inherit the caller's thread state.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-Start"><label for="Cmd-fold-method-Start">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-472">Start</a>() <a href="../builtin.html#name-error">error</a></label><span id='Cmd-fold-method-Start-docs' class="fold-docs">
+<span class="md-text">				Start starts the specified command but does not wait for it to complete.
+				
+				If Start returns successfully, the c.Process field will be set.
+				
+				After a successful call to Start the Wait method must be called in
+				order to release associated system resources.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-StderrPipe"><label for="Cmd-fold-method-StderrPipe">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-784">StderrPipe</a>() (<a href="../io.html">io</a>.<a href="../io.html#name-ReadCloser">ReadCloser</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='Cmd-fold-method-StderrPipe-docs' class="fold-docs">
+<span class="md-text">				StderrPipe returns a pipe that will be connected to the command's
+				standard error when the command starts.
+				
+				Wait will close the pipe after seeing the command exit, so most callers
+				need not close the pipe themselves. It is thus incorrect to call Wait
+				before all reads from the pipe have completed.
+				For the same reason, it is incorrect to use Run when using StderrPipe.
+				See the StdoutPipe example for idiomatic usage.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-StdinPipe"><label for="Cmd-fold-method-StdinPipe">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-717">StdinPipe</a>() (<a href="../io.html">io</a>.<a href="../io.html#name-WriteCloser">WriteCloser</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='Cmd-fold-method-StdinPipe-docs' class="fold-docs">
+<span class="md-text">				StdinPipe returns a pipe that will be connected to the command's
+				standard input when the command starts.
+				The pipe will be closed automatically after Wait sees the command exit.
+				A caller need only call Close to force the pipe to close sooner.
+				For example, if the command being run will not exit until standard input
+				is closed, the caller must close the pipe.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-StdoutPipe"><label for="Cmd-fold-method-StdoutPipe">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-759">StdoutPipe</a>() (<a href="../io.html">io</a>.<a href="../io.html#name-ReadCloser">ReadCloser</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='Cmd-fold-method-StdoutPipe-docs' class="fold-docs">
+<span class="md-text">				StdoutPipe returns a pipe that will be connected to the command's
+				standard output when the command starts.
+				
+				Wait will close the pipe after seeing the command exit, so most callers
+				need not close the pipe themselves. It is thus incorrect to call Wait
+				before all reads from the pipe have completed.
+				For the same reason, it is incorrect to call Run when using StdoutPipe.
+				See the example for idiomatic usage.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-String"><label for="Cmd-fold-method-String">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-309">String</a>() <a href="../builtin.html#name-string">string</a></label><span id='Cmd-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns a human-readable description of c.
+				It is intended only for debugging.
+				In particular, it is not suitable for use as input to a shell.
+				The output of String may vary across Go releases.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Cmd-fold-method-Wait"><label for="Cmd-fold-method-Wait">(*Cmd) <a href="../../src/os/exec/exec.go.html#line-592">Wait</a>() <a href="../builtin.html#name-error">error</a></label><span id='Cmd-fold-method-Wait-docs' class="fold-docs">
+<span class="md-text">				Wait waits for the command to exit and waits for any copying to
+				stdin or copying from stdout or stderr to complete.
+				
+				The command must have been started by Start.
+				
+				The returned error is nil if the command runs, has no problems
+				copying stdin, stdout, and stderr, and exits with a zero exit
+				status.
+				
+				If the command fails to run or doesn't complete successfully, the
+				error is of type *ExitError. Other error types may be
+				returned for I/O problems.
+				
+				If any of c.Stdin, c.Stdout or c.Stderr are not an *os.File, Wait also waits
+				for the respective I/O loop copying to or from the process to complete.
+				
+				Wait releases any resources associated with the Cmd.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Cmd-fold-impls"><label for="Cmd-fold-impls">Implements (<i>at least 2</i>)</label><span id='Cmd-fold-impls-items' class="fold-items"><span>
+			*Cmd : fmt.<a href="../fmt.html#name-Stringer">Stringer</a></span><span>
+			*Cmd : github.com/ChrisTrenkamp/goxpath/tree.<a href="../github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+		<input type='checkbox' class="fold" id="Cmd-fold-results"><label for="Cmd-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Cmd-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Command">Command</a>(name <a href="../builtin.html#name-string">string</a>, arg ...<a href="../builtin.html#name-string">string</a>) *<b>Cmd</b></span><span>
+			func <a href="#name-CommandContext">CommandContext</a>(ctx <a href="../context.html">context</a>.<a href="../context.html#name-Context">Context</a>, name <a href="../builtin.html#name-string">string</a>, arg ...<a href="../builtin.html#name-string">string</a>) *<b>Cmd</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-Error" data-popularity="150">	<input type='checkbox' class="fold" id="Error-fold-content"><label for="Error-fold-content"> type <a href="../../src/os/exec/exec.go.html#line-110">Error</a> <i>(struct)</i></label><span id='Error-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error is returned by LookPath when it fails to classify a file as an
+		executable.</span>
+
+		<input type='checkbox' class="fold" id="Error-fold-fields"><label for="Error-fold-fields">Fields (<i>total 2</i>)</label><span id='Error-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Error-fold-field-Err"><label for="Error-fold-field-Err"><a href="../../src/os/exec/exec.go.html#line-114">Err</a> <i><a href="../builtin.html#name-error">error</a></i></label><span id='Error-fold-field-Err-docs' class="fold-docs">
+<span class="md-text">				Err is the underlying error.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Error-fold-field-Name"><label for="Error-fold-field-Name"><a href="../../src/os/exec/exec.go.html#line-112">Name</a> <i><a href="../builtin.html#name-string">string</a></i></label><span id='Error-fold-field-Name-docs' class="fold-docs">
+<span class="md-text">				Name is the file name for which the error occurred.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Error-fold-methods"><label for="Error-fold-methods">Methods (<i>total 2</i>)</label><span id='Error-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*Error) <a href="../../src/os/exec/exec.go.html#line-117">Error</a>() <a href="../builtin.html#name-string">string</a></span></span><span>
+			<span class="nodocs">(*Error) <a href="../../src/os/exec/exec.go.html#line-121">Unwrap</a>() <a href="../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="Error-fold-impls"><label for="Error-fold-impls">Implements (<i>at least one exported</i>)</label><span id='Error-fold-impls-items' class="fold-items"><span>
+			*Error : <a href="../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-ExitError" data-popularity="650">	<input type='checkbox' class="fold" id="ExitError-fold-content"><label for="ExitError-fold-content"> type <a href="../../src/os/exec/exec.go.html#line-555">ExitError</a> <i>(struct)</i></label><span id='ExitError-fold-content-docs' class="fold-docs">
+<span class="md-text">		An ExitError reports an unsuccessful exit by a command.</span>
+
+		<input type='checkbox' class="fold" id="ExitError-fold-fields"><label for="ExitError-fold-fields">Fields (<i>total 2</i>)</label><span id='ExitError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../src/os/exec/exec.go.html#line-556">ProcessState</a> <i>*<a href="../os.html">os</a>.<a href="../os.html#name-ProcessState">ProcessState</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-field-Stderr"><label for="ExitError-fold-field-Stderr"><a href="../../src/os/exec/exec.go.html#line-568">Stderr</a> <i>[]<a href="../builtin.html#name-byte">byte</a></i></label><span id='ExitError-fold-field-Stderr-docs' class="fold-docs">
+<span class="md-text">				Stderr holds a subset of the standard error output from the
+				Cmd.Output method if standard error was not otherwise being
+				collected.
+				
+				If the error output is long, Stderr may contain only a prefix
+				and suffix of the output, with the middle replaced with
+				text about the number of omitted bytes.
+				
+				Stderr is provided for debugging, for inclusion in error messages.
+				Users with other needs should redirect Cmd.Stderr as needed.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ExitError-fold-methods"><label for="ExitError-fold-methods">Methods (<i>total 10</i>)</label><span id='ExitError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*ExitError) <a href="../../src/os/exec/exec.go.html#line-571">Error</a>() <a href="../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-ExitCode"><label for="ExitError-fold-method-ExitCode">( ExitError) <a href="../../src/os/exec_posix.go.html#line-130">ExitCode</a>() <a href="../builtin.html#name-int">int</a></label><span id='ExitError-fold-method-ExitCode-docs' class="fold-docs">
+<span class="md-text">				ExitCode returns the exit code of the exited process, or -1
+				if the process hasn't exited or was terminated by a signal.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-Exited"><label for="ExitError-fold-method-Exited">( ExitError) <a href="../../src/os/exec.go.html#line-154">Exited</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='ExitError-fold-method-Exited-docs' class="fold-docs">
+<span class="md-text">				Exited reports whether the program has exited.
+				On Unix systems this reports true if the program exited due to calling exit,
+				but false if the program terminated due to a signal.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-Pid"><label for="ExitError-fold-method-Pid">( ExitError) <a href="../../src/os/exec_posix.go.html#line-78">Pid</a>() <a href="../builtin.html#name-int">int</a></label><span id='ExitError-fold-method-Pid-docs' class="fold-docs">
+<span class="md-text">				Pid returns the process id of the exited process.</span>
+</span></span><span>
+			<span class="nodocs">( ExitError) <a href="../../src/os/exec_posix.go.html#line-98">String</a>() <a href="../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-Success"><label for="ExitError-fold-method-Success">( ExitError) <a href="../../src/os/exec.go.html#line-160">Success</a>() <a href="../builtin.html#name-bool">bool</a></label><span id='ExitError-fold-method-Success-docs' class="fold-docs">
+<span class="md-text">				Success reports whether the program exited successfully,
+				such as with exit status 0 on Unix.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-Sys"><label for="ExitError-fold-method-Sys">( ExitError) <a href="../../src/os/exec.go.html#line-167">Sys</a>() <a href="../builtin.html#name-any">any</a></label><span id='ExitError-fold-method-Sys-docs' class="fold-docs">
+<span class="md-text">				Sys returns system-dependent exit information about
+				the process. Convert it to the appropriate underlying
+				type, such as syscall.WaitStatus on Unix, to access its contents.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-SysUsage"><label for="ExitError-fold-method-SysUsage">( ExitError) <a href="../../src/os/exec.go.html#line-176">SysUsage</a>() <a href="../builtin.html#name-any">any</a></label><span id='ExitError-fold-method-SysUsage-docs' class="fold-docs">
+<span class="md-text">				SysUsage returns system-dependent resource usage information about
+				the exited process. Convert it to the appropriate underlying
+				type, such as *syscall.Rusage on Unix, to access its contents.
+				(On Unix, *syscall.Rusage matches struct rusage as defined in the
+				getrusage(2) manual page.)</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-SystemTime"><label for="ExitError-fold-method-SystemTime">( ExitError) <a href="../../src/os/exec.go.html#line-147">SystemTime</a>() <a href="../time.html">time</a>.<a href="../time.html#name-Duration">Duration</a></label><span id='ExitError-fold-method-SystemTime-docs' class="fold-docs">
+<span class="md-text">				SystemTime returns the system CPU time of the exited process and its children.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ExitError-fold-method-UserTime"><label for="ExitError-fold-method-UserTime">( ExitError) <a href="../../src/os/exec.go.html#line-142">UserTime</a>() <a href="../time.html">time</a>.<a href="../time.html#name-Duration">Duration</a></label><span id='ExitError-fold-method-UserTime-docs' class="fold-docs">
+<span class="md-text">				UserTime returns the user CPU time of the exited process and its children.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ExitError-fold-impls"><label for="ExitError-fold-impls">Implements (<i>at least 3</i>)</label><span id='ExitError-fold-impls-items' class="fold-items"><span>
+			*ExitError : <a href="../builtin.html#name-error">error</a></span><span>
+			 ExitError : fmt.<a href="../fmt.html#name-Stringer">Stringer</a></span><span>
+			 ExitError : github.com/ChrisTrenkamp/goxpath/tree.<a href="../github.com/ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 3)</i></span></span>
+
+<div class="anchor value-res" id="name-Command">	<input type='checkbox' class="fold" id="Command-fold-content"><label for="Command-fold-content"> func <a href="../../src/os/exec/exec.go.html#line-271">Command</a>(name <a href="../builtin.html#name-string">string</a>, arg ...<a href="../builtin.html#name-string">string</a>) *<a href="#name-Cmd">Cmd</a></label><span id='Command-fold-content-docs' class="fold-docs">
+<span class="md-text">		Command returns the Cmd struct to execute the named program with
+		the given arguments.
+		
+		It sets only the Path and Args in the returned structure.
+		
+		If name contains no path separators, Command uses LookPath to
+		resolve name to a complete path if possible. Otherwise it uses name
+		directly as Path.
+		
+		The returned Cmd's Args field is constructed from the command name
+		followed by the elements of arg, so arg should not include the
+		command name itself. For example, Command("echo", "hello").
+		Args[0] is always name, not the possibly resolved Path.
+		
+		On Windows, processes receive the whole command line as a single string
+		and do their own parsing. Command combines and quotes Args into a command
+		line string with an algorithm compatible with applications using
+		CommandLineToArgvW (which is the most common way). Notable exceptions are
+		msiexec.exe and cmd.exe (and thus, all batch files), which have a different
+		unquoting algorithm. In these or other similar cases, you can do the
+		quoting yourself and provide the full command line in SysProcAttr.CmdLine,
+		leaving Args empty.</span>
+
+</span></div><div class="anchor value-res" id="name-CommandContext">	<input type='checkbox' class="fold" id="CommandContext-fold-content"><label for="CommandContext-fold-content"> func <a href="../../src/os/exec/exec.go.html#line-296">CommandContext</a>(ctx <a href="../context.html">context</a>.<a href="../context.html#name-Context">Context</a>, name <a href="../builtin.html#name-string">string</a>, arg ...<a href="../builtin.html#name-string">string</a>) *<a href="#name-Cmd">Cmd</a></label><span id='CommandContext-fold-content-docs' class="fold-docs">
+<span class="md-text">		CommandContext is like Command but includes a context.
+		
+		The provided context is used to kill the process (by calling
+		os.Process.Kill) if the context becomes done before the command
+		completes on its own.</span>
+
+</span></div><div class="anchor value-res" id="name-LookPath">	<input type='checkbox' class="fold" id="LookPath-fold-content"><label for="LookPath-fold-content"> func <a href="../../src/os/exec/lp_unix.go.html#line-40">LookPath</a>(file <a href="../builtin.html#name-string">string</a>) (<a href="../builtin.html#name-string">string</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='LookPath-fold-content-docs' class="fold-docs">
+<span class="md-text">		LookPath searches for an executable named file in the
+		directories named by the PATH environment variable.
+		If file contains a slash, it is tried directly and the PATH is not consulted.
+		Otherwise, on success, the result is an absolute path.
+		
+		In older versions of Go, LookPath could return a path relative to the current directory.
+		As of Go 1.19, LookPath will instead return that path along with an error satisfying
+		errors.Is(err, ErrDot). See the package documentation for more details.</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-ErrDot">	<input type='checkbox' class="fold" id="ErrDot-fold-content"><label for="ErrDot-fold-content">  var <a href="../../src/os/exec/exec.go.html#line-1007">ErrDot</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrDot-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrDot indicates that a path lookup resolved to an executable
+		in the current directory due to ‘.’ being in the path, either
+		implicitly or explicitly. See the package documentation for details.
+		
+		Note that functions in this package do not return ErrDot directly.
+		Code should use errors.Is(err, ErrDot), not err == ErrDot,
+		to test whether a returned error err is due to this condition.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrNotFound">	<input type='checkbox' class="fold" id="ErrNotFound-fold-content"><label for="ErrNotFound-fold-content">  var <a href="../../src/os/exec/lp_unix.go.html#line-19">ErrNotFound</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrNotFound-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrNotFound is the error resulting if a path search failed to find an executable file.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

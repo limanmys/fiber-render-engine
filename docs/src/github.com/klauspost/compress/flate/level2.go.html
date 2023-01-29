@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: level2.go in package github.com/klauspost/compress/flate</title>
+<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	level2.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/klauspost/compress/flate.html">github.com/klauspost/compress/flate</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> flate</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// fastGen maintains the table for matches,</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// and the previous byte block for level 2.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// This is the generic implementation.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">type</span> fastEncL2 <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-9"><code>	<a href="fast_encoder.go.html#line-76" class="ident">fastGen</a></code></span>
+<span class="codeline" id="line-10"><code>	table [<a href="fast_encoder.go.html#line-47" class="ident">bTableSize</a>]<a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a></code></span>
+<span class="codeline" id="line-11"><code>}</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// EncodeL2 uses a similar algorithm to level 1, but is capable</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// of matching across blocks giving better compression at a small slowdown.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">func</span> (<label for="r0" class="ident">e</label> *<a href="#line-8" class="ident">fastEncL2</a>) <label for="r1" class="ident">Encode</label>(<label for="r2" class="ident">dst</label> *<a href="token.go.html#line-130" class="ident">tokens</a>, <label for="r3" class="ident">src</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-16"><code>	<span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-17"><code>		<label for="r4" class="ident">inputMargin</label>            = <span class="lit-number">12</span> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-18"><code>		<label for="r5" class="ident">minNonLiteralBlockSize</label> = <span class="lit-number">1</span> + <span class="lit-number">1</span> + <label for="r4" class="ident">inputMargin</label></code></span>
+<span class="codeline" id="line-19"><code>		<label for="r6" class="ident">hashBytes</label>              = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-20"><code>	)</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code>	<span class="keyword">if</span> <a href="deflate.go.html#line-55" class="ident">debugDeflate</a> &amp;&amp; <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-23"><code>		<a href="../../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../fmt/print.go.html#line-257" class="ident">Sprint</a>(<span class="lit-string">"e.cur &lt; 0: "</span>, <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>))</code></span>
+<span class="codeline" id="line-24"><code>	}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code>	<span class="comment">// Protect against e.cur wraparound.</span></code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">for</span> <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> &gt;= <a href="fast_encoder.go.html#line-49" class="ident">bufferReset</a> {</code></span>
+<span class="codeline" id="line-28"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-77" class="ident">hist</a>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-29"><code>			<span class="keyword">for</span> <label for="r7" class="ident">i</label> := <span class="keyword">range</span> <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[:] {</code></span>
+<span class="codeline" id="line-30"><code>				<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r7" class="ident">i</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{}</code></span>
+<span class="codeline" id="line-31"><code>			}</code></span>
+<span class="codeline" id="line-32"><code>			<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> = <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a></code></span>
+<span class="codeline" id="line-33"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-34"><code>		}</code></span>
+<span class="codeline" id="line-35"><code>		<span class="comment">// Shift down everything in the table that isn't already too far away.</span></code></span>
+<span class="codeline" id="line-36"><code>		<label for="r8" class="ident">minOff</label> := <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <a href="../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-77" class="ident">hist</a>)) - <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a></code></span>
+<span class="codeline" id="line-37"><code>		<span class="keyword">for</span> <label for="r9" class="ident">i</label> := <span class="keyword">range</span> <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[:] {</code></span>
+<span class="codeline" id="line-38"><code>			<label for="r10" class="ident">v</label> := <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r9" class="ident">i</label>].<a href="fast_encoder.go.html#line-70" class="ident">offset</a></code></span>
+<span class="codeline" id="line-39"><code>			<span class="keyword">if</span> <label for="r10" class="ident">v</label> &lt;= <label for="r8" class="ident">minOff</label> {</code></span>
+<span class="codeline" id="line-40"><code>				<label for="r10" class="ident">v</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-41"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-42"><code>				<label for="r10" class="ident">v</label> = <label for="r10" class="ident">v</label> - <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a></code></span>
+<span class="codeline" id="line-43"><code>			}</code></span>
+<span class="codeline" id="line-44"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r9" class="ident">i</label>].<a href="fast_encoder.go.html#line-70" class="ident">offset</a> = <label for="r10" class="ident">v</label></code></span>
+<span class="codeline" id="line-45"><code>		}</code></span>
+<span class="codeline" id="line-46"><code>		<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> = <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a></code></span>
+<span class="codeline" id="line-47"><code>	}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code>	<label for="r11" class="ident">s</label> := <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-81" class="ident">addBlock</a>(<label for="r3" class="ident">src</label>)</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>	<span class="comment">// This check isn't in the Snappy implementation, but there, the caller</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">	// instead of the callee handles this case.</span></code></span>
+<span class="codeline" id="line-53"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">src</label>) &lt; <label for="r5" class="ident">minNonLiteralBlockSize</label> {</code></span>
+<span class="codeline" id="line-54"><code>		<span class="comment">// We do not fill the token table.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">		// This will be picked up by caller.</span></code></span>
+<span class="codeline" id="line-56"><code>		<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-135" class="ident">n</a> = <a href="../../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">src</label>))</code></span>
+<span class="codeline" id="line-57"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// Override src</span></code></span>
+<span class="codeline" id="line-61"><code>	<label for="r3" class="ident">src</label> = <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-77" class="ident">hist</a></code></span>
+<span class="codeline" id="line-62"><code>	<label for="r12" class="ident">nextEmit</label> := <label for="r11" class="ident">s</label></code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code>	<span class="comment">// sLimit is when to stop looking for offset/length copies. The inputMargin</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">	// lets us use a fast path for emitLiteral in the main loop, while we are</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">	// looking for copies.</span></code></span>
+<span class="codeline" id="line-67"><code>	<label for="r13" class="ident">sLimit</label> := <a href="../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">src</label>) - <label for="r4" class="ident">inputMargin</label>)</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>	<span class="comment">// nextEmit is where in src the next emitLiteral should start from.</span></code></span>
+<span class="codeline" id="line-70"><code>	<label for="r14" class="ident">cv</label> := <a href="fast_encoder.go.html#line-65" class="ident">load6432</a>(<label for="r3" class="ident">src</label>, <label for="r11" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-72"><code>		<span class="comment">// When should we start skipping if we haven't found matches in a long while.</span></code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">const</span> <label for="r15" class="ident">skipLog</label> = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">const</span> <label for="r16" class="ident">doEvery</label> = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code>		<label for="r17" class="ident">nextS</label> := <label for="r11" class="ident">s</label></code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">var</span> <label for="r18" class="ident">candidate</label> <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a></code></span>
+<span class="codeline" id="line-78"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-79"><code>			<label for="r19" class="ident">nextHash</label> := <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r14" class="ident">cv</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-80"><code>			<label for="r11" class="ident">s</label> = <label for="r17" class="ident">nextS</label></code></span>
+<span class="codeline" id="line-81"><code>			<label for="r17" class="ident">nextS</label> = <label for="r11" class="ident">s</label> + <label for="r16" class="ident">doEvery</label> + (<label for="r11" class="ident">s</label>-<label for="r12" class="ident">nextEmit</label>)&gt;&gt;<label for="r15" class="ident">skipLog</label></code></span>
+<span class="codeline" id="line-82"><code>			<span class="keyword">if</span> <label for="r17" class="ident">nextS</label> &gt; <label for="r13" class="ident">sLimit</label> {</code></span>
+<span class="codeline" id="line-83"><code>				<span class="keyword">goto</span> <label for="r20" class="ident">emitRemainder</label></code></span>
+<span class="codeline" id="line-84"><code>			}</code></span>
+<span class="codeline" id="line-85"><code>			<label for="r18" class="ident">candidate</label> = <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r19" class="ident">nextHash</label>]</code></span>
+<span class="codeline" id="line-86"><code>			<label for="r21" class="ident">now</label> := <a href="fast_encoder.go.html#line-65" class="ident">load6432</a>(<label for="r3" class="ident">src</label>, <label for="r17" class="ident">nextS</label>)</code></span>
+<span class="codeline" id="line-87"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r19" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r11" class="ident">s</label> + <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>}</code></span>
+<span class="codeline" id="line-88"><code>			<label for="r19" class="ident">nextHash</label> = <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r21" class="ident">now</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-89"><code></code></span>
+<span class="codeline" id="line-90"><code>			<label for="r22" class="ident">offset</label> := <label for="r11" class="ident">s</label> - (<label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a> - <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>)</code></span>
+<span class="codeline" id="line-91"><code>			<span class="keyword">if</span> <label for="r22" class="ident">offset</label> &lt; <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a> &amp;&amp; <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r14" class="ident">cv</label>) == <a href="fast_encoder.go.html#line-61" class="ident">load3232</a>(<label for="r3" class="ident">src</label>, <label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a>-<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>) {</code></span>
+<span class="codeline" id="line-92"><code>				<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r19" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r17" class="ident">nextS</label> + <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>}</code></span>
+<span class="codeline" id="line-93"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-94"><code>			}</code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code>			<span class="comment">// Do one right away...</span></code></span>
+<span class="codeline" id="line-97"><code>			<label for="r14" class="ident">cv</label> = <label for="r21" class="ident">now</label></code></span>
+<span class="codeline" id="line-98"><code>			<label for="r11" class="ident">s</label> = <label for="r17" class="ident">nextS</label></code></span>
+<span class="codeline" id="line-99"><code>			<label for="r17" class="ident">nextS</label>++</code></span>
+<span class="codeline" id="line-100"><code>			<label for="r18" class="ident">candidate</label> = <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r19" class="ident">nextHash</label>]</code></span>
+<span class="codeline" id="line-101"><code>			<label for="r21" class="ident">now</label> &gt;&gt;= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-102"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r19" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r11" class="ident">s</label> + <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>}</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code>			<label for="r22" class="ident">offset</label> = <label for="r11" class="ident">s</label> - (<label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a> - <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>)</code></span>
+<span class="codeline" id="line-105"><code>			<span class="keyword">if</span> <label for="r22" class="ident">offset</label> &lt; <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a> &amp;&amp; <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r14" class="ident">cv</label>) == <a href="fast_encoder.go.html#line-61" class="ident">load3232</a>(<label for="r3" class="ident">src</label>, <label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a>-<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>) {</code></span>
+<span class="codeline" id="line-106"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-107"><code>			}</code></span>
+<span class="codeline" id="line-108"><code>			<label for="r14" class="ident">cv</label> = <label for="r21" class="ident">now</label></code></span>
+<span class="codeline" id="line-109"><code>		}</code></span>
+<span class="codeline" id="line-110"><code></code></span>
+<span class="codeline" id="line-111"><code>		<span class="comment">// A 4-byte match has been found. We'll later see if more than 4 bytes</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">		// match. But, prior to the match, src[nextEmit:s] are unmatched. Emit</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">		// them as literal bytes.</span></code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code>		<span class="comment">// Call emitCopy, and then see if another emitCopy could be our next</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">		// move. Repeat until we find no match for the input immediately after</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">		// what was consumed by the last emitCopy call.</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">		// If we exit this loop normally then we need to call emitLiteral next,</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">		// though we don't yet know how big the literal will be. We handle that</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">		// by proceeding to the next iteration of the main loop. We also can</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">		// exit this loop via goto if we get close to exhausting the input.</span></code></span>
+<span class="codeline" id="line-123"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-124"><code>			<span class="comment">// Invariant: we have a 4-byte match at s, and no need to emit any</span></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">			// literal bytes prior to s.</span></code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code>			<span class="comment">// Extend the 4-byte match as long as possible.</span></code></span>
+<span class="codeline" id="line-128"><code>			<label for="r23" class="ident">t</label> := <label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a> - <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a></code></span>
+<span class="codeline" id="line-129"><code>			<label for="r24" class="ident">l</label> := <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-164" class="ident">matchlenLong</a>(<label for="r11" class="ident">s</label>+<span class="lit-number">4</span>, <label for="r23" class="ident">t</label>+<span class="lit-number">4</span>, <label for="r3" class="ident">src</label>) + <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code>			<span class="comment">// Extend backwards</span></code></span>
+<span class="codeline" id="line-132"><code>			<span class="keyword">for</span> <label for="r23" class="ident">t</label> &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r11" class="ident">s</label> &gt; <label for="r12" class="ident">nextEmit</label> &amp;&amp; <label for="r3" class="ident">src</label>[<label for="r23" class="ident">t</label>-<span class="lit-number">1</span>] == <label for="r3" class="ident">src</label>[<label for="r11" class="ident">s</label>-<span class="lit-number">1</span>] {</code></span>
+<span class="codeline" id="line-133"><code>				<label for="r11" class="ident">s</label>--</code></span>
+<span class="codeline" id="line-134"><code>				<label for="r23" class="ident">t</label>--</code></span>
+<span class="codeline" id="line-135"><code>				<label for="r24" class="ident">l</label>++</code></span>
+<span class="codeline" id="line-136"><code>			}</code></span>
+<span class="codeline" id="line-137"><code>			<span class="keyword">if</span> <label for="r12" class="ident">nextEmit</label> &lt; <label for="r11" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-138"><code>				<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a> {</code></span>
+<span class="codeline" id="line-139"><code>					<a href="token.go.html#line-197" class="ident">emitLiteral</a>(<label for="r2" class="ident">dst</label>, <label for="r3" class="ident">src</label>[<label for="r12" class="ident">nextEmit</label>:<label for="r11" class="ident">s</label>])</code></span>
+<span class="codeline" id="line-140"><code>				} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-141"><code>					<span class="keyword">for</span> <label for="r25" class="ident">_</label>, <label for="r26" class="ident">v</label> := <span class="keyword">range</span> <label for="r3" class="ident">src</label>[<label for="r12" class="ident">nextEmit</label>:<label for="r11" class="ident">s</label>] {</code></span>
+<span class="codeline" id="line-142"><code>						<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-136" class="ident">tokens</a>[<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-135" class="ident">n</a>] = <a href="token.go.html#line-128" class="ident">token</a>(<label for="r26" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-143"><code>						<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-133" class="ident">litHist</a>[<label for="r26" class="ident">v</label>]++</code></span>
+<span class="codeline" id="line-144"><code>						<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-135" class="ident">n</a>++</code></span>
+<span class="codeline" id="line-145"><code>					}</code></span>
+<span class="codeline" id="line-146"><code>				}</code></span>
+<span class="codeline" id="line-147"><code>			}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code>			<label for="r2" class="ident">dst</label>.<a href="token.go.html#line-284" class="ident">AddMatchLong</a>(<label for="r24" class="ident">l</label>, <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r11" class="ident">s</label>-<label for="r23" class="ident">t</label>-<a href="fast_encoder.go.html#line-42" class="ident">baseMatchOffset</a>))</code></span>
+<span class="codeline" id="line-150"><code>			<label for="r11" class="ident">s</label> += <label for="r24" class="ident">l</label></code></span>
+<span class="codeline" id="line-151"><code>			<label for="r12" class="ident">nextEmit</label> = <label for="r11" class="ident">s</label></code></span>
+<span class="codeline" id="line-152"><code>			<span class="keyword">if</span> <label for="r17" class="ident">nextS</label> &gt;= <label for="r11" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-153"><code>				<label for="r11" class="ident">s</label> = <label for="r17" class="ident">nextS</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-154"><code>			}</code></span>
+<span class="codeline" id="line-155"><code></code></span>
+<span class="codeline" id="line-156"><code>			<span class="keyword">if</span> <label for="r11" class="ident">s</label> &gt;= <label for="r13" class="ident">sLimit</label> {</code></span>
+<span class="codeline" id="line-157"><code>				<span class="comment">// Index first pair after match end.</span></code></span>
+<span class="codeline" id="line-158"><code>				<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r11" class="ident">s</label>+<label for="r24" class="ident">l</label>+<span class="lit-number">8</span>) &lt; <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">src</label>) {</code></span>
+<span class="codeline" id="line-159"><code>					<label for="r27" class="ident">cv</label> := <a href="fast_encoder.go.html#line-65" class="ident">load6432</a>(<label for="r3" class="ident">src</label>, <label for="r11" class="ident">s</label>)</code></span>
+<span class="codeline" id="line-160"><code>					<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r27" class="ident">cv</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r11" class="ident">s</label> + <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>}</code></span>
+<span class="codeline" id="line-161"><code>				}</code></span>
+<span class="codeline" id="line-162"><code>				<span class="keyword">goto</span> <label for="r20" class="ident">emitRemainder</label></code></span>
+<span class="codeline" id="line-163"><code>			}</code></span>
+<span class="codeline" id="line-164"><code></code></span>
+<span class="codeline" id="line-165"><code>			<span class="comment">// Store every second hash in-between, but offset by 1.</span></code></span>
+<span class="codeline" id="line-166"><code>			<span class="keyword">for</span> <label for="r28" class="ident">i</label> := <label for="r11" class="ident">s</label> - <label for="r24" class="ident">l</label> + <span class="lit-number">2</span>; <label for="r28" class="ident">i</label> &lt; <label for="r11" class="ident">s</label>-<span class="lit-number">5</span>; <label for="r28" class="ident">i</label> += <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-167"><code>				<label for="r29" class="ident">x</label> := <a href="fast_encoder.go.html#line-65" class="ident">load6432</a>(<label for="r3" class="ident">src</label>, <label for="r28" class="ident">i</label>)</code></span>
+<span class="codeline" id="line-168"><code>				<label for="r30" class="ident">nextHash</label> := <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r29" class="ident">x</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-169"><code>				<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r30" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <label for="r28" class="ident">i</label>}</code></span>
+<span class="codeline" id="line-170"><code>				<span class="comment">// Skip one</span></code></span>
+<span class="codeline" id="line-171"><code>				<label for="r29" class="ident">x</label> &gt;&gt;= <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-172"><code>				<label for="r30" class="ident">nextHash</label> = <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r29" class="ident">x</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-173"><code>				<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r30" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <label for="r28" class="ident">i</label> + <span class="lit-number">2</span>}</code></span>
+<span class="codeline" id="line-174"><code>				<span class="comment">// Skip one</span></code></span>
+<span class="codeline" id="line-175"><code>				<label for="r29" class="ident">x</label> &gt;&gt;= <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-176"><code>				<label for="r30" class="ident">nextHash</label> = <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r29" class="ident">x</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-177"><code>				<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r30" class="ident">nextHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <label for="r28" class="ident">i</label> + <span class="lit-number">4</span>}</code></span>
+<span class="codeline" id="line-178"><code>			}</code></span>
+<span class="codeline" id="line-179"><code></code></span>
+<span class="codeline" id="line-180"><code>			<span class="comment">// We could immediately start working at s now, but to improve</span></code></span>
+<span class="codeline" id="line-181"><code><span class="comment">			// compression we first update the hash table at s-2 to s. If</span></code></span>
+<span class="codeline" id="line-182"><code><span class="comment">			// another emitCopy is not our next move, also calculate nextHash</span></code></span>
+<span class="codeline" id="line-183"><code><span class="comment">			// at s+1. At least on GOARCH=amd64, these three hash calculations</span></code></span>
+<span class="codeline" id="line-184"><code><span class="comment">			// are faster as one load64 call (with some shifts) instead of</span></code></span>
+<span class="codeline" id="line-185"><code><span class="comment">			// three load32 calls.</span></code></span>
+<span class="codeline" id="line-186"><code>			<label for="r31" class="ident">x</label> := <a href="fast_encoder.go.html#line-65" class="ident">load6432</a>(<label for="r3" class="ident">src</label>, <label for="r11" class="ident">s</label>-<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-187"><code>			<label for="r32" class="ident">o</label> := <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a> + <label for="r11" class="ident">s</label> - <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-188"><code>			<label for="r33" class="ident">prevHash</label> := <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r31" class="ident">x</label>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-189"><code>			<label for="r34" class="ident">prevHash2</label> := <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r31" class="ident">x</label>&gt;&gt;<span class="lit-number">8</span>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-190"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r33" class="ident">prevHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r32" class="ident">o</label>}</code></span>
+<span class="codeline" id="line-191"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r34" class="ident">prevHash2</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r32" class="ident">o</label> + <span class="lit-number">1</span>}</code></span>
+<span class="codeline" id="line-192"><code>			<label for="r35" class="ident">currHash</label> := <a href="fast_encoder.go.html#line-118" class="ident">hashLen</a>(<label for="r31" class="ident">x</label>&gt;&gt;<span class="lit-number">16</span>, <a href="fast_encoder.go.html#line-46" class="ident">bTableBits</a>, <label for="r6" class="ident">hashBytes</label>)</code></span>
+<span class="codeline" id="line-193"><code>			<label for="r18" class="ident">candidate</label> = <label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r35" class="ident">currHash</label>]</code></span>
+<span class="codeline" id="line-194"><code>			<label for="r0" class="ident">e</label>.<a href="#line-10" class="ident">table</a>[<label for="r35" class="ident">currHash</label>] = <a href="fast_encoder.go.html#line-69" class="ident">tableEntry</a>{<a href="fast_encoder.go.html#line-70" class="ident">offset</a>: <label for="r32" class="ident">o</label> + <span class="lit-number">2</span>}</code></span>
+<span class="codeline" id="line-195"><code></code></span>
+<span class="codeline" id="line-196"><code>			<label for="r36" class="ident">offset</label> := <label for="r11" class="ident">s</label> - (<label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a> - <label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>)</code></span>
+<span class="codeline" id="line-197"><code>			<span class="keyword">if</span> <label for="r36" class="ident">offset</label> &gt; <a href="fast_encoder.go.html#line-44" class="ident">maxMatchOffset</a> || <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r31" class="ident">x</label>&gt;&gt;<span class="lit-number">16</span>) != <a href="fast_encoder.go.html#line-61" class="ident">load3232</a>(<label for="r3" class="ident">src</label>, <label for="r18" class="ident">candidate</label>.<a href="fast_encoder.go.html#line-70" class="ident">offset</a>-<label for="r0" class="ident">e</label>.<a href="fast_encoder.go.html#line-78" class="ident">cur</a>) {</code></span>
+<span class="codeline" id="line-198"><code>				<label for="r14" class="ident">cv</label> = <label for="r31" class="ident">x</label> &gt;&gt; <span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-199"><code>				<label for="r11" class="ident">s</label>++</code></span>
+<span class="codeline" id="line-200"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-201"><code>			}</code></span>
+<span class="codeline" id="line-202"><code>		}</code></span>
+<span class="codeline" id="line-203"><code>	}</code></span>
+<span class="codeline" id="line-204"><code></code></span>
+<span class="codeline" id="line-205"><code><label for="r20" class="ident">emitRemainder</label>:</code></span>
+<span class="codeline" id="line-206"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r12" class="ident">nextEmit</label>) &lt; <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">src</label>) {</code></span>
+<span class="codeline" id="line-207"><code>		<span class="comment">// If nothing was added, don't encode literals.</span></code></span>
+<span class="codeline" id="line-208"><code>		<span class="keyword">if</span> <label for="r2" class="ident">dst</label>.<a href="token.go.html#line-135" class="ident">n</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-209"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-210"><code>		}</code></span>
+<span class="codeline" id="line-211"><code></code></span>
+<span class="codeline" id="line-212"><code>		<a href="token.go.html#line-197" class="ident">emitLiteral</a>(<label for="r2" class="ident">dst</label>, <label for="r3" class="ident">src</label>[<label for="r12" class="ident">nextEmit</label>:])</code></span>
+<span class="codeline" id="line-213"><code>	}</code></span>
+<span class="codeline" id="line-214"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

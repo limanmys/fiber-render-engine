@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: line.go in package github.com/rivo/uniseg</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	line.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/rivo/uniseg.html">github.com/rivo/uniseg</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> uniseg</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"unicode/utf8"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// FirstLineSegment returns the prefix of the given byte slice after which a</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// decision to break the string over to the next line can or must be made,</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// according to the rules of Unicode Standard Annex #14. This is used to</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// implement line breaking.</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Line breaking, also known as word wrapping, is the process of breaking a</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// section of text into lines such that it will fit in the available width of a</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// page, window or other display area.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// The returned "segment" may not be broken into smaller parts, unless no other</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// breaking opportunities present themselves, in which case you may break by</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// grapheme clusters (using the [FirstGraphemeCluster] function to determine the</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// grapheme clusters).</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// The "mustBreak" flag indicates whether you MUST break the line after the</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// given segment (true), for example after newline characters, or you MAY break</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// the line after the given segment (false).</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// This function can be called continuously to extract all non-breaking sub-sets</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// from a byte slice, as illustrated in the example below.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// If you don't know the current state, for example when calling the function</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// for the first time, you must pass -1. For consecutive calls, pass the state</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// and rest slice returned by the previous call.</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// The "rest" slice is the sub-slice of the original byte slice "b" starting</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// after the last byte of the identified line segment. If the length of the</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// "rest" slice is 0, the entire byte slice "b" has been processed. The</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// "segment" byte slice is the sub-slice of the input slice containing the</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// identified line segment.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// Given an empty byte slice "b", the function returns nil values.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// Note that in accordance with UAX #14 LB3, the final segment will end with</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// "mustBreak" set to true. You can choose to ignore this by checking if the</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// length of the "rest" slice is 0 and calling [HasTrailingLineBreak] or</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// [HasTrailingLineBreakInString] on the last rune.</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// Note also that this algorithm may break within grapheme clusters. This is</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// addressed in Section 8.2 Example 6 of UAX #14. To avoid this, you can use</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// the [Step] function instead.</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstLineSegment" class="ident">FirstLineSegment</a></label>(<label for="r1" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r2" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r3" class="ident">segment</label>, <label for="r4" class="ident">rest</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r5" class="ident">mustBreak</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r6" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-49"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-50"><code>	}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code>	<span class="comment">// Extract the first rune.</span></code></span>
+<span class="codeline" id="line-53"><code>	<label for="r7" class="ident">r</label>, <label for="r8" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r8" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
+<span class="codeline" id="line-55"><code>		<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="linerules.go.html#line-7" class="ident">lbAny</a> <span class="comment">// LB3.</span></code></span>
+<span class="codeline" id="line-56"><code>	}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">if</span> <label for="r2" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-60"><code>		<label for="r2" class="ident">state</label>, _ = <a href="linerules.go.html#line-291" class="ident">transitionLineBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r7" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r8" class="ident">length</label>:], <span class="lit-string">""</span>)</code></span>
+<span class="codeline" id="line-61"><code>	}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">var</span> <label for="r9" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-66"><code>		<label for="r10" class="ident">r</label>, <label for="r11" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>[<label for="r8" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-67"><code>		<label for="r2" class="ident">state</label>, <label for="r9" class="ident">boundary</label> = <a href="linerules.go.html#line-291" class="ident">transitionLineBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r10" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r8" class="ident">length</label>+<label for="r11" class="ident">l</label>:], <span class="lit-string">""</span>)</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>		<span class="keyword">if</span> <label for="r9" class="ident">boundary</label> != <a href="linerules.go.html#line-62" class="ident">LineDontBreak</a> {</code></span>
+<span class="codeline" id="line-70"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>[:<label for="r8" class="ident">length</label>], <label for="r1" class="ident">b</label>[<label for="r8" class="ident">length</label>:], <label for="r9" class="ident">boundary</label> == <a href="linerules.go.html#line-64" class="ident">LineMustBreak</a>, <label for="r2" class="ident">state</label></code></span>
+<span class="codeline" id="line-71"><code>		}</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>		<label for="r8" class="ident">length</label> += <label for="r11" class="ident">l</label></code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r8" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-75"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="linerules.go.html#line-7" class="ident">lbAny</a> <span class="comment">// LB3</span></code></span>
+<span class="codeline" id="line-76"><code>		}</code></span>
+<span class="codeline" id="line-77"><code>	}</code></span>
+<span class="codeline" id="line-78"><code>}</code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// FirstLineSegmentInString is like FirstLineSegment() but its input and outputs</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// are strings.</span></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> <label for="r12" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstLineSegmentInString" class="ident">FirstLineSegmentInString</a></label>(<label for="r13" class="ident">str</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r14" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r15" class="ident">segment</label>, <label for="r16" class="ident">rest</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r17" class="ident">mustBreak</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r18" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">str</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-86"><code>	}</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>	<span class="comment">// Extract the first rune.</span></code></span>
+<span class="codeline" id="line-89"><code>	<label for="r19" class="ident">r</label>, <label for="r20" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r13" class="ident">str</label>)</code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">str</label>) &lt;= <label for="r20" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span> <label for="r13" class="ident">str</label>, <span class="lit-string">""</span>, <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="linerules.go.html#line-7" class="ident">lbAny</a> <span class="comment">// LB3.</span></code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">if</span> <label for="r14" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-96"><code>		<label for="r14" class="ident">state</label>, _ = <a href="linerules.go.html#line-291" class="ident">transitionLineBreakState</a>(<label for="r14" class="ident">state</label>, <label for="r19" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r13" class="ident">str</label>[<label for="r20" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-97"><code>	}</code></span>
+<span class="codeline" id="line-98"><code></code></span>
+<span class="codeline" id="line-99"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">var</span> <label for="r21" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-102"><code>		<label for="r22" class="ident">r</label>, <label for="r23" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r13" class="ident">str</label>[<label for="r20" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-103"><code>		<label for="r14" class="ident">state</label>, <label for="r21" class="ident">boundary</label> = <a href="linerules.go.html#line-291" class="ident">transitionLineBreakState</a>(<label for="r14" class="ident">state</label>, <label for="r22" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r13" class="ident">str</label>[<label for="r20" class="ident">length</label>+<label for="r23" class="ident">l</label>:])</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">if</span> <label for="r21" class="ident">boundary</label> != <a href="linerules.go.html#line-62" class="ident">LineDontBreak</a> {</code></span>
+<span class="codeline" id="line-106"><code>			<span class="keyword">return</span> <label for="r13" class="ident">str</label>[:<label for="r20" class="ident">length</label>], <label for="r13" class="ident">str</label>[<label for="r20" class="ident">length</label>:], <label for="r21" class="ident">boundary</label> == <a href="linerules.go.html#line-64" class="ident">LineMustBreak</a>, <label for="r14" class="ident">state</label></code></span>
+<span class="codeline" id="line-107"><code>		}</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code>		<label for="r20" class="ident">length</label> += <label for="r23" class="ident">l</label></code></span>
+<span class="codeline" id="line-110"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">str</label>) &lt;= <label for="r20" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-111"><code>			<span class="keyword">return</span> <label for="r13" class="ident">str</label>, <span class="lit-string">""</span>, <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="linerules.go.html#line-7" class="ident">lbAny</a> <span class="comment">// LB3.</span></code></span>
+<span class="codeline" id="line-112"><code>		}</code></span>
+<span class="codeline" id="line-113"><code>	}</code></span>
+<span class="codeline" id="line-114"><code>}</code></span>
+<span class="codeline" id="line-115"><code></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// HasTrailingLineBreak returns true if the last rune in the given byte slice is</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// one of the hard line break code points defined in LB4 and LB5 of [UAX #14].</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// [UAX #14]: https://www.unicode.org/reports/tr14/#Algorithm</span></code></span>
+<span class="codeline" id="line-120"><code><span class="keyword">func</span> <label for="r24" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-HasTrailingLineBreak" class="ident">HasTrailingLineBreak</a></label>(<label for="r25" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-121"><code>	<label for="r26" class="ident">r</label>, <label for="r27" class="ident">_</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-247" class="ident">DecodeLastRune</a>(<label for="r25" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-122"><code>	<label for="r28" class="ident">property</label>, <label for="r29" class="ident">_</label> := <a href="properties.go.html#line-165" class="ident">propertyWithGenCat</a>(<a href="lineproperties.go.html#line-12" class="ident">lineBreakCodePoints</a>, <label for="r26" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-123"><code>	<span class="keyword">return</span> <label for="r28" class="ident">property</label> == <a href="linerules.go.html#line-8" class="ident">lbBK</a> || <label for="r28" class="ident">property</label> == <a href="linerules.go.html#line-9" class="ident">lbCR</a> || <label for="r28" class="ident">property</label> == <a href="linerules.go.html#line-10" class="ident">lbLF</a> || <label for="r28" class="ident">property</label> == <a href="linerules.go.html#line-11" class="ident">lbNL</a></code></span>
+<span class="codeline" id="line-124"><code>}</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">// HasTrailingLineBreakInString is like [HasTrailingLineBreak] but for a string.</span></code></span>
+<span class="codeline" id="line-127"><code><span class="keyword">func</span> <label for="r30" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-HasTrailingLineBreakInString" class="ident">HasTrailingLineBreakInString</a></label>(<label for="r31" class="ident">str</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-128"><code>	<label for="r32" class="ident">r</label>, <label for="r33" class="ident">_</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-287" class="ident">DecodeLastRuneInString</a>(<label for="r31" class="ident">str</label>)</code></span>
+<span class="codeline" id="line-129"><code>	<label for="r34" class="ident">property</label>, <label for="r35" class="ident">_</label> := <a href="properties.go.html#line-165" class="ident">propertyWithGenCat</a>(<a href="lineproperties.go.html#line-12" class="ident">lineBreakCodePoints</a>, <label for="r32" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">return</span> <label for="r34" class="ident">property</label> == <a href="linerules.go.html#line-8" class="ident">lbBK</a> || <label for="r34" class="ident">property</label> == <a href="linerules.go.html#line-9" class="ident">lbCR</a> || <label for="r34" class="ident">property</label> == <a href="linerules.go.html#line-10" class="ident">lbLF</a> || <label for="r34" class="ident">property</label> == <a href="linerules.go.html#line-11" class="ident">lbNL</a></code></span>
+<span class="codeline" id="line-131"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

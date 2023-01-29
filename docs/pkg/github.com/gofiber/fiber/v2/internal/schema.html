@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/gofiber/fiber/v2/internal/schema</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>schema</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../../../../index.html#pkg-github.com/gofiber/fiber/v2/internal/schema">github.com/gofiber/fiber/v2/internal/schema</a><i> (on <a href="https://pkg.go.dev/github.com/gofiber/fiber/v2/internal/schema" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../../../../dep/github.com/gofiber/fiber/v2/internal/schema.html">7 packages</a>, and imported by <a href="../../../../../../dep/github.com/gofiber/fiber/v2/internal/schema.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/cache.go.html">cache.go</a></span>
+	<span class="nodocs">      <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/converter.go.html">converter.go</a></span>
+	<span class="nodocs">      <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html">decoder.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-3-fold-content"><label for="file-3-fold-content">   <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/doc.go.html#doc">#d</a> <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/doc.go.html">doc.go</a></label><span id='file-3-fold-content-items' class="fold-items">
+<span class="md-text">		Package gorilla/schema fills a struct with form values.
+		
+		The basic usage is really simple. Given this struct:
+		
+			type Person struct {
+				Name  string
+				Phone string
+			}
+		
+		...we can fill it passing a map to the Decode() function:
+		
+			values := map[string][]string{
+				"Name":  {"John"},
+				"Phone": {"999-999-999"},
+			}
+			person := new(Person)
+			decoder := schema.NewDecoder()
+			decoder.Decode(person, values)
+		
+		This is just a simple example and it doesn't make a lot of sense to create
+		the map manually. Typically it will come from a http.Request object and
+		will be of type url.Values, http.Request.Form, or http.Request.MultipartForm:
+		
+			func MyHandler(w http.ResponseWriter, r *http.Request) {
+				err := r.ParseForm()
+		
+				if err != nil {
+					// Handle error
+				}
+		
+				decoder := schema.NewDecoder()
+				// r.PostForm is a map of our POST form values
+				err := decoder.Decode(person, r.PostForm)
+		
+				if err != nil {
+					// Handle error
+				}
+		
+				// Do something with person.Name or person.Phone
+			}
+		
+		Note: it is a good idea to set a Decoder instance as a package global,
+		because it caches meta-data about structs, and an instance can be shared safely:
+		
+			var decoder = schema.NewDecoder()
+		
+		To define custom names for fields, use a struct tag "schema". To not populate
+		certain fields, use a dash for the name and it will be ignored:
+		
+			type Person struct {
+				Name  string `schema:"name"`  // custom name
+				Phone string `schema:"phone"` // custom name
+				Admin bool   `schema:"-"`     // this field is never set
+			}
+		
+		The supported field types in the destination struct are:
+		
+		  - bool
+		  - float variants (float32, float64)
+		  - int variants (int, int8, int16, int32, int64)
+		  - string
+		  - uint variants (uint, uint8, uint16, uint32, uint64)
+		  - struct
+		  - a pointer to one of the above types
+		  - a slice or a pointer to a slice of one of the above types
+		
+		Non-supported types are simply ignored, however custom types can be registered
+		to be converted.
+		
+		To fill nested structs, keys must use a dotted notation as the "path" for the
+		field. So for example, to fill the struct Person below:
+		
+			type Phone struct {
+				Label  string
+				Number string
+			}
+		
+			type Person struct {
+				Name  string
+				Phone Phone
+			}
+		
+		...the source map must have the keys "Name", "Phone.Label" and "Phone.Number".
+		This means that an HTML form to fill a Person struct must look like this:
+		
+			&lt;form&gt;
+				&lt;input type="text" name="Name"&gt;
+				&lt;input type="text" name="Phone.Label"&gt;
+				&lt;input type="text" name="Phone.Number"&gt;
+			&lt;/form&gt;
+		
+		Single values are filled using the first value for a key from the source map.
+		Slices are filled using all values for a key from the source map. So to fill
+		a Person with multiple Phone values, like:
+		
+			type Person struct {
+				Name   string
+				Phones []Phone
+			}
+		
+		...an HTML form that accepts three Phone values would look like this:
+		
+			&lt;form&gt;
+				&lt;input type="text" name="Name"&gt;
+				&lt;input type="text" name="Phones.0.Label"&gt;
+				&lt;input type="text" name="Phones.0.Number"&gt;
+				&lt;input type="text" name="Phones.1.Label"&gt;
+				&lt;input type="text" name="Phones.1.Number"&gt;
+				&lt;input type="text" name="Phones.2.Label"&gt;
+				&lt;input type="text" name="Phones.2.Number"&gt;
+			&lt;/form&gt;
+		
+		Notice that only for slices of structs the slice index is required.
+		This is needed for disambiguation: if the nested struct also had a slice
+		field, we could not translate multiple values to it if we did not use an
+		index for the parent struct.
+		
+		There's also the possibility to create a custom type that implements the
+		TextUnmarshaler interface, and in this case there's no need to register
+		a converter, like:
+		
+			type Person struct {
+			  Emails []Email
+			}
+		
+			type Email struct {
+			  *mail.Address
+			}
+		
+			func (e *Email) UnmarshalText(text []byte) (err error) {
+				e.Address, err = mail.ParseAddress(string(text))
+				return
+			}
+		
+		...an HTML form that accepts three Email values would look like this:
+		
+			&lt;form&gt;
+				&lt;input type="email" name="Emails.0"&gt;
+				&lt;input type="email" name="Emails.1"&gt;
+				&lt;input type="email" name="Emails.2"&gt;
+			&lt;/form&gt;</span>
+</span>
+	<span class="nodocs">      <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html">encoder.go</a></span></div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 7)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-ConversionError" data-popularity="100">	<input type='checkbox' class="fold" id="ConversionError-fold-content"><label for="ConversionError-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-464">ConversionError</a> <i>(struct)</i></label><span id='ConversionError-fold-content-docs' class="fold-docs">
+<span class="md-text">		ConversionError stores information about a failed conversion.</span>
+
+		<input type='checkbox' class="fold" id="ConversionError-fold-fields"><label for="ConversionError-fold-fields">Fields (<i>total 4</i>)</label><span id='ConversionError-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="ConversionError-fold-field-Err"><label for="ConversionError-fold-field-Err"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-468">Err</a> <i><a href="../../../../../builtin.html#name-error">error</a></i></label><span id='ConversionError-fold-field-Err-docs' class="fold-docs">
+<span class="md-text">				// low-level error (when it exists)</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ConversionError-fold-field-Index"><label for="ConversionError-fold-field-Index"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-467">Index</a> <i><a href="../../../../../builtin.html#name-int">int</a></i></label><span id='ConversionError-fold-field-Index-docs' class="fold-docs">
+<span class="md-text">				// index for multi-value fields; -1 for single-value fields.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ConversionError-fold-field-Key"><label for="ConversionError-fold-field-Key"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-465">Key</a> <i><a href="../../../../../builtin.html#name-string">string</a></i></label><span id='ConversionError-fold-field-Key-docs' class="fold-docs">
+<span class="md-text">				// key from the source map.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ConversionError-fold-field-Type"><label for="ConversionError-fold-field-Type"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-466">Type</a> <i><a href="../../../../../reflect.html">reflect</a>.<a href="../../../../../reflect.html#name-Type">Type</a></i></label><span id='ConversionError-fold-field-Type-docs' class="fold-docs">
+<span class="md-text">				// expected type of elem</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ConversionError-fold-methods"><label for="ConversionError-fold-methods">Methods (<i>only one</i>)</label><span id='ConversionError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( ConversionError) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-471">Error</a>() <a href="../../../../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="ConversionError-fold-impls"><label for="ConversionError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='ConversionError-fold-impls-items' class="fold-items"><span>
+			 ConversionError : <a href="../../../../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Converter" data-popularity="35">	<input type='checkbox' class="fold" id="Converter-fold-content"><label for="Converter-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/converter.go.html#line-12">Converter</a> <i>(func)</i></label><span id='Converter-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="Converter-fold-params"><label for="Converter-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Converter-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Decoder">Decoder</a>).<a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-58">RegisterConverter</a>(value interface{}, converterFunc <b>Converter</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Decoder" data-popularity="325">	<input type='checkbox' class="fold" id="Decoder-fold-content"><label for="Decoder-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-21">Decoder</a> <i>(struct)</i></label><span id='Decoder-fold-content-docs' class="fold-docs">
+<span class="md-text">		Decoder decodes values from a map[string][]string to a struct.</span>
+
+		<input type='checkbox' class="fold" id="Decoder-fold-methods"><label for="Decoder-fold-methods">Methods (<i>total 5</i>)</label><span id='Decoder-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Decoder-fold-method-Decode"><label for="Decoder-fold-method-Decode">(*Decoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-70">Decode</a>(dst interface{}, src map[<a href="../../../../../builtin.html#name-string">string</a>][]<a href="../../../../../builtin.html#name-string">string</a>) <a href="../../../../../builtin.html#name-error">error</a></label><span id='Decoder-fold-method-Decode-docs' class="fold-docs">
+<span class="md-text">				Decode decodes a map[string][]string to a struct.
+				
+				The first parameter must be a pointer to a struct.
+				
+				The second parameter is a map, typically url.Values from an HTTP request.
+				Keys are "paths" in dotted notation to the struct fields and nested structs.
+				
+				See the package documentation for a full explanation of the mechanics.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Decoder-fold-method-IgnoreUnknownKeys"><label for="Decoder-fold-method-IgnoreUnknownKeys">(*Decoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-53">IgnoreUnknownKeys</a>(i <a href="../../../../../builtin.html#name-bool">bool</a>)</label><span id='Decoder-fold-method-IgnoreUnknownKeys-docs' class="fold-docs">
+<span class="md-text">				IgnoreUnknownKeys controls the behaviour when the decoder encounters unknown
+				keys in the map.
+				If i is true and an unknown field is encountered, it is ignored. This is
+				similar to how unknown keys are handled by encoding/json.
+				If i is false then Decode will return an error. Note that any valid keys
+				will still be decoded in to the target struct.
+				
+				To preserve backwards compatibility, the default value is false.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Decoder-fold-method-RegisterConverter"><label for="Decoder-fold-method-RegisterConverter">(*Decoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-58">RegisterConverter</a>(value interface{}, converterFunc <a href="#name-Converter">Converter</a>)</label><span id='Decoder-fold-method-RegisterConverter-docs' class="fold-docs">
+<span class="md-text">				RegisterConverter registers a converter function for a custom type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Decoder-fold-method-SetAliasTag"><label for="Decoder-fold-method-SetAliasTag">(*Decoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-29">SetAliasTag</a>(tag <a href="../../../../../builtin.html#name-string">string</a>)</label><span id='Decoder-fold-method-SetAliasTag-docs' class="fold-docs">
+<span class="md-text">				SetAliasTag changes the tag used to locate custom field aliases.
+				The default tag is "schema".</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Decoder-fold-method-ZeroEmpty"><label for="Decoder-fold-method-ZeroEmpty">(*Decoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-41">ZeroEmpty</a>(z <a href="../../../../../builtin.html#name-bool">bool</a>)</label><span id='Decoder-fold-method-ZeroEmpty-docs' class="fold-docs">
+<span class="md-text">				ZeroEmpty controls the behaviour when the decoder encounters empty values
+				in a map.
+				If z is true and a key in the map has the empty string as a value
+				then the corresponding struct field is set to the zero value.
+				If z is false then empty strings are ignored.
+				
+				The default value is false, that is empty values do not change
+				the value of the struct field.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Decoder-fold-results"><label for="Decoder-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Decoder-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewDecoder">NewDecoder</a>() *<b>Decoder</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-EmptyFieldError" data-popularity="100">	<input type='checkbox' class="fold" id="EmptyFieldError-fold-content"><label for="EmptyFieldError-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-498">EmptyFieldError</a> <i>(struct)</i></label><span id='EmptyFieldError-fold-content-docs' class="fold-docs">
+<span class="md-text">		EmptyFieldError stores information about an empty required field.</span>
+
+		<input type='checkbox' class="fold" id="EmptyFieldError-fold-fields"><label for="EmptyFieldError-fold-fields">Fields (<i>only one</i>)</label><span id='EmptyFieldError-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="EmptyFieldError-fold-field-Key"><label for="EmptyFieldError-fold-field-Key"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-490">Key</a> <i><a href="../../../../../builtin.html#name-string">string</a></i></label><span id='EmptyFieldError-fold-field-Key-docs' class="fold-docs">
+<span class="md-text">				// key from the source map.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="EmptyFieldError-fold-methods"><label for="EmptyFieldError-fold-methods">Methods (<i>only one</i>)</label><span id='EmptyFieldError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( EmptyFieldError) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-502">Error</a>() <a href="../../../../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="EmptyFieldError-fold-impls"><label for="EmptyFieldError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='EmptyFieldError-fold-impls-items' class="fold-items"><span>
+			 EmptyFieldError : <a href="../../../../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Encoder" data-popularity="225">	<input type='checkbox' class="fold" id="Encoder-fold-content"><label for="Encoder-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html#line-13">Encoder</a> <i>(struct)</i></label><span id='Encoder-fold-content-docs' class="fold-docs">
+<span class="md-text">		Encoder encodes values from a struct into url.Values.</span>
+
+		<input type='checkbox' class="fold" id="Encoder-fold-methods"><label for="Encoder-fold-methods">Methods (<i>total 3</i>)</label><span id='Encoder-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Encoder-fold-method-Encode"><label for="Encoder-fold-method-Encode">(*Encoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html#line-26">Encode</a>(src interface{}, dst map[<a href="../../../../../builtin.html#name-string">string</a>][]<a href="../../../../../builtin.html#name-string">string</a>) <a href="../../../../../builtin.html#name-error">error</a></label><span id='Encoder-fold-method-Encode-docs' class="fold-docs">
+<span class="md-text">				Encode encodes a struct into map[string][]string.
+				
+				Intended for use with url.Values.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Encoder-fold-method-RegisterEncoder"><label for="Encoder-fold-method-RegisterEncoder">(*Encoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html#line-33">RegisterEncoder</a>(value interface{}, encoder func(<a href="../../../../../reflect.html">reflect</a>.<a href="../../../../../reflect.html#name-Value">Value</a>) <a href="../../../../../builtin.html#name-string">string</a>)</label><span id='Encoder-fold-method-RegisterEncoder-docs' class="fold-docs">
+<span class="md-text">				RegisterEncoder registers a converter for encoding a custom type.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Encoder-fold-method-SetAliasTag"><label for="Encoder-fold-method-SetAliasTag">(*Encoder) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html#line-39">SetAliasTag</a>(tag <a href="../../../../../builtin.html#name-string">string</a>)</label><span id='Encoder-fold-method-SetAliasTag-docs' class="fold-docs">
+<span class="md-text">				SetAliasTag changes the tag used to locate custom field aliases.
+				The default tag is "schema".</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Encoder-fold-results"><label for="Encoder-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Encoder-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewEncoder">NewEncoder</a>() *<b>Encoder</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-MultiError" data-popularity="100">	<input type='checkbox' class="fold" id="MultiError-fold-content"><label for="MultiError-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-509">MultiError</a> <i>(map)</i></label><span id='MultiError-fold-content-docs' class="fold-docs">
+<span class="md-text">		MultiError stores multiple decoding errors.
+		
+		Borrowed from the App Engine SDK.</span>
+
+		<input type='checkbox' class="fold" id="MultiError-fold-methods"><label for="MultiError-fold-methods">Methods (<i>only one</i>)</label><span id='MultiError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( MultiError) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-511">Error</a>() <a href="../../../../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="MultiError-fold-impls"><label for="MultiError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='MultiError-fold-impls-items' class="fold-items"><span>
+			 MultiError : <a href="../../../../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-UnknownKeyError" data-popularity="100">	<input type='checkbox' class="fold" id="UnknownKeyError-fold-content"><label for="UnknownKeyError-fold-content"> type <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-489">UnknownKeyError</a> <i>(struct)</i></label><span id='UnknownKeyError-fold-content-docs' class="fold-docs">
+<span class="md-text">		UnknownKeyError stores information about an unknown key in the source map.</span>
+
+		<input type='checkbox' class="fold" id="UnknownKeyError-fold-fields"><label for="UnknownKeyError-fold-fields">Fields (<i>only one</i>)</label><span id='UnknownKeyError-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="UnknownKeyError-fold-field-Key"><label for="UnknownKeyError-fold-field-Key"><a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-490">Key</a> <i><a href="../../../../../builtin.html#name-string">string</a></i></label><span id='UnknownKeyError-fold-field-Key-docs' class="fold-docs">
+<span class="md-text">				// key from the source map.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="UnknownKeyError-fold-methods"><label for="UnknownKeyError-fold-methods">Methods (<i>only one</i>)</label><span id='UnknownKeyError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( UnknownKeyError) <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-493">Error</a>() <a href="../../../../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="UnknownKeyError-fold-impls"><label for="UnknownKeyError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='UnknownKeyError-fold-impls-items' class="fold-items"><span>
+			 UnknownKeyError : <a href="../../../../../builtin.html#name-error">error</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-NewDecoder">	<input type='checkbox' class="fold" id="NewDecoder-fold-content"><label for="NewDecoder-fold-content"> func <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/decoder.go.html#line-16">NewDecoder</a>() *<a href="#name-Decoder">Decoder</a></label><span id='NewDecoder-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewDecoder returns a new Decoder.</span>
+
+</span></div><div class="anchor value-res" id="name-NewEncoder">	<input type='checkbox' class="fold" id="NewEncoder-fold-content"><label for="NewEncoder-fold-content"> func <a href="../../../../../../src/github.com/gofiber/fiber/v2/internal/schema/encoder.go.html#line-19">NewEncoder</a>() *<a href="#name-Encoder">Encoder</a></label><span id='NewEncoder-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewEncoder returns a new Encoder with defaults.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

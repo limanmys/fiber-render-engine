@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/rivo/uniseg</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>uniseg</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/rivo/uniseg">github.com/rivo/uniseg</a><i> (on <a href="https://pkg.go.dev/github.com/rivo/uniseg" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/rivo/uniseg.html">one package</a>, and imported by <a href="../../../dep/github.com/rivo/uniseg.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">   <a href="../../../src/github.com/rivo/uniseg/doc.go.html#doc">#d</a> <a href="../../../src/github.com/rivo/uniseg/doc.go.html">doc.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package uniseg implements Unicode Text Segmentation, Unicode Line Breaking, and
+		string width calculation for monospace fonts. Unicode Text Segmentation conforms
+		to Unicode Standard Annex #29 (https://unicode.org/reports/tr29/) and Unicode
+		Line Breaking conforms to Unicode Standard Annex #14
+		(https://unicode.org/reports/tr14/).
+		
+		In short, using this package, you can split a string into grapheme clusters
+		(what people would usually refer to as a "character"), into words, and into
+		sentences. Or, in its simplest case, this package allows you to count the number
+		of characters in a string, especially when it contains complex characters such
+		as emojis, combining characters, or characters from Asian, Arabic, Hebrew, or
+		other languages. Additionally, you can use it to implement line breaking (or
+		"word wrapping"), that is, to determine where text can be broken over to the
+		next line when the width of the line is not big enough to fit the entire text.
+		Finally, you can use it to calculate the display width of a string for monospace
+		fonts.
+		
+		# Getting Started
+		
+		If you just want to count the number of characters in a string, you can use
+		[GraphemeClusterCount]. If you want to determine the display width of a string,
+		you can use [StringWidth]. If you want to iterate over a string, you can use
+		[Step], [StepString], or the [Graphemes] class (more convenient but less
+		performant). This will provide you with all information: grapheme clusters,
+		word boundaries, sentence boundaries, line breaks, and monospace character
+		widths. The specialized functions [FirstGraphemeCluster],
+		[FirstGraphemeClusterInString], [FirstWord], [FirstWordInString],
+		[FirstSentence], and [FirstSentenceInString] can be used if only one type of
+		information is needed.
+		
+		# Grapheme Clusters
+		
+		Consider the rainbow flag emoji: 🏳️‍🌈. On most modern systems, it appears as one
+		character. But its string representation actually has 14 bytes, so counting
+		bytes (or using len("🏳️‍🌈")) will not work as expected. Counting runes won't,
+		either: The flag has 4 Unicode code points, thus 4 runes. The stdlib function
+		utf8.RuneCountInString("🏳️‍🌈") and len([]rune("🏳️‍🌈")) will both return 4.
+		
+		The [GraphemeClusterCount] function will return 1 for the rainbow flag emoji.
+		The Graphemes class and a variety of functions in this package will allow you to
+		split strings into its grapheme clusters.
+		
+		# Word Boundaries
+		
+		Word boundaries are used in a number of different contexts. The most familiar
+		ones are selection (double-click mouse selection), cursor movement ("move to
+		next word" control-arrow keys), and the dialog option "Whole Word Search" for
+		search and replace. This package provides methods for determining word
+		boundaries.
+		
+		# Sentence Boundaries
+		
+		Sentence boundaries are often used for triple-click or some other method of
+		selecting or iterating through blocks of text that are larger than single words.
+		They are also used to determine whether words occur within the same sentence in
+		database queries. This package provides methods for determining sentence
+		boundaries.
+		
+		# Line Breaking
+		
+		Line breaking, also known as word wrapping, is the process of breaking a section
+		of text into lines such that it will fit in the available width of a page,
+		window or other display area. This package provides methods to determine the
+		positions in a string where a line must be broken, may be broken, or must not be
+		broken.
+		
+		# Monospace Width
+		
+		Monospace width, as referred to in this package, is the width of a string in a
+		monospace font. This is commonly used in terminal user interfaces or text
+		displays or editors that don't support proportional fonts. A width of 1
+		corresponds to a single character cell. The C function [wcswidth()] and its
+		implementation in other programming languages is in widespread use for the same
+		purpose. However, there is no standard for the calculation of such widths, and
+		this package differs from wcswidth() in a number of ways, presumably to generate
+		more visually pleasing results.
+		
+		To start, we assume that every code point has a width of 1, with the following
+		exceptions:
+		
+		  - Code points with grapheme cluster break properties Control, CR, LF, Extend,
+		    and ZWJ have a width of 0.
+		  - U+2E3A, Two-Em Dash, has a width of 3.
+		  - U+2E3B, Three-Em Dash, has a width of 4.
+		  - Characters with the East-Asian Width properties "Fullwidth" (F) and "Wide"
+		    (W) have a width of 2. (Properties "Ambiguous" (A) and "Neutral" (N) both
+		    have a width of 1.)
+		  - Code points with grapheme cluster break property Regional Indicator have a
+		    width of 2.
+		  - Code points with grapheme cluster break property Extended Pictographic have
+		    a width of 2, unless their Emoji Presentation flag is "No", in which case
+		    the width is 1.
+		
+		For Hangul grapheme clusters composed of conjoining Jamo and for Regional
+		Indicators (flags), all code points except the first one have a width of 0. For
+		grapheme clusters starting with an Extended Pictographic, any additional code
+		point will force a total width of 2, except if the Variation Selector-15
+		(U+FE0E) is included, in which case the total width is always 1. Grapheme
+		clusters ending with Variation Selector-16 (U+FE0F) have a width of 2.
+		
+		Note that whether these widths appear correct depends on your application's
+		render engine, to which extent it conforms to the Unicode Standard, and its
+		choice of font.
+		
+		[wcswidth()]: https://man7.org/linux/man-pages/man3/wcswidth.3.html</span>
+</span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/eastasianwidth.go.html">eastasianwidth.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/emojipresentation.go.html">emojipresentation.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html">grapheme.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/graphemeproperties.go.html">graphemeproperties.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/graphemerules.go.html">graphemerules.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/line.go.html">line.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/lineproperties.go.html">lineproperties.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/linerules.go.html">linerules.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/properties.go.html">properties.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/sentence.go.html">sentence.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/sentenceproperties.go.html">sentenceproperties.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/sentencerules.go.html">sentencerules.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/step.go.html">step.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/width.go.html">width.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/word.go.html">word.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/wordproperties.go.html">wordproperties.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/rivo/uniseg/wordrules.go.html">wordrules.go</a></span></div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (only one)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Graphemes" data-popularity="575">	<input type='checkbox' class="fold" id="Graphemes-fold-content"><label for="Graphemes-fold-content"> type <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-19">Graphemes</a> <i>(struct)</i></label><span id='Graphemes-fold-content-docs' class="fold-docs">
+<span class="md-text">		Graphemes implements an iterator over Unicode grapheme clusters, or
+		user-perceived characters. While iterating, it also provides information
+		about word boundaries, sentence boundaries, line breaks, and monospace
+		character widths.
+		
+		After constructing the class via [NewGraphemes] for a given string "str",
+		[Graphemes.Next] is called for every grapheme cluster in a loop until it
+		returns false. Inside the loop, information about the grapheme cluster as
+		well as boundary information and character width is available via the various
+		methods (see examples below).
+		
+		Using this class to iterate over a string is convenient but it is much slower
+		than using this package's [Step] or [StepString] functions or any of the
+		other specialized functions starting with "First".</span>
+
+		<input type='checkbox' class="fold" id="Graphemes-fold-methods"><label for="Graphemes-fold-methods">Methods (<i>total 10</i>)</label><span id='Graphemes-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Bytes"><label for="Graphemes-fold-method-Bytes">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-84">Bytes</a>() []<a href="../../builtin.html#name-byte">byte</a></label><span id='Graphemes-fold-method-Bytes-docs' class="fold-docs">
+<span class="md-text">				Bytes returns a byte slice which corresponds to the current grapheme cluster.
+				If the iterator is already past the end or [Graphemes.Next] has not yet been
+				called, nil is returned.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-IsSentenceBoundary"><label for="Graphemes-fold-method-IsSentenceBoundary">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-117">IsSentenceBoundary</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Graphemes-fold-method-IsSentenceBoundary-docs' class="fold-docs">
+<span class="md-text">				IsSentenceBoundary returns true if a sentence ends after the current
+				grapheme cluster.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-IsWordBoundary"><label for="Graphemes-fold-method-IsWordBoundary">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-108">IsWordBoundary</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Graphemes-fold-method-IsWordBoundary-docs' class="fold-docs">
+<span class="md-text">				IsWordBoundary returns true if a word ends after the current grapheme
+				cluster.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-LineBreak"><label for="Graphemes-fold-method-LineBreak">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-128">LineBreak</a>() <a href="../../builtin.html#name-int">int</a></label><span id='Graphemes-fold-method-LineBreak-docs' class="fold-docs">
+<span class="md-text">				LineBreak returns whether the line can be broken after the current grapheme
+				cluster. A value of [LineDontBreak] means the line may not be broken, a value
+				of [LineMustBreak] means the line must be broken, and a value of
+				[LineCanBreak] means the line may or may not be broken.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Next"><label for="Graphemes-fold-method-Next">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-52">Next</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Graphemes-fold-method-Next-docs' class="fold-docs">
+<span class="md-text">				Next advances the iterator by one grapheme cluster and returns false if no
+				clusters are left. This function must be called before the first cluster is
+				accessed.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Positions"><label for="Graphemes-fold-method-Positions">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-97">Positions</a>() (<a href="../../builtin.html#name-int">int</a>, <a href="../../builtin.html#name-int">int</a>)</label><span id='Graphemes-fold-method-Positions-docs' class="fold-docs">
+<span class="md-text">				Positions returns the interval of the current grapheme cluster as byte
+				positions into the original string. The first returned value "from" indexes
+				the first byte and the second returned value "to" indexes the first byte that
+				is not included anymore, i.e. str[from:to] is the current grapheme cluster of
+				the original string "str". If [Graphemes.Next] has not yet been called, both
+				values are 0. If the iterator is already past the end, both values are 1.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Reset"><label for="Graphemes-fold-method-Reset">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-148">Reset</a>()</label><span id='Graphemes-fold-method-Reset-docs' class="fold-docs">
+<span class="md-text">				Reset puts the iterator into its initial state such that the next call to
+				[Graphemes.Next] sets it to the first grapheme cluster again.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Runes"><label for="Graphemes-fold-method-Runes">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-67">Runes</a>() []<a href="../../builtin.html#name-rune">rune</a></label><span id='Graphemes-fold-method-Runes-docs' class="fold-docs">
+<span class="md-text">				Runes returns a slice of runes (code points) which corresponds to the current
+				grapheme cluster. If the iterator is already past the end or [Graphemes.Next]
+				has not yet been called, nil is returned.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Str"><label for="Graphemes-fold-method-Str">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-77">Str</a>() <a href="../../builtin.html#name-string">string</a></label><span id='Graphemes-fold-method-Str-docs' class="fold-docs">
+<span class="md-text">				Str returns a substring of the original string which corresponds to the
+				current grapheme cluster. If the iterator is already past the end or
+				[Graphemes.Next] has not yet been called, an empty string is returned.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Graphemes-fold-method-Width"><label for="Graphemes-fold-method-Width">(*Graphemes) <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-139">Width</a>() <a href="../../builtin.html#name-int">int</a></label><span id='Graphemes-fold-method-Width-docs' class="fold-docs">
+<span class="md-text">				Width returns the monospace width of the current grapheme cluster.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Graphemes-fold-results"><label for="Graphemes-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Graphemes-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewGraphemes">NewGraphemes</a>(str <a href="../../builtin.html#name-string">string</a>) *<b>Graphemes</b></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 16)</i></span></span>
+
+<div class="anchor value-res" id="name-FirstGraphemeCluster">	<input type='checkbox' class="fold" id="FirstGraphemeCluster-fold-content"><label for="FirstGraphemeCluster-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-212">FirstGraphemeCluster</a>(b []<a href="../../builtin.html#name-byte">byte</a>, state <a href="../../builtin.html#name-int">int</a>) (cluster, rest []<a href="../../builtin.html#name-byte">byte</a>, width, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstGraphemeCluster-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstGraphemeCluster returns the first grapheme cluster found in the given
+		byte slice according to the rules of Unicode Standard Annex #29, Grapheme
+		Cluster Boundaries. This function can be called continuously to extract all
+		grapheme clusters from a byte slice, as illustrated in the example below.
+		
+		If you don't know the current state, for example when calling the function
+		for the first time, you must pass -1. For consecutive calls, pass the state
+		and rest slice returned by the previous call.
+		
+		The "rest" slice is the sub-slice of the original byte slice "b" starting
+		after the last byte of the identified grapheme cluster. If the length of the
+		"rest" slice is 0, the entire byte slice "b" has been processed. The
+		"cluster" byte slice is the sub-slice of the input slice containing the
+		identified grapheme cluster.
+		
+		The returned width is the width of the grapheme cluster for most monospace
+		fonts where a value of 1 represents one character cell.
+		
+		Given an empty byte slice "b", the function returns nil values.
+		
+		While slightly less convenient than using the Graphemes class, this function
+		has much better performance and makes no allocations. It lends itself well to
+		large byte slices.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstGraphemeClusterInString">	<input type='checkbox' class="fold" id="FirstGraphemeClusterInString-fold-content"><label for="FirstGraphemeClusterInString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-274">FirstGraphemeClusterInString</a>(str <a href="../../builtin.html#name-string">string</a>, state <a href="../../builtin.html#name-int">int</a>) (cluster, rest <a href="../../builtin.html#name-string">string</a>, width, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstGraphemeClusterInString-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstGraphemeClusterInString is like [FirstGraphemeCluster] but its input and
+		outputs are strings.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstLineSegment">	<input type='checkbox' class="fold" id="FirstLineSegment-fold-content"><label for="FirstLineSegment-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/line.go.html#line-46">FirstLineSegment</a>(b []<a href="../../builtin.html#name-byte">byte</a>, state <a href="../../builtin.html#name-int">int</a>) (segment, rest []<a href="../../builtin.html#name-byte">byte</a>, mustBreak <a href="../../builtin.html#name-bool">bool</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstLineSegment-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstLineSegment returns the prefix of the given byte slice after which a
+		decision to break the string over to the next line can or must be made,
+		according to the rules of Unicode Standard Annex #14. This is used to
+		implement line breaking.
+		
+		Line breaking, also known as word wrapping, is the process of breaking a
+		section of text into lines such that it will fit in the available width of a
+		page, window or other display area.
+		
+		The returned "segment" may not be broken into smaller parts, unless no other
+		breaking opportunities present themselves, in which case you may break by
+		grapheme clusters (using the [FirstGraphemeCluster] function to determine the
+		grapheme clusters).
+		
+		The "mustBreak" flag indicates whether you MUST break the line after the
+		given segment (true), for example after newline characters, or you MAY break
+		the line after the given segment (false).
+		
+		This function can be called continuously to extract all non-breaking sub-sets
+		from a byte slice, as illustrated in the example below.
+		
+		If you don't know the current state, for example when calling the function
+		for the first time, you must pass -1. For consecutive calls, pass the state
+		and rest slice returned by the previous call.
+		
+		The "rest" slice is the sub-slice of the original byte slice "b" starting
+		after the last byte of the identified line segment. If the length of the
+		"rest" slice is 0, the entire byte slice "b" has been processed. The
+		"segment" byte slice is the sub-slice of the input slice containing the
+		identified line segment.
+		
+		Given an empty byte slice "b", the function returns nil values.
+		
+		Note that in accordance with UAX #14 LB3, the final segment will end with
+		"mustBreak" set to true. You can choose to ignore this by checking if the
+		length of the "rest" slice is 0 and calling [HasTrailingLineBreak] or
+		[HasTrailingLineBreakInString] on the last rune.
+		
+		Note also that this algorithm may break within grapheme clusters. This is
+		addressed in Section 8.2 Example 6 of UAX #14. To avoid this, you can use
+		the [Step] function instead.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstLineSegmentInString">	<input type='checkbox' class="fold" id="FirstLineSegmentInString-fold-content"><label for="FirstLineSegmentInString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/line.go.html#line-82">FirstLineSegmentInString</a>(str <a href="../../builtin.html#name-string">string</a>, state <a href="../../builtin.html#name-int">int</a>) (segment, rest <a href="../../builtin.html#name-string">string</a>, mustBreak <a href="../../builtin.html#name-bool">bool</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstLineSegmentInString-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstLineSegmentInString is like FirstLineSegment() but its input and outputs
+		are strings.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstSentence">	<input type='checkbox' class="fold" id="FirstSentence-fold-content"><label for="FirstSentence-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/sentence.go.html#line-20">FirstSentence</a>(b []<a href="../../builtin.html#name-byte">byte</a>, state <a href="../../builtin.html#name-int">int</a>) (sentence, rest []<a href="../../builtin.html#name-byte">byte</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstSentence-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstSentence returns the first sentence found in the given byte slice
+		according to the rules of Unicode Standard Annex #29, Sentence Boundaries.
+		This function can be called continuously to extract all sentences from a byte
+		slice, as illustrated in the example below.
+		
+		If you don't know the current state, for example when calling the function
+		for the first time, you must pass -1. For consecutive calls, pass the state
+		and rest slice returned by the previous call.
+		
+		The "rest" slice is the sub-slice of the original byte slice "b" starting
+		after the last byte of the identified sentence. If the length of the "rest"
+		slice is 0, the entire byte slice "b" has been processed. The "sentence" byte
+		slice is the sub-slice of the input slice containing the identified sentence.
+		
+		Given an empty byte slice "b", the function returns nil values.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstSentenceInString">	<input type='checkbox' class="fold" id="FirstSentenceInString-fold-content"><label for="FirstSentenceInString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/sentence.go.html#line-56">FirstSentenceInString</a>(str <a href="../../builtin.html#name-string">string</a>, state <a href="../../builtin.html#name-int">int</a>) (sentence, rest <a href="../../builtin.html#name-string">string</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstSentenceInString-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstSentenceInString is like [FirstSentence] but its input and outputs are
+		strings.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstWord">	<input type='checkbox' class="fold" id="FirstWord-fold-content"><label for="FirstWord-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/word.go.html#line-20">FirstWord</a>(b []<a href="../../builtin.html#name-byte">byte</a>, state <a href="../../builtin.html#name-int">int</a>) (word, rest []<a href="../../builtin.html#name-byte">byte</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstWord-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstWord returns the first word found in the given byte slice according to
+		the rules of Unicode Standard Annex #29, Word Boundaries. This function can
+		be called continuously to extract all words from a byte slice, as illustrated
+		in the example below.
+		
+		If you don't know the current state, for example when calling the function
+		for the first time, you must pass -1. For consecutive calls, pass the state
+		and rest slice returned by the previous call.
+		
+		The "rest" slice is the sub-slice of the original byte slice "b" starting
+		after the last byte of the identified word. If the length of the "rest" slice
+		is 0, the entire byte slice "b" has been processed. The "word" byte slice is
+		the sub-slice of the input slice containing the identified word.
+		
+		Given an empty byte slice "b", the function returns nil values.</span>
+
+</span></div><div class="anchor value-res" id="name-FirstWordInString">	<input type='checkbox' class="fold" id="FirstWordInString-fold-content"><label for="FirstWordInString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/word.go.html#line-55">FirstWordInString</a>(str <a href="../../builtin.html#name-string">string</a>, state <a href="../../builtin.html#name-int">int</a>) (word, rest <a href="../../builtin.html#name-string">string</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='FirstWordInString-fold-content-docs' class="fold-docs">
+<span class="md-text">		FirstWordInString is like [FirstWord] but its input and outputs are strings.</span>
+
+</span></div><div class="anchor value-res" id="name-GraphemeClusterCount">	<input type='checkbox' class="fold" id="GraphemeClusterCount-fold-content"><label for="GraphemeClusterCount-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-157">GraphemeClusterCount</a>(s <a href="../../builtin.html#name-string">string</a>) (n <a href="../../builtin.html#name-int">int</a>)</label><span id='GraphemeClusterCount-fold-content-docs' class="fold-docs">
+<span class="md-text">		GraphemeClusterCount returns the number of user-perceived characters
+		(grapheme clusters) for the given string.</span>
+
+</span></div><div class="anchor value-res" id="name-HasTrailingLineBreak">	<input type='checkbox' class="fold" id="HasTrailingLineBreak-fold-content"><label for="HasTrailingLineBreak-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/line.go.html#line-120">HasTrailingLineBreak</a>(b []<a href="../../builtin.html#name-byte">byte</a>) <a href="../../builtin.html#name-bool">bool</a></label><span id='HasTrailingLineBreak-fold-content-docs' class="fold-docs">
+<span class="md-text">		HasTrailingLineBreak returns true if the last rune in the given byte slice is
+		one of the hard line break code points defined in LB4 and LB5 of [UAX #14].
+		
+		[UAX #14]: https://www.unicode.org/reports/tr14/#Algorithm</span>
+
+</span></div><div class="anchor value-res" id="name-HasTrailingLineBreakInString">	<input type='checkbox' class="fold" id="HasTrailingLineBreakInString-fold-content"><label for="HasTrailingLineBreakInString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/line.go.html#line-127">HasTrailingLineBreakInString</a>(str <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-bool">bool</a></label><span id='HasTrailingLineBreakInString-fold-content-docs' class="fold-docs">
+<span class="md-text">		HasTrailingLineBreakInString is like [HasTrailingLineBreak] but for a string.</span>
+
+</span></div><div class="anchor value-res" id="name-NewGraphemes">	<input type='checkbox' class="fold" id="NewGraphemes-fold-content"><label for="NewGraphemes-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-41">NewGraphemes</a>(str <a href="../../builtin.html#name-string">string</a>) *<a href="#name-Graphemes">Graphemes</a></label><span id='NewGraphemes-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewGraphemes returns a new grapheme cluster iterator.</span>
+
+</span></div><div class="anchor value-res" id="name-ReverseString">	<input type='checkbox' class="fold" id="ReverseString-fold-content"><label for="ReverseString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/grapheme.go.html#line-168">ReverseString</a>(s <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-string">string</a></label><span id='ReverseString-fold-content-docs' class="fold-docs">
+<span class="md-text">		ReverseString reverses the given string while observing grapheme cluster
+		boundaries.</span>
+
+</span></div><div class="anchor value-res" id="name-Step">	<input type='checkbox' class="fold" id="Step-fold-content"><label for="Step-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-90">Step</a>(b []<a href="../../builtin.html#name-byte">byte</a>, state <a href="../../builtin.html#name-int">int</a>) (cluster, rest []<a href="../../builtin.html#name-byte">byte</a>, boundaries <a href="../../builtin.html#name-int">int</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='Step-fold-content-docs' class="fold-docs">
+<span class="md-text">		Step returns the first grapheme cluster (user-perceived character) found in
+		the given byte slice. It also returns information about the boundary between
+		that grapheme cluster and the one following it as well as the monospace width
+		of the grapheme cluster. There are three types of boundary information: word
+		boundaries, sentence boundaries, and line breaks. This function is therefore
+		a combination of [FirstGraphemeCluster], [FirstWord], [FirstSentence], and
+		[FirstLineSegment].
+		
+		The "boundaries" return value can be evaluated as follows:
+		
+		  - boundaries&amp;MaskWord != 0: The boundary is a word boundary.
+		  - boundaries&amp;MaskWord == 0: The boundary is not a word boundary.
+		  - boundaries&amp;MaskSentence != 0: The boundary is a sentence boundary.
+		  - boundaries&amp;MaskSentence == 0: The boundary is not a sentence boundary.
+		  - boundaries&amp;MaskLine == LineDontBreak: You must not break the line at the
+		    boundary.
+		  - boundaries&amp;MaskLine == LineMustBreak: You must break the line at the
+		    boundary.
+		  - boundaries&amp;MaskLine == LineCanBreak: You may or may not break the line at
+		    the boundary.
+		  - boundaries &gt;&gt; ShiftWidth: The width of the grapheme cluster for most
+		    monospace fonts where a value of 1 represents one character cell.
+		
+		This function can be called continuously to extract all grapheme clusters
+		from a byte slice, as illustrated in the examples below.
+		
+		If you don't know which state to pass, for example when calling the function
+		for the first time, you must pass -1. For consecutive calls, pass the state
+		and rest slice returned by the previous call.
+		
+		The "rest" slice is the sub-slice of the original byte slice "b" starting
+		after the last byte of the identified grapheme cluster. If the length of the
+		"rest" slice is 0, the entire byte slice "b" has been processed. The
+		"cluster" byte slice is the sub-slice of the input slice containing the
+		first identified grapheme cluster.
+		
+		Given an empty byte slice "b", the function returns nil values.
+		
+		While slightly less convenient than using the Graphemes class, this function
+		has much better performance and makes no allocations. It lends itself well to
+		large byte slices.
+		
+		Note that in accordance with UAX #14 LB3, the final segment will end with
+		a mandatory line break (boundaries&amp;MaskLine == LineMustBreak). You can choose
+		to ignore this by checking if the length of the "rest" slice is 0 and calling
+		[HasTrailingLineBreak] or [HasTrailingLineBreakInString] on the last rune.</span>
+
+</span></div><div class="anchor value-res" id="name-StepString">	<input type='checkbox' class="fold" id="StepString-fold-content"><label for="StepString-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-171">StepString</a>(str <a href="../../builtin.html#name-string">string</a>, state <a href="../../builtin.html#name-int">int</a>) (cluster, rest <a href="../../builtin.html#name-string">string</a>, boundaries <a href="../../builtin.html#name-int">int</a>, newState <a href="../../builtin.html#name-int">int</a>)</label><span id='StepString-fold-content-docs' class="fold-docs">
+<span class="md-text">		StepString is like [Step] but its input and outputs are strings.</span>
+
+</span></div><div class="anchor value-res" id="name-StringWidth">	<input type='checkbox' class="fold" id="StringWidth-fold-content"><label for="StringWidth-fold-content"> func <a href="../../../src/github.com/rivo/uniseg/width.go.html#line-46">StringWidth</a>(s <a href="../../builtin.html#name-string">string</a>) (width <a href="../../builtin.html#name-int">int</a>)</label><span id='StringWidth-fold-content-docs' class="fold-docs">
+<span class="md-text">		StringWidth returns the monospace width for the given string, that is, the
+		number of same-size cells to be occupied by the string.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 7)</i></span></span>
+
+<div class="anchor value-res" id="name-LineCanBreak">	<input type='checkbox' class="fold" id="LineCanBreak-fold-content"><label for="LineCanBreak-fold-content">const <a href="../../../src/github.com/rivo/uniseg/linerules.go.html#line-63">LineCanBreak</a> = 1 // <span class="md-text">You may or may not break the line here.</span></label><span id='LineCanBreak-fold-content-docs' class="fold-docs">
+<span class="md-text">		These constants define whether a given text may be broken into the next line.
+		If the break is optional (LineCanBreak), you may choose to break or not based
+		on your own criteria, for example, if the text has reached the available
+		width.</span>
+
+</span></div><div class="anchor value-res" id="name-LineDontBreak">	<input type='checkbox' class="fold" id="LineDontBreak-fold-content"><label for="LineDontBreak-fold-content">const <a href="../../../src/github.com/rivo/uniseg/linerules.go.html#line-62">LineDontBreak</a> = 0 // <span class="md-text">You may not break the line here.</span></label><span id='LineDontBreak-fold-content-docs' class="fold-docs">
+<span class="md-text">		These constants define whether a given text may be broken into the next line.
+		If the break is optional (LineCanBreak), you may choose to break or not based
+		on your own criteria, for example, if the text has reached the available
+		width.</span>
+
+</span></div><div class="anchor value-res" id="name-LineMustBreak">	<input type='checkbox' class="fold" id="LineMustBreak-fold-content"><label for="LineMustBreak-fold-content">const <a href="../../../src/github.com/rivo/uniseg/linerules.go.html#line-64">LineMustBreak</a> = 2 // <span class="md-text">You must break the line here.</span></label><span id='LineMustBreak-fold-content-docs' class="fold-docs">
+<span class="md-text">		These constants define whether a given text may be broken into the next line.
+		If the break is optional (LineCanBreak), you may choose to break or not based
+		on your own criteria, for example, if the text has reached the available
+		width.</span>
+
+</span></div><div class="anchor value-res" id="name-MaskLine">	<input type='checkbox' class="fold" id="MaskLine-fold-content"><label for="MaskLine-fold-content">const <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-7">MaskLine</a> = 3</label><span id='MaskLine-fold-content-docs' class="fold-docs">
+<span class="md-text">		The bit masks used to extract boundary information returned by [Step].</span>
+
+</span></div><div class="anchor value-res" id="name-MaskSentence">	<input type='checkbox' class="fold" id="MaskSentence-fold-content"><label for="MaskSentence-fold-content">const <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-9">MaskSentence</a> = 8</label><span id='MaskSentence-fold-content-docs' class="fold-docs">
+<span class="md-text">		The bit masks used to extract boundary information returned by [Step].</span>
+
+</span></div><div class="anchor value-res" id="name-MaskWord">	<input type='checkbox' class="fold" id="MaskWord-fold-content"><label for="MaskWord-fold-content">const <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-8">MaskWord</a> = 4</label><span id='MaskWord-fold-content-docs' class="fold-docs">
+<span class="md-text">		The bit masks used to extract boundary information returned by [Step].</span>
+
+</span></div><div class="anchor value-res" id="name-ShiftWidth">	<input type='checkbox' class="fold" id="ShiftWidth-fold-content"><label for="ShiftWidth-fold-content">const <a href="../../../src/github.com/rivo/uniseg/step.go.html#line-14">ShiftWidth</a> = 4</label><span id='ShiftWidth-fold-content-docs' class="fold-docs">
+<span class="md-text">		The number of bits to shift the boundary information returned by [Step] to
+		obtain the monospace width of the grapheme cluster.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: backend.go in package github.com/jackc/pgx/v5/pgproto3</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	backend.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jackc/pgx/v5/pgproto3.html">github.com/jackc/pgx/v5/pgproto3</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> pgproto3</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"fmt"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"io"</span></label></code></span>
+<span class="codeline" id="line-8"><code>)</code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Backend acts as a server for the PostgreSQL wire protocol version 3.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jackc/pgx/v5/pgproto3.html#name-Backend" class="ident">Backend</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-12"><code>	cr *<a href="chunkreader.go.html#line-14" class="ident">chunkReader</a></code></span>
+<span class="codeline" id="line-13"><code>	w  <a href="../../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../../io/io.go.html#line-96" class="ident">Writer</a></code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code>	<span class="comment">// tracer is used to trace messages when Send or Receive is called. This means an outbound message is traced</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">	// before it is actually transmitted (i.e. before Flush).</span></code></span>
+<span class="codeline" id="line-17"><code>	tracer *<a href="trace.go.html#line-14" class="ident">tracer</a></code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>	wbuf []<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code>	<span class="comment">// Frontend message flyweights</span></code></span>
+<span class="codeline" id="line-22"><code>	bind           <a href="bind.go.html#line-13" class="ident">Bind</a></code></span>
+<span class="codeline" id="line-23"><code>	cancelRequest  <a href="cancel_request.go.html#line-13" class="ident">CancelRequest</a></code></span>
+<span class="codeline" id="line-24"><code>	_close         <a href="close.go.html#line-11" class="ident">Close</a></code></span>
+<span class="codeline" id="line-25"><code>	copyFail       <a href="copy_fail.go.html#line-10" class="ident">CopyFail</a></code></span>
+<span class="codeline" id="line-26"><code>	copyData       <a href="copy_data.go.html#line-10" class="ident">CopyData</a></code></span>
+<span class="codeline" id="line-27"><code>	copyDone       <a href="copy_done.go.html#line-7" class="ident">CopyDone</a></code></span>
+<span class="codeline" id="line-28"><code>	describe       <a href="describe.go.html#line-11" class="ident">Describe</a></code></span>
+<span class="codeline" id="line-29"><code>	execute        <a href="execute.go.html#line-11" class="ident">Execute</a></code></span>
+<span class="codeline" id="line-30"><code>	flush          <a href="flush.go.html#line-7" class="ident">Flush</a></code></span>
+<span class="codeline" id="line-31"><code>	functionCall   <a href="function_call.go.html#line-9" class="ident">FunctionCall</a></code></span>
+<span class="codeline" id="line-32"><code>	gssEncRequest  <a href="gss_enc_request.go.html#line-13" class="ident">GSSEncRequest</a></code></span>
+<span class="codeline" id="line-33"><code>	parse          <a href="parse.go.html#line-11" class="ident">Parse</a></code></span>
+<span class="codeline" id="line-34"><code>	query          <a href="query.go.html#line-10" class="ident">Query</a></code></span>
+<span class="codeline" id="line-35"><code>	sslRequest     <a href="ssl_request.go.html#line-13" class="ident">SSLRequest</a></code></span>
+<span class="codeline" id="line-36"><code>	startupMessage <a href="startup_message.go.html#line-15" class="ident">StartupMessage</a></code></span>
+<span class="codeline" id="line-37"><code>	sync           <a href="sync.go.html#line-7" class="ident">Sync</a></code></span>
+<span class="codeline" id="line-38"><code>	terminate      <a href="terminate.go.html#line-7" class="ident">Terminate</a></code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>	bodyLen    <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-41"><code>	msgType    <a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-42"><code>	partialMsg <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-43"><code>	authType   <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-44"><code>}</code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-47"><code>	minStartupPacketLen = <span class="lit-number">4</span>     <span class="comment">// minStartupPacketLen is a single 32-bit int version or code.</span></code></span>
+<span class="codeline" id="line-48"><code>	maxStartupPacketLen = <span class="lit-number">10000</span> <span class="comment">// maxStartupPacketLen is MAX_STARTUP_PACKET_LENGTH from PG source.</span></code></span>
+<span class="codeline" id="line-49"><code>)</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// NewBackend creates a new Backend.</span></code></span>
+<span class="codeline" id="line-52"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/jackc/pgx/v5/pgproto3.html#name-NewBackend" class="ident">NewBackend</a></label>(<label for="r1" class="ident">r</label> <a href="../../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../../io/io.go.html#line-83" class="ident">Reader</a>, <label for="r2" class="ident">w</label> <a href="../../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../../io/io.go.html#line-96" class="ident">Writer</a>) *<a href="#line-11" class="ident">Backend</a> {</code></span>
+<span class="codeline" id="line-53"><code>	<label for="r3" class="ident">cr</label> := <a href="chunkreader.go.html#line-25" class="ident">newChunkReader</a>(<label for="r1" class="ident">r</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">return</span> &amp;<a href="#line-11" class="ident">Backend</a>{<a href="#line-12" class="ident">cr</a>: <label for="r3" class="ident">cr</label>, <a href="#line-13" class="ident">w</a>: <label for="r2" class="ident">w</label>}</code></span>
+<span class="codeline" id="line-55"><code>}</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// Send sends a message to the frontend (i.e. the client). The message is not guaranteed to be written until Flush is</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">// called.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="keyword">func</span> (<label for="r4" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r5" class="ident">Send</label>(<label for="r6" class="ident">msg</label> <a href="pgproto3.go.html#line-27" class="ident">BackendMessage</a>) {</code></span>
+<span class="codeline" id="line-60"><code>	<label for="r7" class="ident">prevLen</label> := <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>)</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r4" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a> = <label for="r6" class="ident">msg</label>.<a href="pgproto3.go.html#line-17" class="ident">Encode</a>(<label for="r4" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>)</code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">if</span> <label for="r4" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-63"><code>		<label for="r4" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a>.<a href="trace.go.html#line-29" class="ident">traceMessage</a>(<span class="lit-number">'B'</span>, <a href="../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>)-<label for="r7" class="ident">prevLen</label>), <label for="r6" class="ident">msg</label>)</code></span>
+<span class="codeline" id="line-64"><code>	}</code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// Flush writes any pending messages to the frontend (i.e. the client).</span></code></span>
+<span class="codeline" id="line-68"><code><span class="keyword">func</span> (<label for="r8" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r9" class="ident">Flush</label>() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label> := <label for="r8" class="ident">b</label>.<a href="#line-13" class="ident">w</a>.<a href="../../../../../io/io.go.html#line-97" class="ident">Write</a>(<label for="r8" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>)</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">const</span> <label for="r12" class="ident">maxLen</label> = <span class="lit-number">1024</span></code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r8" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>) &gt; <label for="r12" class="ident">maxLen</label> {</code></span>
+<span class="codeline" id="line-73"><code>		<label for="r8" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a> = <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <label for="r12" class="ident">maxLen</label>)</code></span>
+<span class="codeline" id="line-74"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-75"><code>		<label for="r8" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a> = <label for="r8" class="ident">b</label>.<a href="#line-19" class="ident">wbuf</a>[:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-76"><code>	}</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code>	<span class="keyword">if</span> <label for="r11" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-79"><code>		<span class="keyword">return</span> &amp;<a href="pgproto3.go.html#line-56" class="ident">writeError</a>{<a href="pgproto3.go.html#line-57" class="ident">err</a>: <label for="r11" class="ident">err</label>, <a href="pgproto3.go.html#line-58" class="ident">safeToRetry</a>: <label for="r10" class="ident">n</label> == <span class="lit-number">0</span>}</code></span>
+<span class="codeline" id="line-80"><code>	}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-83"><code>}</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">// Trace starts tracing the message traffic to w. It writes in a similar format to that produced by the libpq function</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// PQtrace.</span></code></span>
+<span class="codeline" id="line-87"><code><span class="keyword">func</span> (<label for="r13" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r14" class="ident">Trace</label>(<label for="r15" class="ident">w</label> <a href="../../../../../../pkg/io.html" class="ident i3">io</a>.<a href="../../../../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r16" class="ident">options</label> <a href="trace.go.html#line-21" class="ident">TracerOptions</a>) {</code></span>
+<span class="codeline" id="line-88"><code>	<label for="r13" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a> = &amp;<a href="trace.go.html#line-14" class="ident">tracer</a>{</code></span>
+<span class="codeline" id="line-89"><code>		<a href="trace.go.html#line-15" class="ident">w</a>:             <label for="r15" class="ident">w</label>,</code></span>
+<span class="codeline" id="line-90"><code>		<a href="trace.go.html#line-16" class="ident">buf</a>:           &amp;<a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/buffer.go.html#line-20" class="ident">Buffer</a>{},</code></span>
+<span class="codeline" id="line-91"><code>		<a href="trace.go.html#line-17" class="ident">TracerOptions</a>: <label for="r16" class="ident">options</label>,</code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code>}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// Untrace stops tracing.</span></code></span>
+<span class="codeline" id="line-96"><code><span class="keyword">func</span> (<label for="r17" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r18" class="ident">Untrace</label>() {</code></span>
+<span class="codeline" id="line-97"><code>	<label for="r17" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a> = <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// ReceiveStartupMessage receives the initial connection message. This method is used of the normal Receive method</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// because the initial connection message is "special" and does not include the message type as the first byte. This</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">// will return either a StartupMessage, SSLRequest, GSSEncRequest, or CancelRequest.</span></code></span>
+<span class="codeline" id="line-103"><code><span class="keyword">func</span> (<label for="r19" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r20" class="ident">ReceiveStartupMessage</label>() (<a href="pgproto3.go.html#line-21" class="ident">FrontendMessage</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-104"><code>	<label for="r21" class="ident">buf</label>, <label for="r22" class="ident">err</label> := <label for="r19" class="ident">b</label>.<a href="#line-12" class="ident">cr</a>.<a href="chunkreader.go.html#line-45" class="ident">Next</a>(<span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-106"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-107"><code>	}</code></span>
+<span class="codeline" id="line-108"><code>	<label for="r23" class="ident">msgSize</label> := <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="../../../../../../pkg/encoding/binary.html" class="ident i1">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../../../encoding/binary/binary.go.html#line-156" class="ident">Uint32</a>(<label for="r21" class="ident">buf</label>) - <span class="lit-number">4</span>)</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">if</span> <label for="r23" class="ident">msgSize</label> &lt; <a href="#line-47" class="ident">minStartupPacketLen</a> || <label for="r23" class="ident">msgSize</label> &gt; <a href="#line-48" class="ident">maxStartupPacketLen</a> {</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"invalid length of startup packet: %d"</span>, <label for="r23" class="ident">msgSize</label>)</code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code>	<label for="r21" class="ident">buf</label>, <label for="r22" class="ident">err</label> = <label for="r19" class="ident">b</label>.<a href="#line-12" class="ident">cr</a>.<a href="chunkreader.go.html#line-45" class="ident">Next</a>(<label for="r23" class="ident">msgSize</label>)</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-116"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="frontend.go.html#line-210" class="ident">translateEOFtoErrUnexpectedEOF</a>(<label for="r22" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-117"><code>	}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code>	<label for="r24" class="ident">code</label> := <a href="../../../../../../pkg/encoding/binary.html" class="ident i1">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../../../encoding/binary/binary.go.html#line-156" class="ident">Uint32</a>(<label for="r21" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">switch</span> <label for="r24" class="ident">code</label> {</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">case</span> <a href="startup_message.go.html#line-13" class="ident">ProtocolVersionNumber</a>:</code></span>
+<span class="codeline" id="line-123"><code>		<label for="r22" class="ident">err</label> = <label for="r19" class="ident">b</label>.<a href="#line-36" class="ident">startupMessage</a>.<a href="startup_message.go.html#line-25" class="ident">Decode</a>(<label for="r21" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-124"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-125"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-126"><code>		}</code></span>
+<span class="codeline" id="line-127"><code>		<span class="keyword">return</span> &amp;<label for="r19" class="ident">b</label>.<a href="#line-36" class="ident">startupMessage</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">case</span> <a href="ssl_request.go.html#line-11" class="ident">sslRequestNumber</a>:</code></span>
+<span class="codeline" id="line-129"><code>		<label for="r22" class="ident">err</label> = <label for="r19" class="ident">b</label>.<a href="#line-35" class="ident">sslRequest</a>.<a href="ssl_request.go.html#line-19" class="ident">Decode</a>(<label for="r21" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-130"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-131"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-132"><code>		}</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> &amp;<label for="r19" class="ident">b</label>.<a href="#line-35" class="ident">sslRequest</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">case</span> <a href="cancel_request.go.html#line-11" class="ident">cancelRequestCode</a>:</code></span>
+<span class="codeline" id="line-135"><code>		<label for="r22" class="ident">err</label> = <label for="r19" class="ident">b</label>.<a href="#line-23" class="ident">cancelRequest</a>.<a href="cancel_request.go.html#line-21" class="ident">Decode</a>(<label for="r21" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-136"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-137"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-138"><code>		}</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> &amp;<label for="r19" class="ident">b</label>.<a href="#line-23" class="ident">cancelRequest</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">case</span> <a href="gss_enc_request.go.html#line-11" class="ident">gssEncReqNumber</a>:</code></span>
+<span class="codeline" id="line-141"><code>		<label for="r22" class="ident">err</label> = <label for="r19" class="ident">b</label>.<a href="#line-32" class="ident">gssEncRequest</a>.<a href="gss_enc_request.go.html#line-19" class="ident">Decode</a>(<label for="r21" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-142"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-143"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-144"><code>		}</code></span>
+<span class="codeline" id="line-145"><code>		<span class="keyword">return</span> &amp;<label for="r19" class="ident">b</label>.<a href="#line-32" class="ident">gssEncRequest</a>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"unknown startup message code: %d"</span>, <label for="r24" class="ident">code</label>)</code></span>
+<span class="codeline" id="line-148"><code>	}</code></span>
+<span class="codeline" id="line-149"><code>}</code></span>
+<span class="codeline" id="line-150"><code></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">// Receive receives a message from the frontend. The returned message is only valid until the next call to Receive.</span></code></span>
+<span class="codeline" id="line-152"><code><span class="keyword">func</span> (<label for="r25" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r26" class="ident">Receive</label>() (<a href="pgproto3.go.html#line-21" class="ident">FrontendMessage</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-153"><code>	<span class="keyword">if</span> !<label for="r25" class="ident">b</label>.<a href="#line-42" class="ident">partialMsg</a> {</code></span>
+<span class="codeline" id="line-154"><code>		<label for="r27" class="ident">header</label>, <label for="r28" class="ident">err</label> := <label for="r25" class="ident">b</label>.<a href="#line-12" class="ident">cr</a>.<a href="chunkreader.go.html#line-45" class="ident">Next</a>(<span class="lit-number">5</span>)</code></span>
+<span class="codeline" id="line-155"><code>		<span class="keyword">if</span> <label for="r28" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-156"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="frontend.go.html#line-210" class="ident">translateEOFtoErrUnexpectedEOF</a>(<label for="r28" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-157"><code>		}</code></span>
+<span class="codeline" id="line-158"><code></code></span>
+<span class="codeline" id="line-159"><code>		<label for="r25" class="ident">b</label>.<a href="#line-41" class="ident">msgType</a> = <label for="r27" class="ident">header</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-160"><code>		<label for="r25" class="ident">b</label>.<a href="#line-40" class="ident">bodyLen</a> = <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="../../../../../../pkg/encoding/binary.html" class="ident i1">binary</a>.<a href="../../../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../../../encoding/binary/binary.go.html#line-156" class="ident">Uint32</a>(<label for="r27" class="ident">header</label>[<span class="lit-number">1</span>:])) - <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-161"><code>		<label for="r25" class="ident">b</label>.<a href="#line-42" class="ident">partialMsg</a> = <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-162"><code>	}</code></span>
+<span class="codeline" id="line-163"><code></code></span>
+<span class="codeline" id="line-164"><code>	<span class="keyword">var</span> <label for="r29" class="ident">msg</label> <a href="pgproto3.go.html#line-21" class="ident">FrontendMessage</a></code></span>
+<span class="codeline" id="line-165"><code>	<span class="keyword">switch</span> <label for="r25" class="ident">b</label>.<a href="#line-41" class="ident">msgType</a> {</code></span>
+<span class="codeline" id="line-166"><code>	<span class="keyword">case</span> <span class="lit-number">'B'</span>:</code></span>
+<span class="codeline" id="line-167"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-22" class="ident">bind</a></code></span>
+<span class="codeline" id="line-168"><code>	<span class="keyword">case</span> <span class="lit-number">'C'</span>:</code></span>
+<span class="codeline" id="line-169"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-24" class="ident">_close</a></code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">case</span> <span class="lit-number">'D'</span>:</code></span>
+<span class="codeline" id="line-171"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-28" class="ident">describe</a></code></span>
+<span class="codeline" id="line-172"><code>	<span class="keyword">case</span> <span class="lit-number">'E'</span>:</code></span>
+<span class="codeline" id="line-173"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-29" class="ident">execute</a></code></span>
+<span class="codeline" id="line-174"><code>	<span class="keyword">case</span> <span class="lit-number">'F'</span>:</code></span>
+<span class="codeline" id="line-175"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-31" class="ident">functionCall</a></code></span>
+<span class="codeline" id="line-176"><code>	<span class="keyword">case</span> <span class="lit-number">'f'</span>:</code></span>
+<span class="codeline" id="line-177"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-25" class="ident">copyFail</a></code></span>
+<span class="codeline" id="line-178"><code>	<span class="keyword">case</span> <span class="lit-number">'d'</span>:</code></span>
+<span class="codeline" id="line-179"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-26" class="ident">copyData</a></code></span>
+<span class="codeline" id="line-180"><code>	<span class="keyword">case</span> <span class="lit-number">'c'</span>:</code></span>
+<span class="codeline" id="line-181"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-27" class="ident">copyDone</a></code></span>
+<span class="codeline" id="line-182"><code>	<span class="keyword">case</span> <span class="lit-number">'H'</span>:</code></span>
+<span class="codeline" id="line-183"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-30" class="ident">flush</a></code></span>
+<span class="codeline" id="line-184"><code>	<span class="keyword">case</span> <span class="lit-number">'P'</span>:</code></span>
+<span class="codeline" id="line-185"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-33" class="ident">parse</a></code></span>
+<span class="codeline" id="line-186"><code>	<span class="keyword">case</span> <span class="lit-number">'p'</span>:</code></span>
+<span class="codeline" id="line-187"><code>		<span class="keyword">switch</span> <label for="r25" class="ident">b</label>.<a href="#line-43" class="ident">authType</a> {</code></span>
+<span class="codeline" id="line-188"><code>		<span class="keyword">case</span> <a href="frontend.go.html#line-322" class="ident">AuthTypeSASL</a>:</code></span>
+<span class="codeline" id="line-189"><code>			<label for="r29" class="ident">msg</label> = &amp;<a href="sasl_initial_response.go.html#line-12" class="ident">SASLInitialResponse</a>{}</code></span>
+<span class="codeline" id="line-190"><code>		<span class="keyword">case</span> <a href="frontend.go.html#line-323" class="ident">AuthTypeSASLContinue</a>:</code></span>
+<span class="codeline" id="line-191"><code>			<label for="r29" class="ident">msg</label> = &amp;<a href="sasl_response.go.html#line-10" class="ident">SASLResponse</a>{}</code></span>
+<span class="codeline" id="line-192"><code>		<span class="keyword">case</span> <a href="frontend.go.html#line-324" class="ident">AuthTypeSASLFinal</a>:</code></span>
+<span class="codeline" id="line-193"><code>			<label for="r29" class="ident">msg</label> = &amp;<a href="sasl_response.go.html#line-10" class="ident">SASLResponse</a>{}</code></span>
+<span class="codeline" id="line-194"><code>		<span class="keyword">case</span> <a href="frontend.go.html#line-319" class="ident">AuthTypeGSS</a>, <a href="frontend.go.html#line-320" class="ident">AuthTypeGSSCont</a>:</code></span>
+<span class="codeline" id="line-195"><code>			<label for="r29" class="ident">msg</label> = &amp;<a href="gss_response.go.html#line-9" class="ident">GSSResponse</a>{}</code></span>
+<span class="codeline" id="line-196"><code>		<span class="keyword">case</span> <a href="frontend.go.html#line-316" class="ident">AuthTypeCleartextPassword</a>, <a href="frontend.go.html#line-317" class="ident">AuthTypeMD5Password</a>:</code></span>
+<span class="codeline" id="line-197"><code>			<span class="keyword">fallthrough</span></code></span>
+<span class="codeline" id="line-198"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-199"><code>			<span class="comment">// to maintain backwards compatability</span></code></span>
+<span class="codeline" id="line-200"><code>			<label for="r29" class="ident">msg</label> = &amp;<a href="password_message.go.html#line-10" class="ident">PasswordMessage</a>{}</code></span>
+<span class="codeline" id="line-201"><code>		}</code></span>
+<span class="codeline" id="line-202"><code>	<span class="keyword">case</span> <span class="lit-number">'Q'</span>:</code></span>
+<span class="codeline" id="line-203"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-34" class="ident">query</a></code></span>
+<span class="codeline" id="line-204"><code>	<span class="keyword">case</span> <span class="lit-number">'S'</span>:</code></span>
+<span class="codeline" id="line-205"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-37" class="ident">sync</a></code></span>
+<span class="codeline" id="line-206"><code>	<span class="keyword">case</span> <span class="lit-number">'X'</span>:</code></span>
+<span class="codeline" id="line-207"><code>		<label for="r29" class="ident">msg</label> = &amp;<label for="r25" class="ident">b</label>.<a href="#line-38" class="ident">terminate</a></code></span>
+<span class="codeline" id="line-208"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-209"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"unknown message type: %c"</span>, <label for="r25" class="ident">b</label>.<a href="#line-41" class="ident">msgType</a>)</code></span>
+<span class="codeline" id="line-210"><code>	}</code></span>
+<span class="codeline" id="line-211"><code></code></span>
+<span class="codeline" id="line-212"><code>	<label for="r30" class="ident">msgBody</label>, <label for="r31" class="ident">err</label> := <label for="r25" class="ident">b</label>.<a href="#line-12" class="ident">cr</a>.<a href="chunkreader.go.html#line-45" class="ident">Next</a>(<label for="r25" class="ident">b</label>.<a href="#line-40" class="ident">bodyLen</a>)</code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">if</span> <label for="r31" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-214"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="frontend.go.html#line-210" class="ident">translateEOFtoErrUnexpectedEOF</a>(<label for="r31" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-215"><code>	}</code></span>
+<span class="codeline" id="line-216"><code></code></span>
+<span class="codeline" id="line-217"><code>	<label for="r25" class="ident">b</label>.<a href="#line-42" class="ident">partialMsg</a> = <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-218"><code></code></span>
+<span class="codeline" id="line-219"><code>	<label for="r31" class="ident">err</label> = <label for="r29" class="ident">msg</label>.<a href="pgproto3.go.html#line-14" class="ident">Decode</a>(<label for="r30" class="ident">msgBody</label>)</code></span>
+<span class="codeline" id="line-220"><code>	<span class="keyword">if</span> <label for="r31" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-221"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r31" class="ident">err</label></code></span>
+<span class="codeline" id="line-222"><code>	}</code></span>
+<span class="codeline" id="line-223"><code></code></span>
+<span class="codeline" id="line-224"><code>	<span class="keyword">if</span> <label for="r25" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-225"><code>		<label for="r25" class="ident">b</label>.<a href="#line-17" class="ident">tracer</a>.<a href="trace.go.html#line-29" class="ident">traceMessage</a>(<span class="lit-number">'F'</span>, <a href="../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a>(<span class="lit-number">5</span>+<a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r30" class="ident">msgBody</label>)), <label for="r29" class="ident">msg</label>)</code></span>
+<span class="codeline" id="line-226"><code>	}</code></span>
+<span class="codeline" id="line-227"><code></code></span>
+<span class="codeline" id="line-228"><code>	<span class="keyword">return</span> <label for="r29" class="ident">msg</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-229"><code>}</code></span>
+<span class="codeline" id="line-230"><code></code></span>
+<span class="codeline" id="line-231"><code><span class="comment">// SetAuthType sets the authentication type in the backend.</span></code></span>
+<span class="codeline" id="line-232"><code><span class="comment">// Since multiple message types can start with 'p', SetAuthType allows</span></code></span>
+<span class="codeline" id="line-233"><code><span class="comment">// contextual identification of FrontendMessages. For example, in the</span></code></span>
+<span class="codeline" id="line-234"><code><span class="comment">// PG message flow documentation for PasswordMessage:</span></code></span>
+<span class="codeline" id="line-235"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-236"><code><span class="comment">// 		Byte1('p')</span></code></span>
+<span class="codeline" id="line-237"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">//      Identifies the message as a password response. Note that this is also used for</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">//		GSSAPI, SSPI and SASL response messages. The exact message type can be deduced from</span></code></span>
+<span class="codeline" id="line-240"><code><span class="comment">//		the context.</span></code></span>
+<span class="codeline" id="line-241"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-242"><code><span class="comment">// Since the Frontend does not know about the state of a backend, it is important</span></code></span>
+<span class="codeline" id="line-243"><code><span class="comment">// to call SetAuthType() after an authentication request is received by the Frontend.</span></code></span>
+<span class="codeline" id="line-244"><code><span class="keyword">func</span> (<label for="r32" class="ident">b</label> *<a href="#line-11" class="ident">Backend</a>) <label for="r33" class="ident">SetAuthType</label>(<label for="r34" class="ident">authType</label> <a href="../../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-245"><code>	<span class="keyword">switch</span> <label for="r34" class="ident">authType</label> {</code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">case</span> <a href="frontend.go.html#line-315" class="ident">AuthTypeOk</a>,</code></span>
+<span class="codeline" id="line-247"><code>		<a href="frontend.go.html#line-316" class="ident">AuthTypeCleartextPassword</a>,</code></span>
+<span class="codeline" id="line-248"><code>		<a href="frontend.go.html#line-317" class="ident">AuthTypeMD5Password</a>,</code></span>
+<span class="codeline" id="line-249"><code>		<a href="frontend.go.html#line-318" class="ident">AuthTypeSCMCreds</a>,</code></span>
+<span class="codeline" id="line-250"><code>		<a href="frontend.go.html#line-319" class="ident">AuthTypeGSS</a>,</code></span>
+<span class="codeline" id="line-251"><code>		<a href="frontend.go.html#line-320" class="ident">AuthTypeGSSCont</a>,</code></span>
+<span class="codeline" id="line-252"><code>		<a href="frontend.go.html#line-321" class="ident">AuthTypeSSPI</a>,</code></span>
+<span class="codeline" id="line-253"><code>		<a href="frontend.go.html#line-322" class="ident">AuthTypeSASL</a>,</code></span>
+<span class="codeline" id="line-254"><code>		<a href="frontend.go.html#line-323" class="ident">AuthTypeSASLContinue</a>,</code></span>
+<span class="codeline" id="line-255"><code>		<a href="frontend.go.html#line-324" class="ident">AuthTypeSASLFinal</a>:</code></span>
+<span class="codeline" id="line-256"><code>		<label for="r32" class="ident">b</label>.<a href="#line-43" class="ident">authType</a> = <label for="r34" class="ident">authType</label></code></span>
+<span class="codeline" id="line-257"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-258"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"authType not recognized: %d"</span>, <label for="r34" class="ident">authType</label>)</code></span>
+<span class="codeline" id="line-259"><code>	}</code></span>
+<span class="codeline" id="line-260"><code></code></span>
+<span class="codeline" id="line-261"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-262"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

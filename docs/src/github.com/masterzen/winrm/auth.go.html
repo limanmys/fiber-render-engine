@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: auth.go in package github.com/masterzen/winrm</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	auth.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/masterzen/winrm.html">github.com/masterzen/winrm</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> winrm</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"crypto/tls"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"io/ioutil"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"net"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"net/http"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i5"><span class="lit-string i5">"strings"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i6"><span class="lit-string i6">"time"</span></label></code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i7"><span class="lit-string i7">"github.com/masterzen/winrm/soap"</span></label></code></span>
+<span class="codeline" id="line-13"><code>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">//ClientAuthRequest ClientAuthRequest</span></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/masterzen/winrm.html#name-ClientAuthRequest" class="ident">ClientAuthRequest</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-17"><code>	transport <a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/client.go.html#line-116" class="ident">RoundTripper</a></code></span>
+<span class="codeline" id="line-18"><code>	dial      <span class="keyword">func</span>(network, addr <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="../../../../pkg/net.html" class="ident i3">net</a>.<a href="../../../net/net.go.html#line-113" class="ident">Conn</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-19"><code>}</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">//Transport Transport</span></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="#line-16" class="ident">ClientAuthRequest</a>) <label for="r1" class="ident">Transport</label>(<label for="r2" class="ident">endpoint</label> *<a href="endpoint.go.html#line-10" class="ident">Endpoint</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-23"><code>	<label for="r3" class="ident">cert</label>, <label for="r4" class="ident">err</label> := <a href="../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../crypto/tls/tls.go.html#line-245" class="ident">X509KeyPair</a>(<label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-26" class="ident">Cert</a>, <label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-25" class="ident">Key</a>)</code></span>
+<span class="codeline" id="line-24"><code>	<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-25"><code>		<span class="keyword">return</span> <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-26"><code>	}</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<label for="r5" class="ident">dial</label> := (&amp;<a href="../../../../pkg/net.html" class="ident i3">net</a>.<a href="../../../net/dial.go.html#line-27" class="ident">Dialer</a>{</code></span>
+<span class="codeline" id="line-29"><code>		<a href="../../../net/dial.go.html#line-40" class="ident">Timeout</a>:   <span class="lit-number">30</span> * <a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/time.go.html#line-614" class="ident">Second</a>,</code></span>
+<span class="codeline" id="line-30"><code>		<a href="../../../net/dial.go.html#line-80" class="ident">KeepAlive</a>: <span class="lit-number">30</span> * <a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/time.go.html#line-614" class="ident">Second</a>,</code></span>
+<span class="codeline" id="line-31"><code>	}).<a href="../../../net/dial.go.html#line-354" class="ident">Dial</a></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>	<span class="keyword">if</span> <label for="r0" class="ident">c</label>.<a href="#line-18" class="ident">dial</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-34"><code>		<label for="r5" class="ident">dial</label> = <label for="r0" class="ident">c</label>.<a href="#line-18" class="ident">dial</a></code></span>
+<span class="codeline" id="line-35"><code>	}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">//nolint:gosec</span></code></span>
+<span class="codeline" id="line-38"><code>	<label for="r6" class="ident">transport</label> := &amp;<a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/transport.go.html#line-95" class="ident">Transport</a>{</code></span>
+<span class="codeline" id="line-39"><code>		<a href="../../../net/http/transport.go.html#line-121" class="ident">Proxy</a>: <a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/transport.go.html#line-439" class="ident">ProxyFromEnvironment</a>,</code></span>
+<span class="codeline" id="line-40"><code>		<a href="../../../net/http/transport.go.html#line-169" class="ident">TLSClientConfig</a>: &amp;<a href="../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../crypto/tls/common.go.html#line-517" class="ident">Config</a>{</code></span>
+<span class="codeline" id="line-41"><code>			<a href="../../../crypto/tls/common.go.html#line-716" class="ident">Renegotiation</a>:      <a href="../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../crypto/tls/common.go.html#line-506" class="ident">RenegotiateOnceAsClient</a>,</code></span>
+<span class="codeline" id="line-42"><code>			<a href="../../../crypto/tls/common.go.html#line-646" class="ident">InsecureSkipVerify</a>: <label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-20" class="ident">Insecure</a>,</code></span>
+<span class="codeline" id="line-43"><code>			<a href="../../../crypto/tls/common.go.html#line-539" class="ident">Certificates</a>:       []<a href="../../../../pkg/crypto/tls.html" class="ident i0">tls</a>.<a href="../../../crypto/tls/common.go.html#line-1355" class="ident">Certificate</a>{<label for="r3" class="ident">cert</label>},</code></span>
+<span class="codeline" id="line-44"><code>		},</code></span>
+<span class="codeline" id="line-45"><code>		<a href="../../../net/http/transport.go.html#line-143" class="ident">Dial</a>:                  <label for="r5" class="ident">dial</label>,</code></span>
+<span class="codeline" id="line-46"><code>		<a href="../../../net/http/transport.go.html#line-218" class="ident">ResponseHeaderTimeout</a>: <label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-29" class="ident">Timeout</a>,</code></span>
+<span class="codeline" id="line-47"><code>	}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">if</span> <label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-24" class="ident">CACert</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-24" class="ident">CACert</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-50"><code>		<label for="r7" class="ident">certPool</label>, <label for="r8" class="ident">err</label> := <a href="client.go.html#line-67" class="ident">readCACerts</a>(<label for="r2" class="ident">endpoint</label>.<a href="endpoint.go.html#line-24" class="ident">CACert</a>)</code></span>
+<span class="codeline" id="line-51"><code>		<span class="keyword">if</span> <label for="r8" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-52"><code>			<span class="keyword">return</span> <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-53"><code>		}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code>		<label for="r6" class="ident">transport</label>.<a href="../../../net/http/transport.go.html#line-169" class="ident">TLSClientConfig</a>.<a href="../../../crypto/tls/common.go.html#line-615" class="ident">RootCAs</a> = <label for="r7" class="ident">certPool</label></code></span>
+<span class="codeline" id="line-56"><code>	}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code>	<label for="r0" class="ident">c</label>.<a href="#line-17" class="ident">transport</a> = <label for="r6" class="ident">transport</label></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-61"><code>}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// parse func reads the response body and return it as a string</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> parse(<label for="r10" class="ident">response</label> *<a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/response.go.html#line-35" class="ident">Response</a>) (<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// if we received the content we expected</span></code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">if</span> <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-61" class="ident">Contains</a>(<label for="r10" class="ident">response</label>.<a href="../../../net/http/response.go.html#line-51" class="ident">Header</a>.<a href="../../../net/http/header.go.html#line-49" class="ident">Get</a>(<span class="lit-string">"Content-Type"</span>), <span class="lit-string">"application/soap+xml"</span>) {</code></span>
+<span class="codeline" id="line-67"><code>		<label for="r11" class="ident">body</label>, <label for="r12" class="ident">err</label> := <a href="../../../../pkg/io/ioutil.html" class="ident i2">ioutil</a>.<a href="../../../io/ioutil/ioutil.go.html#line-26" class="ident">ReadAll</a>(<label for="r10" class="ident">response</label>.<a href="../../../net/http/response.go.html#line-72" class="ident">Body</a>)</code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-69"><code>			<span class="comment">// defer can modify the returned value before</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">			// it is actually passed to the calling statement</span></code></span>
+<span class="codeline" id="line-71"><code>			<span class="keyword">if</span> <label for="r13" class="ident">errClose</label> := <label for="r10" class="ident">response</label>.<a href="../../../net/http/response.go.html#line-72" class="ident">Body</a>.<a href="../../../io/io.go.html#line-105" class="ident">Close</a>(); <label for="r13" class="ident">errClose</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r12" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-72"><code>				<label for="r12" class="ident">err</label> = <label for="r13" class="ident">errClose</label></code></span>
+<span class="codeline" id="line-73"><code>			}</code></span>
+<span class="codeline" id="line-74"><code>		}()</code></span>
+<span class="codeline" id="line-75"><code>		<span class="keyword">if</span> <label for="r12" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-76"><code>			<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error while reading request body %w"</span>, <label for="r12" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-77"><code>		}</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r11" class="ident">body</label>), <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-80"><code>	}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"invalid content type"</span>)</code></span>
+<span class="codeline" id="line-83"><code>}</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">//Post Post</span></code></span>
+<span class="codeline" id="line-86"><code><span class="keyword">func</span> (<label for="r14" class="ident">c</label> <a href="#line-16" class="ident">ClientAuthRequest</a>) <label for="r15" class="ident">Post</label>(<label for="r16" class="ident">client</label> *<a href="client.go.html#line-17" class="ident">Client</a>, <label for="r17" class="ident">request</label> *<a href="../../../../pkg/github.com/masterzen/winrm/soap.html" class="ident i7">soap</a>.<a href="soap/message.go.html#line-7" class="ident">SoapMessage</a>) (<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-87"><code>	<label for="r18" class="ident">httpClient</label> := &amp;<a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/client.go.html#line-57" class="ident">Client</a>{<a href="../../../net/http/client.go.html#line-61" class="ident">Transport</a>: <label for="r14" class="ident">c</label>.<a href="#line-17" class="ident">transport</a>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>	<label for="r19" class="ident">req</label>, <label for="r20" class="ident">err</label> := <a href="../../../../pkg/net/http.html" class="ident i4">http</a>.<a href="../../../net/http/request.go.html#line-835" class="ident">NewRequest</a>(<span class="lit-string">"POST"</span>, <label for="r16" class="ident">client</label>.<a href="client.go.html#line-22" class="ident">url</a>, <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/reader.go.html#line-160" class="ident">NewReader</a>(<label for="r17" class="ident">request</label>.<a href="soap/message.go.html#line-43" class="ident">String</a>()))</code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">if</span> <label for="r20" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"impossible to create http request %w"</span>, <label for="r20" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<label for="r19" class="ident">req</label>.<a href="../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../net/http/header.go.html#line-39" class="ident">Set</a>(<span class="lit-string">"Content-Type"</span>, <a href="http.go.html#line-16" class="ident">soapXML</a>+<span class="lit-string">";charset=UTF-8"</span>)</code></span>
+<span class="codeline" id="line-95"><code>	<label for="r19" class="ident">req</label>.<a href="../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../net/http/header.go.html#line-39" class="ident">Set</a>(<span class="lit-string">"Authorization"</span>, <span class="lit-string">"http://schemas.dmtf.org/wbem/wsman/1/wsman/secprofile/https/mutual"</span>)</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code>	<label for="r21" class="ident">resp</label>, <label for="r20" class="ident">err</label> := <label for="r18" class="ident">httpClient</label>.<a href="../../../net/http/client.go.html#line-580" class="ident">Do</a>(<label for="r19" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">if</span> <label for="r20" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-99"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"unknown error %w"</span>, <label for="r20" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-100"><code>	}</code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>	<label for="r22" class="ident">body</label>, <label for="r20" class="ident">err</label> := <a href="#line-64" class="ident">parse</a>(<label for="r21" class="ident">resp</label>)</code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">if</span> <label for="r20" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"http response error: %d - %w"</span>, <label for="r21" class="ident">resp</label>.<a href="../../../net/http/response.go.html#line-37" class="ident">StatusCode</a>, <label for="r20" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-105"><code>	}</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>	<span class="comment">// if we have different 200 http status code</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">	// we must replace the error</span></code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-110"><code>		<span class="keyword">if</span> <label for="r21" class="ident">resp</label>.<a href="../../../net/http/response.go.html#line-37" class="ident">StatusCode</a> != <span class="lit-number">200</span> {</code></span>
+<span class="codeline" id="line-111"><code>			<label for="r22" class="ident">body</label>, <label for="r20" class="ident">err</label> = <span class="lit-string">""</span>, <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"http error %d: %s"</span>, <label for="r21" class="ident">resp</label>.<a href="../../../net/http/response.go.html#line-37" class="ident">StatusCode</a>, <label for="r22" class="ident">body</label>)</code></span>
+<span class="codeline" id="line-112"><code>		}</code></span>
+<span class="codeline" id="line-113"><code>	}()</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">return</span> <label for="r22" class="ident">body</label>, <label for="r20" class="ident">err</label></code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">//NewClientAuthRequestWithDial NewClientAuthRequestWithDial</span></code></span>
+<span class="codeline" id="line-119"><code><span class="keyword">func</span> <label for="r23" class="ident"><a href="../../../../pkg/github.com/masterzen/winrm.html#name-NewClientAuthRequestWithDial" class="ident">NewClientAuthRequestWithDial</a></label>(<label for="r24" class="ident">dial</label> <span class="keyword">func</span>(<label for="r25" class="ident">network</label>, <label for="r26" class="ident">addr</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="../../../../pkg/net.html" class="ident i3">net</a>.<a href="../../../net/net.go.html#line-113" class="ident">Conn</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>)) *<a href="#line-16" class="ident">ClientAuthRequest</a> {</code></span>
+<span class="codeline" id="line-120"><code>	<span class="keyword">return</span> &amp;<a href="#line-16" class="ident">ClientAuthRequest</a>{</code></span>
+<span class="codeline" id="line-121"><code>		<a href="#line-18" class="ident">dial</a>: <label for="r24" class="ident">dial</label>,</code></span>
+<span class="codeline" id="line-122"><code>	}</code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

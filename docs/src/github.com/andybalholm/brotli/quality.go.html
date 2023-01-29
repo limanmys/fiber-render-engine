@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: quality.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	quality.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">const</span> fastOnePassCompressionQuality = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">const</span> fastTwoPassCompressionQuality = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">const</span> zopflificationQuality = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">const</span> hqZopflificationQuality = <span class="lit-number">11</span></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">const</span> maxQualityForStaticEntropyCodes = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">const</span> minQualityForBlockSplit = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">const</span> minQualityForNonzeroDistanceParams = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">const</span> minQualityForOptimizeHistograms = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">const</span> minQualityForExtensiveReferenceSearch = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">const</span> minQualityForContextModeling = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">const</span> minQualityForHqContextModeling = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">const</span> minQualityForHqBlockSplitting = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">/* For quality below MIN_QUALITY_FOR_BLOCK_SPLIT there is no block splitting,</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">   so we buffer at most this much literals and commands. */</span></code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">const</span> maxNumDelayedSymbols = <span class="lit-number">0x2FFF</span></code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">/* Returns hash-table size for quality levels 0 and 1. */</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> maxHashTableSize(<label for="r1" class="ident">quality</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-33"><code>	<span class="keyword">if</span> <label for="r1" class="ident">quality</label> == <a href="#line-3" class="ident">fastOnePassCompressionQuality</a> {</code></span>
+<span class="codeline" id="line-34"><code>		<span class="keyword">return</span> <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-35"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-36"><code>		<span class="keyword">return</span> <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">17</span></code></span>
+<span class="codeline" id="line-37"><code>	}</code></span>
+<span class="codeline" id="line-38"><code>}</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">/* The maximum length for which the zopflification uses distinct distances. */</span></code></span>
+<span class="codeline" id="line-41"><code><span class="keyword">const</span> maxZopfliLenQuality10 = <span class="lit-number">150</span></code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">const</span> maxZopfliLenQuality11 = <span class="lit-number">325</span></code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">/* Do not thoroughly search when a long copy is found. */</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">const</span> longCopyQuickStep = <span class="lit-number">16384</span></code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> maxZopfliLen(<label for="r3" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">if</span> <label for="r3" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt;= <span class="lit-number">10</span> {</code></span>
+<span class="codeline" id="line-50"><code>		<span class="keyword">return</span> <a href="#line-41" class="ident">maxZopfliLenQuality10</a></code></span>
+<span class="codeline" id="line-51"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-52"><code>		<span class="keyword">return</span> <a href="#line-43" class="ident">maxZopfliLenQuality11</a></code></span>
+<span class="codeline" id="line-53"><code>	}</code></span>
+<span class="codeline" id="line-54"><code>}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">/* Number of best candidates to evaluate to expand Zopfli chain. */</span></code></span>
+<span class="codeline" id="line-57"><code><span class="keyword">func</span> maxZopfliCandidates(<label for="r5" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">if</span> <label for="r5" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt;= <span class="lit-number">10</span> {</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-60"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-61"><code>		<span class="keyword">return</span> <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-62"><code>	}</code></span>
+<span class="codeline" id="line-63"><code>}</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">func</span> sanitizeParams(<label for="r7" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) {</code></span>
+<span class="codeline" id="line-66"><code>	<label for="r7" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> = <a href="platform.go.html#line-41" class="ident">brotli_min_int</a>(<a href="encode.go.html#line-40" class="ident">maxQuality</a>, <a href="platform.go.html#line-49" class="ident">brotli_max_int</a>(<a href="encode.go.html#line-37" class="ident">minQuality</a>, <label for="r7" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a>))</code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">if</span> <label for="r7" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt;= <a href="#line-11" class="ident">maxQualityForStaticEntropyCodes</a> {</code></span>
+<span class="codeline" id="line-68"><code>		<label for="r7" class="ident">params</label>.<a href="params.go.html#line-33" class="ident">large_window</a> = <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-69"><code>	}</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <label for="r7" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &lt; <a href="encode.go.html#line-15" class="ident">minWindowBits</a> {</code></span>
+<span class="codeline" id="line-72"><code>		<label for="r7" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> = <a href="encode.go.html#line-15" class="ident">minWindowBits</a></code></span>
+<span class="codeline" id="line-73"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">var</span> <label for="r8" class="ident">max_lgwin</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-75"><code>		<span class="keyword">if</span> <label for="r7" class="ident">params</label>.<a href="params.go.html#line-33" class="ident">large_window</a> {</code></span>
+<span class="codeline" id="line-76"><code>			<label for="r8" class="ident">max_lgwin</label> = <a href="encode.go.html#line-28" class="ident">largeMaxWindowBits</a></code></span>
+<span class="codeline" id="line-77"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-78"><code>			<label for="r8" class="ident">max_lgwin</label> = <a href="encode.go.html#line-22" class="ident">maxWindowBits</a></code></span>
+<span class="codeline" id="line-79"><code>		}</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">if</span> <label for="r7" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &gt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r8" class="ident">max_lgwin</label>) {</code></span>
+<span class="codeline" id="line-81"><code>			<label for="r7" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r8" class="ident">max_lgwin</label>)</code></span>
+<span class="codeline" id="line-82"><code>		}</code></span>
+<span class="codeline" id="line-83"><code>	}</code></span>
+<span class="codeline" id="line-84"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">/* Returns optimized lg_block value. */</span></code></span>
+<span class="codeline" id="line-87"><code><span class="keyword">func</span> computeLgBlock(<label for="r10" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-88"><code>	<span class="keyword">var</span> <label for="r11" class="ident">lgblock</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <label for="r10" class="ident">params</label>.<a href="params.go.html#line-30" class="ident">lgblock</a></code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">if</span> <label for="r10" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> == <a href="#line-3" class="ident">fastOnePassCompressionQuality</a> || <label for="r10" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> == <a href="#line-5" class="ident">fastTwoPassCompressionQuality</a> {</code></span>
+<span class="codeline" id="line-90"><code>		<label for="r11" class="ident">lgblock</label> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r10" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a>)</code></span>
+<span class="codeline" id="line-91"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r10" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <a href="#line-13" class="ident">minQualityForBlockSplit</a> {</code></span>
+<span class="codeline" id="line-92"><code>		<label for="r11" class="ident">lgblock</label> = <span class="lit-number">14</span></code></span>
+<span class="codeline" id="line-93"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r11" class="ident">lgblock</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-94"><code>		<label for="r11" class="ident">lgblock</label> = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">if</span> <label for="r10" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &gt;= <span class="lit-number">9</span> &amp;&amp; <label for="r10" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &gt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r11" class="ident">lgblock</label>) {</code></span>
+<span class="codeline" id="line-96"><code>			<label for="r11" class="ident">lgblock</label> = <a href="platform.go.html#line-41" class="ident">brotli_min_int</a>(<span class="lit-number">18</span>, <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r10" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a>))</code></span>
+<span class="codeline" id="line-97"><code>		}</code></span>
+<span class="codeline" id="line-98"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-99"><code>		<label for="r11" class="ident">lgblock</label> = <a href="platform.go.html#line-41" class="ident">brotli_min_int</a>(<a href="encode.go.html#line-34" class="ident">maxInputBlockBits</a>, <a href="platform.go.html#line-49" class="ident">brotli_max_int</a>(<a href="encode.go.html#line-31" class="ident">minInputBlockBits</a>, <label for="r11" class="ident">lgblock</label>))</code></span>
+<span class="codeline" id="line-100"><code>	}</code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">return</span> <label for="r11" class="ident">lgblock</label></code></span>
+<span class="codeline" id="line-103"><code>}</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">/* Returns log2 of the size of main ring buffer area.</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">   Allocate at least lgwin + 1 bits for the ring buffer so that the newly</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">   added block fits there completely and we still get lgwin bits and at least</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">   read_block_size_bits + 1 bits because the copy tail length needs to be</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">   smaller than ring-buffer size. */</span></code></span>
+<span class="codeline" id="line-110"><code><span class="keyword">func</span> computeRbBits(<label for="r13" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-111"><code>	<span class="keyword">return</span> <span class="lit-number">1</span> + <a href="platform.go.html#line-49" class="ident">brotli_max_int</a>(<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r13" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a>), <label for="r13" class="ident">params</label>.<a href="params.go.html#line-30" class="ident">lgblock</a>)</code></span>
+<span class="codeline" id="line-112"><code>}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code><span class="keyword">func</span> maxMetablockSize(<label for="r15" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">var</span> <label for="r16" class="ident">bits</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="platform.go.html#line-41" class="ident">brotli_min_int</a>(<a href="#line-110" class="ident">computeRbBits</a>(<label for="r15" class="ident">params</label>), <a href="encode.go.html#line-34" class="ident">maxInputBlockBits</a>)</code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">1</span>) &lt;&lt; <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r16" class="ident">bits</label>)</code></span>
+<span class="codeline" id="line-117"><code>}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">/* When searching for backward references and have not seen matches for a long</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">   time, we can skip some match lookups. Unsuccessful match lookups are very</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">   expensive and this kind of a heuristic speeds up compression quite a lot.</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">   At first 8 byte strides are taken and every second byte is put to hasher.</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">   After 4x more literals stride by 16 bytes, every put 4-th byte to hasher.</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">   Applied only to qualities 2 to 9. */</span></code></span>
+<span class="codeline" id="line-125"><code><span class="keyword">func</span> literalSpreeLengthForSparseSearch(<label for="r18" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">if</span> <label for="r18" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-127"><code>		<span class="keyword">return</span> <span class="lit-number">64</span></code></span>
+<span class="codeline" id="line-128"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">return</span> <span class="lit-number">512</span></code></span>
+<span class="codeline" id="line-130"><code>	}</code></span>
+<span class="codeline" id="line-131"><code>}</code></span>
+<span class="codeline" id="line-132"><code></code></span>
+<span class="codeline" id="line-133"><code><span class="keyword">func</span> chooseHasher(<label for="r20" class="ident">params</label> *<a href="params.go.html#line-26" class="ident">encoderParams</a>, <label for="r21" class="ident">hparams</label> *<a href="params.go.html#line-10" class="ident">hasherParams</a>) {</code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &gt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-135"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-136"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> == <span class="lit-number">4</span> &amp;&amp; <label for="r20" class="ident">params</label>.<a href="params.go.html#line-31" class="ident">size_hint</a> &gt;= <span class="lit-number">1</span>&lt;&lt;<span class="lit-number">20</span> {</code></span>
+<span class="codeline" id="line-137"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">54</span></code></span>
+<span class="codeline" id="line-138"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">5</span> {</code></span>
+<span class="codeline" id="line-139"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a></code></span>
+<span class="codeline" id="line-140"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &lt;= <span class="lit-number">16</span> {</code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-142"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">40</span></code></span>
+<span class="codeline" id="line-143"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-144"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">41</span></code></span>
+<span class="codeline" id="line-145"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-146"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">42</span></code></span>
+<span class="codeline" id="line-147"><code>		}</code></span>
+<span class="codeline" id="line-148"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-31" class="ident">size_hint</a> &gt;= <span class="lit-number">1</span>&lt;&lt;<span class="lit-number">20</span> &amp;&amp; <label for="r20" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &gt;= <span class="lit-number">19</span> {</code></span>
+<span class="codeline" id="line-149"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-150"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-13" class="ident">block_bits</a> = <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-151"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-12" class="ident">bucket_bits</a> = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-152"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-14" class="ident">hash_len</a> = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-154"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-155"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-156"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-157"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-158"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-159"><code>		}</code></span>
+<span class="codeline" id="line-160"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-161"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-162"><code>		<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-13" class="ident">block_bits</a> = <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-163"><code>		<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-164"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-12" class="ident">bucket_bits</a> = <span class="lit-number">14</span></code></span>
+<span class="codeline" id="line-165"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-166"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-12" class="ident">bucket_bits</a> = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-167"><code>		}</code></span>
+<span class="codeline" id="line-168"><code>		<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">7</span> {</code></span>
+<span class="codeline" id="line-169"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-170"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-28" class="ident">quality</a> &lt; <span class="lit-number">9</span> {</code></span>
+<span class="codeline" id="line-171"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-172"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-173"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-15" class="ident">num_last_distances_to_check</a> = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-174"><code>		}</code></span>
+<span class="codeline" id="line-175"><code>	}</code></span>
+<span class="codeline" id="line-176"><code></code></span>
+<span class="codeline" id="line-177"><code>	<span class="keyword">if</span> <label for="r20" class="ident">params</label>.<a href="params.go.html#line-29" class="ident">lgwin</a> &gt; <span class="lit-number">24</span> {</code></span>
+<span class="codeline" id="line-178"><code>		<span class="comment">/* Different hashers for large window brotli: not for qualities &lt;= 2,</span></code></span>
+<span class="codeline" id="line-179"><code><span class="comment">		   these are too fast for large window. Not for qualities &gt;= 10: their</span></code></span>
+<span class="codeline" id="line-180"><code><span class="comment">		   hasher already works well with large window. So the changes are:</span></code></span>
+<span class="codeline" id="line-181"><code><span class="comment">		   H3 --&gt; H35: for quality 3.</span></code></span>
+<span class="codeline" id="line-182"><code><span class="comment">		   H54 --&gt; H55: for quality 4 with size hint &gt; 1MB</span></code></span>
+<span class="codeline" id="line-183"><code><span class="comment">		   H6 --&gt; H65: for qualities 5, 6, 7, 8, 9. */</span></code></span>
+<span class="codeline" id="line-184"><code>		<span class="keyword">if</span> <label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> == <span class="lit-number">3</span> {</code></span>
+<span class="codeline" id="line-185"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">35</span></code></span>
+<span class="codeline" id="line-186"><code>		}</code></span>
+<span class="codeline" id="line-187"><code></code></span>
+<span class="codeline" id="line-188"><code>		<span class="keyword">if</span> <label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> == <span class="lit-number">54</span> {</code></span>
+<span class="codeline" id="line-189"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">55</span></code></span>
+<span class="codeline" id="line-190"><code>		}</code></span>
+<span class="codeline" id="line-191"><code></code></span>
+<span class="codeline" id="line-192"><code>		<span class="keyword">if</span> <label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> == <span class="lit-number">6</span> {</code></span>
+<span class="codeline" id="line-193"><code>			<label for="r21" class="ident">hparams</label>.<a href="params.go.html#line-11" class="ident">type_</a> = <span class="lit-number">65</span></code></span>
+<span class="codeline" id="line-194"><code>		}</code></span>
+<span class="codeline" id="line-195"><code>	}</code></span>
+<span class="codeline" id="line-196"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

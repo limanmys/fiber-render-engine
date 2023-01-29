@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: width.go in package github.com/rivo/uniseg</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	width.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/rivo/uniseg.html">github.com/rivo/uniseg</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> uniseg</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// runeWidth returns the monospace width for the given rune. The provided</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// grapheme property is a value mapped by the [graphemeCodePoints] table.</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// Every rune has a width of 1, except for runes with the following properties</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// (evaluated in this order):</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">//   - Control, CR, LF, Extend, ZWJ: Width of 0</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">//   - \u2e3a, TWO-EM DASH: Width of 3</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">//   - \u2e3b, THREE-EM DASH: Width of 4</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//   - East-Asian width Fullwidth and Wide: Width of 2 (Ambiguous and Neutral</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">//     have a width of 1)</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//   - Regional Indicator: Width of 2</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">//   - Extended Pictographic: Width of 2, unless Emoji Presentation is "No".</span></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">func</span> runeWidth(<label for="r1" class="ident">r</label> <a href="../../../../pkg/builtin.html#name-rune" class="ident">rune</a>, <label for="r2" class="ident">graphemeProperty</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-17"><code>	<span class="keyword">switch</span> <label for="r2" class="ident">graphemeProperty</label> {</code></span>
+<span class="codeline" id="line-18"><code>	<span class="keyword">case</span> <a href="properties.go.html#line-11" class="ident">prControl</a>, <a href="properties.go.html#line-9" class="ident">prCR</a>, <a href="properties.go.html#line-10" class="ident">prLF</a>, <a href="properties.go.html#line-12" class="ident">prExtend</a>, <a href="properties.go.html#line-20" class="ident">prZWJ</a>:</code></span>
+<span class="codeline" id="line-19"><code>		<span class="keyword">return</span> <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-20"><code>	<span class="keyword">case</span> <a href="properties.go.html#line-13" class="ident">prRegionalIndicator</a>:</code></span>
+<span class="codeline" id="line-21"><code>		<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-22"><code>	<span class="keyword">case</span> <a href="properties.go.html#line-21" class="ident">prExtendedPictographic</a>:</code></span>
+<span class="codeline" id="line-23"><code>		<span class="keyword">if</span> <a href="properties.go.html#line-159" class="ident">property</a>(<a href="emojipresentation.go.html#line-12" class="ident">emojiPresentation</a>, <label for="r1" class="ident">r</label>) == <a href="properties.go.html#line-89" class="ident">prEmojiPresentation</a> {</code></span>
+<span class="codeline" id="line-24"><code>			<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-25"><code>		}</code></span>
+<span class="codeline" id="line-26"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-27"><code>	}</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code>	<span class="keyword">switch</span> <label for="r1" class="ident">r</label> {</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">case</span> <span class="lit-number">0x2e3a</span>:</code></span>
+<span class="codeline" id="line-31"><code>		<span class="keyword">return</span> <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">case</span> <span class="lit-number">0x2e3b</span>:</code></span>
+<span class="codeline" id="line-33"><code>		<span class="keyword">return</span> <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-34"><code>	}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code>	<span class="keyword">switch</span> <a href="properties.go.html#line-159" class="ident">property</a>(<a href="eastasianwidth.go.html#line-12" class="ident">eastAsianWidth</a>, <label for="r1" class="ident">r</label>) {</code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">case</span> <a href="properties.go.html#line-86" class="ident">prW</a>, <a href="properties.go.html#line-88" class="ident">prF</a>:</code></span>
+<span class="codeline" id="line-38"><code>		<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-39"><code>	}</code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-42"><code>}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// StringWidth returns the monospace width for the given string, that is, the</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// number of same-size cells to be occupied by the string.</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> <label for="r3" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-StringWidth" class="ident">StringWidth</a></label>(<label for="r4" class="ident">s</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r5" class="ident">width</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-47"><code>	<label for="r6" class="ident">state</label> := -<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">for</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">s</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-49"><code>		<span class="keyword">var</span> <label for="r7" class="ident">w</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-50"><code>		_, <label for="r4" class="ident">s</label>, <label for="r7" class="ident">w</label>, <label for="r6" class="ident">state</label> = <a href="grapheme.go.html#line-274" class="ident">FirstGraphemeClusterInString</a>(<label for="r4" class="ident">s</label>, <label for="r6" class="ident">state</label>)</code></span>
+<span class="codeline" id="line-51"><code>		<label for="r5" class="ident">width</label> += <label for="r7" class="ident">w</label></code></span>
+<span class="codeline" id="line-52"><code>	}</code></span>
+<span class="codeline" id="line-53"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-54"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

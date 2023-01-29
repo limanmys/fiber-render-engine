@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: doc.go in package github.com/rivo/uniseg</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	doc.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/rivo/uniseg.html">github.com/rivo/uniseg</a>
+</code></pre>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">Package uniseg implements Unicode Text Segmentation, Unicode Line Breaking, and</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">string width calculation for monospace fonts. Unicode Text Segmentation conforms</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">to Unicode Standard Annex #29 (https://unicode.org/reports/tr29/) and Unicode</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">Line Breaking conforms to Unicode Standard Annex #14</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">(https://unicode.org/reports/tr14/).</span></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">In short, using this package, you can split a string into grapheme clusters</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">(what people would usually refer to as a "character"), into words, and into</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">sentences. Or, in its simplest case, this package allows you to count the number</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">of characters in a string, especially when it contains complex characters such</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">as emojis, combining characters, or characters from Asian, Arabic, Hebrew, or</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">other languages. Additionally, you can use it to implement line breaking (or</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">"word wrapping"), that is, to determine where text can be broken over to the</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">next line when the width of the line is not big enough to fit the entire text.</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">Finally, you can use it to calculate the display width of a string for monospace</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">fonts.</span></code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code><span class="comment"># Getting Started</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">If you just want to count the number of characters in a string, you can use</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">[GraphemeClusterCount]. If you want to determine the display width of a string,</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">you can use [StringWidth]. If you want to iterate over a string, you can use</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">[Step], [StepString], or the [Graphemes] class (more convenient but less</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">performant). This will provide you with all information: grapheme clusters,</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">word boundaries, sentence boundaries, line breaks, and monospace character</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">widths. The specialized functions [FirstGraphemeCluster],</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">[FirstGraphemeClusterInString], [FirstWord], [FirstWordInString],</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">[FirstSentence], and [FirstSentenceInString] can be used if only one type of</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">information is needed.</span></code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment"># Grapheme Clusters</span></code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">Consider the rainbow flag emoji: 🏳️‍🌈. On most modern systems, it appears as one</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">character. But its string representation actually has 14 bytes, so counting</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">bytes (or using len("🏳️‍🌈")) will not work as expected. Counting runes won't,</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">either: The flag has 4 Unicode code points, thus 4 runes. The stdlib function</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">utf8.RuneCountInString("🏳️‍🌈") and len([]rune("🏳️‍🌈")) will both return 4.</span></code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">The [GraphemeClusterCount] function will return 1 for the rainbow flag emoji.</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">The Graphemes class and a variety of functions in this package will allow you to</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">split strings into its grapheme clusters.</span></code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="comment"># Word Boundaries</span></code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">Word boundaries are used in a number of different contexts. The most familiar</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">ones are selection (double-click mouse selection), cursor movement ("move to</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">next word" control-arrow keys), and the dialog option "Whole Word Search" for</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">search and replace. This package provides methods for determining word</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">boundaries.</span></code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment"># Sentence Boundaries</span></code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">Sentence boundaries are often used for triple-click or some other method of</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">selecting or iterating through blocks of text that are larger than single words.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">They are also used to determine whether words occur within the same sentence in</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">database queries. This package provides methods for determining sentence</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">boundaries.</span></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code><span class="comment"># Line Breaking</span></code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">Line breaking, also known as word wrapping, is the process of breaking a section</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">of text into lines such that it will fit in the available width of a page,</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">window or other display area. This package provides methods to determine the</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">positions in a string where a line must be broken, may be broken, or must not be</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">broken.</span></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment"># Monospace Width</span></code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">Monospace width, as referred to in this package, is the width of a string in a</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">monospace font. This is commonly used in terminal user interfaces or text</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">displays or editors that don't support proportional fonts. A width of 1</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">corresponds to a single character cell. The C function [wcswidth()] and its</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">implementation in other programming languages is in widespread use for the same</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">purpose. However, there is no standard for the calculation of such widths, and</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">this package differs from wcswidth() in a number of ways, presumably to generate</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">more visually pleasing results.</span></code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">To start, we assume that every code point has a width of 1, with the following</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">exceptions:</span></code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">  - Code points with grapheme cluster break properties Control, CR, LF, Extend,</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">    and ZWJ have a width of 0.</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">  - U+2E3A, Two-Em Dash, has a width of 3.</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">  - U+2E3B, Three-Em Dash, has a width of 4.</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">  - Characters with the East-Asian Width properties "Fullwidth" (F) and "Wide"</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">    (W) have a width of 2. (Properties "Ambiguous" (A) and "Neutral" (N) both</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">    have a width of 1.)</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">  - Code points with grapheme cluster break property Regional Indicator have a</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">    width of 2.</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">  - Code points with grapheme cluster break property Extended Pictographic have</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">    a width of 2, unless their Emoji Presentation flag is "No", in which case</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">    the width is 1.</span></code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">For Hangul grapheme clusters composed of conjoining Jamo and for Regional</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">Indicators (flags), all code points except the first one have a width of 0. For</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">grapheme clusters starting with an Extended Pictographic, any additional code</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">point will force a total width of 2, except if the Variation Selector-15</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">(U+FE0E) is included, in which case the total width is always 1. Grapheme</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">clusters ending with Variation Selector-16 (U+FE0F) have a width of 2.</span></code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">Note that whether these widths appear correct depends on your application's</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">render engine, to which extent it conforms to the Unicode Standard, and its</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">choice of font.</span></code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">[wcswidth()]: https://man7.org/linux/man-pages/man3/wcswidth.3.html</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-108"><code><span class="keyword">package</span> uniseg</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

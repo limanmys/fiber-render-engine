@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: config.go in package go.uber.org/zap</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	config.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/go.uber.org/zap.html">go.uber.org/zap</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright (c) 2016 Uber Technologies, Inc.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a copy</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// of this software and associated documentation files (the "Software"), to deal</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// in the Software without restriction, including without limitation the rights</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// copies of the Software, and to permit persons to whom the Software is</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// furnished to do so, subject to the following conditions:</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// The above copyright notice and this permission notice shall be included in</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// all copies or substantial portions of the Software.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// THE SOFTWARE.</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">package</span> zap</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-24"><code>	<label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-25"><code>	<label for="i1"><span class="lit-string i1">"sort"</span></label></code></span>
+<span class="codeline" id="line-26"><code>	<label for="i2"><span class="lit-string i2">"time"</span></label></code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<label for="i3"><span class="lit-string i3">"go.uber.org/zap/zapcore"</span></label></code></span>
+<span class="codeline" id="line-29"><code>)</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// SamplingConfig sets a sampling strategy for the logger. Sampling caps the</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// global CPU and I/O load that logging puts on your process while attempting</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// to preserve a representative subset of your logs.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// If specified, the Sampler will invoke the Hook after each decision.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Values configured here are per-second. See zapcore.NewSamplerWithOptions for</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// details.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/zap.html#name-SamplingConfig" class="ident">SamplingConfig</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-40"><code>	Initial    <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>                                           <span class="lit-string">`json:"initial" yaml:"initial"`</span></code></span>
+<span class="codeline" id="line-41"><code>	Thereafter <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>                                           <span class="lit-string">`json:"thereafter" yaml:"thereafter"`</span></code></span>
+<span class="codeline" id="line-42"><code>	Hook       <span class="keyword">func</span>(<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/entry.go.html#line-145" class="ident">Entry</a>, <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/sampler.go.html#line-86" class="ident">SamplingDecision</a>) <span class="lit-string">`json:"-" yaml:"-"`</span></code></span>
+<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// Config offers a declarative way to construct a logger. It doesn't do</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// anything that can't be done with New, Options, and the various</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// zapcore.WriteSyncer and zapcore.Core wrappers, but it's a simpler way to</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// toggle common options.</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// Note that Config intentionally supports only the most common options. More</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// unusual logging setups (logging to network connections or message queues,</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// splitting output between multiple files, etc.) are possible, but require</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// direct use of the zapcore package. For sample code, see the package-level</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// BasicConfiguration and AdvancedConfiguration examples.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// For an example showing runtime log level changes, see the documentation for</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// AtomicLevel.</span></code></span>
+<span class="codeline" id="line-58"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/zap.html#name-Config" class="ident">Config</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-59"><code>	<span class="comment">// Level is the minimum enabled logging level. Note that this is a dynamic</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">	// level, so calling Config.Level.SetLevel will atomically change the log</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">	// level of all loggers descended from this config.</span></code></span>
+<span class="codeline" id="line-62"><code>	Level <a href="level.go.html#line-70" class="ident">AtomicLevel</a> <span class="lit-string">`json:"level" yaml:"level"`</span></code></span>
+<span class="codeline" id="line-63"><code>	<span class="comment">// Development puts the logger in development mode, which changes the</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">	// behavior of DPanicLevel and takes stacktraces more liberally.</span></code></span>
+<span class="codeline" id="line-65"><code>	Development <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> <span class="lit-string">`json:"development" yaml:"development"`</span></code></span>
+<span class="codeline" id="line-66"><code>	<span class="comment">// DisableCaller stops annotating logs with the calling function's file</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">	// name and line number. By default, all logs are annotated.</span></code></span>
+<span class="codeline" id="line-68"><code>	DisableCaller <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> <span class="lit-string">`json:"disableCaller" yaml:"disableCaller"`</span></code></span>
+<span class="codeline" id="line-69"><code>	<span class="comment">// DisableStacktrace completely disables automatic stacktrace capturing. By</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">	// default, stacktraces are captured for WarnLevel and above logs in</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">	// development and ErrorLevel and above in production.</span></code></span>
+<span class="codeline" id="line-72"><code>	DisableStacktrace <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> <span class="lit-string">`json:"disableStacktrace" yaml:"disableStacktrace"`</span></code></span>
+<span class="codeline" id="line-73"><code>	<span class="comment">// Sampling sets a sampling policy. A nil SamplingConfig disables sampling.</span></code></span>
+<span class="codeline" id="line-74"><code>	Sampling *<a href="#line-39" class="ident">SamplingConfig</a> <span class="lit-string">`json:"sampling" yaml:"sampling"`</span></code></span>
+<span class="codeline" id="line-75"><code>	<span class="comment">// Encoding sets the logger's encoding. Valid values are "json" and</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">	// "console", as well as any third-party encodings registered via</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">	// RegisterEncoder.</span></code></span>
+<span class="codeline" id="line-78"><code>	Encoding <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`json:"encoding" yaml:"encoding"`</span></code></span>
+<span class="codeline" id="line-79"><code>	<span class="comment">// EncoderConfig sets options for the chosen encoder. See</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">	// zapcore.EncoderConfig for details.</span></code></span>
+<span class="codeline" id="line-81"><code>	EncoderConfig <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-316" class="ident">EncoderConfig</a> <span class="lit-string">`json:"encoderConfig" yaml:"encoderConfig"`</span></code></span>
+<span class="codeline" id="line-82"><code>	<span class="comment">// OutputPaths is a list of URLs or file paths to write logging output to.</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">	// See Open for details.</span></code></span>
+<span class="codeline" id="line-84"><code>	OutputPaths []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`json:"outputPaths" yaml:"outputPaths"`</span></code></span>
+<span class="codeline" id="line-85"><code>	<span class="comment">// ErrorOutputPaths is a list of URLs to write internal logger errors to.</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">	// The default is standard error.</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">	// Note that this setting only affects internal errors; for sample code that</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">	// sends error-level logs to a different location from info- and debug-level</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">	// logs, see the package-level AdvancedConfiguration example.</span></code></span>
+<span class="codeline" id="line-91"><code>	ErrorOutputPaths []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`json:"errorOutputPaths" yaml:"errorOutputPaths"`</span></code></span>
+<span class="codeline" id="line-92"><code>	<span class="comment">// InitialFields is a collection of fields to add to the root logger.</span></code></span>
+<span class="codeline" id="line-93"><code>	InitialFields <span class="keyword">map</span>[<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">interface</span>{} <span class="lit-string">`json:"initialFields" yaml:"initialFields"`</span></code></span>
+<span class="codeline" id="line-94"><code>}</code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">// NewProductionEncoderConfig returns an opinionated EncoderConfig for</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">// production environments.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-NewProductionEncoderConfig" class="ident">NewProductionEncoderConfig</a></label>() <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-316" class="ident">EncoderConfig</a> {</code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">return</span> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-316" class="ident">EncoderConfig</a>{</code></span>
+<span class="codeline" id="line-100"><code>		<a href="zapcore/encoder.go.html#line-321" class="ident">TimeKey</a>:        <span class="lit-string">"ts"</span>,</code></span>
+<span class="codeline" id="line-101"><code>		<a href="zapcore/encoder.go.html#line-320" class="ident">LevelKey</a>:       <span class="lit-string">"level"</span>,</code></span>
+<span class="codeline" id="line-102"><code>		<a href="zapcore/encoder.go.html#line-322" class="ident">NameKey</a>:        <span class="lit-string">"logger"</span>,</code></span>
+<span class="codeline" id="line-103"><code>		<a href="zapcore/encoder.go.html#line-323" class="ident">CallerKey</a>:      <span class="lit-string">"caller"</span>,</code></span>
+<span class="codeline" id="line-104"><code>		<a href="zapcore/encoder.go.html#line-324" class="ident">FunctionKey</a>:    <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-37" class="ident">OmitKey</a>,</code></span>
+<span class="codeline" id="line-105"><code>		<a href="zapcore/encoder.go.html#line-319" class="ident">MessageKey</a>:     <span class="lit-string">"msg"</span>,</code></span>
+<span class="codeline" id="line-106"><code>		<a href="zapcore/encoder.go.html#line-325" class="ident">StacktraceKey</a>:  <span class="lit-string">"stacktrace"</span>,</code></span>
+<span class="codeline" id="line-107"><code>		<a href="zapcore/encoder.go.html#line-327" class="ident">LineEnding</a>:     <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-34" class="ident">DefaultLineEnding</a>,</code></span>
+<span class="codeline" id="line-108"><code>		<a href="zapcore/encoder.go.html#line-331" class="ident">EncodeLevel</a>:    <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-44" class="ident">LowercaseLevelEncoder</a>,</code></span>
+<span class="codeline" id="line-109"><code>		<a href="zapcore/encoder.go.html#line-332" class="ident">EncodeTime</a>:     <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-97" class="ident">EpochTimeEncoder</a>,</code></span>
+<span class="codeline" id="line-110"><code>		<a href="zapcore/encoder.go.html#line-333" class="ident">EncodeDuration</a>: <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-225" class="ident">SecondsDurationEncoder</a>,</code></span>
+<span class="codeline" id="line-111"><code>		<a href="zapcore/encoder.go.html#line-334" class="ident">EncodeCaller</a>:   <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-276" class="ident">ShortCallerEncoder</a>,</code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code>}</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">// NewProductionConfig is a reasonable production logging configuration.</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// Logging is enabled at InfoLevel and above.</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">// It uses a JSON encoder, writes to standard error, and enables sampling.</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// Stacktraces are automatically included on logs of ErrorLevel and above.</span></code></span>
+<span class="codeline" id="line-120"><code><span class="keyword">func</span> <label for="r1" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-NewProductionConfig" class="ident">NewProductionConfig</a></label>() <a href="#line-58" class="ident">Config</a> {</code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">return</span> <a href="#line-58" class="ident">Config</a>{</code></span>
+<span class="codeline" id="line-122"><code>		<a href="#line-62" class="ident">Level</a>:       <a href="level.go.html#line-86" class="ident">NewAtomicLevelAt</a>(<a href="level.go.html#line-34" class="ident">InfoLevel</a>),</code></span>
+<span class="codeline" id="line-123"><code>		<a href="#line-65" class="ident">Development</a>: <a href="../../../pkg/builtin.html#name-false" class="ident">false</a>,</code></span>
+<span class="codeline" id="line-124"><code>		<a href="#line-74" class="ident">Sampling</a>: &amp;<a href="#line-39" class="ident">SamplingConfig</a>{</code></span>
+<span class="codeline" id="line-125"><code>			<a href="#line-40" class="ident">Initial</a>:    <span class="lit-number">100</span>,</code></span>
+<span class="codeline" id="line-126"><code>			<a href="#line-41" class="ident">Thereafter</a>: <span class="lit-number">100</span>,</code></span>
+<span class="codeline" id="line-127"><code>		},</code></span>
+<span class="codeline" id="line-128"><code>		<a href="#line-78" class="ident">Encoding</a>:         <span class="lit-string">"json"</span>,</code></span>
+<span class="codeline" id="line-129"><code>		<a href="#line-81" class="ident">EncoderConfig</a>:    <a href="#line-98" class="ident">NewProductionEncoderConfig</a>(),</code></span>
+<span class="codeline" id="line-130"><code>		<a href="#line-84" class="ident">OutputPaths</a>:      []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>{<span class="lit-string">"stderr"</span>},</code></span>
+<span class="codeline" id="line-131"><code>		<a href="#line-91" class="ident">ErrorOutputPaths</a>: []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>{<span class="lit-string">"stderr"</span>},</code></span>
+<span class="codeline" id="line-132"><code>	}</code></span>
+<span class="codeline" id="line-133"><code>}</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">// NewDevelopmentEncoderConfig returns an opinionated EncoderConfig for</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">// development environments.</span></code></span>
+<span class="codeline" id="line-137"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-NewDevelopmentEncoderConfig" class="ident">NewDevelopmentEncoderConfig</a></label>() <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-316" class="ident">EncoderConfig</a> {</code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">return</span> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-316" class="ident">EncoderConfig</a>{</code></span>
+<span class="codeline" id="line-139"><code>		<span class="comment">// Keys can be anything except the empty string.</span></code></span>
+<span class="codeline" id="line-140"><code>		<a href="zapcore/encoder.go.html#line-321" class="ident">TimeKey</a>:        <span class="lit-string">"T"</span>,</code></span>
+<span class="codeline" id="line-141"><code>		<a href="zapcore/encoder.go.html#line-320" class="ident">LevelKey</a>:       <span class="lit-string">"L"</span>,</code></span>
+<span class="codeline" id="line-142"><code>		<a href="zapcore/encoder.go.html#line-322" class="ident">NameKey</a>:        <span class="lit-string">"N"</span>,</code></span>
+<span class="codeline" id="line-143"><code>		<a href="zapcore/encoder.go.html#line-323" class="ident">CallerKey</a>:      <span class="lit-string">"C"</span>,</code></span>
+<span class="codeline" id="line-144"><code>		<a href="zapcore/encoder.go.html#line-324" class="ident">FunctionKey</a>:    <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-37" class="ident">OmitKey</a>,</code></span>
+<span class="codeline" id="line-145"><code>		<a href="zapcore/encoder.go.html#line-319" class="ident">MessageKey</a>:     <span class="lit-string">"M"</span>,</code></span>
+<span class="codeline" id="line-146"><code>		<a href="zapcore/encoder.go.html#line-325" class="ident">StacktraceKey</a>:  <span class="lit-string">"S"</span>,</code></span>
+<span class="codeline" id="line-147"><code>		<a href="zapcore/encoder.go.html#line-327" class="ident">LineEnding</a>:     <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-34" class="ident">DefaultLineEnding</a>,</code></span>
+<span class="codeline" id="line-148"><code>		<a href="zapcore/encoder.go.html#line-331" class="ident">EncodeLevel</a>:    <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-60" class="ident">CapitalLevelEncoder</a>,</code></span>
+<span class="codeline" id="line-149"><code>		<a href="zapcore/encoder.go.html#line-332" class="ident">EncodeTime</a>:     <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-135" class="ident">ISO8601TimeEncoder</a>,</code></span>
+<span class="codeline" id="line-150"><code>		<a href="zapcore/encoder.go.html#line-333" class="ident">EncodeDuration</a>: <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-243" class="ident">StringDurationEncoder</a>,</code></span>
+<span class="codeline" id="line-151"><code>		<a href="zapcore/encoder.go.html#line-334" class="ident">EncodeCaller</a>:   <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-276" class="ident">ShortCallerEncoder</a>,</code></span>
+<span class="codeline" id="line-152"><code>	}</code></span>
+<span class="codeline" id="line-153"><code>}</code></span>
+<span class="codeline" id="line-154"><code></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">// NewDevelopmentConfig is a reasonable development logging configuration.</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">// Logging is enabled at DebugLevel and above.</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// It enables development mode (which makes DPanicLevel logs panic), uses a</span></code></span>
+<span class="codeline" id="line-159"><code><span class="comment">// console encoder, writes to standard error, and disables sampling.</span></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">// Stacktraces are automatically included on logs of WarnLevel and above.</span></code></span>
+<span class="codeline" id="line-161"><code><span class="keyword">func</span> <label for="r3" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-NewDevelopmentConfig" class="ident">NewDevelopmentConfig</a></label>() <a href="#line-58" class="ident">Config</a> {</code></span>
+<span class="codeline" id="line-162"><code>	<span class="keyword">return</span> <a href="#line-58" class="ident">Config</a>{</code></span>
+<span class="codeline" id="line-163"><code>		<a href="#line-62" class="ident">Level</a>:            <a href="level.go.html#line-86" class="ident">NewAtomicLevelAt</a>(<a href="level.go.html#line-32" class="ident">DebugLevel</a>),</code></span>
+<span class="codeline" id="line-164"><code>		<a href="#line-65" class="ident">Development</a>:      <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>,</code></span>
+<span class="codeline" id="line-165"><code>		<a href="#line-78" class="ident">Encoding</a>:         <span class="lit-string">"console"</span>,</code></span>
+<span class="codeline" id="line-166"><code>		<a href="#line-81" class="ident">EncoderConfig</a>:    <a href="#line-137" class="ident">NewDevelopmentEncoderConfig</a>(),</code></span>
+<span class="codeline" id="line-167"><code>		<a href="#line-84" class="ident">OutputPaths</a>:      []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>{<span class="lit-string">"stderr"</span>},</code></span>
+<span class="codeline" id="line-168"><code>		<a href="#line-91" class="ident">ErrorOutputPaths</a>: []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>{<span class="lit-string">"stderr"</span>},</code></span>
+<span class="codeline" id="line-169"><code>	}</code></span>
+<span class="codeline" id="line-170"><code>}</code></span>
+<span class="codeline" id="line-171"><code></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">// Build constructs a logger from the Config and Options.</span></code></span>
+<span class="codeline" id="line-173"><code><span class="keyword">func</span> (<label for="r4" class="ident">cfg</label> <a href="#line-58" class="ident">Config</a>) <label for="r5" class="ident">Build</label>(<label for="r6" class="ident">opts</label> ...<a href="options.go.html#line-30" class="ident">Option</a>) (*<a href="logger.go.html#line-40" class="ident">Logger</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-174"><code>	<label for="r7" class="ident">enc</label>, <label for="r8" class="ident">err</label> := <label for="r4" class="ident">cfg</label>.<a href="#line-262" class="ident">buildEncoder</a>()</code></span>
+<span class="codeline" id="line-175"><code>	<span class="keyword">if</span> <label for="r8" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-176"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-177"><code>	}</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code>	<label for="r9" class="ident">sink</label>, <label for="r10" class="ident">errSink</label>, <label for="r8" class="ident">err</label> := <label for="r4" class="ident">cfg</label>.<a href="#line-249" class="ident">openSinks</a>()</code></span>
+<span class="codeline" id="line-180"><code>	<span class="keyword">if</span> <label for="r8" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-181"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">err</label></code></span>
+<span class="codeline" id="line-182"><code>	}</code></span>
+<span class="codeline" id="line-183"><code></code></span>
+<span class="codeline" id="line-184"><code>	<span class="keyword">if</span> <label for="r4" class="ident">cfg</label>.<a href="#line-62" class="ident">Level</a> == (<a href="level.go.html#line-70" class="ident">AtomicLevel</a>{}) {</code></span>
+<span class="codeline" id="line-185"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"missing Level"</span>)</code></span>
+<span class="codeline" id="line-186"><code>	}</code></span>
+<span class="codeline" id="line-187"><code></code></span>
+<span class="codeline" id="line-188"><code>	<label for="r11" class="ident">log</label> := <a href="logger.go.html#line-67" class="ident">New</a>(</code></span>
+<span class="codeline" id="line-189"><code>		<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/core.go.html#line-58" class="ident">NewCore</a>(<label for="r7" class="ident">enc</label>, <label for="r9" class="ident">sink</label>, <label for="r4" class="ident">cfg</label>.<a href="#line-62" class="ident">Level</a>),</code></span>
+<span class="codeline" id="line-190"><code>		<label for="r4" class="ident">cfg</label>.<a href="#line-198" class="ident">buildOptions</a>(<label for="r10" class="ident">errSink</label>)...,</code></span>
+<span class="codeline" id="line-191"><code>	)</code></span>
+<span class="codeline" id="line-192"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">opts</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-193"><code>		<label for="r11" class="ident">log</label> = <label for="r11" class="ident">log</label>.<a href="logger.go.html#line-167" class="ident">WithOptions</a>(<label for="r6" class="ident">opts</label>...)</code></span>
+<span class="codeline" id="line-194"><code>	}</code></span>
+<span class="codeline" id="line-195"><code>	<span class="keyword">return</span> <label for="r11" class="ident">log</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-196"><code>}</code></span>
+<span class="codeline" id="line-197"><code></code></span>
+<span class="codeline" id="line-198"><code><span class="keyword">func</span> (<label for="r12" class="ident">cfg</label> <a href="#line-58" class="ident">Config</a>) <label for="r13" class="ident">buildOptions</label>(<label for="r14" class="ident">errSink</label> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>) []<a href="options.go.html#line-30" class="ident">Option</a> {</code></span>
+<span class="codeline" id="line-199"><code>	<label for="r15" class="ident">opts</label> := []<a href="options.go.html#line-30" class="ident">Option</a>{<a href="options.go.html#line-75" class="ident">ErrorOutput</a>(<label for="r14" class="ident">errSink</label>)}</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code>	<span class="keyword">if</span> <label for="r12" class="ident">cfg</label>.<a href="#line-65" class="ident">Development</a> {</code></span>
+<span class="codeline" id="line-202"><code>		<label for="r15" class="ident">opts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r15" class="ident">opts</label>, <a href="options.go.html#line-83" class="ident">Development</a>())</code></span>
+<span class="codeline" id="line-203"><code>	}</code></span>
+<span class="codeline" id="line-204"><code></code></span>
+<span class="codeline" id="line-205"><code>	<span class="keyword">if</span> !<label for="r12" class="ident">cfg</label>.<a href="#line-68" class="ident">DisableCaller</a> {</code></span>
+<span class="codeline" id="line-206"><code>		<label for="r15" class="ident">opts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r15" class="ident">opts</label>, <a href="options.go.html#line-91" class="ident">AddCaller</a>())</code></span>
+<span class="codeline" id="line-207"><code>	}</code></span>
+<span class="codeline" id="line-208"><code></code></span>
+<span class="codeline" id="line-209"><code>	<label for="r16" class="ident">stackLevel</label> := <a href="level.go.html#line-40" class="ident">ErrorLevel</a></code></span>
+<span class="codeline" id="line-210"><code>	<span class="keyword">if</span> <label for="r12" class="ident">cfg</label>.<a href="#line-65" class="ident">Development</a> {</code></span>
+<span class="codeline" id="line-211"><code>		<label for="r16" class="ident">stackLevel</label> = <a href="level.go.html#line-37" class="ident">WarnLevel</a></code></span>
+<span class="codeline" id="line-212"><code>	}</code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">if</span> !<label for="r12" class="ident">cfg</label>.<a href="#line-72" class="ident">DisableStacktrace</a> {</code></span>
+<span class="codeline" id="line-214"><code>		<label for="r15" class="ident">opts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r15" class="ident">opts</label>, <a href="options.go.html#line-116" class="ident">AddStacktrace</a>(<label for="r16" class="ident">stackLevel</label>))</code></span>
+<span class="codeline" id="line-215"><code>	}</code></span>
+<span class="codeline" id="line-216"><code></code></span>
+<span class="codeline" id="line-217"><code>	<span class="keyword">if</span> <label for="r17" class="ident">scfg</label> := <label for="r12" class="ident">cfg</label>.<a href="#line-74" class="ident">Sampling</a>; <label for="r17" class="ident">scfg</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-218"><code>		<label for="r15" class="ident">opts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r15" class="ident">opts</label>, <a href="options.go.html#line-42" class="ident">WrapCore</a>(<span class="keyword">func</span>(<label for="r18" class="ident">core</label> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/core.go.html#line-25" class="ident">Core</a>) <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/core.go.html#line-25" class="ident">Core</a> {</code></span>
+<span class="codeline" id="line-219"><code>			<span class="keyword">var</span> <label for="r19" class="ident">samplerOpts</label> []<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/sampler.go.html#line-103" class="ident">SamplerOption</a></code></span>
+<span class="codeline" id="line-220"><code>			<span class="keyword">if</span> <label for="r17" class="ident">scfg</label>.<a href="#line-42" class="ident">Hook</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-221"><code>				<label for="r19" class="ident">samplerOpts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r19" class="ident">samplerOpts</label>, <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/sampler.go.html#line-122" class="ident">SamplerHook</a>(<label for="r17" class="ident">scfg</label>.<a href="#line-42" class="ident">Hook</a>))</code></span>
+<span class="codeline" id="line-222"><code>			}</code></span>
+<span class="codeline" id="line-223"><code>			<span class="keyword">return</span> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/sampler.go.html#line-153" class="ident">NewSamplerWithOptions</a>(</code></span>
+<span class="codeline" id="line-224"><code>				<label for="r18" class="ident">core</label>,</code></span>
+<span class="codeline" id="line-225"><code>				<a href="../../../pkg/time.html" class="ident i2">time</a>.<a href="../../time/time.go.html#line-614" class="ident">Second</a>,</code></span>
+<span class="codeline" id="line-226"><code>				<label for="r12" class="ident">cfg</label>.<a href="#line-74" class="ident">Sampling</a>.<a href="#line-40" class="ident">Initial</a>,</code></span>
+<span class="codeline" id="line-227"><code>				<label for="r12" class="ident">cfg</label>.<a href="#line-74" class="ident">Sampling</a>.<a href="#line-41" class="ident">Thereafter</a>,</code></span>
+<span class="codeline" id="line-228"><code>				<label for="r19" class="ident">samplerOpts</label>...,</code></span>
+<span class="codeline" id="line-229"><code>			)</code></span>
+<span class="codeline" id="line-230"><code>		}))</code></span>
+<span class="codeline" id="line-231"><code>	}</code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">cfg</label>.<a href="#line-93" class="ident">InitialFields</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-234"><code>		<label for="r20" class="ident">fs</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="field.go.html#line-33" class="ident">Field</a>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">cfg</label>.<a href="#line-93" class="ident">InitialFields</a>))</code></span>
+<span class="codeline" id="line-235"><code>		<label for="r21" class="ident">keys</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">cfg</label>.<a href="#line-93" class="ident">InitialFields</a>))</code></span>
+<span class="codeline" id="line-236"><code>		<span class="keyword">for</span> <label for="r22" class="ident">k</label> := <span class="keyword">range</span> <label for="r12" class="ident">cfg</label>.<a href="#line-93" class="ident">InitialFields</a> {</code></span>
+<span class="codeline" id="line-237"><code>			<label for="r21" class="ident">keys</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r21" class="ident">keys</label>, <label for="r22" class="ident">k</label>)</code></span>
+<span class="codeline" id="line-238"><code>		}</code></span>
+<span class="codeline" id="line-239"><code>		<a href="../../../pkg/sort.html" class="ident i1">sort</a>.<a href="../../sort/sort.go.html#line-164" class="ident">Strings</a>(<label for="r21" class="ident">keys</label>)</code></span>
+<span class="codeline" id="line-240"><code>		<span class="keyword">for</span> <label for="r23" class="ident">_</label>, <label for="r24" class="ident">k</label> := <span class="keyword">range</span> <label for="r21" class="ident">keys</label> {</code></span>
+<span class="codeline" id="line-241"><code>			<label for="r20" class="ident">fs</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r20" class="ident">fs</label>, <a href="field.go.html#line-420" class="ident">Any</a>(<label for="r24" class="ident">k</label>, <label for="r12" class="ident">cfg</label>.<a href="#line-93" class="ident">InitialFields</a>[<label for="r24" class="ident">k</label>]))</code></span>
+<span class="codeline" id="line-242"><code>		}</code></span>
+<span class="codeline" id="line-243"><code>		<label for="r15" class="ident">opts</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r15" class="ident">opts</label>, <a href="options.go.html#line-62" class="ident">Fields</a>(<label for="r20" class="ident">fs</label>...))</code></span>
+<span class="codeline" id="line-244"><code>	}</code></span>
+<span class="codeline" id="line-245"><code></code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">return</span> <label for="r15" class="ident">opts</label></code></span>
+<span class="codeline" id="line-247"><code>}</code></span>
+<span class="codeline" id="line-248"><code></code></span>
+<span class="codeline" id="line-249"><code><span class="keyword">func</span> (<label for="r25" class="ident">cfg</label> <a href="#line-58" class="ident">Config</a>) <label for="r26" class="ident">openSinks</label>() (<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>, <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-250"><code>	<label for="r27" class="ident">sink</label>, <label for="r28" class="ident">closeOut</label>, <label for="r29" class="ident">err</label> := <a href="writer.go.html#line-50" class="ident">Open</a>(<label for="r25" class="ident">cfg</label>.<a href="#line-84" class="ident">OutputPaths</a>...)</code></span>
+<span class="codeline" id="line-251"><code>	<span class="keyword">if</span> <label for="r29" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-252"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r29" class="ident">err</label></code></span>
+<span class="codeline" id="line-253"><code>	}</code></span>
+<span class="codeline" id="line-254"><code>	<label for="r30" class="ident">errSink</label>, <label for="r31" class="ident">_</label>, <label for="r29" class="ident">err</label> := <a href="writer.go.html#line-50" class="ident">Open</a>(<label for="r25" class="ident">cfg</label>.<a href="#line-91" class="ident">ErrorOutputPaths</a>...)</code></span>
+<span class="codeline" id="line-255"><code>	<span class="keyword">if</span> <label for="r29" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-256"><code>		<label for="r28" class="ident">closeOut</label>()</code></span>
+<span class="codeline" id="line-257"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r29" class="ident">err</label></code></span>
+<span class="codeline" id="line-258"><code>	}</code></span>
+<span class="codeline" id="line-259"><code>	<span class="keyword">return</span> <label for="r27" class="ident">sink</label>, <label for="r30" class="ident">errSink</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-260"><code>}</code></span>
+<span class="codeline" id="line-261"><code></code></span>
+<span class="codeline" id="line-262"><code><span class="keyword">func</span> (<label for="r32" class="ident">cfg</label> <a href="#line-58" class="ident">Config</a>) <label for="r33" class="ident">buildEncoder</label>() (<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i3">zapcore</a>.<a href="zapcore/encoder.go.html#line-440" class="ident">Encoder</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-263"><code>	<span class="keyword">return</span> <a href="encoder.go.html#line-64" class="ident">newEncoder</a>(<label for="r32" class="ident">cfg</label>.<a href="#line-78" class="ident">Encoding</a>, <label for="r32" class="ident">cfg</label>.<a href="#line-81" class="ident">EncoderConfig</a>)</code></span>
+<span class="codeline" id="line-264"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

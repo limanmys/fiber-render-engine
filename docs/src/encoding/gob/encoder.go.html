@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: encoder.go in package encoding/gob</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	encoder.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/encoding/gob.html">encoding/gob</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> gob</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"io"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"reflect"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"sync"</span></label></code></span>
+<span class="codeline" id="line-12"><code>)</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// An Encoder manages the transmission of type and data information to the</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// other side of a connection.  It is safe for concurrent use by multiple</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// goroutines.</span></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">type</span> <a href="../../../pkg/encoding/gob.html#name-Encoder" class="ident">Encoder</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-18"><code>	mutex      <a href="../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a>              <span class="comment">// each item must be sent atomically</span></code></span>
+<span class="codeline" id="line-19"><code>	w          []<a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>             <span class="comment">// where to send the data</span></code></span>
+<span class="codeline" id="line-20"><code>	sent       <span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<a href="type.go.html#line-161" class="ident">typeId</a> <span class="comment">// which types we've already sent</span></code></span>
+<span class="codeline" id="line-21"><code>	countState *<a href="encode.go.html#line-26" class="ident">encoderState</a>           <span class="comment">// stage for writing counts</span></code></span>
+<span class="codeline" id="line-22"><code>	freeList   *<a href="encode.go.html#line-26" class="ident">encoderState</a>           <span class="comment">// list of free encoderStates; avoids reallocation</span></code></span>
+<span class="codeline" id="line-23"><code>	byteBuf    <a href="encode.go.html#line-37" class="ident">encBuffer</a>               <span class="comment">// buffer for top-level encoderState</span></code></span>
+<span class="codeline" id="line-24"><code>	err        <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-25"><code>}</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// Before we encode a message, we reserve space at the head of the</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// buffer in which to encode its length. This means we can use the</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// buffer to assemble the message without another allocation.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="keyword">const</span> maxLength = <span class="lit-number">9</span> <span class="comment">// Maximum size of an encoded length.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">var</span> spaceForLength = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="#line-30" class="ident">maxLength</a>)</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// NewEncoder returns a new encoder that will transmit on the io.Writer.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/encoding/gob.html#name-NewEncoder" class="ident">NewEncoder</a></label>(<label for="r1" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>) *<a href="#line-17" class="ident">Encoder</a> {</code></span>
+<span class="codeline" id="line-35"><code>	<label for="r2" class="ident">enc</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-17" class="ident">Encoder</a>)</code></span>
+<span class="codeline" id="line-36"><code>	<label for="r2" class="ident">enc</label>.<a href="#line-19" class="ident">w</a> = []<a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>{<label for="r1" class="ident">w</label>}</code></span>
+<span class="codeline" id="line-37"><code>	<label for="r2" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<a href="type.go.html#line-161" class="ident">typeId</a>)</code></span>
+<span class="codeline" id="line-38"><code>	<label for="r2" class="ident">enc</label>.<a href="#line-21" class="ident">countState</a> = <label for="r2" class="ident">enc</label>.<a href="encode.go.html#line-79" class="ident">newEncoderState</a>(<a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="encode.go.html#line-37" class="ident">encBuffer</a>))</code></span>
+<span class="codeline" id="line-39"><code>	<span class="keyword">return</span> <label for="r2" class="ident">enc</label></code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// writer() returns the innermost writer the encoder is using</span></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">func</span> (<label for="r3" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r4" class="ident">writer</label>() <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a> {</code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">return</span> <label for="r3" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>)-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// pushWriter adds a writer to the encoder.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> (<label for="r5" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r6" class="ident">pushWriter</label>(<label for="r7" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>) {</code></span>
+<span class="codeline" id="line-49"><code>	<label for="r5" class="ident">enc</label>.<a href="#line-19" class="ident">w</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r5" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>, <label for="r7" class="ident">w</label>)</code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// popWriter pops the innermost writer.</span></code></span>
+<span class="codeline" id="line-53"><code><span class="keyword">func</span> (<label for="r8" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r9" class="ident">popWriter</label>() {</code></span>
+<span class="codeline" id="line-54"><code>	<label for="r8" class="ident">enc</label>.<a href="#line-19" class="ident">w</a> = <label for="r8" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>[<span class="lit-number">0</span> : <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r8" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>)-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-55"><code>}</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code><span class="keyword">func</span> (<label for="r10" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r11" class="ident">setError</label>(<label for="r12" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">if</span> <label for="r10" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> { <span class="comment">// remember the first.</span></code></span>
+<span class="codeline" id="line-59"><code>		<label for="r10" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> = <label for="r12" class="ident">err</label></code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code>}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// writeMessage sends the data item preceded by a unsigned count of its length.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r13" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r14" class="ident">writeMessage</label>(<label for="r15" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r16" class="ident">b</label> *<a href="encode.go.html#line-37" class="ident">encBuffer</a>) {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="comment">// Space has been reserved for the length at the head of the message.</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">	// This is a little dirty: we grab the slice from the bytes.Buffer and massage</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">	// it by hand.</span></code></span>
+<span class="codeline" id="line-68"><code>	<label for="r17" class="ident">message</label> := <label for="r16" class="ident">b</label>.<a href="encode.go.html#line-67" class="ident">Bytes</a>()</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r18" class="ident">messageLen</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r17" class="ident">message</label>) - <a href="#line-30" class="ident">maxLength</a></code></span>
+<span class="codeline" id="line-70"><code>	<span class="comment">// Length cannot be bigger than the decoder can handle.</span></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">if</span> <label for="r18" class="ident">messageLen</label> &gt;= <a href="decoder.go.html#line-18" class="ident">tooBig</a> {</code></span>
+<span class="codeline" id="line-72"><code>		<label for="r13" class="ident">enc</label>.<a href="#line-57" class="ident">setError</a>(<a href="../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"gob: encoder: message too big"</span>))</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code>	<span class="comment">// Encode the length.</span></code></span>
+<span class="codeline" id="line-76"><code>	<label for="r13" class="ident">enc</label>.<a href="#line-21" class="ident">countState</a>.<a href="encode.go.html#line-28" class="ident">b</a>.<a href="encode.go.html#line-71" class="ident">Reset</a>()</code></span>
+<span class="codeline" id="line-77"><code>	<label for="r13" class="ident">enc</label>.<a href="#line-21" class="ident">countState</a>.<a href="encode.go.html#line-107" class="ident">encodeUint</a>(<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r18" class="ident">messageLen</label>))</code></span>
+<span class="codeline" id="line-78"><code>	<span class="comment">// Copy the length to be a prefix of the message.</span></code></span>
+<span class="codeline" id="line-79"><code>	<label for="r19" class="ident">offset</label> := <a href="#line-30" class="ident">maxLength</a> - <label for="r13" class="ident">enc</label>.<a href="#line-21" class="ident">countState</a>.<a href="encode.go.html#line-28" class="ident">b</a>.<a href="encode.go.html#line-63" class="ident">Len</a>()</code></span>
+<span class="codeline" id="line-80"><code>	<a href="../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r17" class="ident">message</label>[<label for="r19" class="ident">offset</label>:], <label for="r13" class="ident">enc</label>.<a href="#line-21" class="ident">countState</a>.<a href="encode.go.html#line-28" class="ident">b</a>.<a href="encode.go.html#line-67" class="ident">Bytes</a>())</code></span>
+<span class="codeline" id="line-81"><code>	<span class="comment">// Write the data.</span></code></span>
+<span class="codeline" id="line-82"><code>	<label for="r20" class="ident">_</label>, <label for="r21" class="ident">err</label> := <label for="r15" class="ident">w</label>.<a href="../../io/io.go.html#line-97" class="ident">Write</a>(<label for="r17" class="ident">message</label>[<label for="r19" class="ident">offset</label>:])</code></span>
+<span class="codeline" id="line-83"><code>	<span class="comment">// Drain the buffer and restore the space at the front for the count of the next message.</span></code></span>
+<span class="codeline" id="line-84"><code>	<label for="r16" class="ident">b</label>.<a href="encode.go.html#line-71" class="ident">Reset</a>()</code></span>
+<span class="codeline" id="line-85"><code>	<label for="r16" class="ident">b</label>.<a href="encode.go.html#line-54" class="ident">Write</a>(<a href="#line-31" class="ident">spaceForLength</a>)</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">if</span> <label for="r21" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-87"><code>		<label for="r13" class="ident">enc</label>.<a href="#line-57" class="ident">setError</a>(<label for="r21" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-89"><code>}</code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// sendActualType sends the requested type, without further investigation, unless</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// it's been sent before.</span></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> (<label for="r22" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r23" class="ident">sendActualType</label>(<label for="r24" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r25" class="ident">state</label> *<a href="encode.go.html#line-26" class="ident">encoderState</a>, <label for="r26" class="ident">ut</label> *<a href="type.go.html#line-22" class="ident">userTypeInfo</a>, <label for="r27" class="ident">actual</label> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>) (<label for="r28" class="ident">sent</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <label for="r29" class="ident">_</label>, <label for="r30" class="ident">alreadySent</label> := <label for="r22" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r27" class="ident">actual</label>]; <label for="r30" class="ident">alreadySent</label> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code>	<label for="r31" class="ident">info</label>, <label for="r32" class="ident">err</label> := <a href="type.go.html#line-693" class="ident">getTypeInfo</a>(<label for="r26" class="ident">ut</label>)</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">if</span> <label for="r32" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-99"><code>		<label for="r22" class="ident">enc</label>.<a href="#line-57" class="ident">setError</a>(<label for="r32" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-101"><code>	}</code></span>
+<span class="codeline" id="line-102"><code>	<span class="comment">// Send the pair (-id, type)</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">	// Id:</span></code></span>
+<span class="codeline" id="line-104"><code>	<label for="r25" class="ident">state</label>.<a href="encode.go.html#line-123" class="ident">encodeInt</a>(-<a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r31" class="ident">info</label>.<a href="type.go.html#line-674" class="ident">id</a>))</code></span>
+<span class="codeline" id="line-105"><code>	<span class="comment">// Type:</span></code></span>
+<span class="codeline" id="line-106"><code>	<label for="r22" class="ident">enc</label>.<a href="encode.go.html#line-690" class="ident">encode</a>(<label for="r25" class="ident">state</label>.<a href="encode.go.html#line-28" class="ident">b</a>, <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r31" class="ident">info</label>.<a href="type.go.html#line-677" class="ident">wire</a>), <a href="type.go.html#line-260" class="ident">wireTypeUserInfo</a>)</code></span>
+<span class="codeline" id="line-107"><code>	<label for="r22" class="ident">enc</label>.<a href="#line-64" class="ident">writeMessage</a>(<label for="r24" class="ident">w</label>, <label for="r25" class="ident">state</label>.<a href="encode.go.html#line-28" class="ident">b</a>)</code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">if</span> <label for="r22" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-109"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-110"><code>	}</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>	<span class="comment">// Remember we've sent this type, both what the user gave us and the base type.</span></code></span>
+<span class="codeline" id="line-113"><code>	<label for="r22" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r26" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a>] = <label for="r31" class="ident">info</label>.<a href="type.go.html#line-674" class="ident">id</a></code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">if</span> <label for="r26" class="ident">ut</label>.<a href="type.go.html#line-23" class="ident">user</a> != <label for="r26" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a> {</code></span>
+<span class="codeline" id="line-115"><code>		<label for="r22" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r26" class="ident">ut</label>.<a href="type.go.html#line-23" class="ident">user</a>] = <label for="r31" class="ident">info</label>.<a href="type.go.html#line-674" class="ident">id</a></code></span>
+<span class="codeline" id="line-116"><code>	}</code></span>
+<span class="codeline" id="line-117"><code>	<span class="comment">// Now send the inner types</span></code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">switch</span> <label for="r33" class="ident">st</label> := <label for="r27" class="ident">actual</label>; <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-103" class="ident">Kind</a>() {</code></span>
+<span class="codeline" id="line-119"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-269" class="ident">Struct</a>:</code></span>
+<span class="codeline" id="line-120"><code>		<span class="keyword">for</span> <label for="r34" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r34" class="ident">i</label> &lt; <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-206" class="ident">NumField</a>(); <label for="r34" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-121"><code>			<span class="keyword">if</span> <a href="type.go.html#line-557" class="ident">isExported</a>(<label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-165" class="ident">Field</a>(<label for="r34" class="ident">i</label>).<a href="../../reflect/type.go.html#line-1149" class="ident">Name</a>) {</code></span>
+<span class="codeline" id="line-122"><code>				<label for="r22" class="ident">enc</label>.<a href="#line-135" class="ident">sendType</a>(<label for="r24" class="ident">w</label>, <label for="r25" class="ident">state</label>, <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-165" class="ident">Field</a>(<label for="r34" class="ident">i</label>).<a href="../../reflect/type.go.html#line-1156" class="ident">Type</a>)</code></span>
+<span class="codeline" id="line-123"><code>			}</code></span>
+<span class="codeline" id="line-124"><code>		}</code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-261" class="ident">Array</a>, <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-267" class="ident">Slice</a>:</code></span>
+<span class="codeline" id="line-126"><code>		<label for="r22" class="ident">enc</label>.<a href="#line-135" class="ident">sendType</a>(<label for="r24" class="ident">w</label>, <label for="r25" class="ident">state</label>, <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-160" class="ident">Elem</a>())</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-265" class="ident">Map</a>:</code></span>
+<span class="codeline" id="line-128"><code>		<label for="r22" class="ident">enc</label>.<a href="#line-135" class="ident">sendType</a>(<label for="r24" class="ident">w</label>, <label for="r25" class="ident">state</label>, <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-198" class="ident">Key</a>())</code></span>
+<span class="codeline" id="line-129"><code>		<label for="r22" class="ident">enc</label>.<a href="#line-135" class="ident">sendType</a>(<label for="r24" class="ident">w</label>, <label for="r25" class="ident">state</label>, <label for="r33" class="ident">st</label>.<a href="../../reflect/type.go.html#line-160" class="ident">Elem</a>())</code></span>
+<span class="codeline" id="line-130"><code>	}</code></span>
+<span class="codeline" id="line-131"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-132"><code>}</code></span>
+<span class="codeline" id="line-133"><code></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">// sendType sends the type info to the other side, if necessary.</span></code></span>
+<span class="codeline" id="line-135"><code><span class="keyword">func</span> (<label for="r35" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r36" class="ident">sendType</label>(<label for="r37" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r38" class="ident">state</label> *<a href="encode.go.html#line-26" class="ident">encoderState</a>, <label for="r39" class="ident">origt</label> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>) (<label for="r40" class="ident">sent</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-136"><code>	<label for="r41" class="ident">ut</label> := <a href="type.go.html#line-151" class="ident">userType</a>(<label for="r39" class="ident">origt</label>)</code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">if</span> <label for="r41" class="ident">ut</label>.<a href="type.go.html#line-26" class="ident">externalEnc</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-138"><code>		<span class="comment">// The rules are different: regardless of the underlying type's representation,</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">		// we need to tell the other side that the base type is a GobEncoder.</span></code></span>
+<span class="codeline" id="line-140"><code>		<span class="keyword">return</span> <label for="r35" class="ident">enc</label>.<a href="#line-93" class="ident">sendActualType</a>(<label for="r37" class="ident">w</label>, <label for="r38" class="ident">state</label>, <label for="r41" class="ident">ut</label>, <label for="r41" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a>)</code></span>
+<span class="codeline" id="line-141"><code>	}</code></span>
+<span class="codeline" id="line-142"><code></code></span>
+<span class="codeline" id="line-143"><code>	<span class="comment">// It's a concrete value, so drill down to the base type.</span></code></span>
+<span class="codeline" id="line-144"><code>	<span class="keyword">switch</span> <label for="r42" class="ident">rt</label> := <label for="r41" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a>; <label for="r42" class="ident">rt</label>.<a href="../../reflect/type.go.html#line-103" class="ident">Kind</a>() {</code></span>
+<span class="codeline" id="line-145"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-146"><code>		<span class="comment">// Basic types and interfaces do not need to be described.</span></code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-148"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-267" class="ident">Slice</a>:</code></span>
+<span class="codeline" id="line-149"><code>		<span class="comment">// If it's []uint8, don't send; it's considered basic.</span></code></span>
+<span class="codeline" id="line-150"><code>		<span class="keyword">if</span> <label for="r42" class="ident">rt</label>.<a href="../../reflect/type.go.html#line-160" class="ident">Elem</a>().<a href="../../reflect/type.go.html#line-103" class="ident">Kind</a>() == <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-252" class="ident">Uint8</a> {</code></span>
+<span class="codeline" id="line-151"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-152"><code>		}</code></span>
+<span class="codeline" id="line-153"><code>		<span class="comment">// Otherwise we do send.</span></code></span>
+<span class="codeline" id="line-154"><code>		<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-155"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-261" class="ident">Array</a>:</code></span>
+<span class="codeline" id="line-156"><code>		<span class="comment">// arrays must be sent so we know their lengths and element types.</span></code></span>
+<span class="codeline" id="line-157"><code>		<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-158"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-265" class="ident">Map</a>:</code></span>
+<span class="codeline" id="line-159"><code>		<span class="comment">// maps must be sent so we know their lengths and key/value types.</span></code></span>
+<span class="codeline" id="line-160"><code>		<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-161"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-269" class="ident">Struct</a>:</code></span>
+<span class="codeline" id="line-162"><code>		<span class="comment">// structs must be sent so we know their fields.</span></code></span>
+<span class="codeline" id="line-163"><code>		<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-164"><code>	<span class="keyword">case</span> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-262" class="ident">Chan</a>, <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-263" class="ident">Func</a>:</code></span>
+<span class="codeline" id="line-165"><code>		<span class="comment">// If we get here, it's a field of a struct; ignore it.</span></code></span>
+<span class="codeline" id="line-166"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-167"><code>	}</code></span>
+<span class="codeline" id="line-168"><code></code></span>
+<span class="codeline" id="line-169"><code>	<span class="keyword">return</span> <label for="r35" class="ident">enc</label>.<a href="#line-93" class="ident">sendActualType</a>(<label for="r37" class="ident">w</label>, <label for="r38" class="ident">state</label>, <label for="r41" class="ident">ut</label>, <label for="r41" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a>)</code></span>
+<span class="codeline" id="line-170"><code>}</code></span>
+<span class="codeline" id="line-171"><code></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">// Encode transmits the data item represented by the empty interface value,</span></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">// guaranteeing that all necessary type information has been transmitted first.</span></code></span>
+<span class="codeline" id="line-174"><code><span class="comment">// Passing a nil pointer to Encoder will panic, as they cannot be transmitted by gob.</span></code></span>
+<span class="codeline" id="line-175"><code><span class="keyword">func</span> (<label for="r43" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r44" class="ident">Encode</label>(<label for="r45" class="ident">e</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-176"><code>	<span class="keyword">return</span> <label for="r43" class="ident">enc</label>.<a href="#line-218" class="ident">EncodeValue</a>(<a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r45" class="ident">e</label>))</code></span>
+<span class="codeline" id="line-177"><code>}</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code><span class="comment">// sendTypeDescriptor makes sure the remote side knows about this type.</span></code></span>
+<span class="codeline" id="line-180"><code><span class="comment">// It will send a descriptor if this is the first time the type has been</span></code></span>
+<span class="codeline" id="line-181"><code><span class="comment">// sent.</span></code></span>
+<span class="codeline" id="line-182"><code><span class="keyword">func</span> (<label for="r46" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r47" class="ident">sendTypeDescriptor</label>(<label for="r48" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r49" class="ident">state</label> *<a href="encode.go.html#line-26" class="ident">encoderState</a>, <label for="r50" class="ident">ut</label> *<a href="type.go.html#line-22" class="ident">userTypeInfo</a>) {</code></span>
+<span class="codeline" id="line-183"><code>	<span class="comment">// Make sure the type is known to the other side.</span></code></span>
+<span class="codeline" id="line-184"><code><span class="comment">	// First, have we already sent this type?</span></code></span>
+<span class="codeline" id="line-185"><code>	<label for="r51" class="ident">rt</label> := <label for="r50" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a></code></span>
+<span class="codeline" id="line-186"><code>	<span class="keyword">if</span> <label for="r50" class="ident">ut</label>.<a href="type.go.html#line-26" class="ident">externalEnc</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-187"><code>		<label for="r51" class="ident">rt</label> = <label for="r50" class="ident">ut</label>.<a href="type.go.html#line-23" class="ident">user</a></code></span>
+<span class="codeline" id="line-188"><code>	}</code></span>
+<span class="codeline" id="line-189"><code>	<span class="keyword">if</span> <label for="r52" class="ident">_</label>, <label for="r53" class="ident">alreadySent</label> := <label for="r46" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r51" class="ident">rt</label>]; !<label for="r53" class="ident">alreadySent</label> {</code></span>
+<span class="codeline" id="line-190"><code>		<span class="comment">// No, so send it.</span></code></span>
+<span class="codeline" id="line-191"><code>		<label for="r54" class="ident">sent</label> := <label for="r46" class="ident">enc</label>.<a href="#line-135" class="ident">sendType</a>(<label for="r48" class="ident">w</label>, <label for="r49" class="ident">state</label>, <label for="r51" class="ident">rt</label>)</code></span>
+<span class="codeline" id="line-192"><code>		<span class="keyword">if</span> <label for="r46" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-193"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-194"><code>		}</code></span>
+<span class="codeline" id="line-195"><code>		<span class="comment">// If the type info has still not been transmitted, it means we have</span></code></span>
+<span class="codeline" id="line-196"><code><span class="comment">		// a singleton basic type (int, []byte etc.) at top level. We don't</span></code></span>
+<span class="codeline" id="line-197"><code><span class="comment">		// need to send the type info but we do need to update enc.sent.</span></code></span>
+<span class="codeline" id="line-198"><code>		<span class="keyword">if</span> !<label for="r54" class="ident">sent</label> {</code></span>
+<span class="codeline" id="line-199"><code>			<label for="r55" class="ident">info</label>, <label for="r56" class="ident">err</label> := <a href="type.go.html#line-693" class="ident">getTypeInfo</a>(<label for="r50" class="ident">ut</label>)</code></span>
+<span class="codeline" id="line-200"><code>			<span class="keyword">if</span> <label for="r56" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-201"><code>				<label for="r46" class="ident">enc</label>.<a href="#line-57" class="ident">setError</a>(<label for="r56" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-202"><code>				<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-203"><code>			}</code></span>
+<span class="codeline" id="line-204"><code>			<label for="r46" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r51" class="ident">rt</label>] = <label for="r55" class="ident">info</label>.<a href="type.go.html#line-674" class="ident">id</a></code></span>
+<span class="codeline" id="line-205"><code>		}</code></span>
+<span class="codeline" id="line-206"><code>	}</code></span>
+<span class="codeline" id="line-207"><code>}</code></span>
+<span class="codeline" id="line-208"><code></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">// sendTypeId sends the id, which must have already been defined.</span></code></span>
+<span class="codeline" id="line-210"><code><span class="keyword">func</span> (<label for="r57" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r58" class="ident">sendTypeId</label>(<label for="r59" class="ident">state</label> *<a href="encode.go.html#line-26" class="ident">encoderState</a>, <label for="r60" class="ident">ut</label> *<a href="type.go.html#line-22" class="ident">userTypeInfo</a>) {</code></span>
+<span class="codeline" id="line-211"><code>	<span class="comment">// Identify the type of this top-level value.</span></code></span>
+<span class="codeline" id="line-212"><code>	<label for="r59" class="ident">state</label>.<a href="encode.go.html#line-123" class="ident">encodeInt</a>(<a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r57" class="ident">enc</label>.<a href="#line-20" class="ident">sent</a>[<label for="r60" class="ident">ut</label>.<a href="type.go.html#line-24" class="ident">base</a>]))</code></span>
+<span class="codeline" id="line-213"><code>}</code></span>
+<span class="codeline" id="line-214"><code></code></span>
+<span class="codeline" id="line-215"><code><span class="comment">// EncodeValue transmits the data item represented by the reflection value,</span></code></span>
+<span class="codeline" id="line-216"><code><span class="comment">// guaranteeing that all necessary type information has been transmitted first.</span></code></span>
+<span class="codeline" id="line-217"><code><span class="comment">// Passing a nil pointer to EncodeValue will panic, as they cannot be transmitted by gob.</span></code></span>
+<span class="codeline" id="line-218"><code><span class="keyword">func</span> (<label for="r61" class="ident">enc</label> *<a href="#line-17" class="ident">Encoder</a>) <label for="r62" class="ident">EncodeValue</label>(<label for="r63" class="ident">value</label> <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/value.go.html#line-39" class="ident">Value</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-219"><code>	<span class="keyword">if</span> <label for="r63" class="ident">value</label>.<a href="../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-244" class="ident">Invalid</a> {</code></span>
+<span class="codeline" id="line-220"><code>		<span class="keyword">return</span> <a href="../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"gob: cannot encode nil value"</span>)</code></span>
+<span class="codeline" id="line-221"><code>	}</code></span>
+<span class="codeline" id="line-222"><code>	<span class="keyword">if</span> <label for="r63" class="ident">value</label>.<a href="../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../reflect/type.go.html#line-266" class="ident">Pointer</a> &amp;&amp; <label for="r63" class="ident">value</label>.<a href="../../reflect/value.go.html#line-1537" class="ident">IsNil</a>() {</code></span>
+<span class="codeline" id="line-223"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"gob: cannot encode nil pointer of type "</span> + <label for="r63" class="ident">value</label>.<a href="../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../reflect/type.go.html#line-100" class="ident">String</a>())</code></span>
+<span class="codeline" id="line-224"><code>	}</code></span>
+<span class="codeline" id="line-225"><code></code></span>
+<span class="codeline" id="line-226"><code>	<span class="comment">// Make sure we're single-threaded through here, so multiple</span></code></span>
+<span class="codeline" id="line-227"><code><span class="comment">	// goroutines can share an encoder.</span></code></span>
+<span class="codeline" id="line-228"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-18" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-229"><code>	<span class="keyword">defer</span> <label for="r61" class="ident">enc</label>.<a href="#line-18" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-230"><code></code></span>
+<span class="codeline" id="line-231"><code>	<span class="comment">// Remove any nested writers remaining due to previous errors.</span></code></span>
+<span class="codeline" id="line-232"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-19" class="ident">w</a> = <label for="r61" class="ident">enc</label>.<a href="#line-19" class="ident">w</a>[<span class="lit-number">0</span>:<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-233"><code></code></span>
+<span class="codeline" id="line-234"><code>	<label for="r64" class="ident">ut</label>, <label for="r65" class="ident">err</label> := <a href="type.go.html#line-44" class="ident">validUserType</a>(<label for="r63" class="ident">value</label>.<a href="../../reflect/value.go.html#line-2525" class="ident">Type</a>())</code></span>
+<span class="codeline" id="line-235"><code>	<span class="keyword">if</span> <label for="r65" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-236"><code>		<span class="keyword">return</span> <label for="r65" class="ident">err</label></code></span>
+<span class="codeline" id="line-237"><code>	}</code></span>
+<span class="codeline" id="line-238"><code></code></span>
+<span class="codeline" id="line-239"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-240"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-23" class="ident">byteBuf</a>.<a href="encode.go.html#line-71" class="ident">Reset</a>()</code></span>
+<span class="codeline" id="line-241"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-23" class="ident">byteBuf</a>.<a href="encode.go.html#line-54" class="ident">Write</a>(<a href="#line-31" class="ident">spaceForLength</a>)</code></span>
+<span class="codeline" id="line-242"><code>	<label for="r66" class="ident">state</label> := <label for="r61" class="ident">enc</label>.<a href="encode.go.html#line-79" class="ident">newEncoderState</a>(&amp;<label for="r61" class="ident">enc</label>.<a href="#line-23" class="ident">byteBuf</a>)</code></span>
+<span class="codeline" id="line-243"><code></code></span>
+<span class="codeline" id="line-244"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-182" class="ident">sendTypeDescriptor</a>(<label for="r61" class="ident">enc</label>.<a href="#line-43" class="ident">writer</a>(), <label for="r66" class="ident">state</label>, <label for="r64" class="ident">ut</label>)</code></span>
+<span class="codeline" id="line-245"><code>	<label for="r61" class="ident">enc</label>.<a href="#line-210" class="ident">sendTypeId</a>(<label for="r66" class="ident">state</label>, <label for="r64" class="ident">ut</label>)</code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">if</span> <label for="r61" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-247"><code>		<span class="keyword">return</span> <label for="r61" class="ident">enc</label>.<a href="#line-24" class="ident">err</a></code></span>
+<span class="codeline" id="line-248"><code>	}</code></span>
+<span class="codeline" id="line-249"><code></code></span>
+<span class="codeline" id="line-250"><code>	<span class="comment">// Encode the object.</span></code></span>
+<span class="codeline" id="line-251"><code>	<label for="r61" class="ident">enc</label>.<a href="encode.go.html#line-690" class="ident">encode</a>(<label for="r66" class="ident">state</label>.<a href="encode.go.html#line-28" class="ident">b</a>, <label for="r63" class="ident">value</label>, <label for="r64" class="ident">ut</label>)</code></span>
+<span class="codeline" id="line-252"><code>	<span class="keyword">if</span> <label for="r61" class="ident">enc</label>.<a href="#line-24" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-253"><code>		<label for="r61" class="ident">enc</label>.<a href="#line-64" class="ident">writeMessage</a>(<label for="r61" class="ident">enc</label>.<a href="#line-43" class="ident">writer</a>(), <label for="r66" class="ident">state</label>.<a href="encode.go.html#line-28" class="ident">b</a>)</code></span>
+<span class="codeline" id="line-254"><code>	}</code></span>
+<span class="codeline" id="line-255"><code></code></span>
+<span class="codeline" id="line-256"><code>	<label for="r61" class="ident">enc</label>.<a href="encode.go.html#line-96" class="ident">freeEncoderState</a>(<label for="r66" class="ident">state</label>)</code></span>
+<span class="codeline" id="line-257"><code>	<span class="keyword">return</span> <label for="r61" class="ident">enc</label>.<a href="#line-24" class="ident">err</a></code></span>
+<span class="codeline" id="line-258"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: bit_reader.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	bit_reader.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">/* Copyright 2013 Google Inc. All Rights Reserved.</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">   Distributed under MIT license.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">   See file LICENSE for detail or copy at https://opensource.org/licenses/MIT</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">/* Bit reading helpers */</span></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">const</span> shortFillBitWindowRead = (<span class="lit-number">8</span> &gt;&gt; <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">var</span> kBitMask = [<span class="lit-number">33</span>]<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>{</code></span>
+<span class="codeline" id="line-16"><code>	<span class="lit-number">0x00000000</span>,</code></span>
+<span class="codeline" id="line-17"><code>	<span class="lit-number">0x00000001</span>,</code></span>
+<span class="codeline" id="line-18"><code>	<span class="lit-number">0x00000003</span>,</code></span>
+<span class="codeline" id="line-19"><code>	<span class="lit-number">0x00000007</span>,</code></span>
+<span class="codeline" id="line-20"><code>	<span class="lit-number">0x0000000F</span>,</code></span>
+<span class="codeline" id="line-21"><code>	<span class="lit-number">0x0000001F</span>,</code></span>
+<span class="codeline" id="line-22"><code>	<span class="lit-number">0x0000003F</span>,</code></span>
+<span class="codeline" id="line-23"><code>	<span class="lit-number">0x0000007F</span>,</code></span>
+<span class="codeline" id="line-24"><code>	<span class="lit-number">0x000000FF</span>,</code></span>
+<span class="codeline" id="line-25"><code>	<span class="lit-number">0x000001FF</span>,</code></span>
+<span class="codeline" id="line-26"><code>	<span class="lit-number">0x000003FF</span>,</code></span>
+<span class="codeline" id="line-27"><code>	<span class="lit-number">0x000007FF</span>,</code></span>
+<span class="codeline" id="line-28"><code>	<span class="lit-number">0x00000FFF</span>,</code></span>
+<span class="codeline" id="line-29"><code>	<span class="lit-number">0x00001FFF</span>,</code></span>
+<span class="codeline" id="line-30"><code>	<span class="lit-number">0x00003FFF</span>,</code></span>
+<span class="codeline" id="line-31"><code>	<span class="lit-number">0x00007FFF</span>,</code></span>
+<span class="codeline" id="line-32"><code>	<span class="lit-number">0x0000FFFF</span>,</code></span>
+<span class="codeline" id="line-33"><code>	<span class="lit-number">0x0001FFFF</span>,</code></span>
+<span class="codeline" id="line-34"><code>	<span class="lit-number">0x0003FFFF</span>,</code></span>
+<span class="codeline" id="line-35"><code>	<span class="lit-number">0x0007FFFF</span>,</code></span>
+<span class="codeline" id="line-36"><code>	<span class="lit-number">0x000FFFFF</span>,</code></span>
+<span class="codeline" id="line-37"><code>	<span class="lit-number">0x001FFFFF</span>,</code></span>
+<span class="codeline" id="line-38"><code>	<span class="lit-number">0x003FFFFF</span>,</code></span>
+<span class="codeline" id="line-39"><code>	<span class="lit-number">0x007FFFFF</span>,</code></span>
+<span class="codeline" id="line-40"><code>	<span class="lit-number">0x00FFFFFF</span>,</code></span>
+<span class="codeline" id="line-41"><code>	<span class="lit-number">0x01FFFFFF</span>,</code></span>
+<span class="codeline" id="line-42"><code>	<span class="lit-number">0x03FFFFFF</span>,</code></span>
+<span class="codeline" id="line-43"><code>	<span class="lit-number">0x07FFFFFF</span>,</code></span>
+<span class="codeline" id="line-44"><code>	<span class="lit-number">0x0FFFFFFF</span>,</code></span>
+<span class="codeline" id="line-45"><code>	<span class="lit-number">0x1FFFFFFF</span>,</code></span>
+<span class="codeline" id="line-46"><code>	<span class="lit-number">0x3FFFFFFF</span>,</code></span>
+<span class="codeline" id="line-47"><code>	<span class="lit-number">0x7FFFFFFF</span>,</code></span>
+<span class="codeline" id="line-48"><code>	<span class="lit-number">0xFFFFFFFF</span>,</code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> bitMask(<label for="r1" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">return</span> <a href="#line-15" class="ident">kBitMask</a>[<label for="r1" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-53"><code>}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">type</span> bitReader <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-56"><code>	val_      <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-57"><code>	bit_pos_  <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-58"><code>	input     []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-59"><code>	input_len <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-60"><code>	byte_pos  <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-61"><code>}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code><span class="keyword">type</span> bitReaderState <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-64"><code>	val_      <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-65"><code>	bit_pos_  <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-66"><code>	input     []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-67"><code>	input_len <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-68"><code>	byte_pos  <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-69"><code>}</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">/* Initializes the BrotliBitReader fields. */</span></code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">/* Ensures that accumulator is not empty.</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">   May consume up to sizeof(brotli_reg_t) - 1 bytes of input.</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">   Returns false if data is required but there is no input available.</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">   For BROTLI_ALIGNED_READ this function also prepares bit reader for aligned</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">   reading. */</span></code></span>
+<span class="codeline" id="line-78"><code><span class="keyword">func</span> bitReaderSaveState(<label for="r3" class="ident">from</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r4" class="ident">to</label> *<a href="#line-63" class="ident">bitReaderState</a>) {</code></span>
+<span class="codeline" id="line-79"><code>	<label for="r4" class="ident">to</label>.<a href="#line-64" class="ident">val_</a> = <label for="r3" class="ident">from</label>.<a href="#line-56" class="ident">val_</a></code></span>
+<span class="codeline" id="line-80"><code>	<label for="r4" class="ident">to</label>.<a href="#line-65" class="ident">bit_pos_</a> = <label for="r3" class="ident">from</label>.<a href="#line-57" class="ident">bit_pos_</a></code></span>
+<span class="codeline" id="line-81"><code>	<label for="r4" class="ident">to</label>.<a href="#line-66" class="ident">input</a> = <label for="r3" class="ident">from</label>.<a href="#line-58" class="ident">input</a></code></span>
+<span class="codeline" id="line-82"><code>	<label for="r4" class="ident">to</label>.<a href="#line-67" class="ident">input_len</a> = <label for="r3" class="ident">from</label>.<a href="#line-59" class="ident">input_len</a></code></span>
+<span class="codeline" id="line-83"><code>	<label for="r4" class="ident">to</label>.<a href="#line-68" class="ident">byte_pos</a> = <label for="r3" class="ident">from</label>.<a href="#line-60" class="ident">byte_pos</a></code></span>
+<span class="codeline" id="line-84"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="keyword">func</span> bitReaderRestoreState(<label for="r6" class="ident">to</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r7" class="ident">from</label> *<a href="#line-63" class="ident">bitReaderState</a>) {</code></span>
+<span class="codeline" id="line-87"><code>	<label for="r6" class="ident">to</label>.<a href="#line-56" class="ident">val_</a> = <label for="r7" class="ident">from</label>.<a href="#line-64" class="ident">val_</a></code></span>
+<span class="codeline" id="line-88"><code>	<label for="r6" class="ident">to</label>.<a href="#line-57" class="ident">bit_pos_</a> = <label for="r7" class="ident">from</label>.<a href="#line-65" class="ident">bit_pos_</a></code></span>
+<span class="codeline" id="line-89"><code>	<label for="r6" class="ident">to</label>.<a href="#line-58" class="ident">input</a> = <label for="r7" class="ident">from</label>.<a href="#line-66" class="ident">input</a></code></span>
+<span class="codeline" id="line-90"><code>	<label for="r6" class="ident">to</label>.<a href="#line-59" class="ident">input_len</a> = <label for="r7" class="ident">from</label>.<a href="#line-67" class="ident">input_len</a></code></span>
+<span class="codeline" id="line-91"><code>	<label for="r6" class="ident">to</label>.<a href="#line-60" class="ident">byte_pos</a> = <label for="r7" class="ident">from</label>.<a href="#line-68" class="ident">byte_pos</a></code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="keyword">func</span> getAvailableBits(<label for="r9" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">return</span> <span class="lit-number">64</span> - <label for="r9" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a></code></span>
+<span class="codeline" id="line-96"><code>}</code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">/* Returns amount of unread bytes the bit reader still has buffered from the</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">   BrotliInput, including whole bytes in br-&gt;val_. */</span></code></span>
+<span class="codeline" id="line-100"><code><span class="keyword">func</span> getRemainingBytes(<label for="r11" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r11" class="ident">br</label>.<a href="#line-59" class="ident">input_len</a>-<label for="r11" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a>) + (<a href="#line-94" class="ident">getAvailableBits</a>(<label for="r11" class="ident">br</label>) &gt;&gt; <span class="lit-number">3</span>))</code></span>
+<span class="codeline" id="line-102"><code>}</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">/* Checks if there is at least |num| bytes left in the input ring-buffer</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">   (excluding the bits remaining in br-&gt;val_). */</span></code></span>
+<span class="codeline" id="line-106"><code><span class="keyword">func</span> checkInputAmount(<label for="r13" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r14" class="ident">num</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> <label for="r13" class="ident">br</label>.<a href="#line-59" class="ident">input_len</a>-<label for="r13" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a> &gt;= <label for="r14" class="ident">num</label></code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">/* Guarantees that there are at least |n_bits| + 1 bits in accumulator.</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">   Precondition: accumulator contains at least 1 bit.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">   |n_bits| should be in the range [1..24] for regular build. For portable</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">   non-64-bit little-endian build only 16 bits are safe to request. */</span></code></span>
+<span class="codeline" id="line-114"><code><span class="keyword">func</span> fillBitWindow(<label for="r16" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r17" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">if</span> <label for="r16" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> &gt;= <span class="lit-number">32</span> {</code></span>
+<span class="codeline" id="line-116"><code>		<label for="r16" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> &gt;&gt;= <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-117"><code>		<label for="r16" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> ^= <span class="lit-number">32</span> <span class="comment">/* here same as -= 32 because of the if condition */</span></code></span>
+<span class="codeline" id="line-118"><code>		<label for="r16" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> |= (<a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-54" class="ident">LittleEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-79" class="ident">Uint32</a>(<label for="r16" class="ident">br</label>.<a href="#line-58" class="ident">input</a>[<label for="r16" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a>:]))) &lt;&lt; <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-119"><code>		<label for="r16" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a> += <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-120"><code>	}</code></span>
+<span class="codeline" id="line-121"><code>}</code></span>
+<span class="codeline" id="line-122"><code></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">/* Mostly like BrotliFillBitWindow, but guarantees only 16 bits and reads no</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">   more than BROTLI_SHORT_FILL_BIT_WINDOW_READ bytes of input. */</span></code></span>
+<span class="codeline" id="line-125"><code><span class="keyword">func</span> fillBitWindow16(<label for="r19" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) {</code></span>
+<span class="codeline" id="line-126"><code>	<a href="#line-114" class="ident">fillBitWindow</a>(<label for="r19" class="ident">br</label>, <span class="lit-number">17</span>)</code></span>
+<span class="codeline" id="line-127"><code>}</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">/* Tries to pull one byte of input to accumulator.</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">   Returns false if there is no input available. */</span></code></span>
+<span class="codeline" id="line-131"><code><span class="keyword">func</span> pullByte(<label for="r21" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">if</span> <label for="r21" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a> == <label for="r21" class="ident">br</label>.<a href="#line-59" class="ident">input_len</a> {</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-134"><code>	}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code>	<label for="r21" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> &gt;&gt;= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-137"><code>	<label for="r21" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> |= (<a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r21" class="ident">br</label>.<a href="#line-58" class="ident">input</a>[<label for="r21" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a>])) &lt;&lt; <span class="lit-number">56</span></code></span>
+<span class="codeline" id="line-138"><code>	<label for="r21" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> -= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-139"><code>	<label for="r21" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a>++</code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-141"><code>}</code></span>
+<span class="codeline" id="line-142"><code></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">/* Returns currently available bits.</span></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">   The number of valid bits could be calculated by BrotliGetAvailableBits. */</span></code></span>
+<span class="codeline" id="line-145"><code><span class="keyword">func</span> getBitsUnmasked(<label for="r23" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">return</span> <label for="r23" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> &gt;&gt; <label for="r23" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a></code></span>
+<span class="codeline" id="line-147"><code>}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">/* Like BrotliGetBits, but does not mask the result.</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">   The result contains at least 16 valid bits. */</span></code></span>
+<span class="codeline" id="line-151"><code><span class="keyword">func</span> get16BitsUnmasked(<label for="r25" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-152"><code>	<a href="#line-114" class="ident">fillBitWindow</a>(<label for="r25" class="ident">br</label>, <span class="lit-number">16</span>)</code></span>
+<span class="codeline" id="line-153"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="#line-145" class="ident">getBitsUnmasked</a>(<label for="r25" class="ident">br</label>))</code></span>
+<span class="codeline" id="line-154"><code>}</code></span>
+<span class="codeline" id="line-155"><code></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">/* Returns the specified number of bits from |br| without advancing bit</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">   position. */</span></code></span>
+<span class="codeline" id="line-158"><code><span class="keyword">func</span> getBits(<label for="r27" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r28" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-159"><code>	<a href="#line-114" class="ident">fillBitWindow</a>(<label for="r27" class="ident">br</label>, <label for="r28" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-160"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="#line-145" class="ident">getBitsUnmasked</a>(<label for="r27" class="ident">br</label>)) &amp; <a href="#line-51" class="ident">bitMask</a>(<label for="r28" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-161"><code>}</code></span>
+<span class="codeline" id="line-162"><code></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">/* Tries to peek the specified amount of bits. Returns false, if there</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">   is not enough input. */</span></code></span>
+<span class="codeline" id="line-165"><code><span class="keyword">func</span> safeGetBits(<label for="r30" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r31" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r32" class="ident">val</label> *<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-166"><code>	<span class="keyword">for</span> <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r30" class="ident">br</label>) &lt; <label for="r31" class="ident">n_bits</label> {</code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">if</span> !<a href="#line-131" class="ident">pullByte</a>(<label for="r30" class="ident">br</label>) {</code></span>
+<span class="codeline" id="line-168"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-169"><code>		}</code></span>
+<span class="codeline" id="line-170"><code>	}</code></span>
+<span class="codeline" id="line-171"><code></code></span>
+<span class="codeline" id="line-172"><code>	*<label for="r32" class="ident">val</label> = <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="#line-145" class="ident">getBitsUnmasked</a>(<label for="r30" class="ident">br</label>)) &amp; <a href="#line-51" class="ident">bitMask</a>(<label for="r31" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-173"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-174"><code>}</code></span>
+<span class="codeline" id="line-175"><code></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">/* Advances the bit pos by |n_bits|. */</span></code></span>
+<span class="codeline" id="line-177"><code><span class="keyword">func</span> dropBits(<label for="r34" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r35" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-178"><code>	<label for="r34" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> += <label for="r35" class="ident">n_bits</label></code></span>
+<span class="codeline" id="line-179"><code>}</code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code><span class="keyword">func</span> bitReaderUnload(<label for="r37" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) {</code></span>
+<span class="codeline" id="line-182"><code>	<span class="keyword">var</span> <label for="r38" class="ident">unused_bytes</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r37" class="ident">br</label>) &gt;&gt; <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-183"><code>	<span class="keyword">var</span> <label for="r39" class="ident">unused_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <label for="r38" class="ident">unused_bytes</label> &lt;&lt; <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-184"><code>	<label for="r37" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a> -= <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r38" class="ident">unused_bytes</label>)</code></span>
+<span class="codeline" id="line-185"><code>	<span class="keyword">if</span> <label for="r39" class="ident">unused_bits</label> == <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-186"><code>		<label for="r37" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-187"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-188"><code>		<label for="r37" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> &lt;&lt;= <label for="r39" class="ident">unused_bits</label></code></span>
+<span class="codeline" id="line-189"><code>	}</code></span>
+<span class="codeline" id="line-190"><code></code></span>
+<span class="codeline" id="line-191"><code>	<label for="r37" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> += <label for="r39" class="ident">unused_bits</label></code></span>
+<span class="codeline" id="line-192"><code>}</code></span>
+<span class="codeline" id="line-193"><code></code></span>
+<span class="codeline" id="line-194"><code><span class="comment">/* Reads the specified number of bits from |br| and advances the bit pos.</span></code></span>
+<span class="codeline" id="line-195"><code><span class="comment">   Precondition: accumulator MUST contain at least |n_bits|. */</span></code></span>
+<span class="codeline" id="line-196"><code><span class="keyword">func</span> takeBits(<label for="r41" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r42" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r43" class="ident">val</label> *<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-197"><code>	*<label for="r43" class="ident">val</label> = <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<a href="#line-145" class="ident">getBitsUnmasked</a>(<label for="r41" class="ident">br</label>)) &amp; <a href="#line-51" class="ident">bitMask</a>(<label for="r42" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-198"><code>	<a href="#line-177" class="ident">dropBits</a>(<label for="r41" class="ident">br</label>, <label for="r42" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-199"><code>}</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code><span class="comment">/* Reads the specified number of bits from |br| and advances the bit pos.</span></code></span>
+<span class="codeline" id="line-202"><code><span class="comment">   Assumes that there is enough input to perform BrotliFillBitWindow. */</span></code></span>
+<span class="codeline" id="line-203"><code><span class="keyword">func</span> readBits(<label for="r45" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r46" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-204"><code>	<span class="keyword">var</span> <label for="r47" class="ident">val</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-205"><code>	<a href="#line-114" class="ident">fillBitWindow</a>(<label for="r45" class="ident">br</label>, <label for="r46" class="ident">n_bits</label>)</code></span>
+<span class="codeline" id="line-206"><code>	<a href="#line-196" class="ident">takeBits</a>(<label for="r45" class="ident">br</label>, <label for="r46" class="ident">n_bits</label>, &amp;<label for="r47" class="ident">val</label>)</code></span>
+<span class="codeline" id="line-207"><code>	<span class="keyword">return</span> <label for="r47" class="ident">val</label></code></span>
+<span class="codeline" id="line-208"><code>}</code></span>
+<span class="codeline" id="line-209"><code></code></span>
+<span class="codeline" id="line-210"><code><span class="comment">/* Tries to read the specified amount of bits. Returns false, if there</span></code></span>
+<span class="codeline" id="line-211"><code><span class="comment">   is not enough input. |n_bits| MUST be positive. */</span></code></span>
+<span class="codeline" id="line-212"><code><span class="keyword">func</span> safeReadBits(<label for="r49" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r50" class="ident">n_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r51" class="ident">val</label> *<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">for</span> <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r49" class="ident">br</label>) &lt; <label for="r50" class="ident">n_bits</label> {</code></span>
+<span class="codeline" id="line-214"><code>		<span class="keyword">if</span> !<a href="#line-131" class="ident">pullByte</a>(<label for="r49" class="ident">br</label>) {</code></span>
+<span class="codeline" id="line-215"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-216"><code>		}</code></span>
+<span class="codeline" id="line-217"><code>	}</code></span>
+<span class="codeline" id="line-218"><code></code></span>
+<span class="codeline" id="line-219"><code>	<a href="#line-196" class="ident">takeBits</a>(<label for="r49" class="ident">br</label>, <label for="r50" class="ident">n_bits</label>, <label for="r51" class="ident">val</label>)</code></span>
+<span class="codeline" id="line-220"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-221"><code>}</code></span>
+<span class="codeline" id="line-222"><code></code></span>
+<span class="codeline" id="line-223"><code><span class="comment">/* Advances the bit reader position to the next byte boundary and verifies</span></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">   that any skipped bits are set to zero. */</span></code></span>
+<span class="codeline" id="line-225"><code><span class="keyword">func</span> bitReaderJumpToByteBoundary(<label for="r53" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-226"><code>	<span class="keyword">var</span> <label for="r54" class="ident">pad_bits_count</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r53" class="ident">br</label>) &amp; <span class="lit-number">0x7</span></code></span>
+<span class="codeline" id="line-227"><code>	<span class="keyword">var</span> <label for="r55" class="ident">pad_bits</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-228"><code>	<span class="keyword">if</span> <label for="r54" class="ident">pad_bits_count</label> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-229"><code>		<a href="#line-196" class="ident">takeBits</a>(<label for="r53" class="ident">br</label>, <label for="r54" class="ident">pad_bits_count</label>, &amp;<label for="r55" class="ident">pad_bits</label>)</code></span>
+<span class="codeline" id="line-230"><code>	}</code></span>
+<span class="codeline" id="line-231"><code></code></span>
+<span class="codeline" id="line-232"><code>	<span class="keyword">return</span> <label for="r55" class="ident">pad_bits</label> == <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-233"><code>}</code></span>
+<span class="codeline" id="line-234"><code></code></span>
+<span class="codeline" id="line-235"><code><span class="comment">/* Copies remaining input bytes stored in the bit reader to the output. Value</span></code></span>
+<span class="codeline" id="line-236"><code><span class="comment">   |num| may not be larger than BrotliGetRemainingBytes. The bit reader must be</span></code></span>
+<span class="codeline" id="line-237"><code><span class="comment">   warmed up again after this. */</span></code></span>
+<span class="codeline" id="line-238"><code><span class="keyword">func</span> copyBytes(<label for="r57" class="ident">dest</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r58" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>, <label for="r59" class="ident">num</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) {</code></span>
+<span class="codeline" id="line-239"><code>	<span class="keyword">for</span> <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r58" class="ident">br</label>) &gt;= <span class="lit-number">8</span> &amp;&amp; <label for="r59" class="ident">num</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-240"><code>		<label for="r57" class="ident">dest</label>[<span class="lit-number">0</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="#line-145" class="ident">getBitsUnmasked</a>(<label for="r58" class="ident">br</label>))</code></span>
+<span class="codeline" id="line-241"><code>		<a href="#line-177" class="ident">dropBits</a>(<label for="r58" class="ident">br</label>, <span class="lit-number">8</span>)</code></span>
+<span class="codeline" id="line-242"><code>		<label for="r57" class="ident">dest</label> = <label for="r57" class="ident">dest</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-243"><code>		<label for="r59" class="ident">num</label>--</code></span>
+<span class="codeline" id="line-244"><code>	}</code></span>
+<span class="codeline" id="line-245"><code></code></span>
+<span class="codeline" id="line-246"><code>	<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r57" class="ident">dest</label>, <label for="r58" class="ident">br</label>.<a href="#line-58" class="ident">input</a>[<label for="r58" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a>:][:<label for="r59" class="ident">num</label>])</code></span>
+<span class="codeline" id="line-247"><code>	<label for="r58" class="ident">br</label>.<a href="#line-60" class="ident">byte_pos</a> += <label for="r59" class="ident">num</label></code></span>
+<span class="codeline" id="line-248"><code>}</code></span>
+<span class="codeline" id="line-249"><code></code></span>
+<span class="codeline" id="line-250"><code><span class="keyword">func</span> initBitReader(<label for="r61" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) {</code></span>
+<span class="codeline" id="line-251"><code>	<label for="r61" class="ident">br</label>.<a href="#line-56" class="ident">val_</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-252"><code>	<label for="r61" class="ident">br</label>.<a href="#line-57" class="ident">bit_pos_</a> = <span class="lit-number">64</span></code></span>
+<span class="codeline" id="line-253"><code>}</code></span>
+<span class="codeline" id="line-254"><code></code></span>
+<span class="codeline" id="line-255"><code><span class="keyword">func</span> warmupBitReader(<label for="r63" class="ident">br</label> *<a href="#line-55" class="ident">bitReader</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-256"><code>	<span class="comment">/* Fixing alignment after unaligned BrotliFillWindow would result accumulator</span></code></span>
+<span class="codeline" id="line-257"><code><span class="comment">	   overflow. If unalignment is caused by BrotliSafeReadBits, then there is</span></code></span>
+<span class="codeline" id="line-258"><code><span class="comment">	   enough space in accumulator to fix alignment. */</span></code></span>
+<span class="codeline" id="line-259"><code>	<span class="keyword">if</span> <a href="#line-94" class="ident">getAvailableBits</a>(<label for="r63" class="ident">br</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-260"><code>		<span class="keyword">if</span> !<a href="#line-131" class="ident">pullByte</a>(<label for="r63" class="ident">br</label>) {</code></span>
+<span class="codeline" id="line-261"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-262"><code>		}</code></span>
+<span class="codeline" id="line-263"><code>	}</code></span>
+<span class="codeline" id="line-264"><code></code></span>
+<span class="codeline" id="line-265"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-266"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

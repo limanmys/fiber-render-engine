@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: sql.go in package gorm.io/gorm/logger</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	sql.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/gorm.io/gorm/logger.html">gorm.io/gorm/logger</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> logger</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"database/sql/driver"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"reflect"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"regexp"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"strconv"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i5"><span class="lit-string i5">"strings"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i6"><span class="lit-string i6">"time"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i7"><span class="lit-string i7">"unicode"</span></label></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i8"><span class="lit-string i8">"gorm.io/gorm/utils"</span></label></code></span>
+<span class="codeline" id="line-14"><code>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-17"><code>	tmFmtWithMS = <span class="lit-string">"2006-01-02 15:04:05.999"</span></code></span>
+<span class="codeline" id="line-18"><code>	tmFmtZero   = <span class="lit-string">"0000-00-00 00:00:00"</span></code></span>
+<span class="codeline" id="line-19"><code>	nullStr     = <span class="lit-string">"NULL"</span></code></span>
+<span class="codeline" id="line-20"><code>)</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">func</span> isPrintable(<label for="r1" class="ident">s</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-23"><code>	<span class="keyword">for</span> <label for="r2" class="ident">_</label>, <label for="r3" class="ident">r</label> := <span class="keyword">range</span> <label for="r1" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-24"><code>		<span class="keyword">if</span> !<a href="../../../../pkg/unicode.html" class="ident i7">unicode</a>.<a href="../../../unicode/graphic.go.html#line-50" class="ident">IsPrint</a>(<label for="r3" class="ident">r</label>) {</code></span>
+<span class="codeline" id="line-25"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-26"><code>		}</code></span>
+<span class="codeline" id="line-27"><code>	}</code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">var</span> convertibleTypes = []<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-39" class="ident">Type</a>{<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-1431" class="ident">TypeOf</a>(<a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a>{}), <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-1431" class="ident">TypeOf</a>(<a href="../../../../pkg/builtin.html#name-false" class="ident">false</a>), <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-1431" class="ident">TypeOf</a>([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{})}</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">var</span> numericPlaceholderRe = <a href="../../../../pkg/regexp.html" class="ident i3">regexp</a>.<a href="../../../regexp/regexp.go.html#line-316" class="ident">MustCompile</a>(<span class="lit-string">`\$\d+\$`</span>)</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// ExplainSQL generate SQL string with given parameters, the generated SQL is expected to be used in logger, execute it might introduce a SQL injection vulnerability</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../pkg/gorm.io/gorm/logger.html#name-ExplainSQL" class="ident">ExplainSQL</a></label>(<label for="r5" class="ident">sql</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r6" class="ident">numericPlaceholder</label> *<a href="../../../../pkg/regexp.html" class="ident i3">regexp</a>.<a href="../../../regexp/regexp.go.html#line-86" class="ident">Regexp</a>, <label for="r7" class="ident">escaper</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r8" class="ident">avars</label> ...<span class="keyword">interface</span>{}) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-38"><code>		<label for="r9" class="ident">convertParams</label> <span class="keyword">func</span>(<span class="keyword">interface</span>{}, <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>)</code></span>
+<span class="codeline" id="line-39"><code>		<label for="r10" class="ident">vars</label>          = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r8" class="ident">avars</label>))</code></span>
+<span class="codeline" id="line-40"><code>	)</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>	<label for="r9" class="ident">convertParams</label> = <span class="keyword">func</span>(<label for="r11" class="ident">v</label> <span class="keyword">interface</span>{}, <label for="r12" class="ident">idx</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-43"><code>		<span class="keyword">switch</span> v := <label for="r11" class="ident">v</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-44"><code>		<span class="keyword">case</span> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>:</code></span>
+<span class="codeline" id="line-45"><code>			<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/strconv.html" class="ident i4">strconv</a>.<a href="../../../strconv/atob.go.html#line-21" class="ident">FormatBool</a>(<label for="r13" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-46"><code>		<span class="keyword">case</span> <a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a>:</code></span>
+<span class="codeline" id="line-47"><code>			<span class="keyword">if</span> <label for="r14" class="ident">v</label>.<a href="../../../time/time.go.html#line-434" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-48"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="#line-18" class="ident">tmFmtZero</a> + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-49"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-50"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <label for="r14" class="ident">v</label>.<a href="../../../time/format.go.html#line-598" class="ident">Format</a>(<a href="#line-17" class="ident">tmFmtWithMS</a>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-51"><code>			}</code></span>
+<span class="codeline" id="line-52"><code>		<span class="keyword">case</span> *<a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a>:</code></span>
+<span class="codeline" id="line-53"><code>			<span class="keyword">if</span> <label for="r15" class="ident">v</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-54"><code>				<span class="keyword">if</span> <label for="r15" class="ident">v</label>.<a href="../../../time/time.go.html#line-434" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-55"><code>					<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="#line-18" class="ident">tmFmtZero</a> + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-56"><code>				} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-57"><code>					<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <label for="r15" class="ident">v</label>.<a href="../../../time/format.go.html#line-598" class="ident">Format</a>(<a href="#line-17" class="ident">tmFmtWithMS</a>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-58"><code>				}</code></span>
+<span class="codeline" id="line-59"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-60"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="#line-19" class="ident">nullStr</a></code></span>
+<span class="codeline" id="line-61"><code>			}</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">case</span> <a href="../../../../pkg/database/sql/driver.html" class="ident i0">driver</a>.<a href="../../../database/sql/driver/types.go.html#line-39" class="ident">Valuer</a>:</code></span>
+<span class="codeline" id="line-63"><code>			<label for="r16" class="ident">reflectValue</label> := <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r17" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-64"><code>			<span class="keyword">if</span> <label for="r17" class="ident">v</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r16" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() &amp;&amp; ((<label for="r16" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a> &amp;&amp; !<label for="r16" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1537" class="ident">IsNil</a>()) || <label for="r16" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() != <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a>) {</code></span>
+<span class="codeline" id="line-65"><code>				<label for="r18" class="ident">r</label>, <label for="r19" class="ident">_</label> := <label for="r17" class="ident">v</label>.<a href="../../../database/sql/driver/types.go.html#line-42" class="ident">Value</a>()</code></span>
+<span class="codeline" id="line-66"><code>				<label for="r9" class="ident">convertParams</label>(<label for="r18" class="ident">r</label>, <label for="r12" class="ident">idx</label>)</code></span>
+<span class="codeline" id="line-67"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-68"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="#line-19" class="ident">nullStr</a></code></span>
+<span class="codeline" id="line-69"><code>			}</code></span>
+<span class="codeline" id="line-70"><code>		<span class="keyword">case</span> <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-62" class="ident">Stringer</a>:</code></span>
+<span class="codeline" id="line-71"><code>			<label for="r20" class="ident">reflectValue</label> := <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r21" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-72"><code>			<span class="keyword">switch</span> <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() {</code></span>
+<span class="codeline" id="line-73"><code>			<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-246" class="ident">Int</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-247" class="ident">Int8</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-248" class="ident">Int16</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-249" class="ident">Int32</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-250" class="ident">Int64</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-251" class="ident">Uint</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-252" class="ident">Uint8</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-253" class="ident">Uint16</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-254" class="ident">Uint32</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-255" class="ident">Uint64</a>:</code></span>
+<span class="codeline" id="line-74"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%d"</span>, <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1477" class="ident">Interface</a>())</code></span>
+<span class="codeline" id="line-75"><code>			<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-257" class="ident">Float32</a>, <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-258" class="ident">Float64</a>:</code></span>
+<span class="codeline" id="line-76"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%.6f"</span>, <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1477" class="ident">Interface</a>())</code></span>
+<span class="codeline" id="line-77"><code>			<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-245" class="ident">Bool</a>:</code></span>
+<span class="codeline" id="line-78"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%t"</span>, <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1477" class="ident">Interface</a>())</code></span>
+<span class="codeline" id="line-79"><code>			<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-268" class="ident">String</a>:</code></span>
+<span class="codeline" id="line-80"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-1042" class="ident">ReplaceAll</a>(<a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%v"</span>, <label for="r21" class="ident">v</label>), <label for="r7" class="ident">escaper</label>, <span class="lit-string">"\\"</span>+<label for="r7" class="ident">escaper</label>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-81"><code>			<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-82"><code>				<span class="keyword">if</span> <label for="r21" class="ident">v</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() &amp;&amp; ((<label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a> &amp;&amp; !<label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1537" class="ident">IsNil</a>()) || <label for="r20" class="ident">reflectValue</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() != <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a>) {</code></span>
+<span class="codeline" id="line-83"><code>					<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-1042" class="ident">ReplaceAll</a>(<a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%v"</span>, <label for="r21" class="ident">v</label>), <label for="r7" class="ident">escaper</label>, <span class="lit-string">"\\"</span>+<label for="r7" class="ident">escaper</label>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-84"><code>				} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-85"><code>					<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="#line-19" class="ident">nullStr</a></code></span>
+<span class="codeline" id="line-86"><code>				}</code></span>
+<span class="codeline" id="line-87"><code>			}</code></span>
+<span class="codeline" id="line-88"><code>		<span class="keyword">case</span> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>:</code></span>
+<span class="codeline" id="line-89"><code>			<span class="keyword">if</span> <label for="r22" class="ident">s</label> := <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r23" class="ident">v</label>); <a href="#line-22" class="ident">isPrintable</a>(<label for="r22" class="ident">s</label>) {</code></span>
+<span class="codeline" id="line-90"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-1042" class="ident">ReplaceAll</a>(<label for="r22" class="ident">s</label>, <label for="r7" class="ident">escaper</label>, <span class="lit-string">"\\"</span>+<label for="r7" class="ident">escaper</label>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-91"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-92"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <span class="lit-string">"&lt;binary&gt;"</span> + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-93"><code>			}</code></span>
+<span class="codeline" id="line-94"><code>		<span class="keyword">case</span> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../pkg/builtin.html#name-int8" class="ident">int8</a>, <a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <a href="../../../../pkg/builtin.html#name-int32" class="ident">int32</a>, <a href="../../../../pkg/builtin.html#name-int64" class="ident">int64</a>, <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>, <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>, <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>:</code></span>
+<span class="codeline" id="line-95"><code>			<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/utils.html" class="ident i8">utils</a>.<a href="../utils/utils.go.html#line-107" class="ident">ToString</a>(<label for="r24" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-96"><code>		<span class="keyword">case</span> <a href="../../../../pkg/builtin.html#name-float64" class="ident">float64</a>, <a href="../../../../pkg/builtin.html#name-float32" class="ident">float32</a>:</code></span>
+<span class="codeline" id="line-97"><code>			<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%.6f"</span>, <label for="r25" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-98"><code>		<span class="keyword">case</span> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>:</code></span>
+<span class="codeline" id="line-99"><code>			<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-1042" class="ident">ReplaceAll</a>(<label for="r26" class="ident">v</label>, <label for="r7" class="ident">escaper</label>, <span class="lit-string">"\\"</span>+<label for="r7" class="ident">escaper</label>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-101"><code>			<label for="r27" class="ident">rv</label> := <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r28" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-102"><code>			<span class="keyword">if</span> <label for="r28" class="ident">v</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> || !<label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() || <label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a> &amp;&amp; <label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-1537" class="ident">IsNil</a>() {</code></span>
+<span class="codeline" id="line-103"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <a href="#line-19" class="ident">nullStr</a></code></span>
+<span class="codeline" id="line-104"><code>			} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r29" class="ident">valuer</label>, <label for="r30" class="ident">ok</label> := <label for="r28" class="ident">v</label>.(<a href="../../../../pkg/database/sql/driver.html" class="ident i0">driver</a>.<a href="../../../database/sql/driver/types.go.html#line-39" class="ident">Valuer</a>); <label for="r30" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-105"><code>				<label for="r28" class="ident">v</label>, _ = <label for="r29" class="ident">valuer</label>.<a href="../../../database/sql/driver/types.go.html#line-42" class="ident">Value</a>()</code></span>
+<span class="codeline" id="line-106"><code>				<label for="r9" class="ident">convertParams</label>(<label for="r28" class="ident">v</label>, <label for="r12" class="ident">idx</label>)</code></span>
+<span class="codeline" id="line-107"><code>			} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/type.go.html#line-274" class="ident">Ptr</a> &amp;&amp; !<label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-1568" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-108"><code>				<label for="r9" class="ident">convertParams</label>(<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3030" class="ident">Indirect</a>(<label for="r27" class="ident">rv</label>).<a href="../../../reflect/value.go.html#line-1477" class="ident">Interface</a>(), <label for="r12" class="ident">idx</label>)</code></span>
+<span class="codeline" id="line-109"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-110"><code>				<span class="keyword">for</span> <label for="r31" class="ident">_</label>, <label for="r32" class="ident">t</label> := <span class="keyword">range</span> <a href="#line-31" class="ident">convertibleTypes</a> {</code></span>
+<span class="codeline" id="line-111"><code>					<span class="keyword">if</span> <label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../../reflect/type.go.html#line-115" class="ident">ConvertibleTo</a>(<label for="r32" class="ident">t</label>) {</code></span>
+<span class="codeline" id="line-112"><code>						<label for="r9" class="ident">convertParams</label>(<label for="r27" class="ident">rv</label>.<a href="../../../reflect/value.go.html#line-3151" class="ident">Convert</a>(<label for="r32" class="ident">t</label>).<a href="../../../reflect/value.go.html#line-1477" class="ident">Interface</a>(), <label for="r12" class="ident">idx</label>)</code></span>
+<span class="codeline" id="line-113"><code>						<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-114"><code>					}</code></span>
+<span class="codeline" id="line-115"><code>				}</code></span>
+<span class="codeline" id="line-116"><code>				<label for="r10" class="ident">vars</label>[<label for="r12" class="ident">idx</label>] = <label for="r7" class="ident">escaper</label> + <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/strings.go.html#line-1042" class="ident">ReplaceAll</a>(<a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/print.go.html#line-257" class="ident">Sprint</a>(<label for="r28" class="ident">v</label>), <label for="r7" class="ident">escaper</label>, <span class="lit-string">"\\"</span>+<label for="r7" class="ident">escaper</label>) + <label for="r7" class="ident">escaper</label></code></span>
+<span class="codeline" id="line-117"><code>			}</code></span>
+<span class="codeline" id="line-118"><code>		}</code></span>
+<span class="codeline" id="line-119"><code>	}</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">for</span> <label for="r33" class="ident">idx</label>, <label for="r34" class="ident">v</label> := <span class="keyword">range</span> <label for="r8" class="ident">avars</label> {</code></span>
+<span class="codeline" id="line-122"><code>		<label for="r9" class="ident">convertParams</label>(<label for="r34" class="ident">v</label>, <label for="r33" class="ident">idx</label>)</code></span>
+<span class="codeline" id="line-123"><code>	}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">if</span> <label for="r6" class="ident">numericPlaceholder</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-126"><code>		<span class="keyword">var</span> <label for="r35" class="ident">idx</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-127"><code>		<span class="keyword">var</span> <label for="r36" class="ident">newSQL</label> <a href="../../../../pkg/strings.html" class="ident i5">strings</a>.<a href="../../../strings/builder.go.html#line-15" class="ident">Builder</a></code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">for</span> <label for="r37" class="ident">_</label>, <label for="r38" class="ident">v</label> := <span class="keyword">range</span> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r5" class="ident">sql</label>) {</code></span>
+<span class="codeline" id="line-130"><code>			<span class="keyword">if</span> <label for="r38" class="ident">v</label> == <span class="lit-number">'?'</span> {</code></span>
+<span class="codeline" id="line-131"><code>				<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">vars</label>) &gt; <label for="r35" class="ident">idx</label> {</code></span>
+<span class="codeline" id="line-132"><code>					<label for="r36" class="ident">newSQL</label>.<a href="../../../strings/builder.go.html#line-122" class="ident">WriteString</a>(<label for="r10" class="ident">vars</label>[<label for="r35" class="ident">idx</label>])</code></span>
+<span class="codeline" id="line-133"><code>					<label for="r35" class="ident">idx</label>++</code></span>
+<span class="codeline" id="line-134"><code>					<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-135"><code>				}</code></span>
+<span class="codeline" id="line-136"><code>			}</code></span>
+<span class="codeline" id="line-137"><code>			<label for="r36" class="ident">newSQL</label>.<a href="../../../strings/builder.go.html#line-96" class="ident">WriteByte</a>(<label for="r38" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-138"><code>		}</code></span>
+<span class="codeline" id="line-139"><code></code></span>
+<span class="codeline" id="line-140"><code>		<label for="r5" class="ident">sql</label> = <label for="r36" class="ident">newSQL</label>.<a href="../../../strings/builder.go.html#line-47" class="ident">String</a>()</code></span>
+<span class="codeline" id="line-141"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-142"><code>		<label for="r5" class="ident">sql</label> = <label for="r6" class="ident">numericPlaceholder</label>.<a href="../../../regexp/regexp.go.html#line-578" class="ident">ReplaceAllString</a>(<label for="r5" class="ident">sql</label>, <span class="lit-string">"$$$1$$"</span>)</code></span>
+<span class="codeline" id="line-143"><code></code></span>
+<span class="codeline" id="line-144"><code>		<label for="r5" class="ident">sql</label> = <a href="#line-33" class="ident">numericPlaceholderRe</a>.<a href="../../../regexp/regexp.go.html#line-602" class="ident">ReplaceAllStringFunc</a>(<label for="r5" class="ident">sql</label>, <span class="keyword">func</span>(<label for="r39" class="ident">v</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-145"><code>			<label for="r40" class="ident">num</label> := <label for="r39" class="ident">v</label>[<span class="lit-number">1</span> : <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r39" class="ident">v</label>)-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-146"><code>			<label for="r41" class="ident">n</label>, <label for="r42" class="ident">_</label> := <a href="../../../../pkg/strconv.html" class="ident i4">strconv</a>.<a href="../../../strconv/atoi.go.html#line-231" class="ident">Atoi</a>(<label for="r40" class="ident">num</label>)</code></span>
+<span class="codeline" id="line-147"><code></code></span>
+<span class="codeline" id="line-148"><code>			<span class="comment">// position var start from 1 ($1, $2)</span></code></span>
+<span class="codeline" id="line-149"><code>			<label for="r41" class="ident">n</label> -= <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-150"><code>			<span class="keyword">if</span> <label for="r41" class="ident">n</label> &gt;= <span class="lit-number">0</span> &amp;&amp; <label for="r41" class="ident">n</label> &lt;= <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">vars</label>)-<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-151"><code>				<span class="keyword">return</span> <label for="r10" class="ident">vars</label>[<label for="r41" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-152"><code>			}</code></span>
+<span class="codeline" id="line-153"><code>			<span class="keyword">return</span> <label for="r39" class="ident">v</label></code></span>
+<span class="codeline" id="line-154"><code>		})</code></span>
+<span class="codeline" id="line-155"><code>	}</code></span>
+<span class="codeline" id="line-156"><code></code></span>
+<span class="codeline" id="line-157"><code>	<span class="keyword">return</span> <label for="r5" class="ident">sql</label></code></span>
+<span class="codeline" id="line-158"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

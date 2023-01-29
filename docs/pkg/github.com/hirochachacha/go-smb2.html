@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/hirochachacha/go-smb2</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>smb2</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/hirochachacha/go-smb2">github.com/hirochachacha/go-smb2</a><i> (on <a href="https://pkg.go.dev/github.com/hirochachacha/go-smb2" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/hirochachacha/go-smb2.html">36 packages</a>, and imported by <a href="../../../dep/github.com/hirochachacha/go-smb2.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/all.go.html">all.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html">client.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/client_fs.go.html">client_fs.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/conn.go.html">conn.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/credit.go.html">credit.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html">deprecated.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html">errors.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/feature.go.html">feature.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/filepath.go.html">filepath.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html">initiator.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/kdf.go.html">kdf.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/path.go.html">path.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/session.go.html">session.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-13-fold-content"><label for="file-13-fold-content">   <a href="../../../src/github.com/hirochachacha/go-smb2/smb2.go.html#doc">#d</a> <a href="../../../src/github.com/hirochachacha/go-smb2/smb2.go.html">smb2.go</a></label><span id='file-13-fold-content-items' class="fold-items">
+<span class="md-text">		Package smb2 implements the SMB2/3 client in [MS-SMB2].
+		
+		https://msdn.microsoft.com/en-us/library/cc246482.aspx
+		
+		This package doesn't support CAP_UNIX extension.
+		Symlink is supported by FSCTL_SET_REPARSE_POINT and FSCTL_GET_REPARSE_POINT.
+		The symlink-following algorithm is explained in 2.2.2.2.1 and 2.2.2.2.1.1.
+		
+		https://msdn.microsoft.com/en-us/library/cc246542.aspx
+		
+		Supported features and protocol versions are declared in feature.go.</span>
+</span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/spnego.go.html">spnego.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/transport.go.html">transport.go</a></span>
+	<span class="nodocs">      <a href="../../../src/github.com/hirochachacha/go-smb2/tree_conn.go.html">tree_conn.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content"></label><span id='example-0-fold-content-items' class="fold-items">
+	  {
+	  	conn, err := net.Dial("tcp", "localhost:445")
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  	defer conn.Close()
+	  
+	  	d := &amp;smb2.Dialer{
+	  		Initiator: &amp;smb2.NTLMInitiator{
+	  			User:     "Guest",
+	  			Password: "",
+	  			Domain:   "MicrosoftAccount",
+	  		},
+	  	}
+	  
+	  	c, err := d.Dial(conn)
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  	defer c.Logoff()
+	  
+	  	fs, err := c.Mount(`\\localhost\share`)
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  	defer fs.Umount()
+	  
+	  	f, err := fs.Create("hello.txt")
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  	defer fs.Remove("hello.txt")
+	  	defer f.Close()
+	  
+	  	_, err = f.Write([]byte("Hello world!"))
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  
+	  	_, err = f.Seek(0, io.SeekStart)
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  
+	  	bs, err := ioutil.ReadAll(f)
+	  	if err != nil {
+	  		panic(err)
+	  	}
+	  
+	  	fmt.Println(string(bs))
+	  
+	  }</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 18)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Client" data-popularity="0">	<span class="nodocs"> type <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html#line-3">Client</a> = <a href="#name-Session">Session</a> <i>(struct)</i></span></div><div class="anchor type-res" id="name-ContextError" data-popularity="150">	<input type='checkbox' class="fold" id="ContextError-fold-content"><label for="ContextError-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-50">ContextError</a> <i>(struct)</i></label><span id='ContextError-fold-content-docs' class="fold-docs">
+<span class="md-text">		ContextError wraps a context error to support os.IsTimeout function.</span>
+
+		<input type='checkbox' class="fold" id="ContextError-fold-fields"><label for="ContextError-fold-fields">Fields (<i>only one</i>)</label><span id='ContextError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/vendor/golang.org/x/net/http2/hpack/hpack.go.html#line-19">Err</a> <i><a href="../../builtin.html#name-error">error</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="ContextError-fold-methods"><label for="ContextError-fold-methods">Methods (<i>total 2</i>)</label><span id='ContextError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*ContextError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-58">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span><span>
+			<span class="nodocs">(*ContextError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-54">Timeout</a>() <a href="../../builtin.html#name-bool">bool</a></span></span></span>
+		<input type='checkbox' class="fold" id="ContextError-fold-impls"><label for="ContextError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='ContextError-fold-impls-items' class="fold-items"><span>
+			*ContextError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Dialer" data-popularity="100">	<input type='checkbox' class="fold" id="Dialer-fold-content"><label for="Dialer-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-23">Dialer</a> <i>(struct)</i></label><span id='Dialer-fold-content-docs' class="fold-docs">
+<span class="md-text">		Dialer contains options for func (*Dialer) Dial.</span>
+
+		<input type='checkbox' class="fold" id="Dialer-fold-fields"><label for="Dialer-fold-fields">Fields (<i>total 3</i>)</label><span id='Dialer-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-26">Initiator</a> <i><a href="#name-Initiator">Initiator</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="Dialer-fold-field-MaxCreditBalance"><label for="Dialer-fold-field-MaxCreditBalance"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-24">MaxCreditBalance</a> <i><a href="../../builtin.html#name-uint16">uint16</a></i></label><span id='Dialer-fold-field-MaxCreditBalance-docs' class="fold-docs">
+<span class="md-text">				// if it's zero, clientMaxCreditBalance is used. (See feature.go for more details)</span>
+</span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-25">Negotiator</a> <i><a href="#name-Negotiator">Negotiator</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="Dialer-fold-methods"><label for="Dialer-fold-methods">Methods (<i>total 2</i>)</label><span id='Dialer-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Dialer-fold-method-Dial"><label for="Dialer-fold-method-Dial">(*Dialer) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-33">Dial</a>(tcpConn <a href="../../net.html">net</a>.<a href="../../net.html#name-Conn">Conn</a>) (*<a href="#name-Session">Session</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Dialer-fold-method-Dial-docs' class="fold-docs">
+<span class="md-text">				Dial performs negotiation and authentication.
+				It returns a session. It doesn't support NetBIOS transport.
+				This implementation doesn't support multi-session on the same TCP connection.
+				If you want to use another session, you need to prepare another TCP connection at first.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Dialer-fold-method-DialContext"><label for="Dialer-fold-method-DialContext">(*Dialer) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-42">DialContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>, tcpConn <a href="../../net.html">net</a>.<a href="../../net.html#name-Conn">Conn</a>) (*<a href="#name-Session">Session</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Dialer-fold-method-DialContext-docs' class="fold-docs">
+<span class="md-text">				DialContext performs negotiation and authentication using the provided context.
+				Note that returned session doesn't inherit context.
+				If you want to use the same context, call Session.WithContext manually.
+				This implementation doesn't support multi-session on the same TCP connection.
+				If you want to use another session, you need to prepare another TCP connection at first.</span>
+</span></span></span>
+
+</span></div><div class="anchor type-res" id="name-File" data-popularity="2225">	<input type='checkbox' class="fold" id="File-fold-content"><label for="File-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1025">File</a> <i>(struct)</i></label><span id='File-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="File-fold-methods"><label for="File-fold-methods">Methods (<i>total 17</i>)</label><span id='File-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1541">Chmod</a>(mode <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1038">Close</a>() <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1096">Name</a>() <a href="../../builtin.html#name-string">string</a></span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1100">Read</a>(b []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-ReadAt"><label for="File-fold-method-ReadAt">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1126">ReadAt</a>(b []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-ReadAt-docs' class="fold-docs">
+<span class="md-text">				ReadAt implements io.ReaderAt.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-ReadFrom"><label for="File-fold-method-ReadFrom">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1842">ReadFrom</a>(r <a href="../../io.html">io</a>.<a href="../../io.html#name-Reader">Reader</a>) (n <a href="../../builtin.html#name-int64">int64</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-ReadFrom-docs' class="fold-docs">
+<span class="md-text">				ReadFrom implements io.ReadFrom.
+				If r is *File on the same *Share as f, it invokes server-side copy.</span>
+</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1267">Readdir</a>(n <a href="../../builtin.html#name-int">int</a>) (fi []<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1312">Readdirnames</a>(n <a href="../../builtin.html#name-int">int</a>) (names []<a href="../../builtin.html#name-string">string</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-Seek"><label for="File-fold-method-Seek">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1328">Seek</a>(offset <a href="../../builtin.html#name-int64">int64</a>, whence <a href="../../builtin.html#name-int">int</a>) (ret <a href="../../builtin.html#name-int64">int64</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-Seek-docs' class="fold-docs">
+<span class="md-text">				Seek implements io.Seeker.</span>
+</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1372">Stat</a>() (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1414">Statfs</a>() (<a href="#name-FileFsInfo">FileFsInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1486">Sync</a>() (err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1513">Truncate</a>(size <a href="../../builtin.html#name-int64">int64</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1591">Write</a>(b []<a href="../../builtin.html#name-byte">byte</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-WriteAt"><label for="File-fold-method-WriteAt">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1614">WriteAt</a>(b []<a href="../../builtin.html#name-byte">byte</a>, off <a href="../../builtin.html#name-int64">int64</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-WriteAt-docs' class="fold-docs">
+<span class="md-text">				WriteAt implements io.WriterAt.</span>
+</span></span><span>
+			<span class="nodocs">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1880">WriteString</a>(s <a href="../../builtin.html#name-string">string</a>) (n <a href="../../builtin.html#name-int">int</a>, err <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="File-fold-method-WriteTo"><label for="File-fold-method-WriteTo">(*File) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1862">WriteTo</a>(w <a href="../../io.html">io</a>.<a href="../../io.html#name-Writer">Writer</a>) (n <a href="../../builtin.html#name-int64">int64</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='File-fold-method-WriteTo-docs' class="fold-docs">
+<span class="md-text">				WriteTo implements io.WriteTo.
+				If w is *File on the same *Share as f, it invokes server-side copy.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="File-fold-impls"><label for="File-fold-impls">Implements (<i>at least 23</i>)</label><span id='File-fold-impls-items' class="fold-items"><span>
+			*File : github.com/pkg/sftp.<a href="../pkg/sftp.html#name-WriterAtReaderAt">WriterAtReaderAt</a></span><span>
+			*File : go.uber.org/zap.<a href="../../go.uber.org/zap.html#name-Sink">Sink</a></span><span>
+			*File : go.uber.org/zap/zapcore.<a href="../../go.uber.org/zap/zapcore.html#name-WriteSyncer">WriteSyncer</a></span><span>
+			*File : io.<a href="../../io.html#name-Closer">Closer</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadCloser">ReadCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-Reader">Reader</a></span><span>
+			*File : io.<a href="../../io.html#name-ReaderAt">ReaderAt</a></span><span>
+			*File : io.<a href="../../io.html#name-ReaderFrom">ReaderFrom</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadSeekCloser">ReadSeekCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadSeeker">ReadSeeker</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriteCloser">ReadWriteCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriter">ReadWriter</a></span><span>
+			*File : io.<a href="../../io.html#name-ReadWriteSeeker">ReadWriteSeeker</a></span><span>
+			*File : io.<a href="../../io.html#name-Seeker">Seeker</a></span><span>
+			*File : io.<a href="../../io.html#name-StringWriter">StringWriter</a></span><span>
+			*File : io.<a href="../../io.html#name-WriteCloser">WriteCloser</a></span><span>
+			*File : io.<a href="../../io.html#name-Writer">Writer</a></span><span>
+			*File : io.<a href="../../io.html#name-WriterAt">WriterAt</a></span><span>
+			*File : io.<a href="../../io.html#name-WriterTo">WriterTo</a></span><span>
+			*File : io.<a href="../../io.html#name-WriteSeeker">WriteSeeker</a></span><span>
+			*File : io/fs.<a href="../../io/fs.html#name-File">File</a></span><span>
+			*File : mime/multipart.<a href="../../mime/multipart.html#name-File">File</a></span><span>
+			*File : net/http.<a href="../../net/http.html#name-File">File</a></span></span>
+		<input type='checkbox' class="fold" id="File-fold-results"><label for="File-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='File-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Share">Share</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-245">Create</a>(name <a href="../../builtin.html#name-string">string</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Share">Share</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-270">Open</a>(name <a href="../../builtin.html#name-string">string</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Share">Share</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-274">OpenFile</a>(name <a href="../../builtin.html#name-string">string</a>, flag <a href="../../builtin.html#name-int">int</a>, perm <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) (*<b>File</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-FileFsInfo" data-popularity="400">	<input type='checkbox' class="fold" id="FileFsInfo-fold-content"><label for="FileFsInfo-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1422">FileFsInfo</a> <b><i>(interface)</i></b></label><span id='FileFsInfo-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="FileFsInfo-fold-methods"><label for="FileFsInfo-fold-methods">Methods (<i>total 5</i>)</label><span id='FileFsInfo-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( FileFsInfo) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1427">AvailableBlockCount</a>() <a href="../../builtin.html#name-uint64">uint64</a></span></span><span>
+			<span class="nodocs">( FileFsInfo) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1423">BlockSize</a>() <a href="../../builtin.html#name-uint64">uint64</a></span></span><span>
+			<span class="nodocs">( FileFsInfo) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1424">FragmentSize</a>() <a href="../../builtin.html#name-uint64">uint64</a></span></span><span>
+			<span class="nodocs">( FileFsInfo) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1426">FreeBlockCount</a>() <a href="../../builtin.html#name-uint64">uint64</a></span></span><span>
+			<span class="nodocs">( FileFsInfo) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1425">TotalBlockCount</a>() <a href="../../builtin.html#name-uint64">uint64</a></span></span></span>
+		<input type='checkbox' class="fold" id="FileFsInfo-fold-results"><label for="FileFsInfo-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='FileFsInfo-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-File">File</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-1414">Statfs</a>() (<b>FileFsInfo</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Share">Share</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-873">Statfs</a>(name <a href="../../builtin.html#name-string">string</a>) (<b>FileFsInfo</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-FileStat" data-popularity="350">	<input type='checkbox' class="fold" id="FileStat-fold-content"><label for="FileStat-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2072">FileStat</a> <i>(struct)</i></label><span id='FileStat-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="FileStat-fold-fields"><label for="FileStat-fold-fields">Fields (<i>total 8</i>)</label><span id='FileStat-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2078">AllocationSize</a> <i><a href="../../builtin.html#name-int64">int64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2076">ChangeTime</a> <i><a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2073">CreationTime</a> <i><a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2077">EndOfFile</a> <i><a href="../../builtin.html#name-int64">int64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2079">FileAttributes</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2080">FileName</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2074">LastAccessTime</a> <i><a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2075">LastWriteTime</a> <i><a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="FileStat-fold-methods"><label for="FileStat-fold-methods">Methods (<i>total 6</i>)</label><span id='FileStat-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2115">IsDir</a>() <a href="../../builtin.html#name-bool">bool</a></span></span><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2111">ModTime</a>() <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></span></span><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2091">Mode</a>() <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a></span></span><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2083">Name</a>() <a href="../../builtin.html#name-string">string</a></span></span><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2087">Size</a>() <a href="../../builtin.html#name-int64">int64</a></span></span><span>
+			<span class="nodocs">(*FileStat) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-2119">Sys</a>() interface{}</span></span></span>
+		<input type='checkbox' class="fold" id="FileStat-fold-impls"><label for="FileStat-fold-impls">Implements (<i>at least one exported</i>)</label><span id='FileStat-fold-impls-items' class="fold-items"><span>
+			*FileStat : io/fs.<a href="../../io/fs.html#name-FileInfo">FileInfo</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Initiator" data-popularity="150">	<input type='checkbox' class="fold" id="Initiator-fold-content"><label for="Initiator-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-10">Initiator</a> <b><i>(interface)</i></b></label><span id='Initiator-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="Initiator-fold-impledby"><label for="Initiator-fold-impledby">Implemented By (<i>at least one exported</i>)</label><span id='Initiator-fold-impledby-items' class="fold-items"><span>
+			*<a href="#name-NTLMInitiator">NTLMInitiator</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-InternalError" data-popularity="100">	<input type='checkbox' class="fold" id="InternalError-fold-content"><label for="InternalError-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-20">InternalError</a> <i>(struct)</i></label><span id='InternalError-fold-content-docs' class="fold-docs">
+<span class="md-text">		InternalError represents internal error.</span>
+
+		<input type='checkbox' class="fold" id="InternalError-fold-fields"><label for="InternalError-fold-fields">Fields (<i>only one</i>)</label><span id='InternalError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/jackc/pgx/v5/pgproto3/copy_fail.go.html#line-11">Message</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="InternalError-fold-methods"><label for="InternalError-fold-methods">Methods (<i>only one</i>)</label><span id='InternalError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*InternalError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-24">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="InternalError-fold-impls"><label for="InternalError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='InternalError-fold-impls-items' class="fold-items"><span>
+			*InternalError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-InvalidResponseError" data-popularity="100">	<input type='checkbox' class="fold" id="InvalidResponseError-fold-content"><label for="InvalidResponseError-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-29">InvalidResponseError</a> <i>(struct)</i></label><span id='InvalidResponseError-fold-content-docs' class="fold-docs">
+<span class="md-text">		InvalidResponseError represents a data sent by the server is corrupted or unexpected.</span>
+
+		<input type='checkbox' class="fold" id="InvalidResponseError-fold-fields"><label for="InvalidResponseError-fold-fields">Fields (<i>only one</i>)</label><span id='InvalidResponseError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/jackc/pgx/v5/pgproto3/copy_fail.go.html#line-11">Message</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="InvalidResponseError-fold-methods"><label for="InvalidResponseError-fold-methods">Methods (<i>only one</i>)</label><span id='InvalidResponseError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*InvalidResponseError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-33">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="InvalidResponseError-fold-impls"><label for="InvalidResponseError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='InvalidResponseError-fold-impls-items' class="fold-items"><span>
+			*InvalidResponseError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Negotiator" data-popularity="0">	<input type='checkbox' class="fold" id="Negotiator-fold-content"><label for="Negotiator-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/conn.go.html#line-18">Negotiator</a> <i>(struct)</i></label><span id='Negotiator-fold-content-docs' class="fold-docs">
+<span class="md-text">		Negotiator contains options for func (*Dialer) Dial.</span>
+
+		<input type='checkbox' class="fold" id="Negotiator-fold-fields"><label for="Negotiator-fold-fields">Fields (<i>total 3</i>)</label><span id='Negotiator-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Negotiator-fold-field-ClientGuid"><label for="Negotiator-fold-field-ClientGuid"><a href="../../../src/github.com/hirochachacha/go-smb2/conn.go.html#line-20">ClientGuid</a> <i>[16]<a href="../../builtin.html#name-byte">byte</a></i></label><span id='Negotiator-fold-field-ClientGuid-docs' class="fold-docs">
+<span class="md-text">				// if it's zero, generated by crypto/rand.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Negotiator-fold-field-RequireMessageSigning"><label for="Negotiator-fold-field-RequireMessageSigning"><a href="../../../src/github.com/hirochachacha/go-smb2/conn.go.html#line-19">RequireMessageSigning</a> <i><a href="../../builtin.html#name-bool">bool</a></i></label><span id='Negotiator-fold-field-RequireMessageSigning-docs' class="fold-docs">
+<span class="md-text">				// enforce signing?</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Negotiator-fold-field-SpecifiedDialect"><label for="Negotiator-fold-field-SpecifiedDialect"><a href="../../../src/github.com/hirochachacha/go-smb2/conn.go.html#line-21">SpecifiedDialect</a> <i><a href="../../builtin.html#name-uint16">uint16</a></i></label><span id='Negotiator-fold-field-SpecifiedDialect-docs' class="fold-docs">
+<span class="md-text">				// if it's zero, clientDialects is used. (See feature.go for more details)</span>
+</span></span></span>
+
+</span></div><div class="anchor type-res" id="name-NTLMInitiator" data-popularity="50">	<input type='checkbox' class="fold" id="NTLMInitiator-fold-content"><label for="NTLMInitiator-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-20">NTLMInitiator</a> <i>(struct)</i></label><span id='NTLMInitiator-fold-content-docs' class="fold-docs">
+<span class="md-text">		NTLMInitiator implements session-setup through NTLMv2.
+		It doesn't support NTLMv1. You can use Hash instead of Password.</span>
+
+		<input type='checkbox' class="fold" id="NTLMInitiator-fold-fields"><label for="NTLMInitiator-fold-fields">Fields (<i>total 6</i>)</label><span id='NTLMInitiator-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-24">Domain</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-23">Hash</a> <i>[]<a href="../../builtin.html#name-byte">byte</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-22">Password</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-26">TargetSPN</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-21">User</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../src/github.com/hirochachacha/go-smb2/initiator.go.html#line-25">Workstation</a> <i><a href="../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="NTLMInitiator-fold-impls"><label for="NTLMInitiator-fold-impls">Implements (<i>at least one exported</i>)</label><span id='NTLMInitiator-fold-impls-items' class="fold-items"><span>
+			*NTLMInitiator : <a href="#name-Initiator">Initiator</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-RemoteFile" data-popularity="0">	<span class="nodocs"> type <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html#line-5">RemoteFile</a> = <a href="#name-File">File</a> <i>(struct)</i></span></div><div class="anchor type-res" id="name-RemoteFileStat" data-popularity="0">	<span class="nodocs"> type <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html#line-6">RemoteFileStat</a> = <a href="#name-FileStat">FileStat</a> <i>(struct)</i></span></div><div class="anchor type-res" id="name-RemoteFileSystem" data-popularity="0">	<span class="nodocs"> type <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html#line-4">RemoteFileSystem</a> = <a href="#name-Share">Share</a> <i>(struct)</i></span></div><div class="anchor type-res" id="name-ResponseError" data-popularity="100">	<input type='checkbox' class="fold" id="ResponseError-fold-content"><label for="ResponseError-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-40">ResponseError</a> <i>(struct)</i></label><span id='ResponseError-fold-content-docs' class="fold-docs">
+<span class="md-text">		ResponseError represents a error with a nt status code sent by the server.
+		The NTSTATUS is defined in [MS-ERREF].
+		https://msdn.microsoft.com/en-au/library/cc704588.aspx</span>
+
+		<input type='checkbox' class="fold" id="ResponseError-fold-fields"><label for="ResponseError-fold-fields">Fields (<i>only one</i>)</label><span id='ResponseError-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="ResponseError-fold-field-Code"><label for="ResponseError-fold-field-Code"><a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-41">Code</a> <i><a href="../../builtin.html#name-uint32">uint32</a></i></label><span id='ResponseError-fold-field-Code-docs' class="fold-docs">
+<span class="md-text">				// NTSTATUS</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ResponseError-fold-methods"><label for="ResponseError-fold-methods">Methods (<i>only one</i>)</label><span id='ResponseError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*ResponseError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-45">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="ResponseError-fold-impls"><label for="ResponseError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='ResponseError-fold-impls-items' class="fold-items"><span>
+			*ResponseError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Session" data-popularity="500">	<input type='checkbox' class="fold" id="Session-fold-content"><label for="Session-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-76">Session</a> <i>(struct)</i></label><span id='Session-fold-content-docs' class="fold-docs">
+<span class="md-text">		Session represents a SMB session.</span>
+
+		<input type='checkbox' class="fold" id="Session-fold-methods"><label for="Session-fold-methods">Methods (<i>total 4</i>)</label><span id='Session-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*Session) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-117">ListSharenames</a>() ([]<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="Session-fold-method-Logoff"><label for="Session-fold-method-Logoff">(*Session) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-90">Logoff</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Session-fold-method-Logoff-docs' class="fold-docs">
+<span class="md-text">				Logoff invalidates the current SMB session.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Session-fold-method-Mount"><label for="Session-fold-method-Mount">(*Session) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-98">Mount</a>(sharename <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-Share">Share</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Session-fold-method-Mount-docs' class="fold-docs">
+<span class="md-text">				Mount mounts the SMB share.
+				sharename must follow format like `&lt;share&gt;` or `\\&lt;server&gt;\&lt;share&gt;`.
+				Note that the mounted share doesn't inherit session's context.
+				If you want to use the same context, call Share.WithContext manually.</span>
+</span></span><span>
+			<span class="nodocs">(*Session) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-82">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Session</b></span></span></span>
+		<input type='checkbox' class="fold" id="Session-fold-results"><label for="Session-fold-results">As Outputs Of (<i>at least 4</i>)</label><span id='Session-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Dialer">Dialer</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-33">Dial</a>(tcpConn <a href="../../net.html">net</a>.<a href="../../net.html#name-Conn">Conn</a>) (*<b>Session</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Dialer">Dialer</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-42">DialContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>, tcpConn <a href="../../net.html">net</a>.<a href="../../net.html#name-Conn">Conn</a>) (*<b>Session</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*Session).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-82">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Session</b></span><span>
+			func github.com/limanmys/render-engine/internal/bridge.<a href="../limanmys/render-engine/internal/bridge.html#name-OpenSmbConnection">OpenSmbConnection</a>(host, username, password <a href="../../builtin.html#name-string">string</a>) (*<b>Session</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Share" data-popularity="1300">	<input type='checkbox' class="fold" id="Share-fold-content"><label for="Share-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-225">Share</a> <i>(struct)</i></label><span id='Share-fold-content-docs' class="fold-docs">
+<span class="md-text">		Share represents a SMB tree connection with VFS interface.</span>
+
+		<input type='checkbox' class="fold" id="Share-fold-methods"><label for="Share-fold-methods">Methods (<i>total 23</i>)</label><span id='Share-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-761">Chmod</a>(name <a href="../../builtin.html#name-string">string</a>, mode <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-718">Chtimes</a>(name <a href="../../builtin.html#name-string">string</a>, atime <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>, mtime <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-245">Create</a>(name <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client_fs.go.html#line-14">DirFS</a>(dirname <a href="../../builtin.html#name-string">string</a>) <a href="../../io/fs.html">fs</a>.<a href="../../io/fs.html#name-FS">FS</a></span></span><span>
+			<input type='checkbox' class="fold" id="Share-fold-method-Glob"><label for="Share-fold-method-Glob">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/filepath.go.html#line-238">Glob</a>(pattern <a href="../../builtin.html#name-string">string</a>) (matches []<a href="../../builtin.html#name-string">string</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='Share-fold-method-Glob-docs' class="fold-docs">
+<span class="md-text">				Glob should work like filepath.Glob.</span>
+</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-612">Lstat</a>(name <a href="../../builtin.html#name-string">string</a>) (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-341">Mkdir</a>(name <a href="../../builtin.html#name-string">string</a>, perm <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<input type='checkbox' class="fold" id="Share-fold-method-MkdirAll"><label for="Share-fold-method-MkdirAll">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/all.go.html#line-41">MkdirAll</a>(path <a href="../../builtin.html#name-string">string</a>, perm <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Share-fold-method-MkdirAll-docs' class="fold-docs">
+<span class="md-text">				MkdirAll mimics os.MkdirAll</span>
+</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-270">Open</a>(name <a href="../../builtin.html#name-string">string</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-274">OpenFile</a>(name <a href="../../builtin.html#name-string">string</a>, flag <a href="../../builtin.html#name-int">int</a>, perm <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) (*<a href="#name-File">File</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-795">ReadDir</a>(dirname <a href="../../builtin.html#name-string">string</a>) ([]<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-817">ReadFile</a>(filename <a href="../../builtin.html#name-string">string</a>) ([]<a href="../../builtin.html#name-byte">byte</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-372">Readlink</a>(name <a href="../../builtin.html#name-string">string</a>) (<a href="../../builtin.html#name-string">string</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-431">Remove</a>(name <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<input type='checkbox' class="fold" id="Share-fold-method-RemoveAll"><label for="Share-fold-method-RemoveAll">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/all.go.html#line-90">RemoveAll</a>(path <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Share-fold-method-RemoveAll-docs' class="fold-docs">
+<span class="md-text">				RemoveAll removes path and any children it contains.
+				It removes everything it can but returns the first error
+				it encounters. If the path does not exist, RemoveAll
+				returns nil (no error).</span>
+</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-479">Rename</a>(oldpath, newpath <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-646">Stat</a>(name <a href="../../builtin.html#name-string">string</a>) (<a href="../../os.html">os</a>.<a href="../../os.html#name-FileInfo">FileInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-873">Statfs</a>(name <a href="../../builtin.html#name-string">string</a>) (<a href="#name-FileFsInfo">FileFsInfo</a>, <a href="../../builtin.html#name-error">error</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="Share-fold-method-Symlink"><label for="Share-fold-method-Symlink">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-537">Symlink</a>(target, linkpath <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Share-fold-method-Symlink-docs' class="fold-docs">
+<span class="md-text">				Symlink mimics os.Symlink.
+				This API should work on latest Windows and latest MacOS.
+				However it may not work on Linux because Samba doesn't support reparse point well.
+				Also there is a restriction on target pathname.
+				Generally, a pathname begins with leading backslash (e.g `\dir\name`) can be interpreted as two ways.
+				On windows, it is evaluated as a relative path, on other systems, it is evaluated as an absolute path.
+				This implementation always assumes that format is absolute path.
+				So, if you know the target server is Windows, you should avoid that format.
+				If you want to use an absolute target path on windows, you can use // `C:\dir\name` format instead.</span>
+</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-680">Truncate</a>(name <a href="../../builtin.html#name-string">string</a>, size <a href="../../builtin.html#name-int64">int64</a>) <a href="../../builtin.html#name-error">error</a></span></span><span>
+			<input type='checkbox' class="fold" id="Share-fold-method-Umount"><label for="Share-fold-method-Umount">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-241">Umount</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Share-fold-method-Umount-docs' class="fold-docs">
+<span class="md-text">				Umount disconects the current SMB tree.</span>
+</span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-230">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Share</b></span></span><span>
+			<span class="nodocs">(*Share) <a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-859">WriteFile</a>(filename <a href="../../builtin.html#name-string">string</a>, data []<a href="../../builtin.html#name-byte">byte</a>, perm <a href="../../os.html">os</a>.<a href="../../os.html#name-FileMode">FileMode</a>) <a href="../../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="Share-fold-results"><label for="Share-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='Share-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Session">Session</a>).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-98">Mount</a>(sharename <a href="../../builtin.html#name-string">string</a>) (*<b>Share</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*Share).<a href="../../../src/github.com/hirochachacha/go-smb2/client.go.html#line-230">WithContext</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) *<b>Share</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-TransportError" data-popularity="100">	<input type='checkbox' class="fold" id="TransportError-fold-content"><label for="TransportError-fold-content"> type <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-11">TransportError</a> <i>(struct)</i></label><span id='TransportError-fold-content-docs' class="fold-docs">
+<span class="md-text">		TransportError represents a error come from net.Conn layer.</span>
+
+		<input type='checkbox' class="fold" id="TransportError-fold-fields"><label for="TransportError-fold-fields">Fields (<i>only one</i>)</label><span id='TransportError-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../src/vendor/golang.org/x/net/http2/hpack/hpack.go.html#line-19">Err</a> <i><a href="../../builtin.html#name-error">error</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="TransportError-fold-methods"><label for="TransportError-fold-methods">Methods (<i>only one</i>)</label><span id='TransportError-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*TransportError) <a href="../../../src/github.com/hirochachacha/go-smb2/errors.go.html#line-15">Error</a>() <a href="../../builtin.html#name-string">string</a></span></span></span>
+		<input type='checkbox' class="fold" id="TransportError-fold-impls"><label for="TransportError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='TransportError-fold-impls-items' class="fold-items"><span>
+			*TransportError : <a href="../../builtin.html#name-error">error</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-IsPathSeparator">	<span class="nodocs"> func <a href="../../../src/github.com/hirochachacha/go-smb2/path.go.html#line-14">IsPathSeparator</a>(c <a href="../../builtin.html#name-uint8">uint8</a>) <a href="../../builtin.html#name-bool">bool</a></span></div><div class="anchor value-res" id="name-Match">	<input type='checkbox' class="fold" id="Match-fold-content"><label for="Match-fold-content"> func <a href="../../../src/github.com/hirochachacha/go-smb2/filepath.go.html#line-67">Match</a>(pattern, name <a href="../../builtin.html#name-string">string</a>) (matched <a href="../../builtin.html#name-bool">bool</a>, err <a href="../../builtin.html#name-error">error</a>)</label><span id='Match-fold-content-docs' class="fold-docs">
+<span class="md-text">		Match reports whether name matches the shell file name pattern.
+		The pattern syntax is:
+		
+			pattern:
+				{ term }
+			term:
+				'*'         matches any sequence of non-Separator characters
+				'?'         matches any single non-Separator character
+				'[' [ '^' ] { character-range } ']'
+				            character class (must be non-empty)
+				c           matches character c (c != '*', '?', '[')
+		
+			character-range:
+				c           matches character c (c != '-', ']')
+				lo '-' hi   matches character c for lo &lt;= c &lt;= hi
+		
+		Match requires pattern to match all of name, not just a substring.
+		The only possible returned error is ErrBadPattern, when pattern
+		is malformed.</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-ErrBadPattern">	<input type='checkbox' class="fold" id="ErrBadPattern-fold-content"><label for="ErrBadPattern-fold-content">  var <a href="../../../src/github.com/hirochachacha/go-smb2/filepath.go.html#line-46">ErrBadPattern</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrBadPattern-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrBadPattern indicates a pattern was malformed.</span>
+
+</span></div><div class="anchor value-res" id="name-NORMALIZE_PATH">	<span class="nodocs">  var <a href="../../../src/github.com/hirochachacha/go-smb2/path.go.html#line-10">NORMALIZE_PATH</a> <a href="../../builtin.html#name-bool">bool</a> // <span class="md-text">normalize path arguments automatically</span></span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-MaxReadSizeLimit">	<span class="nodocs">const <a href="../../../src/github.com/hirochachacha/go-smb2/deprecated.go.html#line-8">MaxReadSizeLimit</a> = 1048576 // <span class="md-text">deprecated constant</span></span></div><div class="anchor value-res" id="name-PathSeparator">	<span class="nodocs">const <a href="../../../src/github.com/hirochachacha/go-smb2/path.go.html#line-12">PathSeparator</a> = 92</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

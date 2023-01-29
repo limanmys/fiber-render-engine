@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: flags.go in package internal/goexperiment</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	flags.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/goexperiment.html">internal/goexperiment</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2021 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package goexperiment implements support for toolchain experiments.</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// Toolchain experiments are controlled by the GOEXPERIMENT</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// environment variable. GOEXPERIMENT is a comma-separated list of</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// experiment names. GOEXPERIMENT can be set at make.bash time, which</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// sets the default experiments for binaries built with the tool</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// chain; or it can be set at build time. GOEXPERIMENT can also be set</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// to "none", which disables any experiments that were enabled at</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// make.bash time.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Experiments are exposed to the build in the following ways:</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// - Build tag goexperiment.x is set if experiment x (lower case) is</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// enabled.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// - For each experiment x (in camel case), this package contains a</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// boolean constant x and an integer constant xInt.</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// - In runtime assembly, the macro GOEXPERIMENT_x is defined if</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// experiment x (lower case) is enabled.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// In the toolchain, the set of experiments enabled for the current</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// build should be accessed via objabi.Experiment.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// The set of experiments is included in the output of runtime.Version()</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// and "go version &lt;binary&gt;" if it differs from the default experiments.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// For the set of experiments supported by the current toolchain, see</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// "go doc goexperiment.Flags".</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// Note that this package defines the set of experiments (in Flags)</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// and records the experiments that were enabled when the package</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// was compiled (as boolean and integer constants).</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// Note especially that this package does not itself change behavior</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// at run time based on the GOEXPERIMENT variable.</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// The code used in builds to interpret the GOEXPERIMENT variable</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// is in the separate package internal/buildcfg.</span></code></span></div><span class="codeline" id="line-43"><code><span class="keyword">package</span> goexperiment</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">//go:generate go run mkconsts.go</span></code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// Flags is the set of experiments that can be enabled or disabled in</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// the current toolchain.</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// When specified in the GOEXPERIMENT environment variable or as build</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// tags, experiments use the strings.ToLower of their field name.</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// For the baseline experimental configuration, see</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// objabi.experimentBaseline.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// If you change this struct definition, run "go generate".</span></code></span>
+<span class="codeline" id="line-57"><code><span class="keyword">type</span> <a href="../../../pkg/internal/goexperiment.html#name-Flags" class="ident">Flags</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-58"><code>	FieldTrack        <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-59"><code>	PreemptibleLoops  <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-60"><code>	StaticLockRanking <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-61"><code>	BoringCrypto      <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	<span class="comment">// Unified enables the compiler's unified IR construction</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">	// experiment.</span></code></span>
+<span class="codeline" id="line-65"><code>	Unified <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code>	<span class="comment">// Regabi is split into several sub-experiments that can be</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">	// enabled individually. Not all combinations work.</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">	// The "regabi" GOEXPERIMENT is an alias for all "working"</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">	// subexperiments.</span></code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code>	<span class="comment">// RegabiWrappers enables ABI wrappers for calling between</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">	// ABI0 and ABIInternal functions. Without this, the ABIs are</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">	// assumed to be identical so cross-ABI calls are direct.</span></code></span>
+<span class="codeline" id="line-75"><code>	RegabiWrappers <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-76"><code>	<span class="comment">// RegabiArgs enables register arguments/results in all</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">	// compiled Go functions.</span></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">	// Requires wrappers (to do ABI translation), and reflect (so</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">	// reflection calls use registers).</span></code></span>
+<span class="codeline" id="line-81"><code>	RegabiArgs <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code>	<span class="comment">// HeapMinimum512KiB reduces the minimum heap size to 512 KiB.</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">	// This was originally reduced as part of PacerRedesign, but</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">	// has been broken out to its own experiment that is disabled</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">	// by default.</span></code></span>
+<span class="codeline" id="line-88"><code>	HeapMinimum512KiB <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-89"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

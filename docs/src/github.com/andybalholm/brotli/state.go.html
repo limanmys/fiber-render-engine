@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: state.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	state.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"io"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">/* Copyright 2015 Google Inc. All Rights Reserved.</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">   Distributed under MIT license.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">   See file LICENSE for detail or copy at https://opensource.org/licenses/MIT</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">/* Brotli state for partial streaming decoding. */</span></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-13"><code>	stateUninited = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-14"><code>	stateLargeWindowBits</code></span>
+<span class="codeline" id="line-15"><code>	stateInitialize</code></span>
+<span class="codeline" id="line-16"><code>	stateMetablockBegin</code></span>
+<span class="codeline" id="line-17"><code>	stateMetablockHeader</code></span>
+<span class="codeline" id="line-18"><code>	stateMetablockHeader2</code></span>
+<span class="codeline" id="line-19"><code>	stateContextModes</code></span>
+<span class="codeline" id="line-20"><code>	stateCommandBegin</code></span>
+<span class="codeline" id="line-21"><code>	stateCommandInner</code></span>
+<span class="codeline" id="line-22"><code>	stateCommandPostDecodeLiterals</code></span>
+<span class="codeline" id="line-23"><code>	stateCommandPostWrapCopy</code></span>
+<span class="codeline" id="line-24"><code>	stateUncompressed</code></span>
+<span class="codeline" id="line-25"><code>	stateMetadata</code></span>
+<span class="codeline" id="line-26"><code>	stateCommandInnerWrite</code></span>
+<span class="codeline" id="line-27"><code>	stateMetablockDone</code></span>
+<span class="codeline" id="line-28"><code>	stateCommandPostWrite1</code></span>
+<span class="codeline" id="line-29"><code>	stateCommandPostWrite2</code></span>
+<span class="codeline" id="line-30"><code>	stateHuffmanCode0</code></span>
+<span class="codeline" id="line-31"><code>	stateHuffmanCode1</code></span>
+<span class="codeline" id="line-32"><code>	stateHuffmanCode2</code></span>
+<span class="codeline" id="line-33"><code>	stateHuffmanCode3</code></span>
+<span class="codeline" id="line-34"><code>	stateContextMap1</code></span>
+<span class="codeline" id="line-35"><code>	stateContextMap2</code></span>
+<span class="codeline" id="line-36"><code>	stateTreeGroup</code></span>
+<span class="codeline" id="line-37"><code>	stateDone</code></span>
+<span class="codeline" id="line-38"><code>)</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-41"><code>	stateMetablockHeaderNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-42"><code>	stateMetablockHeaderEmpty</code></span>
+<span class="codeline" id="line-43"><code>	stateMetablockHeaderNibbles</code></span>
+<span class="codeline" id="line-44"><code>	stateMetablockHeaderSize</code></span>
+<span class="codeline" id="line-45"><code>	stateMetablockHeaderUncompressed</code></span>
+<span class="codeline" id="line-46"><code>	stateMetablockHeaderReserved</code></span>
+<span class="codeline" id="line-47"><code>	stateMetablockHeaderBytes</code></span>
+<span class="codeline" id="line-48"><code>	stateMetablockHeaderMetadata</code></span>
+<span class="codeline" id="line-49"><code>)</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-52"><code>	stateUncompressedNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-53"><code>	stateUncompressedWrite</code></span>
+<span class="codeline" id="line-54"><code>)</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-57"><code>	stateTreeGroupNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-58"><code>	stateTreeGroupLoop</code></span>
+<span class="codeline" id="line-59"><code>)</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-62"><code>	stateContextMapNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-63"><code>	stateContextMapReadPrefix</code></span>
+<span class="codeline" id="line-64"><code>	stateContextMapHuffman</code></span>
+<span class="codeline" id="line-65"><code>	stateContextMapDecode</code></span>
+<span class="codeline" id="line-66"><code>	stateContextMapTransform</code></span>
+<span class="codeline" id="line-67"><code>)</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-70"><code>	stateHuffmanNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-71"><code>	stateHuffmanSimpleSize</code></span>
+<span class="codeline" id="line-72"><code>	stateHuffmanSimpleRead</code></span>
+<span class="codeline" id="line-73"><code>	stateHuffmanSimpleBuild</code></span>
+<span class="codeline" id="line-74"><code>	stateHuffmanComplex</code></span>
+<span class="codeline" id="line-75"><code>	stateHuffmanLengthSymbols</code></span>
+<span class="codeline" id="line-76"><code>)</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-79"><code>	stateDecodeUint8None = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-80"><code>	stateDecodeUint8Short</code></span>
+<span class="codeline" id="line-81"><code>	stateDecodeUint8Long</code></span>
+<span class="codeline" id="line-82"><code>)</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-85"><code>	stateReadBlockLengthNone = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-86"><code>	stateReadBlockLengthSuffix</code></span>
+<span class="codeline" id="line-87"><code>)</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/andybalholm/brotli.html#name-Reader" class="ident">Reader</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-90"><code>	src <a href="../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-91"><code>	buf []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="comment">// scratch space for reading from src</span></code></span>
+<span class="codeline" id="line-92"><code>	in  []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> <span class="comment">// current chunk to decode; usually aliases buf</span></code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	state        <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-95"><code>	loop_counter <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-96"><code>	br           <a href="bit_reader.go.html#line-55" class="ident">bitReader</a></code></span>
+<span class="codeline" id="line-97"><code>	buffer       <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-98"><code>		u64 <a href="../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-99"><code>		u8  [<span class="lit-number">8</span>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-100"><code>	}</code></span>
+<span class="codeline" id="line-101"><code>	buffer_length               <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-102"><code>	pos                         <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-103"><code>	max_backward_distance       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-104"><code>	max_distance                <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-105"><code>	ringbuffer_size             <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-106"><code>	ringbuffer_mask             <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-107"><code>	dist_rb_idx                 <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-108"><code>	dist_rb                     [<span class="lit-number">4</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-109"><code>	error_code                  <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-110"><code>	sub_loop_counter            <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-111"><code>	ringbuffer                  []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-112"><code>	ringbuffer_end              []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-113"><code>	htree_command               []<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-114"><code>	context_lookup              []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-115"><code>	context_map_slice           []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-116"><code>	dist_context_map_slice      []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-117"><code>	literal_hgroup              <a href="huffman.go.html#line-93" class="ident">huffmanTreeGroup</a></code></span>
+<span class="codeline" id="line-118"><code>	insert_copy_hgroup          <a href="huffman.go.html#line-93" class="ident">huffmanTreeGroup</a></code></span>
+<span class="codeline" id="line-119"><code>	distance_hgroup             <a href="huffman.go.html#line-93" class="ident">huffmanTreeGroup</a></code></span>
+<span class="codeline" id="line-120"><code>	block_type_trees            []<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-121"><code>	block_len_trees             []<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-122"><code>	trivial_literal_context     <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-123"><code>	distance_context            <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-124"><code>	meta_block_remaining_len    <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-125"><code>	block_length_index          <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-126"><code>	block_length                [<span class="lit-number">3</span>]<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-127"><code>	num_block_types             [<span class="lit-number">3</span>]<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-128"><code>	block_type_rb               [<span class="lit-number">6</span>]<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-129"><code>	distance_postfix_bits       <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-130"><code>	num_direct_distance_codes   <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-131"><code>	distance_postfix_mask       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-132"><code>	num_dist_htrees             <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-133"><code>	dist_context_map            []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-134"><code>	literal_htree               []<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-135"><code>	dist_htree_index            <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-136"><code>	repeat_code_len             <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-137"><code>	prev_code_len               <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-138"><code>	copy_length                 <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-139"><code>	distance_code               <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-140"><code>	rb_roundtrips               <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-141"><code>	partial_pos_out             <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-142"><code>	symbol                      <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-143"><code>	repeat                      <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-144"><code>	space                       <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-145"><code>	table                       [<span class="lit-number">32</span>]<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-146"><code>	symbol_lists                <a href="symbol_list.go.html#line-11" class="ident">symbolList</a></code></span>
+<span class="codeline" id="line-147"><code>	symbols_lists_array         [<a href="huffman.go.html#line-11" class="ident">huffmanMaxCodeLength</a> + <span class="lit-number">1</span> + <a href="constants.go.html#line-18" class="ident">numCommandSymbols</a>]<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-148"><code>	next_symbol                 [<span class="lit-number">32</span>]<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-149"><code>	code_length_code_lengths    [<a href="constants.go.html#line-31" class="ident">codeLengthCodes</a>]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-150"><code>	code_length_histo           [<span class="lit-number">16</span>]<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-151"><code>	htree_index                 <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-152"><code>	next                        []<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-153"><code>	context_index               <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-154"><code>	max_run_length_prefix       <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-155"><code>	code                        <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-156"><code>	context_map_table           [<a href="huffman.go.html#line-62" class="ident">huffmanMaxSize272</a>]<a href="huffman.go.html#line-68" class="ident">huffmanCode</a></code></span>
+<span class="codeline" id="line-157"><code>	substate_metablock_header   <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-158"><code>	substate_tree_group         <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-159"><code>	substate_context_map        <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-160"><code>	substate_uncompressed       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-161"><code>	substate_huffman            <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-162"><code>	substate_decode_uint8       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-163"><code>	substate_read_block_length  <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-164"><code>	is_last_metablock           <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-165"><code>	is_uncompressed             <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-166"><code>	is_metadata                 <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-167"><code>	should_wrap_ringbuffer      <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-168"><code>	canny_ringbuffer_allocation <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-169"><code>	large_window                <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-170"><code>	size_nibbles                <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-171"><code>	window_bits                 <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-172"><code>	new_ringbuffer_size         <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-173"><code>	num_literal_htrees          <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-174"><code>	context_map                 []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-175"><code>	context_modes               []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-176"><code>	dictionary                  *<a href="dictionary.go.html#line-10" class="ident">dictionary</a></code></span>
+<span class="codeline" id="line-177"><code>	transforms                  *<a href="transform.go.html#line-32" class="ident">transforms</a></code></span>
+<span class="codeline" id="line-178"><code>	trivial_literal_contexts    [<span class="lit-number">8</span>]<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-179"><code>}</code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code><span class="keyword">func</span> decoderStateInit(<label for="r1" class="ident">s</label> *<a href="#line-89" class="ident">Reader</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-182"><code>	<label for="r1" class="ident">s</label>.<a href="#line-109" class="ident">error_code</a> = <span class="lit-number">0</span> <span class="comment">/* BROTLI_DECODER_NO_ERROR */</span></code></span>
+<span class="codeline" id="line-183"><code></code></span>
+<span class="codeline" id="line-184"><code>	<a href="bit_reader.go.html#line-250" class="ident">initBitReader</a>(&amp;<label for="r1" class="ident">s</label>.<a href="#line-96" class="ident">br</a>)</code></span>
+<span class="codeline" id="line-185"><code>	<label for="r1" class="ident">s</label>.<a href="#line-94" class="ident">state</a> = <a href="#line-13" class="ident">stateUninited</a></code></span>
+<span class="codeline" id="line-186"><code>	<label for="r1" class="ident">s</label>.<a href="#line-169" class="ident">large_window</a> = <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-187"><code>	<label for="r1" class="ident">s</label>.<a href="#line-157" class="ident">substate_metablock_header</a> = <a href="#line-41" class="ident">stateMetablockHeaderNone</a></code></span>
+<span class="codeline" id="line-188"><code>	<label for="r1" class="ident">s</label>.<a href="#line-158" class="ident">substate_tree_group</a> = <a href="#line-57" class="ident">stateTreeGroupNone</a></code></span>
+<span class="codeline" id="line-189"><code>	<label for="r1" class="ident">s</label>.<a href="#line-159" class="ident">substate_context_map</a> = <a href="#line-62" class="ident">stateContextMapNone</a></code></span>
+<span class="codeline" id="line-190"><code>	<label for="r1" class="ident">s</label>.<a href="#line-160" class="ident">substate_uncompressed</a> = <a href="#line-52" class="ident">stateUncompressedNone</a></code></span>
+<span class="codeline" id="line-191"><code>	<label for="r1" class="ident">s</label>.<a href="#line-161" class="ident">substate_huffman</a> = <a href="#line-70" class="ident">stateHuffmanNone</a></code></span>
+<span class="codeline" id="line-192"><code>	<label for="r1" class="ident">s</label>.<a href="#line-162" class="ident">substate_decode_uint8</a> = <a href="#line-79" class="ident">stateDecodeUint8None</a></code></span>
+<span class="codeline" id="line-193"><code>	<label for="r1" class="ident">s</label>.<a href="#line-163" class="ident">substate_read_block_length</a> = <a href="#line-85" class="ident">stateReadBlockLengthNone</a></code></span>
+<span class="codeline" id="line-194"><code></code></span>
+<span class="codeline" id="line-195"><code>	<label for="r1" class="ident">s</label>.<a href="#line-101" class="ident">buffer_length</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-196"><code>	<label for="r1" class="ident">s</label>.<a href="#line-95" class="ident">loop_counter</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-197"><code>	<label for="r1" class="ident">s</label>.<a href="#line-102" class="ident">pos</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-198"><code>	<label for="r1" class="ident">s</label>.<a href="#line-140" class="ident">rb_roundtrips</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-199"><code>	<label for="r1" class="ident">s</label>.<a href="#line-141" class="ident">partial_pos_out</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code>	<label for="r1" class="ident">s</label>.<a href="#line-120" class="ident">block_type_trees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-202"><code>	<label for="r1" class="ident">s</label>.<a href="#line-121" class="ident">block_len_trees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-203"><code>	<label for="r1" class="ident">s</label>.<a href="#line-111" class="ident">ringbuffer</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-204"><code>	<label for="r1" class="ident">s</label>.<a href="#line-105" class="ident">ringbuffer_size</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-205"><code>	<label for="r1" class="ident">s</label>.<a href="#line-172" class="ident">new_ringbuffer_size</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-206"><code>	<label for="r1" class="ident">s</label>.<a href="#line-106" class="ident">ringbuffer_mask</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-207"><code></code></span>
+<span class="codeline" id="line-208"><code>	<label for="r1" class="ident">s</label>.<a href="#line-174" class="ident">context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-209"><code>	<label for="r1" class="ident">s</label>.<a href="#line-175" class="ident">context_modes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-210"><code>	<label for="r1" class="ident">s</label>.<a href="#line-133" class="ident">dist_context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-211"><code>	<label for="r1" class="ident">s</label>.<a href="#line-115" class="ident">context_map_slice</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-212"><code>	<label for="r1" class="ident">s</label>.<a href="#line-116" class="ident">dist_context_map_slice</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-213"><code></code></span>
+<span class="codeline" id="line-214"><code>	<label for="r1" class="ident">s</label>.<a href="#line-110" class="ident">sub_loop_counter</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-215"><code></code></span>
+<span class="codeline" id="line-216"><code>	<label for="r1" class="ident">s</label>.<a href="#line-117" class="ident">literal_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-217"><code>	<label for="r1" class="ident">s</label>.<a href="#line-117" class="ident">literal_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-218"><code>	<label for="r1" class="ident">s</label>.<a href="#line-118" class="ident">insert_copy_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-219"><code>	<label for="r1" class="ident">s</label>.<a href="#line-118" class="ident">insert_copy_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-220"><code>	<label for="r1" class="ident">s</label>.<a href="#line-119" class="ident">distance_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-221"><code>	<label for="r1" class="ident">s</label>.<a href="#line-119" class="ident">distance_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-222"><code></code></span>
+<span class="codeline" id="line-223"><code>	<label for="r1" class="ident">s</label>.<a href="#line-164" class="ident">is_last_metablock</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-224"><code>	<label for="r1" class="ident">s</label>.<a href="#line-165" class="ident">is_uncompressed</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-225"><code>	<label for="r1" class="ident">s</label>.<a href="#line-166" class="ident">is_metadata</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-226"><code>	<label for="r1" class="ident">s</label>.<a href="#line-167" class="ident">should_wrap_ringbuffer</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-227"><code>	<label for="r1" class="ident">s</label>.<a href="#line-168" class="ident">canny_ringbuffer_allocation</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-228"><code></code></span>
+<span class="codeline" id="line-229"><code>	<label for="r1" class="ident">s</label>.<a href="#line-171" class="ident">window_bits</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-230"><code>	<label for="r1" class="ident">s</label>.<a href="#line-104" class="ident">max_distance</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-231"><code>	<label for="r1" class="ident">s</label>.<a href="#line-108" class="ident">dist_rb</a>[<span class="lit-number">0</span>] = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-232"><code>	<label for="r1" class="ident">s</label>.<a href="#line-108" class="ident">dist_rb</a>[<span class="lit-number">1</span>] = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-233"><code>	<label for="r1" class="ident">s</label>.<a href="#line-108" class="ident">dist_rb</a>[<span class="lit-number">2</span>] = <span class="lit-number">11</span></code></span>
+<span class="codeline" id="line-234"><code>	<label for="r1" class="ident">s</label>.<a href="#line-108" class="ident">dist_rb</a>[<span class="lit-number">3</span>] = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-235"><code>	<label for="r1" class="ident">s</label>.<a href="#line-107" class="ident">dist_rb_idx</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-236"><code>	<label for="r1" class="ident">s</label>.<a href="#line-120" class="ident">block_type_trees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-237"><code>	<label for="r1" class="ident">s</label>.<a href="#line-121" class="ident">block_len_trees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-238"><code></code></span>
+<span class="codeline" id="line-239"><code>	<label for="r1" class="ident">s</label>.<a href="#line-146" class="ident">symbol_lists</a>.<a href="symbol_list.go.html#line-12" class="ident">storage</a> = <label for="r1" class="ident">s</label>.<a href="#line-147" class="ident">symbols_lists_array</a>[:]</code></span>
+<span class="codeline" id="line-240"><code>	<label for="r1" class="ident">s</label>.<a href="#line-146" class="ident">symbol_lists</a>.<a href="symbol_list.go.html#line-13" class="ident">offset</a> = <a href="huffman.go.html#line-11" class="ident">huffmanMaxCodeLength</a> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-241"><code></code></span>
+<span class="codeline" id="line-242"><code>	<label for="r1" class="ident">s</label>.<a href="#line-176" class="ident">dictionary</a> = <a href="dictionary.go.html#line-122888" class="ident">getDictionary</a>()</code></span>
+<span class="codeline" id="line-243"><code>	<label for="r1" class="ident">s</label>.<a href="#line-177" class="ident">transforms</a> = <a href="transform.go.html#line-495" class="ident">getTransforms</a>()</code></span>
+<span class="codeline" id="line-244"><code></code></span>
+<span class="codeline" id="line-245"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-246"><code>}</code></span>
+<span class="codeline" id="line-247"><code></code></span>
+<span class="codeline" id="line-248"><code><span class="keyword">func</span> decoderStateMetablockBegin(<label for="r3" class="ident">s</label> *<a href="#line-89" class="ident">Reader</a>) {</code></span>
+<span class="codeline" id="line-249"><code>	<label for="r3" class="ident">s</label>.<a href="#line-124" class="ident">meta_block_remaining_len</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-250"><code>	<label for="r3" class="ident">s</label>.<a href="#line-126" class="ident">block_length</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-251"><code>	<label for="r3" class="ident">s</label>.<a href="#line-126" class="ident">block_length</a>[<span class="lit-number">1</span>] = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-252"><code>	<label for="r3" class="ident">s</label>.<a href="#line-126" class="ident">block_length</a>[<span class="lit-number">2</span>] = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">24</span></code></span>
+<span class="codeline" id="line-253"><code>	<label for="r3" class="ident">s</label>.<a href="#line-127" class="ident">num_block_types</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-254"><code>	<label for="r3" class="ident">s</label>.<a href="#line-127" class="ident">num_block_types</a>[<span class="lit-number">1</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-255"><code>	<label for="r3" class="ident">s</label>.<a href="#line-127" class="ident">num_block_types</a>[<span class="lit-number">2</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-256"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-257"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">1</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-258"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">2</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-259"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">3</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-260"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">4</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-261"><code>	<label for="r3" class="ident">s</label>.<a href="#line-128" class="ident">block_type_rb</a>[<span class="lit-number">5</span>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-262"><code>	<label for="r3" class="ident">s</label>.<a href="#line-174" class="ident">context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-263"><code>	<label for="r3" class="ident">s</label>.<a href="#line-175" class="ident">context_modes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-264"><code>	<label for="r3" class="ident">s</label>.<a href="#line-133" class="ident">dist_context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-265"><code>	<label for="r3" class="ident">s</label>.<a href="#line-115" class="ident">context_map_slice</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-266"><code>	<label for="r3" class="ident">s</label>.<a href="#line-134" class="ident">literal_htree</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-267"><code>	<label for="r3" class="ident">s</label>.<a href="#line-116" class="ident">dist_context_map_slice</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-268"><code>	<label for="r3" class="ident">s</label>.<a href="#line-135" class="ident">dist_htree_index</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-269"><code>	<label for="r3" class="ident">s</label>.<a href="#line-114" class="ident">context_lookup</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-270"><code>	<label for="r3" class="ident">s</label>.<a href="#line-117" class="ident">literal_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-271"><code>	<label for="r3" class="ident">s</label>.<a href="#line-117" class="ident">literal_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-272"><code>	<label for="r3" class="ident">s</label>.<a href="#line-118" class="ident">insert_copy_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-273"><code>	<label for="r3" class="ident">s</label>.<a href="#line-118" class="ident">insert_copy_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-274"><code>	<label for="r3" class="ident">s</label>.<a href="#line-119" class="ident">distance_hgroup</a>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-275"><code>	<label for="r3" class="ident">s</label>.<a href="#line-119" class="ident">distance_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-276"><code>}</code></span>
+<span class="codeline" id="line-277"><code></code></span>
+<span class="codeline" id="line-278"><code><span class="keyword">func</span> decoderStateCleanupAfterMetablock(<label for="r5" class="ident">s</label> *<a href="#line-89" class="ident">Reader</a>) {</code></span>
+<span class="codeline" id="line-279"><code>	<label for="r5" class="ident">s</label>.<a href="#line-175" class="ident">context_modes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-280"><code>	<label for="r5" class="ident">s</label>.<a href="#line-174" class="ident">context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-281"><code>	<label for="r5" class="ident">s</label>.<a href="#line-133" class="ident">dist_context_map</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-282"><code>	<label for="r5" class="ident">s</label>.<a href="#line-117" class="ident">literal_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-283"><code>	<label for="r5" class="ident">s</label>.<a href="#line-118" class="ident">insert_copy_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-284"><code>	<label for="r5" class="ident">s</label>.<a href="#line-119" class="ident">distance_hgroup</a>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-285"><code>}</code></span>
+<span class="codeline" id="line-286"><code></code></span>
+<span class="codeline" id="line-287"><code><span class="keyword">func</span> decoderHuffmanTreeGroupInit(<label for="r7" class="ident">s</label> *<a href="#line-89" class="ident">Reader</a>, <label for="r8" class="ident">group</label> *<a href="huffman.go.html#line-93" class="ident">huffmanTreeGroup</a>, <label for="r9" class="ident">alphabet_size</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r10" class="ident">max_symbol</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r11" class="ident">ntrees</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-288"><code>	<span class="keyword">var</span> <label for="r12" class="ident">max_table_size</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="huffman.go.html#line-15" class="ident">kMaxHuffmanTableSize</a>[(<label for="r9" class="ident">alphabet_size</label>+<span class="lit-number">31</span>)&gt;&gt;<span class="lit-number">5</span>])</code></span>
+<span class="codeline" id="line-289"><code>	<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-96" class="ident">alphabet_size</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r9" class="ident">alphabet_size</label>)</code></span>
+<span class="codeline" id="line-290"><code>	<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-97" class="ident">max_symbol</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r10" class="ident">max_symbol</label>)</code></span>
+<span class="codeline" id="line-291"><code>	<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-98" class="ident">num_htrees</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r11" class="ident">ntrees</label>)</code></span>
+<span class="codeline" id="line-292"><code>	<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-94" class="ident">htrees</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([][]<a href="huffman.go.html#line-68" class="ident">huffmanCode</a>, <label for="r11" class="ident">ntrees</label>)</code></span>
+<span class="codeline" id="line-293"><code>	<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-95" class="ident">codes</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="huffman.go.html#line-68" class="ident">huffmanCode</a>, (<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r11" class="ident">ntrees</label>) * <label for="r12" class="ident">max_table_size</label>))</code></span>
+<span class="codeline" id="line-294"><code>	<span class="keyword">return</span> !(<label for="r8" class="ident">group</label>.<a href="huffman.go.html#line-95" class="ident">codes</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-295"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

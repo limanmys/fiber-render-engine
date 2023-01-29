@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: stat_posix.go in package github.com/pkg/sftp</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	stat_posix.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/pkg/sftp.html">github.com/pkg/sftp</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">//go:build !plan9</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// +build !plan9</span></code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">package</span> sftp</code></span>
+<span class="codeline" id="line-5"><code></code></span>
+<span class="codeline" id="line-6"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-7"><code>	<label for="i0"><span class="lit-string i0">"os"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i1"><span class="lit-string i1">"syscall"</span></label></code></span>
+<span class="codeline" id="line-9"><code>)</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">const</span> <a href="../../../../pkg/github.com/pkg/sftp.html#name-EBADF" class="ident">EBADF</a> = <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1215" class="ident">EBADF</a></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">func</span> wrapPathError(<label for="r1" class="ident">filepath</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r2" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-14"><code>	<span class="keyword">if</span> <label for="r3" class="ident">errno</label>, <label for="r4" class="ident">ok</label> := <label for="r2" class="ident">err</label>.(<a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/syscall_unix.go.html#line-110" class="ident">Errno</a>); <label for="r4" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-15"><code>		<span class="keyword">return</span> &amp;<a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/error.go.html#line-48" class="ident">PathError</a>{<a href="../../../io/fs/fs.go.html#line-246" class="ident">Path</a>: <label for="r1" class="ident">filepath</label>, <a href="../../../io/fs/fs.go.html#line-247" class="ident">Err</a>: <label for="r3" class="ident">errno</label>}</code></span>
+<span class="codeline" id="line-16"><code>	}</code></span>
+<span class="codeline" id="line-17"><code>	<span class="keyword">return</span> <label for="r2" class="ident">err</label></code></span>
+<span class="codeline" id="line-18"><code>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// translateErrno translates a syscall error number to a SFTP error code.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">func</span> translateErrno(<label for="r6" class="ident">errno</label> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/syscall_unix.go.html#line-110" class="ident">Errno</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-22"><code>	<span class="keyword">switch</span> <label for="r6" class="ident">errno</label> {</code></span>
+<span class="codeline" id="line-23"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-24"><code>		<span class="keyword">return</span> <a href="sftp.go.html#line-40" class="ident">sshFxOk</a></code></span>
+<span class="codeline" id="line-25"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1280" class="ident">ENOENT</a>:</code></span>
+<span class="codeline" id="line-26"><code>		<span class="keyword">return</span> <a href="sftp.go.html#line-42" class="ident">sshFxNoSuchFile</a></code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1207" class="ident">EACCES</a>, <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1309" class="ident">EPERM</a>:</code></span>
+<span class="codeline" id="line-28"><code>		<span class="keyword">return</span> <a href="sftp.go.html#line-43" class="ident">sshFxPermissionDenied</a></code></span>
+<span class="codeline" id="line-29"><code>	}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code>	<span class="keyword">return</span> <a href="sftp.go.html#line-44" class="ident">sshFxFailure</a></code></span>
+<span class="codeline" id="line-32"><code>}</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="keyword">func</span> translateSyscallError(<label for="r8" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) (<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">switch</span> e := <label for="r8" class="ident">err</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-36"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/syscall_unix.go.html#line-110" class="ident">Errno</a>:</code></span>
+<span class="codeline" id="line-37"><code>		<span class="keyword">return</span> <a href="#line-21" class="ident">translateErrno</a>(<label for="r9" class="ident">e</label>), <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">case</span> *<a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/error.go.html#line-48" class="ident">PathError</a>:</code></span>
+<span class="codeline" id="line-39"><code>		<a href="release.go.html#line-5" class="ident">debug</a>(<span class="lit-string">"statusFromError,pathError: error is %T %#v"</span>, <label for="r10" class="ident">e</label>.<a href="../../../io/fs/fs.go.html#line-247" class="ident">Err</a>, <label for="r10" class="ident">e</label>.<a href="../../../io/fs/fs.go.html#line-247" class="ident">Err</a>)</code></span>
+<span class="codeline" id="line-40"><code>		<span class="keyword">if</span> <label for="r11" class="ident">errno</label>, <label for="r12" class="ident">ok</label> := <label for="r10" class="ident">e</label>.<a href="../../../io/fs/fs.go.html#line-247" class="ident">Err</a>.(<a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/syscall_unix.go.html#line-110" class="ident">Errno</a>); <label for="r12" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-41"><code>			<span class="keyword">return</span> <a href="#line-21" class="ident">translateErrno</a>(<label for="r11" class="ident">errno</label>), <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-42"><code>		}</code></span>
+<span class="codeline" id="line-43"><code>	}</code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">return</span> <span class="lit-number">0</span>, <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// isRegular returns true if the mode describes a regular file.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> isRegular(<label for="r14" class="ident">mode</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">return</span> <label for="r14" class="ident">mode</label>&amp;<a href="syscall_good.go.html#line-8" class="ident">S_IFMT</a> == <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1071" class="ident">S_IFREG</a></code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// toFileMode converts sftp filemode bits to the os.FileMode specification</span></code></span>
+<span class="codeline" id="line-53"><code><span class="keyword">func</span> toFileMode(<label for="r16" class="ident">mode</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-28" class="ident">FileMode</a> {</code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">var</span> <label for="r17" class="ident">fm</label> = <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-28" class="ident">FileMode</a>(<label for="r16" class="ident">mode</label> &amp; <span class="lit-number">0777</span>)</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">switch</span> <label for="r16" class="ident">mode</label> &amp; <a href="syscall_good.go.html#line-8" class="ident">S_IFMT</a> {</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1065" class="ident">S_IFBLK</a>:</code></span>
+<span class="codeline" id="line-58"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-43" class="ident">ModeDevice</a></code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1066" class="ident">S_IFCHR</a>:</code></span>
+<span class="codeline" id="line-60"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-43" class="ident">ModeDevice</a> | <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-48" class="ident">ModeCharDevice</a></code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1067" class="ident">S_IFDIR</a>:</code></span>
+<span class="codeline" id="line-62"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-38" class="ident">ModeDir</a></code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1068" class="ident">S_IFIFO</a>:</code></span>
+<span class="codeline" id="line-64"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-44" class="ident">ModeNamedPipe</a></code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1069" class="ident">S_IFLNK</a>:</code></span>
+<span class="codeline" id="line-66"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-42" class="ident">ModeSymlink</a></code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1071" class="ident">S_IFREG</a>:</code></span>
+<span class="codeline" id="line-68"><code>		<span class="comment">// nothing to do</span></code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">case</span> <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1072" class="ident">S_IFSOCK</a>:</code></span>
+<span class="codeline" id="line-70"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-45" class="ident">ModeSocket</a></code></span>
+<span class="codeline" id="line-71"><code>	}</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>	<span class="keyword">if</span> <label for="r16" class="ident">mode</label>&amp;<a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1081" class="ident">S_ISUID</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-74"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-46" class="ident">ModeSetuid</a></code></span>
+<span class="codeline" id="line-75"><code>	}</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r16" class="ident">mode</label>&amp;<a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1080" class="ident">S_ISGID</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-77"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-47" class="ident">ModeSetgid</a></code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">if</span> <label for="r16" class="ident">mode</label>&amp;<a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1082" class="ident">S_ISVTX</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-80"><code>		<label for="r17" class="ident">fm</label> |= <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-49" class="ident">ModeSticky</a></code></span>
+<span class="codeline" id="line-81"><code>	}</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">return</span> <label for="r17" class="ident">fm</label></code></span>
+<span class="codeline" id="line-84"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">// fromFileMode converts from the os.FileMode specification to sftp filemode bits</span></code></span>
+<span class="codeline" id="line-87"><code><span class="keyword">func</span> fromFileMode(<label for="r19" class="ident">mode</label> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-28" class="ident">FileMode</a>) <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-88"><code>	<label for="r20" class="ident">ret</label> := <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">mode</label> &amp; <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-55" class="ident">ModePerm</a>)</code></span>
+<span class="codeline" id="line-89"><code></code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">switch</span> <label for="r19" class="ident">mode</label> &amp; <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-53" class="ident">ModeType</a> {</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-43" class="ident">ModeDevice</a> | <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-48" class="ident">ModeCharDevice</a>:</code></span>
+<span class="codeline" id="line-92"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1066" class="ident">S_IFCHR</a></code></span>
+<span class="codeline" id="line-93"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-43" class="ident">ModeDevice</a>:</code></span>
+<span class="codeline" id="line-94"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1065" class="ident">S_IFBLK</a></code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-38" class="ident">ModeDir</a>:</code></span>
+<span class="codeline" id="line-96"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1067" class="ident">S_IFDIR</a></code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-44" class="ident">ModeNamedPipe</a>:</code></span>
+<span class="codeline" id="line-98"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1068" class="ident">S_IFIFO</a></code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-42" class="ident">ModeSymlink</a>:</code></span>
+<span class="codeline" id="line-100"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1069" class="ident">S_IFLNK</a></code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-102"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1071" class="ident">S_IFREG</a></code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">case</span> <a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-45" class="ident">ModeSocket</a>:</code></span>
+<span class="codeline" id="line-104"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1072" class="ident">S_IFSOCK</a></code></span>
+<span class="codeline" id="line-105"><code>	}</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">if</span> <label for="r19" class="ident">mode</label>&amp;<a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-46" class="ident">ModeSetuid</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-108"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1081" class="ident">S_ISUID</a></code></span>
+<span class="codeline" id="line-109"><code>	}</code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">if</span> <label for="r19" class="ident">mode</label>&amp;<a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-47" class="ident">ModeSetgid</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-111"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1080" class="ident">S_ISGID</a></code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">if</span> <label for="r19" class="ident">mode</label>&amp;<a href="../../../../pkg/os.html" class="ident i0">os</a>.<a href="../../../os/types.go.html#line-49" class="ident">ModeSticky</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-114"><code>		<label for="r20" class="ident">ret</label> |= <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1082" class="ident">S_ISVTX</a></code></span>
+<span class="codeline" id="line-115"><code>	}</code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">return</span> <label for="r20" class="ident">ret</label></code></span>
+<span class="codeline" id="line-118"><code>}</code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-121"><code>	s_ISUID = <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1081" class="ident">S_ISUID</a></code></span>
+<span class="codeline" id="line-122"><code>	s_ISGID = <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1080" class="ident">S_ISGID</a></code></span>
+<span class="codeline" id="line-123"><code>	s_ISVTX = <a href="../../../../pkg/syscall.html" class="ident i1">syscall</a>.<a href="../../../syscall/zerrors_linux_amd64.go.html#line-1082" class="ident">S_ISVTX</a></code></span>
+<span class="codeline" id="line-124"><code>)</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: cache.go in package github.com/jcmturner/gokrb5/v8/client</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	cache.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html">github.com/jcmturner/gokrb5/v8/client</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> client</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding/json"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"sort"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"sync"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"time"</span></label></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i5"><span class="lit-string i5">"github.com/jcmturner/gokrb5/v8/messages"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i6"><span class="lit-string i6">"github.com/jcmturner/gokrb5/v8/types"</span></label></code></span>
+<span class="codeline" id="line-12"><code>)</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// Cache for service tickets held by the client.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html#name-Cache" class="ident">Cache</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-16"><code>	Entries <span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-21" class="ident">CacheEntry</a></code></span>
+<span class="codeline" id="line-17"><code>	mux     <a href="../../../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a></code></span>
+<span class="codeline" id="line-18"><code>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// CacheEntry holds details for a cache entry.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html#name-CacheEntry" class="ident">CacheEntry</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-22"><code>	SPN        <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-23"><code>	Ticket     <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html" class="ident i5">messages</a>.<a href="../messages/Ticket.go^90029.html#line-27" class="ident">Ticket</a> <span class="lit-string">`json:"-"`</span></code></span>
+<span class="codeline" id="line-24"><code>	AuthTime   <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-25"><code>	StartTime  <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-26"><code>	EndTime    <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-27"><code>	RenewTill  <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-28"><code>	SessionKey <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i6">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a> <span class="lit-string">`json:"-"`</span></code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// NewCache creates a new client ticket cache instance.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html#name-NewCache" class="ident">NewCache</a></label>() *<a href="#line-15" class="ident">Cache</a> {</code></span>
+<span class="codeline" id="line-33"><code>	<span class="keyword">return</span> &amp;<a href="#line-15" class="ident">Cache</a>{</code></span>
+<span class="codeline" id="line-34"><code>		<a href="#line-16" class="ident">Entries</a>: <span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="#line-21" class="ident">CacheEntry</a>{},</code></span>
+<span class="codeline" id="line-35"><code>	}</code></span>
+<span class="codeline" id="line-36"><code>}</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// getEntry returns a cache entry that matches the SPN.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">func</span> (<label for="r1" class="ident">c</label> *<a href="#line-15" class="ident">Cache</a>) <label for="r2" class="ident">getEntry</label>(<label for="r3" class="ident">spn</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="#line-21" class="ident">CacheEntry</a>, <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-40"><code>	<label for="r1" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">defer</span> <label for="r1" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-42"><code>	<label for="r4" class="ident">e</label>, <label for="r5" class="ident">ok</label> := (*<label for="r1" class="ident">c</label>).<a href="#line-16" class="ident">Entries</a>[<label for="r3" class="ident">spn</label>]</code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">return</span> <label for="r4" class="ident">e</label>, <label for="r5" class="ident">ok</label></code></span>
+<span class="codeline" id="line-44"><code>}</code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// JSON returns information about the cached service tickets in a JSON format.</span></code></span>
+<span class="codeline" id="line-47"><code><span class="keyword">func</span> (<label for="r6" class="ident">c</label> *<a href="#line-15" class="ident">Cache</a>) <label for="r7" class="ident">JSON</label>() (<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-48"><code>	<label for="r6" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">defer</span> <label for="r6" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">var</span> <label for="r8" class="ident">es</label> []<a href="#line-21" class="ident">CacheEntry</a></code></span>
+<span class="codeline" id="line-51"><code>	<label for="r9" class="ident">keys</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <span class="lit-number">0</span>, <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a>))</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">for</span> <label for="r10" class="ident">k</label> := <span class="keyword">range</span> <label for="r6" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a> {</code></span>
+<span class="codeline" id="line-53"><code>		<label for="r9" class="ident">keys</label> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r9" class="ident">keys</label>, <label for="r10" class="ident">k</label>)</code></span>
+<span class="codeline" id="line-54"><code>	}</code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../../../../pkg/sort.html" class="ident i2">sort</a>.<a href="../../../../../sort/sort.go.html#line-164" class="ident">Strings</a>(<label for="r9" class="ident">keys</label>)</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">for</span> <label for="r11" class="ident">_</label>, <label for="r12" class="ident">k</label> := <span class="keyword">range</span> <label for="r9" class="ident">keys</label> {</code></span>
+<span class="codeline" id="line-57"><code>		<label for="r8" class="ident">es</label> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">es</label>, <label for="r6" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a>[<label for="r12" class="ident">k</label>])</code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code>	<label for="r13" class="ident">b</label>, <label for="r14" class="ident">err</label> := <a href="../../../../../../pkg/encoding/json.html" class="ident i0">json</a>.<a href="../../../../../encoding/json/encode.go.html#line-174" class="ident">MarshalIndent</a>(&amp;<label for="r8" class="ident">es</label>, <span class="lit-string">""</span>, <span class="lit-string">"  "</span>)</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">if</span> <label for="r14" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-61"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <label for="r14" class="ident">err</label></code></span>
+<span class="codeline" id="line-62"><code>	}</code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>(<label for="r13" class="ident">b</label>), <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-64"><code>}</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// addEntry adds a ticket to the cache.</span></code></span>
+<span class="codeline" id="line-67"><code><span class="keyword">func</span> (<label for="r15" class="ident">c</label> *<a href="#line-15" class="ident">Cache</a>) <label for="r16" class="ident">addEntry</label>(<label for="r17" class="ident">tkt</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html" class="ident i5">messages</a>.<a href="../messages/Ticket.go^90029.html#line-27" class="ident">Ticket</a>, <label for="r18" class="ident">authTime</label>, <label for="r19" class="ident">startTime</label>, <label for="r20" class="ident">endTime</label>, <label for="r21" class="ident">renewTill</label> <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-129" class="ident">Time</a>, <label for="r22" class="ident">sessionKey</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i6">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>) <a href="#line-21" class="ident">CacheEntry</a> {</code></span>
+<span class="codeline" id="line-68"><code>	<label for="r23" class="ident">spn</label> := <label for="r17" class="ident">tkt</label>.<a href="../messages/Ticket.go^90029.html#line-30" class="ident">SName</a>.<a href="../types/PrincipalName.go^15d67.html#line-51" class="ident">PrincipalNameString</a>()</code></span>
+<span class="codeline" id="line-69"><code>	<label for="r15" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">defer</span> <label for="r15" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-71"><code>	(*<label for="r15" class="ident">c</label>).<a href="#line-16" class="ident">Entries</a>[<label for="r23" class="ident">spn</label>] = <a href="#line-21" class="ident">CacheEntry</a>{</code></span>
+<span class="codeline" id="line-72"><code>		<a href="#line-22" class="ident">SPN</a>:        <label for="r23" class="ident">spn</label>,</code></span>
+<span class="codeline" id="line-73"><code>		<a href="#line-23" class="ident">Ticket</a>:     <label for="r17" class="ident">tkt</label>,</code></span>
+<span class="codeline" id="line-74"><code>		<a href="#line-24" class="ident">AuthTime</a>:   <label for="r18" class="ident">authTime</label>,</code></span>
+<span class="codeline" id="line-75"><code>		<a href="#line-25" class="ident">StartTime</a>:  <label for="r19" class="ident">startTime</label>,</code></span>
+<span class="codeline" id="line-76"><code>		<a href="#line-26" class="ident">EndTime</a>:    <label for="r20" class="ident">endTime</label>,</code></span>
+<span class="codeline" id="line-77"><code>		<a href="#line-27" class="ident">RenewTill</a>:  <label for="r21" class="ident">renewTill</label>,</code></span>
+<span class="codeline" id="line-78"><code>		<a href="#line-28" class="ident">SessionKey</a>: <label for="r22" class="ident">sessionKey</label>,</code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">return</span> <label for="r15" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a>[<label for="r23" class="ident">spn</label>]</code></span>
+<span class="codeline" id="line-81"><code>}</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">// clear deletes all the cache entries</span></code></span>
+<span class="codeline" id="line-84"><code><span class="keyword">func</span> (<label for="r24" class="ident">c</label> *<a href="#line-15" class="ident">Cache</a>) <label for="r25" class="ident">clear</label>() {</code></span>
+<span class="codeline" id="line-85"><code>	<label for="r24" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">defer</span> <label for="r24" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-87"><code>	<span class="keyword">for</span> <label for="r26" class="ident">k</label> := <span class="keyword">range</span> <label for="r24" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a> {</code></span>
+<span class="codeline" id="line-88"><code>		<a href="../../../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<label for="r24" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a>, <label for="r26" class="ident">k</label>)</code></span>
+<span class="codeline" id="line-89"><code>	}</code></span>
+<span class="codeline" id="line-90"><code>}</code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// RemoveEntry removes the cache entry for the defined SPN.</span></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> (<label for="r27" class="ident">c</label> *<a href="#line-15" class="ident">Cache</a>) <label for="r28" class="ident">RemoveEntry</label>(<label for="r29" class="ident">spn</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-94"><code>	<label for="r27" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">defer</span> <label for="r27" class="ident">c</label>.<a href="#line-17" class="ident">mux</a>.<a href="../../../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-96"><code>	<a href="../../../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<label for="r27" class="ident">c</label>.<a href="#line-16" class="ident">Entries</a>, <label for="r29" class="ident">spn</label>)</code></span>
+<span class="codeline" id="line-97"><code>}</code></span>
+<span class="codeline" id="line-98"><code></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">// GetCachedTicket returns a ticket from the cache for the SPN.</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// Only a ticket that is currently valid will be returned.</span></code></span>
+<span class="codeline" id="line-101"><code><span class="keyword">func</span> (<label for="r30" class="ident">cl</label> *<a href="client.go.html#line-25" class="ident">Client</a>) <label for="r31" class="ident">GetCachedTicket</label>(<label for="r32" class="ident">spn</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html" class="ident i5">messages</a>.<a href="../messages/Ticket.go^90029.html#line-27" class="ident">Ticket</a>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i6">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a>, <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">if</span> <label for="r33" class="ident">e</label>, <label for="r34" class="ident">ok</label> := <label for="r30" class="ident">cl</label>.<a href="client.go.html#line-30" class="ident">cache</a>.<a href="#line-39" class="ident">getEntry</a>(<label for="r32" class="ident">spn</label>); <label for="r34" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-103"><code>		<span class="comment">//If within time window of ticket return it</span></code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">if</span> <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>().<a href="../../../../../time/time.go.html#line-250" class="ident">After</a>(<label for="r33" class="ident">e</label>.<a href="#line-25" class="ident">StartTime</a>) &amp;&amp; <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>().<a href="../../../../../time/time.go.html#line-260" class="ident">Before</a>(<label for="r33" class="ident">e</label>.<a href="#line-26" class="ident">EndTime</a>) {</code></span>
+<span class="codeline" id="line-105"><code>			<label for="r30" class="ident">cl</label>.<a href="settings.go.html#line-75" class="ident">Log</a>(<span class="lit-string">"ticket received from cache for %s"</span>, <label for="r32" class="ident">spn</label>)</code></span>
+<span class="codeline" id="line-106"><code>			<span class="keyword">return</span> <label for="r33" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>, <label for="r33" class="ident">e</label>.<a href="#line-28" class="ident">SessionKey</a>, <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-107"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <a href="../../../../../../pkg/time.html" class="ident i4">time</a>.<a href="../../../../../time/time.go.html#line-1089" class="ident">Now</a>().<a href="../../../../../time/time.go.html#line-1104" class="ident">UTC</a>().<a href="../../../../../time/time.go.html#line-260" class="ident">Before</a>(<label for="r33" class="ident">e</label>.<a href="#line-27" class="ident">RenewTill</a>) {</code></span>
+<span class="codeline" id="line-108"><code>			<label for="r35" class="ident">e</label>, <label for="r36" class="ident">err</label> := <label for="r30" class="ident">cl</label>.<a href="#line-122" class="ident">renewTicket</a>(<label for="r33" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-109"><code>			<span class="keyword">if</span> <label for="r36" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-110"><code>				<span class="keyword">return</span> <label for="r35" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>, <label for="r35" class="ident">e</label>.<a href="#line-28" class="ident">SessionKey</a>, <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-111"><code>			}</code></span>
+<span class="codeline" id="line-112"><code>			<span class="keyword">return</span> <label for="r35" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>, <label for="r35" class="ident">e</label>.<a href="#line-28" class="ident">SessionKey</a>, <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-113"><code>		}</code></span>
+<span class="codeline" id="line-114"><code>	}</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">var</span> <label for="r37" class="ident">tkt</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/messages.html" class="ident i5">messages</a>.<a href="../messages/Ticket.go^90029.html#line-27" class="ident">Ticket</a></code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">var</span> <label for="r38" class="ident">key</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i6">types</a>.<a href="../types/Cryptosystem.go^b5b5f.html#line-22" class="ident">EncryptionKey</a></code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">return</span> <label for="r37" class="ident">tkt</label>, <label for="r38" class="ident">key</label>, <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-118"><code>}</code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// renewTicket renews a cache entry ticket.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">// To renew from outside the client package use GetCachedTicket</span></code></span>
+<span class="codeline" id="line-122"><code><span class="keyword">func</span> (<label for="r39" class="ident">cl</label> *<a href="client.go.html#line-25" class="ident">Client</a>) <label for="r40" class="ident">renewTicket</label>(<label for="r41" class="ident">e</label> <a href="#line-21" class="ident">CacheEntry</a>) (<a href="#line-21" class="ident">CacheEntry</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-123"><code>	<label for="r42" class="ident">spn</label> := <label for="r41" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>.<a href="../messages/Ticket.go^90029.html#line-30" class="ident">SName</a></code></span>
+<span class="codeline" id="line-124"><code>	<label for="r43" class="ident">_</label>, <label for="r44" class="ident">_</label>, <label for="r45" class="ident">err</label> := <label for="r39" class="ident">cl</label>.<a href="TGSExchange.go^dfc7b.html#line-12" class="ident">TGSREQGenerateAndExchange</a>(<label for="r42" class="ident">spn</label>, <label for="r41" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>.<a href="../messages/Ticket.go^90029.html#line-29" class="ident">Realm</a>, <label for="r41" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>, <label for="r41" class="ident">e</label>.<a href="#line-28" class="ident">SessionKey</a>, <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a>)</code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">if</span> <label for="r45" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-126"><code>		<span class="keyword">return</span> <label for="r41" class="ident">e</label>, <label for="r45" class="ident">err</label></code></span>
+<span class="codeline" id="line-127"><code>	}</code></span>
+<span class="codeline" id="line-128"><code>	<label for="r41" class="ident">e</label>, <label for="r46" class="ident">ok</label> := <label for="r39" class="ident">cl</label>.<a href="client.go.html#line-30" class="ident">cache</a>.<a href="#line-39" class="ident">getEntry</a>(<label for="r41" class="ident">e</label>.<a href="#line-23" class="ident">Ticket</a>.<a href="../messages/Ticket.go^90029.html#line-30" class="ident">SName</a>.<a href="../types/PrincipalName.go^15d67.html#line-51" class="ident">PrincipalNameString</a>())</code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">if</span> !<label for="r46" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-130"><code>		<span class="keyword">return</span> <label for="r41" class="ident">e</label>, <a href="../../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"ticket was not added to cache"</span>)</code></span>
+<span class="codeline" id="line-131"><code>	}</code></span>
+<span class="codeline" id="line-132"><code>	<label for="r39" class="ident">cl</label>.<a href="settings.go.html#line-75" class="ident">Log</a>(<span class="lit-string">"ticket renewed for %s (EndTime: %v)"</span>, <label for="r42" class="ident">spn</label>.<a href="../types/PrincipalName.go^15d67.html#line-51" class="ident">PrincipalNameString</a>(), <label for="r41" class="ident">e</label>.<a href="#line-26" class="ident">EndTime</a>)</code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">return</span> <label for="r41" class="ident">e</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-134"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

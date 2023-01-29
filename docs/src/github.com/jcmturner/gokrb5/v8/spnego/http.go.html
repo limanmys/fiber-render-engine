@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: http.go in package github.com/jcmturner/gokrb5/v8/spnego</title>
+<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	http.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html">github.com/jcmturner/gokrb5/v8/spnego</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124],
+input[id=r125]:checked ~pre label[for=r125],
+input[id=r126]:checked ~pre label[for=r126],
+input[id=r127]:checked ~pre label[for=r127],
+input[id=r128]:checked ~pre label[for=r128],
+input[id=r129]:checked ~pre label[for=r129],
+input[id=r130]:checked ~pre label[for=r130]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8,
+input[id=i9]:checked ~pre .i9,
+input[id=i10]:checked ~pre .i10,
+input[id=i11]:checked ~pre .i11,
+input[id=i12]:checked ~pre .i12,
+input[id=i13]:checked ~pre .i13,
+input[id=i14]:checked ~pre .i14,
+input[id=i15]:checked ~pre .i15,
+input[id=i16]:checked ~pre .i16,
+input[id=i17]:checked ~pre .i17,
+input[id=i18]:checked ~pre .i18,
+input[id=i19]:checked ~pre .i19
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="r125" type="radio" name="g"/>
+<input id="r126" type="radio" name="g"/>
+<input id="r127" type="radio" name="g"/>
+<input id="r128" type="radio" name="g"/>
+<input id="r129" type="radio" name="g"/>
+<input id="r130" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+<input id="i9" type="radio" name="i"/>
+<input id="i10" type="radio" name="i"/>
+<input id="i11" type="radio" name="i"/>
+<input id="i12" type="radio" name="i"/>
+<input id="i13" type="radio" name="i"/>
+<input id="i14" type="radio" name="i"/>
+<input id="i15" type="radio" name="i"/>
+<input id="i16" type="radio" name="i"/>
+<input id="i17" type="radio" name="i"/>
+<input id="i18" type="radio" name="i"/>
+<input id="i19" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> spnego</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"encoding/base64"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"errors"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"fmt"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"io"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i5"><span class="lit-string i5">"net"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i6"><span class="lit-string i6">"net/http"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i7"><span class="lit-string i7">"net/http/cookiejar"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i8"><span class="lit-string i8">"net/url"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i9"><span class="lit-string i9">"strings"</span></label></code></span>
+<span class="codeline" id="line-14"><code></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i10"><span class="lit-string i10">"github.com/jcmturner/gofork/encoding/asn1"</span></label></code></span>
+<span class="codeline" id="line-16"><code>	<label for="i11"><span class="lit-string i11">"github.com/jcmturner/goidentity/v6"</span></label></code></span>
+<span class="codeline" id="line-17"><code>	<label for="i12"><span class="lit-string i12">"github.com/jcmturner/gokrb5/v8/client"</span></label></code></span>
+<span class="codeline" id="line-18"><code>	<label for="i13"><span class="lit-string i13">"github.com/jcmturner/gokrb5/v8/credentials"</span></label></code></span>
+<span class="codeline" id="line-19"><code>	<label for="i14"><span class="lit-string i14">"github.com/jcmturner/gokrb5/v8/gssapi"</span></label></code></span>
+<span class="codeline" id="line-20"><code>	<label for="i15"><span class="lit-string i15">"github.com/jcmturner/gokrb5/v8/iana/nametype"</span></label></code></span>
+<span class="codeline" id="line-21"><code>	<label for="i16"><span class="lit-string i16">"github.com/jcmturner/gokrb5/v8/keytab"</span></label></code></span>
+<span class="codeline" id="line-22"><code>	<label for="i17"><span class="lit-string i17">"github.com/jcmturner/gokrb5/v8/krberror"</span></label></code></span>
+<span class="codeline" id="line-23"><code>	<label for="i18"><span class="lit-string i18">"github.com/jcmturner/gokrb5/v8/service"</span></label></code></span>
+<span class="codeline" id="line-24"><code>	<label for="i19"><span class="lit-string i19">"github.com/jcmturner/gokrb5/v8/types"</span></label></code></span>
+<span class="codeline" id="line-25"><code>)</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// Client side functionality //</span></code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// Client will negotiate authentication with a server using SPNEGO.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-Client" class="ident">Client</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-31"><code>	*<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/client.go.html#line-57" class="ident">Client</a></code></span>
+<span class="codeline" id="line-32"><code>	krb5Client *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i12">client</a>.<a href="../client/client.go.html#line-25" class="ident">Client</a></code></span>
+<span class="codeline" id="line-33"><code>	spn        <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-34"><code>	reqs       []*<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a></code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="keyword">type</span> redirectErr <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-38"><code>	reqTarget *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a></code></span>
+<span class="codeline" id="line-39"><code>}</code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="keyword">func</span> (<label for="r0" class="ident">e</label> <a href="#line-37" class="ident">redirectErr</a>) <label for="r1" class="ident">Error</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-42"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"redirect to %v"</span>, <label for="r0" class="ident">e</label>.<a href="#line-38" class="ident">reqTarget</a>.<a href="../../../../../net/http/request.go.html#line-124" class="ident">URL</a>)</code></span>
+<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">type</span> teeReadCloser <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-104" class="ident">Closer</a></code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// NewClient returns a SPNEGO enabled HTTP client.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// Be careful when passing in the *http.Client if it is beginning reused in multiple calls to this function.</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// Ensure reuse of the provided *http.Client is for the same user as a session cookie may have been added to</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// http.Client's cookie jar.</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// Incorrect reuse of the provided *http.Client could lead to access to the wrong user's session.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-NewClient" class="ident">NewClient</a></label>(<label for="r3" class="ident">krb5Cl</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i12">client</a>.<a href="../client/client.go.html#line-25" class="ident">Client</a>, <label for="r4" class="ident">httpCl</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/client.go.html#line-57" class="ident">Client</a>, <label for="r5" class="ident">spn</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) *<a href="#line-30" class="ident">Client</a> {</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">if</span> <label for="r4" class="ident">httpCl</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-57"><code>		<label for="r4" class="ident">httpCl</label> = &amp;<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/client.go.html#line-57" class="ident">Client</a>{}</code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code>	<span class="comment">// Add a cookie jar if there isn't one</span></code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">if</span> <label for="r4" class="ident">httpCl</label>.<a href="../../../../../net/http/client.go.html#line-88" class="ident">Jar</a> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-61"><code>		<label for="r4" class="ident">httpCl</label>.<a href="../../../../../net/http/client.go.html#line-88" class="ident">Jar</a>, _ = <a href="../../../../../../pkg/net/http/cookiejar.html" class="ident i7">cookiejar</a>.<a href="../../../../../net/http/cookiejar/jar.go.html#line-78" class="ident">New</a>(<a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-62"><code>	}</code></span>
+<span class="codeline" id="line-63"><code>	<span class="comment">// Add a CheckRedirect function that will execute any functional already defined and then error with a redirectErr</span></code></span>
+<span class="codeline" id="line-64"><code>	<label for="r6" class="ident">f</label> := <label for="r4" class="ident">httpCl</label>.<a href="../../../../../net/http/client.go.html#line-77" class="ident">CheckRedirect</a></code></span>
+<span class="codeline" id="line-65"><code>	<label for="r4" class="ident">httpCl</label>.<a href="../../../../../net/http/client.go.html#line-77" class="ident">CheckRedirect</a> = <span class="keyword">func</span>(<label for="r7" class="ident">req</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>, <label for="r8" class="ident">via</label> []*<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">if</span> <label for="r6" class="ident">f</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-67"><code>			<label for="r9" class="ident">err</label> := <label for="r6" class="ident">f</label>(<label for="r7" class="ident">req</label>, <label for="r8" class="ident">via</label>)</code></span>
+<span class="codeline" id="line-68"><code>			<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-69"><code>				<span class="keyword">return</span> <label for="r9" class="ident">err</label></code></span>
+<span class="codeline" id="line-70"><code>			}</code></span>
+<span class="codeline" id="line-71"><code>		}</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">return</span> <a href="#line-37" class="ident">redirectErr</a>{<a href="#line-38" class="ident">reqTarget</a>: <label for="r7" class="ident">req</label>}</code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code>	<span class="keyword">return</span> &amp;<a href="#line-30" class="ident">Client</a>{</code></span>
+<span class="codeline" id="line-75"><code>		<a href="#line-31" class="ident">Client</a>:     <label for="r4" class="ident">httpCl</label>,</code></span>
+<span class="codeline" id="line-76"><code>		<a href="#line-32" class="ident">krb5Client</a>: <label for="r3" class="ident">krb5Cl</label>,</code></span>
+<span class="codeline" id="line-77"><code>		<a href="#line-33" class="ident">spn</a>:        <label for="r5" class="ident">spn</label>,</code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// Do is the SPNEGO enabled HTTP client's equivalent of the http.Client's Do method.</span></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> (<label for="r10" class="ident">c</label> *<a href="#line-30" class="ident">Client</a>) <label for="r11" class="ident">Do</label>(<label for="r12" class="ident">req</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>) (<label for="r13" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>, <label for="r14" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">var</span> <label for="r15" class="ident">body</label> <a href="../../../../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../../../../bytes/buffer.go.html#line-20" class="ident">Buffer</a></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">if</span> <label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-85"><code>		<span class="comment">// Use a tee reader to capture any body sent in case we have to replay it again</span></code></span>
+<span class="codeline" id="line-86"><code>		<label for="r16" class="ident">teeR</label> := <a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-563" class="ident">TeeReader</a>(<label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a>, &amp;<label for="r15" class="ident">body</label>)</code></span>
+<span class="codeline" id="line-87"><code>		<label for="r17" class="ident">teeRC</label> := <a href="#line-45" class="ident">teeReadCloser</a>{<label for="r16" class="ident">teeR</label>, <label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a>}</code></span>
+<span class="codeline" id="line-88"><code>		<label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> = <label for="r17" class="ident">teeRC</label></code></span>
+<span class="codeline" id="line-89"><code>	}</code></span>
+<span class="codeline" id="line-90"><code>	<label for="r13" class="ident">resp</label>, <label for="r14" class="ident">err</label> = <label for="r10" class="ident">c</label>.<a href="#line-31" class="ident">Client</a>.<a href="../../../../../net/http/client.go.html#line-580" class="ident">Do</a>(<label for="r12" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">if</span> <label for="r14" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">if</span> <label for="r18" class="ident">ue</label>, <label for="r19" class="ident">ok</label> := <label for="r14" class="ident">err</label>.(*<a href="../../../../../../pkg/net/url.html" class="ident i8">url</a>.<a href="../../../../../net/url/url.go.html#line-23" class="ident">Error</a>); <label for="r19" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-93"><code>			<span class="keyword">if</span> <label for="r20" class="ident">e</label>, <label for="r21" class="ident">ok</label> := <label for="r18" class="ident">ue</label>.<a href="../../../../../net/url/url.go.html#line-26" class="ident">Err</a>.(<a href="#line-37" class="ident">redirectErr</a>); <label for="r21" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-94"><code>				<span class="comment">// Picked up a redirect</span></code></span>
+<span class="codeline" id="line-95"><code>				<label for="r20" class="ident">e</label>.<a href="#line-38" class="ident">reqTarget</a>.<a href="../../../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../../../net/http/header.go.html#line-80" class="ident">Del</a>(<a href="#line-238" class="ident">HTTPHeaderAuthRequest</a>)</code></span>
+<span class="codeline" id="line-96"><code>				<label for="r10" class="ident">c</label>.<a href="#line-34" class="ident">reqs</a> = <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r10" class="ident">c</label>.<a href="#line-34" class="ident">reqs</a>, <label for="r20" class="ident">e</label>.<a href="#line-38" class="ident">reqTarget</a>)</code></span>
+<span class="codeline" id="line-97"><code>				<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">c</label>.<a href="#line-34" class="ident">reqs</a>) &gt;= <span class="lit-number">10</span> {</code></span>
+<span class="codeline" id="line-98"><code>					<span class="keyword">return</span> <label for="r13" class="ident">resp</label>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"stopped after 10 redirects"</span>)</code></span>
+<span class="codeline" id="line-99"><code>				}</code></span>
+<span class="codeline" id="line-100"><code>				<span class="keyword">if</span> <label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-101"><code>					<span class="comment">// Refresh the body reader so the body can be sent again</span></code></span>
+<span class="codeline" id="line-102"><code>					<label for="r20" class="ident">e</label>.<a href="#line-38" class="ident">reqTarget</a>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> = <a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-627" class="ident">NopCloser</a>(&amp;<label for="r15" class="ident">body</label>)</code></span>
+<span class="codeline" id="line-103"><code>				}</code></span>
+<span class="codeline" id="line-104"><code>				<span class="keyword">return</span> <label for="r10" class="ident">c</label>.<label for="r11" class="ident">Do</label>(<label for="r20" class="ident">e</label>.<a href="#line-38" class="ident">reqTarget</a>)</code></span>
+<span class="codeline" id="line-105"><code>			}</code></span>
+<span class="codeline" id="line-106"><code>		}</code></span>
+<span class="codeline" id="line-107"><code>		<span class="keyword">return</span> <label for="r13" class="ident">resp</label>, <label for="r14" class="ident">err</label></code></span>
+<span class="codeline" id="line-108"><code>	}</code></span>
+<span class="codeline" id="line-109"><code>	<span class="keyword">if</span> <a href="#line-158" class="ident">respUnauthorizedNegotiate</a>(<label for="r13" class="ident">resp</label>) {</code></span>
+<span class="codeline" id="line-110"><code>		<label for="r22" class="ident">err</label> := <a href="#line-197" class="ident">SetSPNEGOHeader</a>(<label for="r10" class="ident">c</label>.<a href="#line-32" class="ident">krb5Client</a>, <label for="r12" class="ident">req</label>, <label for="r10" class="ident">c</label>.<a href="#line-33" class="ident">spn</a>)</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">if</span> <label for="r22" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-112"><code>			<span class="keyword">return</span> <label for="r13" class="ident">resp</label>, <label for="r22" class="ident">err</label></code></span>
+<span class="codeline" id="line-113"><code>		}</code></span>
+<span class="codeline" id="line-114"><code>		<span class="keyword">if</span> <label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-115"><code>			<span class="comment">// Refresh the body reader so the body can be sent again</span></code></span>
+<span class="codeline" id="line-116"><code>			<label for="r12" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-182" class="ident">Body</a> = <a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-627" class="ident">NopCloser</a>(&amp;<label for="r15" class="ident">body</label>)</code></span>
+<span class="codeline" id="line-117"><code>		}</code></span>
+<span class="codeline" id="line-118"><code>		<a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-385" class="ident">Copy</a>(<a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-584" class="ident">Discard</a>, <label for="r13" class="ident">resp</label>.<a href="../../../../../net/http/response.go.html#line-72" class="ident">Body</a>)</code></span>
+<span class="codeline" id="line-119"><code>		<label for="r13" class="ident">resp</label>.<a href="../../../../../net/http/response.go.html#line-72" class="ident">Body</a>.<a href="../../../../../io/io.go.html#line-105" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-120"><code>		<span class="keyword">return</span> <label for="r10" class="ident">c</label>.<label for="r11" class="ident">Do</label>(<label for="r12" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-121"><code>	}</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <label for="r13" class="ident">resp</label>, <label for="r14" class="ident">err</label></code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">// Get is the SPNEGO enabled HTTP client's equivalent of the http.Client's Get method.</span></code></span>
+<span class="codeline" id="line-126"><code><span class="keyword">func</span> (<label for="r23" class="ident">c</label> *<a href="#line-30" class="ident">Client</a>) <label for="r24" class="ident">Get</label>(<label for="r25" class="ident">url</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r26" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>, <label for="r27" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-127"><code>	<label for="r28" class="ident">req</label>, <label for="r27" class="ident">err</label> := <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-835" class="ident">NewRequest</a>(<span class="lit-string">"GET"</span>, <label for="r25" class="ident">url</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">if</span> <label for="r27" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r27" class="ident">err</label></code></span>
+<span class="codeline" id="line-130"><code>	}</code></span>
+<span class="codeline" id="line-131"><code>	<span class="keyword">return</span> <label for="r23" class="ident">c</label>.<a href="#line-82" class="ident">Do</a>(<label for="r28" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-132"><code>}</code></span>
+<span class="codeline" id="line-133"><code></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">// Post is the SPNEGO enabled HTTP client's equivalent of the http.Client's Post method.</span></code></span>
+<span class="codeline" id="line-135"><code><span class="keyword">func</span> (<label for="r29" class="ident">c</label> *<a href="#line-30" class="ident">Client</a>) <label for="r30" class="ident">Post</label>(<label for="r31" class="ident">url</label>, <label for="r32" class="ident">contentType</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r33" class="ident">body</label> <a href="../../../../../../pkg/io.html" class="ident i4">io</a>.<a href="../../../../../io/io.go.html#line-83" class="ident">Reader</a>) (<label for="r34" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>, <label for="r35" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-136"><code>	<label for="r36" class="ident">req</label>, <label for="r35" class="ident">err</label> := <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-835" class="ident">NewRequest</a>(<span class="lit-string">"POST"</span>, <label for="r31" class="ident">url</label>, <label for="r33" class="ident">body</label>)</code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">if</span> <label for="r35" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-138"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r35" class="ident">err</label></code></span>
+<span class="codeline" id="line-139"><code>	}</code></span>
+<span class="codeline" id="line-140"><code>	<label for="r36" class="ident">req</label>.<a href="../../../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<span class="lit-string">"Content-Type"</span>, <label for="r32" class="ident">contentType</label>)</code></span>
+<span class="codeline" id="line-141"><code>	<span class="keyword">return</span> <label for="r29" class="ident">c</label>.<a href="#line-82" class="ident">Do</a>(<label for="r36" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-142"><code>}</code></span>
+<span class="codeline" id="line-143"><code></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">// PostForm is the SPNEGO enabled HTTP client's equivalent of the http.Client's PostForm method.</span></code></span>
+<span class="codeline" id="line-145"><code><span class="keyword">func</span> (<label for="r37" class="ident">c</label> *<a href="#line-30" class="ident">Client</a>) <label for="r38" class="ident">PostForm</label>(<label for="r39" class="ident">url</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r40" class="ident">data</label> <a href="../../../../../../pkg/net/url.html" class="ident i8">url</a>.<a href="../../../../../net/url/url.go.html#line-876" class="ident">Values</a>) (<label for="r41" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>, <label for="r42" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">return</span> <label for="r37" class="ident">c</label>.<a href="#line-135" class="ident">Post</a>(<label for="r39" class="ident">url</label>, <span class="lit-string">"application/x-www-form-urlencoded"</span>, <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/reader.go.html#line-160" class="ident">NewReader</a>(<label for="r40" class="ident">data</label>.<a href="../../../../../net/url/url.go.html#line-965" class="ident">Encode</a>()))</code></span>
+<span class="codeline" id="line-147"><code>}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">// Head is the SPNEGO enabled HTTP client's equivalent of the http.Client's Head method.</span></code></span>
+<span class="codeline" id="line-150"><code><span class="keyword">func</span> (<label for="r43" class="ident">c</label> *<a href="#line-30" class="ident">Client</a>) <label for="r44" class="ident">Head</label>(<label for="r45" class="ident">url</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r46" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>, <label for="r47" class="ident">err</label> <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-151"><code>	<label for="r48" class="ident">req</label>, <label for="r47" class="ident">err</label> := <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-835" class="ident">NewRequest</a>(<span class="lit-string">"HEAD"</span>, <label for="r45" class="ident">url</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-152"><code>	<span class="keyword">if</span> <label for="r47" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r47" class="ident">err</label></code></span>
+<span class="codeline" id="line-154"><code>	}</code></span>
+<span class="codeline" id="line-155"><code>	<span class="keyword">return</span> <label for="r43" class="ident">c</label>.<a href="#line-82" class="ident">Do</a>(<label for="r48" class="ident">req</label>)</code></span>
+<span class="codeline" id="line-156"><code>}</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code><span class="keyword">func</span> respUnauthorizedNegotiate(<label for="r50" class="ident">resp</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/response.go.html#line-35" class="ident">Response</a>) <a href="../../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-159"><code>	<span class="keyword">if</span> <label for="r50" class="ident">resp</label>.<a href="../../../../../net/http/response.go.html#line-37" class="ident">StatusCode</a> == <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/status.go.html#line-37" class="ident">StatusUnauthorized</a> {</code></span>
+<span class="codeline" id="line-160"><code>		<span class="keyword">if</span> <label for="r50" class="ident">resp</label>.<a href="../../../../../net/http/response.go.html#line-51" class="ident">Header</a>.<a href="../../../../../net/http/header.go.html#line-49" class="ident">Get</a>(<a href="#line-240" class="ident">HTTPHeaderAuthResponse</a>) == <a href="#line-242" class="ident">HTTPHeaderAuthResponseValueKey</a> {</code></span>
+<span class="codeline" id="line-161"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-162"><code>		}</code></span>
+<span class="codeline" id="line-163"><code>	}</code></span>
+<span class="codeline" id="line-164"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-165"><code>}</code></span>
+<span class="codeline" id="line-166"><code></code></span>
+<span class="codeline" id="line-167"><code><span class="keyword">func</span> setRequestSPN(<label for="r52" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>) (<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i19">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-168"><code>	<label for="r53" class="ident">h</label> := <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-990" class="ident">TrimSuffix</a>(<label for="r52" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-124" class="ident">URL</a>.<a href="../../../../../net/url/url.go.html#line-363" class="ident">Host</a>, <span class="lit-string">"."</span>)</code></span>
+<span class="codeline" id="line-169"><code>	<span class="comment">// This if statement checks if the host includes a port number</span></code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-76" class="ident">LastIndex</a>(<label for="r52" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-124" class="ident">URL</a>.<a href="../../../../../net/url/url.go.html#line-363" class="ident">Host</a>, <span class="lit-string">":"</span>) &gt; <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-76" class="ident">LastIndex</a>(<label for="r52" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-124" class="ident">URL</a>.<a href="../../../../../net/url/url.go.html#line-363" class="ident">Host</a>, <span class="lit-string">"]"</span>) {</code></span>
+<span class="codeline" id="line-171"><code>		<span class="comment">// There is a port number in the URL</span></code></span>
+<span class="codeline" id="line-172"><code>		<label for="r54" class="ident">h</label>, <label for="r55" class="ident">p</label>, <label for="r56" class="ident">err</label> := <a href="../../../../../../pkg/net.html" class="ident i5">net</a>.<a href="../../../../../net/ipsock.go.html#line-164" class="ident">SplitHostPort</a>(<label for="r53" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-173"><code>		<span class="keyword">if</span> <label for="r56" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-174"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i19">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-13" class="ident">PrincipalName</a>{}, <label for="r56" class="ident">err</label></code></span>
+<span class="codeline" id="line-175"><code>		}</code></span>
+<span class="codeline" id="line-176"><code>		<label for="r57" class="ident">name</label>, <label for="r56" class="ident">err</label> := <a href="../../../../../../pkg/net.html" class="ident i5">net</a>.<a href="../../../../../net/lookup.go.html#line-450" class="ident">LookupCNAME</a>(<label for="r54" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-177"><code>		<span class="keyword">if</span> <label for="r57" class="ident">name</label> != <span class="lit-string">""</span> &amp;&amp; <label for="r56" class="ident">err</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-178"><code>			<span class="comment">// Underlyng canonical name should be used for SPN</span></code></span>
+<span class="codeline" id="line-179"><code>			<label for="r54" class="ident">h</label> = <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-589" class="ident">ToLower</a>(<label for="r57" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-180"><code>		}</code></span>
+<span class="codeline" id="line-181"><code>		<label for="r54" class="ident">h</label> = <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-990" class="ident">TrimSuffix</a>(<label for="r54" class="ident">h</label>, <span class="lit-string">"."</span>)</code></span>
+<span class="codeline" id="line-182"><code>		<label for="r52" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-239" class="ident">Host</a> = <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%s:%s"</span>, <label for="r54" class="ident">h</label>, <label for="r55" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-183"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i19">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-19" class="ident">NewPrincipalName</a>(<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/nametype.html" class="ident i15">nametype</a>.<a href="../iana/nametype/constants.go.html#line-7" class="ident">KRB_NT_PRINCIPAL</a>, <span class="lit-string">"HTTP/"</span>+<label for="r54" class="ident">h</label>), <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-184"><code>	}</code></span>
+<span class="codeline" id="line-185"><code>	<label for="r58" class="ident">name</label>, <label for="r59" class="ident">err</label> := <a href="../../../../../../pkg/net.html" class="ident i5">net</a>.<a href="../../../../../net/lookup.go.html#line-450" class="ident">LookupCNAME</a>(<label for="r53" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-186"><code>	<span class="keyword">if</span> <label for="r58" class="ident">name</label> != <span class="lit-string">""</span> &amp;&amp; <label for="r59" class="ident">err</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-187"><code>		<span class="comment">// Underlyng canonical name should be used for SPN</span></code></span>
+<span class="codeline" id="line-188"><code>		<label for="r53" class="ident">h</label> = <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-589" class="ident">ToLower</a>(<label for="r58" class="ident">name</label>)</code></span>
+<span class="codeline" id="line-189"><code>	}</code></span>
+<span class="codeline" id="line-190"><code>	<label for="r53" class="ident">h</label> = <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-990" class="ident">TrimSuffix</a>(<label for="r53" class="ident">h</label>, <span class="lit-string">"."</span>)</code></span>
+<span class="codeline" id="line-191"><code>	<label for="r52" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-239" class="ident">Host</a> = <label for="r53" class="ident">h</label></code></span>
+<span class="codeline" id="line-192"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i19">types</a>.<a href="../types/PrincipalName.go^15d67.html#line-19" class="ident">NewPrincipalName</a>(<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/iana/nametype.html" class="ident i15">nametype</a>.<a href="../iana/nametype/constants.go.html#line-7" class="ident">KRB_NT_PRINCIPAL</a>, <span class="lit-string">"HTTP/"</span>+<label for="r53" class="ident">h</label>), <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-193"><code>}</code></span>
+<span class="codeline" id="line-194"><code></code></span>
+<span class="codeline" id="line-195"><code><span class="comment">// SetSPNEGOHeader gets the service ticket and sets it as the SPNEGO authorization header on HTTP request object.</span></code></span>
+<span class="codeline" id="line-196"><code><span class="comment">// To auto generate the SPN from the request object pass a null string "".</span></code></span>
+<span class="codeline" id="line-197"><code><span class="keyword">func</span> <label for="r60" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-SetSPNEGOHeader" class="ident">SetSPNEGOHeader</a></label>(<label for="r61" class="ident">cl</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/client.html" class="ident i12">client</a>.<a href="../client/client.go.html#line-25" class="ident">Client</a>, <label for="r62" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>, <label for="r63" class="ident">spn</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-198"><code>	<span class="keyword">if</span> <label for="r63" class="ident">spn</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-199"><code>		<label for="r64" class="ident">pn</label>, <label for="r65" class="ident">err</label> := <a href="#line-167" class="ident">setRequestSPN</a>(<label for="r62" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-200"><code>		<span class="keyword">if</span> <label for="r65" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-201"><code>			<span class="keyword">return</span> <label for="r65" class="ident">err</label></code></span>
+<span class="codeline" id="line-202"><code>		}</code></span>
+<span class="codeline" id="line-203"><code>		<label for="r63" class="ident">spn</label> = <label for="r64" class="ident">pn</label>.<a href="../types/PrincipalName.go^15d67.html#line-51" class="ident">PrincipalNameString</a>()</code></span>
+<span class="codeline" id="line-204"><code>	}</code></span>
+<span class="codeline" id="line-205"><code>	<label for="r61" class="ident">cl</label>.<a href="../client/settings.go.html#line-75" class="ident">Log</a>(<span class="lit-string">"using SPN %s"</span>, <label for="r63" class="ident">spn</label>)</code></span>
+<span class="codeline" id="line-206"><code>	<label for="r66" class="ident">s</label> := <a href="spnego.go.html#line-25" class="ident">SPNEGOClient</a>(<label for="r61" class="ident">cl</label>, <label for="r63" class="ident">spn</label>)</code></span>
+<span class="codeline" id="line-207"><code>	<label for="r67" class="ident">err</label> := <label for="r66" class="ident">s</label>.<a href="spnego.go.html#line-46" class="ident">AcquireCred</a>()</code></span>
+<span class="codeline" id="line-208"><code>	<span class="keyword">if</span> <label for="r67" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-209"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not acquire client credential: %v"</span>, <label for="r67" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-210"><code>	}</code></span>
+<span class="codeline" id="line-211"><code>	<label for="r68" class="ident">st</label>, <label for="r67" class="ident">err</label> := <label for="r66" class="ident">s</label>.<a href="spnego.go.html#line-51" class="ident">InitSecContext</a>()</code></span>
+<span class="codeline" id="line-212"><code>	<span class="keyword">if</span> <label for="r67" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-213"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"could not initialize context: %v"</span>, <label for="r67" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-214"><code>	}</code></span>
+<span class="codeline" id="line-215"><code>	<label for="r69" class="ident">nb</label>, <label for="r67" class="ident">err</label> := <label for="r68" class="ident">st</label>.<a href="../gssapi/gssapi.go.html#line-51" class="ident">Marshal</a>()</code></span>
+<span class="codeline" id="line-216"><code>	<span class="keyword">if</span> <label for="r67" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-217"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i17">krberror</a>.<a href="../krberror/error.go.html#line-47" class="ident">Errorf</a>(<label for="r67" class="ident">err</label>, <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/krberror.html" class="ident i17">krberror</a>.<a href="../krberror/error.go.html#line-12" class="ident">EncodingError</a>, <span class="lit-string">"could not marshal SPNEGO"</span>)</code></span>
+<span class="codeline" id="line-218"><code>	}</code></span>
+<span class="codeline" id="line-219"><code>	<label for="r70" class="ident">hs</label> := <span class="lit-string">"Negotiate "</span> + <a href="../../../../../../pkg/encoding/base64.html" class="ident i1">base64</a>.<a href="../../../../../encoding/base64/base64.go.html#line-99" class="ident">StdEncoding</a>.<a href="../../../../../encoding/base64/base64.go.html#line-177" class="ident">EncodeToString</a>(<label for="r69" class="ident">nb</label>)</code></span>
+<span class="codeline" id="line-220"><code>	<label for="r62" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<a href="#line-238" class="ident">HTTPHeaderAuthRequest</a>, <label for="r70" class="ident">hs</label>)</code></span>
+<span class="codeline" id="line-221"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-222"><code>}</code></span>
+<span class="codeline" id="line-223"><code></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">// Service side functionality //</span></code></span>
+<span class="codeline" id="line-225"><code></code></span>
+<span class="codeline" id="line-226"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-227"><code>	<span class="comment">// spnegoNegTokenRespKRBAcceptCompleted - The response on successful authentication always has this header. Capturing as const so we don't have marshaling and encoding overhead.</span></code></span>
+<span class="codeline" id="line-228"><code>	spnegoNegTokenRespKRBAcceptCompleted = <span class="lit-string">"Negotiate oRQwEqADCgEAoQsGCSqGSIb3EgECAg=="</span></code></span>
+<span class="codeline" id="line-229"><code>	<span class="comment">// spnegoNegTokenRespReject - The response on a failed authentication always has this rejection header. Capturing as const so we don't have marshaling and encoding overhead.</span></code></span>
+<span class="codeline" id="line-230"><code>	spnegoNegTokenRespReject = <span class="lit-string">"Negotiate oQcwBaADCgEC"</span></code></span>
+<span class="codeline" id="line-231"><code>	<span class="comment">// spnegoNegTokenRespIncompleteKRB5 - Response token specifying incomplete context and KRB5 as the supported mechtype.</span></code></span>
+<span class="codeline" id="line-232"><code>	spnegoNegTokenRespIncompleteKRB5 = <span class="lit-string">"Negotiate oRQwEqADCgEBoQsGCSqGSIb3EgECAg=="</span></code></span>
+<span class="codeline" id="line-233"><code>	<span class="comment">// sessionCredentials is the session value key holding the credentials jcmturner/goidentity/Identity object.</span></code></span>
+<span class="codeline" id="line-234"><code>	sessionCredentials = <span class="lit-string">"github.com/jcmturner/gokrb5/v8/sessionCredentials"</span></code></span>
+<span class="codeline" id="line-235"><code>	<span class="comment">// ctxCredentials is the SPNEGO context key holding the credentials jcmturner/goidentity/Identity object.</span></code></span>
+<span class="codeline" id="line-236"><code>	ctxCredentials = <span class="lit-string">"github.com/jcmturner/gokrb5/v8/ctxCredentials"</span></code></span>
+<span class="codeline" id="line-237"><code>	<span class="comment">// HTTPHeaderAuthRequest is the header that will hold authn/z information.</span></code></span>
+<span class="codeline" id="line-238"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-HTTPHeaderAuthRequest" class="ident">HTTPHeaderAuthRequest</a> = <span class="lit-string">"Authorization"</span></code></span>
+<span class="codeline" id="line-239"><code>	<span class="comment">// HTTPHeaderAuthResponse is the header that will hold SPNEGO data from the server.</span></code></span>
+<span class="codeline" id="line-240"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-HTTPHeaderAuthResponse" class="ident">HTTPHeaderAuthResponse</a> = <span class="lit-string">"WWW-Authenticate"</span></code></span>
+<span class="codeline" id="line-241"><code>	<span class="comment">// HTTPHeaderAuthResponseValueKey is the key in the auth header for SPNEGO.</span></code></span>
+<span class="codeline" id="line-242"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-HTTPHeaderAuthResponseValueKey" class="ident">HTTPHeaderAuthResponseValueKey</a> = <span class="lit-string">"Negotiate"</span></code></span>
+<span class="codeline" id="line-243"><code>	<span class="comment">// UnauthorizedMsg is the message returned in the body when authentication fails.</span></code></span>
+<span class="codeline" id="line-244"><code>	<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-UnauthorizedMsg" class="ident">UnauthorizedMsg</a> = <span class="lit-string">"Unauthorised.\n"</span></code></span>
+<span class="codeline" id="line-245"><code>)</code></span>
+<span class="codeline" id="line-246"><code></code></span>
+<span class="codeline" id="line-247"><code><span class="comment">// SPNEGOKRB5Authenticate is a Kerberos SPNEGO authentication HTTP handler wrapper.</span></code></span>
+<span class="codeline" id="line-248"><code><span class="keyword">func</span> <label for="r71" class="ident"><a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/spnego.html#name-SPNEGOKRB5Authenticate" class="ident">SPNEGOKRB5Authenticate</a></label>(<label for="r72" class="ident">inner</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-86" class="ident">Handler</a>, <label for="r73" class="ident">kt</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/keytab.html" class="ident i16">keytab</a>.<a href="../keytab/keytab.go.html#line-25" class="ident">Keytab</a>, <label for="r74" class="ident">settings</label> ...<span class="keyword">func</span>(*<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html" class="ident i18">service</a>.<a href="../service/settings.go.html#line-13" class="ident">Settings</a>)) <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-86" class="ident">Handler</a> {</code></span>
+<span class="codeline" id="line-249"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-2105" class="ident">HandlerFunc</a>(<span class="keyword">func</span>(<label for="r75" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r76" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>) {</code></span>
+<span class="codeline" id="line-250"><code>		<span class="comment">// Set up the SPNEGO GSS-API mechanism</span></code></span>
+<span class="codeline" id="line-251"><code>		<span class="keyword">var</span> <label for="r77" class="ident">spnego</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a></code></span>
+<span class="codeline" id="line-252"><code>		<label for="r78" class="ident">h</label>, <label for="r79" class="ident">err</label> := <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/types.html" class="ident i19">types</a>.<a href="../types/HostAddress.go^be2d3.html#line-25" class="ident">GetHostAddress</a>(<label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>)</code></span>
+<span class="codeline" id="line-253"><code>		<span class="keyword">if</span> <label for="r79" class="ident">err</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-254"><code>			<span class="comment">// put in this order so that if the user provides a ClientAddress it will override the one here.</span></code></span>
+<span class="codeline" id="line-255"><code>			<label for="r80" class="ident">o</label> := <a href="../../../../../../pkg/builtin.html#name-append" class="ident">append</a>([]<span class="keyword">func</span>(*<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html" class="ident i18">service</a>.<a href="../service/settings.go.html#line-13" class="ident">Settings</a>){<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/service.html" class="ident i18">service</a>.<a href="../service/settings.go.html#line-67" class="ident">ClientAddress</a>(<label for="r78" class="ident">h</label>)}, <label for="r74" class="ident">settings</label>...)</code></span>
+<span class="codeline" id="line-256"><code>			<label for="r77" class="ident">spnego</label> = <a href="spnego.go.html#line-34" class="ident">SPNEGOService</a>(<label for="r73" class="ident">kt</label>, <label for="r80" class="ident">o</label>...)</code></span>
+<span class="codeline" id="line-257"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-258"><code>			<label for="r77" class="ident">spnego</label> = <a href="spnego.go.html#line-34" class="ident">SPNEGOService</a>(<label for="r73" class="ident">kt</label>, <label for="r74" class="ident">settings</label>...)</code></span>
+<span class="codeline" id="line-259"><code>			<label for="r77" class="ident">spnego</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<span class="lit-string">"%s - SPNEGO could not parse client address: %v"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r79" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-260"><code>		}</code></span>
+<span class="codeline" id="line-261"><code></code></span>
+<span class="codeline" id="line-262"><code>		<span class="comment">// Check if there is a session manager and if there is an already established session for this client</span></code></span>
+<span class="codeline" id="line-263"><code>		<label for="r81" class="ident">id</label>, <label for="r79" class="ident">err</label> := <a href="#line-343" class="ident">getSessionCredentials</a>(<label for="r77" class="ident">spnego</label>, <label for="r76" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-264"><code>		<span class="keyword">if</span> <label for="r79" class="ident">err</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r81" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-250" class="ident">Authenticated</a>() {</code></span>
+<span class="codeline" id="line-265"><code>			<span class="comment">// There is an established session so bypass auth and serve</span></code></span>
+<span class="codeline" id="line-266"><code>			<label for="r77" class="ident">spnego</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<span class="lit-string">"%s - SPNEGO request served under session %s"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r81" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-295" class="ident">SessionID</a>())</code></span>
+<span class="codeline" id="line-267"><code>			<label for="r72" class="ident">inner</label>.<a href="../../../../../net/http/server.go.html#line-87" class="ident">ServeHTTP</a>(<label for="r75" class="ident">w</label>, <a href="../../../../../../pkg/github.com/jcmturner/goidentity/v6.html" class="ident i11">goidentity</a>.<a href="../../../goidentity/v6/identity.go.html#line-40" class="ident">AddToHTTPRequestContext</a>(&amp;<label for="r81" class="ident">id</label>, <label for="r76" class="ident">r</label>))</code></span>
+<span class="codeline" id="line-268"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-269"><code>		}</code></span>
+<span class="codeline" id="line-270"><code></code></span>
+<span class="codeline" id="line-271"><code>		<label for="r82" class="ident">st</label>, <label for="r79" class="ident">err</label> := <a href="#line-307" class="ident">getAuthorizationNegotiationHeaderAsSPNEGOToken</a>(<label for="r77" class="ident">spnego</label>, <label for="r76" class="ident">r</label>, <label for="r75" class="ident">w</label>)</code></span>
+<span class="codeline" id="line-272"><code>		<span class="keyword">if</span> <label for="r82" class="ident">st</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> || <label for="r79" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-273"><code>			<span class="comment">// response to client and logging handled in function above so just return</span></code></span>
+<span class="codeline" id="line-274"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-275"><code>		}</code></span>
+<span class="codeline" id="line-276"><code></code></span>
+<span class="codeline" id="line-277"><code>		<span class="comment">// Validate the context token</span></code></span>
+<span class="codeline" id="line-278"><code>		<label for="r83" class="ident">authed</label>, <label for="r84" class="ident">ctx</label>, <label for="r85" class="ident">status</label> := <label for="r77" class="ident">spnego</label>.<a href="spnego.go.html#line-69" class="ident">AcceptSecContext</a>(<label for="r82" class="ident">st</label>)</code></span>
+<span class="codeline" id="line-279"><code>		<span class="keyword">if</span> <label for="r85" class="ident">status</label>.<a href="../gssapi/gssapi.go.html#line-137" class="ident">Code</a> != <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html" class="ident i14">gssapi</a>.<a href="../gssapi/gssapi.go.html#line-41" class="ident">StatusComplete</a> &amp;&amp; <label for="r85" class="ident">status</label>.<a href="../gssapi/gssapi.go.html#line-137" class="ident">Code</a> != <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html" class="ident i14">gssapi</a>.<a href="../gssapi/gssapi.go.html#line-42" class="ident">StatusContinueNeeded</a> {</code></span>
+<span class="codeline" id="line-280"><code>			<a href="#line-386" class="ident">spnegoResponseReject</a>(<label for="r77" class="ident">spnego</label>, <label for="r75" class="ident">w</label>, <span class="lit-string">"%s - SPNEGO validation error: %v"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r85" class="ident">status</label>)</code></span>
+<span class="codeline" id="line-281"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-282"><code>		}</code></span>
+<span class="codeline" id="line-283"><code>		<span class="keyword">if</span> <label for="r85" class="ident">status</label>.<a href="../gssapi/gssapi.go.html#line-137" class="ident">Code</a> == <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/gssapi.html" class="ident i14">gssapi</a>.<a href="../gssapi/gssapi.go.html#line-42" class="ident">StatusContinueNeeded</a> {</code></span>
+<span class="codeline" id="line-284"><code>			<a href="#line-380" class="ident">spnegoNegotiateKRB5MechType</a>(<label for="r77" class="ident">spnego</label>, <label for="r75" class="ident">w</label>, <span class="lit-string">"%s - SPNEGO GSS-API continue needed"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>)</code></span>
+<span class="codeline" id="line-285"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-286"><code>		}</code></span>
+<span class="codeline" id="line-287"><code></code></span>
+<span class="codeline" id="line-288"><code>		<span class="keyword">if</span> <label for="r83" class="ident">authed</label> {</code></span>
+<span class="codeline" id="line-289"><code>			<span class="comment">// Authentication successful; get user's credentials from the context</span></code></span>
+<span class="codeline" id="line-290"><code>			<label for="r86" class="ident">id</label> := <label for="r84" class="ident">ctx</label>.<a href="../../../../../context/context.go.html#line-153" class="ident">Value</a>(<a href="#line-236" class="ident">ctxCredentials</a>).(*<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/credentials.html" class="ident i13">credentials</a>.<a href="../credentials/credentials.go.html#line-24" class="ident">Credentials</a>)</code></span>
+<span class="codeline" id="line-291"><code>			<span class="comment">// Create a new session if a session manager has been configured</span></code></span>
+<span class="codeline" id="line-292"><code>			<label for="r79" class="ident">err</label> = <a href="#line-360" class="ident">newSession</a>(<label for="r77" class="ident">spnego</label>, <label for="r76" class="ident">r</label>, <label for="r75" class="ident">w</label>, <label for="r86" class="ident">id</label>)</code></span>
+<span class="codeline" id="line-293"><code>			<span class="keyword">if</span> <label for="r79" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-294"><code>				<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-295"><code>			}</code></span>
+<span class="codeline" id="line-296"><code>			<a href="#line-392" class="ident">spnegoResponseAcceptCompleted</a>(<label for="r77" class="ident">spnego</label>, <label for="r75" class="ident">w</label>, <span class="lit-string">"%s %s@%s - SPNEGO authentication succeeded"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r86" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-169" class="ident">UserName</a>(), <label for="r86" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-189" class="ident">Domain</a>())</code></span>
+<span class="codeline" id="line-297"><code>			<span class="comment">// Add the identity to the context and serve the inner/wrapped handler</span></code></span>
+<span class="codeline" id="line-298"><code>			<label for="r72" class="ident">inner</label>.<a href="../../../../../net/http/server.go.html#line-87" class="ident">ServeHTTP</a>(<label for="r75" class="ident">w</label>, <a href="../../../../../../pkg/github.com/jcmturner/goidentity/v6.html" class="ident i11">goidentity</a>.<a href="../../../goidentity/v6/identity.go.html#line-40" class="ident">AddToHTTPRequestContext</a>(<label for="r86" class="ident">id</label>, <label for="r76" class="ident">r</label>))</code></span>
+<span class="codeline" id="line-299"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-300"><code>		}</code></span>
+<span class="codeline" id="line-301"><code>		<span class="comment">// If we get to here we have not authenticationed so just reject</span></code></span>
+<span class="codeline" id="line-302"><code>		<a href="#line-386" class="ident">spnegoResponseReject</a>(<label for="r77" class="ident">spnego</label>, <label for="r75" class="ident">w</label>, <span class="lit-string">"%s - SPNEGO Kerberos authentication failed"</span>, <label for="r76" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>)</code></span>
+<span class="codeline" id="line-303"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-304"><code>	})</code></span>
+<span class="codeline" id="line-305"><code>}</code></span>
+<span class="codeline" id="line-306"><code></code></span>
+<span class="codeline" id="line-307"><code><span class="keyword">func</span> getAuthorizationNegotiationHeaderAsSPNEGOToken(<label for="r88" class="ident">spnego</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r89" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>, <label for="r90" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>) (*<a href="spnego.go.html#line-100" class="ident">SPNEGOToken</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-308"><code>	<label for="r91" class="ident">s</label> := <a href="../../../../../../pkg/strings.html" class="ident i9">strings</a>.<a href="../../../../../strings/strings.go.html#line-279" class="ident">SplitN</a>(<label for="r89" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-166" class="ident">Header</a>.<a href="../../../../../net/http/header.go.html#line-49" class="ident">Get</a>(<a href="#line-238" class="ident">HTTPHeaderAuthRequest</a>), <span class="lit-string">" "</span>, <span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-309"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r91" class="ident">s</label>) != <span class="lit-number">2</span> || <label for="r91" class="ident">s</label>[<span class="lit-number">0</span>] != <a href="#line-242" class="ident">HTTPHeaderAuthResponseValueKey</a> {</code></span>
+<span class="codeline" id="line-310"><code>		<span class="comment">// No Authorization header set so return 401 with WWW-Authenticate Negotiate header</span></code></span>
+<span class="codeline" id="line-311"><code>		<label for="r90" class="ident">w</label>.<a href="../../../../../net/http/server.go.html#line-116" class="ident">Header</a>().<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<a href="#line-240" class="ident">HTTPHeaderAuthResponse</a>, <a href="#line-242" class="ident">HTTPHeaderAuthResponseValueKey</a>)</code></span>
+<span class="codeline" id="line-312"><code>		<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-2118" class="ident">Error</a>(<label for="r90" class="ident">w</label>, <a href="#line-244" class="ident">UnauthorizedMsg</a>, <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/status.go.html#line-37" class="ident">StatusUnauthorized</a>)</code></span>
+<span class="codeline" id="line-313"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"client did not provide a negotiation authorization header"</span>)</code></span>
+<span class="codeline" id="line-314"><code>	}</code></span>
+<span class="codeline" id="line-315"><code></code></span>
+<span class="codeline" id="line-316"><code>	<span class="comment">// Decode the header into an SPNEGO context token</span></code></span>
+<span class="codeline" id="line-317"><code>	<label for="r92" class="ident">b</label>, <label for="r93" class="ident">err</label> := <a href="../../../../../../pkg/encoding/base64.html" class="ident i1">base64</a>.<a href="../../../../../encoding/base64/base64.go.html#line-99" class="ident">StdEncoding</a>.<a href="../../../../../encoding/base64/base64.go.html#line-381" class="ident">DecodeString</a>(<label for="r91" class="ident">s</label>[<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-318"><code>	<span class="keyword">if</span> <label for="r93" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-319"><code>		<label for="r93" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error in base64 decoding negotiation header: %v"</span>, <label for="r93" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-320"><code>		<a href="#line-380" class="ident">spnegoNegotiateKRB5MechType</a>(<label for="r88" class="ident">spnego</label>, <label for="r90" class="ident">w</label>, <span class="lit-string">"%s - SPNEGO %v"</span>, <label for="r89" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r93" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-321"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r93" class="ident">err</label></code></span>
+<span class="codeline" id="line-322"><code>	}</code></span>
+<span class="codeline" id="line-323"><code>	<span class="keyword">var</span> <label for="r94" class="ident">st</label> <a href="spnego.go.html#line-100" class="ident">SPNEGOToken</a></code></span>
+<span class="codeline" id="line-324"><code>	<label for="r93" class="ident">err</label> = <label for="r94" class="ident">st</label>.<a href="spnego.go.html#line-132" class="ident">Unmarshal</a>(<label for="r92" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-325"><code>	<span class="keyword">if</span> <label for="r93" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-326"><code>		<span class="comment">// Check if this is a raw KRB5 context token - issue #347.</span></code></span>
+<span class="codeline" id="line-327"><code>		<span class="keyword">var</span> <label for="r95" class="ident">k5t</label> <a href="krb5Token.go^ac60d.html#line-31" class="ident">KRB5Token</a></code></span>
+<span class="codeline" id="line-328"><code>		<span class="keyword">if</span> <label for="r95" class="ident">k5t</label>.<a href="krb5Token.go^ac60d.html#line-67" class="ident">Unmarshal</a>(<label for="r92" class="ident">b</label>) != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-329"><code>			<label for="r93" class="ident">err</label> = <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"error in unmarshaling SPNEGO token: %v"</span>, <label for="r93" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-330"><code>			<a href="#line-380" class="ident">spnegoNegotiateKRB5MechType</a>(<label for="r88" class="ident">spnego</label>, <label for="r90" class="ident">w</label>, <span class="lit-string">"%s - SPNEGO %v"</span>, <label for="r89" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r93" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-331"><code>			<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r93" class="ident">err</label></code></span>
+<span class="codeline" id="line-332"><code>		}</code></span>
+<span class="codeline" id="line-333"><code>		<span class="comment">// Wrap it into an SPNEGO context token</span></code></span>
+<span class="codeline" id="line-334"><code>		<label for="r94" class="ident">st</label>.<a href="spnego.go.html#line-101" class="ident">Init</a> = <a href="../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-335"><code>		<label for="r94" class="ident">st</label>.<a href="spnego.go.html#line-103" class="ident">NegTokenInit</a> = <a href="negotiationToken.go^6f78f.html#line-30" class="ident">NegTokenInit</a>{</code></span>
+<span class="codeline" id="line-336"><code>			<a href="negotiationToken.go^6f78f.html#line-31" class="ident">MechTypes</a>:      []<a href="../../../../../../pkg/github.com/jcmturner/gofork/encoding/asn1.html" class="ident i10">asn1</a>.<a href="../../../gofork/encoding/asn1/asn1.go.html#line-212" class="ident">ObjectIdentifier</a>{<label for="r95" class="ident">k5t</label>.<a href="krb5Token.go^ac60d.html#line-32" class="ident">OID</a>},</code></span>
+<span class="codeline" id="line-337"><code>			<a href="negotiationToken.go^6f78f.html#line-33" class="ident">MechTokenBytes</a>: <label for="r92" class="ident">b</label>,</code></span>
+<span class="codeline" id="line-338"><code>		}</code></span>
+<span class="codeline" id="line-339"><code>	}</code></span>
+<span class="codeline" id="line-340"><code>	<span class="keyword">return</span> &amp;<label for="r94" class="ident">st</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-341"><code>}</code></span>
+<span class="codeline" id="line-342"><code></code></span>
+<span class="codeline" id="line-343"><code><span class="keyword">func</span> getSessionCredentials(<label for="r97" class="ident">spnego</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r98" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>) (<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/credentials.html" class="ident i13">credentials</a>.<a href="../credentials/credentials.go.html#line-24" class="ident">Credentials</a>, <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-344"><code>	<span class="keyword">var</span> <label for="r99" class="ident">creds</label> <a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/credentials.html" class="ident i13">credentials</a>.<a href="../credentials/credentials.go.html#line-24" class="ident">Credentials</a></code></span>
+<span class="codeline" id="line-345"><code>	<span class="comment">// Check if there is a session manager and if there is an already established session for this client</span></code></span>
+<span class="codeline" id="line-346"><code>	<span class="keyword">if</span> <label for="r100" class="ident">sm</label> := <label for="r97" class="ident">spnego</label>.<a href="spnego.go.html#line-19" class="ident">serviceSettings</a>.<a href="../service/settings.go.html#line-150" class="ident">SessionManager</a>(); <label for="r100" class="ident">sm</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-347"><code>		<label for="r101" class="ident">cb</label>, <label for="r102" class="ident">err</label> := <label for="r100" class="ident">sm</label>.<a href="../service/settings.go.html#line-162" class="ident">Get</a>(<label for="r98" class="ident">r</label>, <a href="#line-234" class="ident">sessionCredentials</a>)</code></span>
+<span class="codeline" id="line-348"><code>		<span class="keyword">if</span> <label for="r102" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> || <label for="r101" class="ident">cb</label> == <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> || <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r101" class="ident">cb</label>) &lt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-349"><code>			<span class="keyword">return</span> <label for="r99" class="ident">creds</label>, <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"%s - SPNEGO error getting session and credentials for request: %v"</span>, <label for="r98" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r102" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-350"><code>		}</code></span>
+<span class="codeline" id="line-351"><code>		<label for="r102" class="ident">err</label> = <label for="r99" class="ident">creds</label>.<a href="../credentials/credentials.go.html#line-361" class="ident">Unmarshal</a>(<label for="r101" class="ident">cb</label>)</code></span>
+<span class="codeline" id="line-352"><code>		<span class="keyword">if</span> <label for="r102" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-353"><code>			<span class="keyword">return</span> <label for="r99" class="ident">creds</label>, <a href="../../../../../../pkg/fmt.html" class="ident i3">fmt</a>.<a href="../../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"%s - SPNEGO credentials malformed in session: %v"</span>, <label for="r98" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r102" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-354"><code>		}</code></span>
+<span class="codeline" id="line-355"><code>		<span class="keyword">return</span> <label for="r99" class="ident">creds</label>, <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-356"><code>	}</code></span>
+<span class="codeline" id="line-357"><code>	<span class="keyword">return</span> <label for="r99" class="ident">creds</label>, <a href="../../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"no session manager configured"</span>)</code></span>
+<span class="codeline" id="line-358"><code>}</code></span>
+<span class="codeline" id="line-359"><code></code></span>
+<span class="codeline" id="line-360"><code><span class="keyword">func</span> newSession(<label for="r104" class="ident">spnego</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r105" class="ident">r</label> *<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/request.go.html#line-103" class="ident">Request</a>, <label for="r106" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r107" class="ident">id</label> *<a href="../../../../../../pkg/github.com/jcmturner/gokrb5/v8/credentials.html" class="ident i13">credentials</a>.<a href="../credentials/credentials.go.html#line-24" class="ident">Credentials</a>) <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-361"><code>	<span class="keyword">if</span> <label for="r108" class="ident">sm</label> := <label for="r104" class="ident">spnego</label>.<a href="spnego.go.html#line-19" class="ident">serviceSettings</a>.<a href="../service/settings.go.html#line-150" class="ident">SessionManager</a>(); <label for="r108" class="ident">sm</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-362"><code>		<span class="comment">// create new session</span></code></span>
+<span class="codeline" id="line-363"><code>		<label for="r109" class="ident">idb</label>, <label for="r110" class="ident">err</label> := <label for="r107" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-333" class="ident">Marshal</a>()</code></span>
+<span class="codeline" id="line-364"><code>		<span class="keyword">if</span> <label for="r110" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-365"><code>			<a href="#line-397" class="ident">spnegoInternalServerError</a>(<label for="r104" class="ident">spnego</label>, <label for="r106" class="ident">w</label>, <span class="lit-string">"SPNEGO could not marshal credentials to add to the session: %v"</span>, <label for="r110" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-366"><code>			<span class="keyword">return</span> <label for="r110" class="ident">err</label></code></span>
+<span class="codeline" id="line-367"><code>		}</code></span>
+<span class="codeline" id="line-368"><code>		<label for="r110" class="ident">err</label> = <label for="r108" class="ident">sm</label>.<a href="../service/settings.go.html#line-161" class="ident">New</a>(<label for="r106" class="ident">w</label>, <label for="r105" class="ident">r</label>, <a href="#line-234" class="ident">sessionCredentials</a>, <label for="r109" class="ident">idb</label>)</code></span>
+<span class="codeline" id="line-369"><code>		<span class="keyword">if</span> <label for="r110" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-370"><code>			<a href="#line-397" class="ident">spnegoInternalServerError</a>(<label for="r104" class="ident">spnego</label>, <label for="r106" class="ident">w</label>, <span class="lit-string">"SPNEGO could not create new session: %v"</span>, <label for="r110" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-371"><code>			<span class="keyword">return</span> <label for="r110" class="ident">err</label></code></span>
+<span class="codeline" id="line-372"><code>		}</code></span>
+<span class="codeline" id="line-373"><code>		<label for="r104" class="ident">spnego</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<span class="lit-string">"%s %s@%s - SPNEGO new session (%s) created"</span>, <label for="r105" class="ident">r</label>.<a href="../../../../../net/http/request.go.html#line-286" class="ident">RemoteAddr</a>, <label for="r107" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-169" class="ident">UserName</a>(), <label for="r107" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-189" class="ident">Domain</a>(), <label for="r107" class="ident">id</label>.<a href="../credentials/credentials.go.html#line-295" class="ident">SessionID</a>())</code></span>
+<span class="codeline" id="line-374"><code>	}</code></span>
+<span class="codeline" id="line-375"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-376"><code>}</code></span>
+<span class="codeline" id="line-377"><code></code></span>
+<span class="codeline" id="line-378"><code><span class="comment">// Log and respond to client for error conditions</span></code></span>
+<span class="codeline" id="line-379"><code></code></span>
+<span class="codeline" id="line-380"><code><span class="keyword">func</span> spnegoNegotiateKRB5MechType(<label for="r112" class="ident">s</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r113" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r114" class="ident">format</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r115" class="ident">v</label> ...<span class="keyword">interface</span>{}) {</code></span>
+<span class="codeline" id="line-381"><code>	<label for="r112" class="ident">s</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<label for="r114" class="ident">format</label>, <label for="r115" class="ident">v</label>...)</code></span>
+<span class="codeline" id="line-382"><code>	<label for="r113" class="ident">w</label>.<a href="../../../../../net/http/server.go.html#line-116" class="ident">Header</a>().<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<a href="#line-240" class="ident">HTTPHeaderAuthResponse</a>, <a href="#line-232" class="ident">spnegoNegTokenRespIncompleteKRB5</a>)</code></span>
+<span class="codeline" id="line-383"><code>	<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-2118" class="ident">Error</a>(<label for="r113" class="ident">w</label>, <a href="#line-244" class="ident">UnauthorizedMsg</a>, <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/status.go.html#line-37" class="ident">StatusUnauthorized</a>)</code></span>
+<span class="codeline" id="line-384"><code>}</code></span>
+<span class="codeline" id="line-385"><code></code></span>
+<span class="codeline" id="line-386"><code><span class="keyword">func</span> spnegoResponseReject(<label for="r117" class="ident">s</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r118" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r119" class="ident">format</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r120" class="ident">v</label> ...<span class="keyword">interface</span>{}) {</code></span>
+<span class="codeline" id="line-387"><code>	<label for="r117" class="ident">s</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<label for="r119" class="ident">format</label>, <label for="r120" class="ident">v</label>...)</code></span>
+<span class="codeline" id="line-388"><code>	<label for="r118" class="ident">w</label>.<a href="../../../../../net/http/server.go.html#line-116" class="ident">Header</a>().<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<a href="#line-240" class="ident">HTTPHeaderAuthResponse</a>, <a href="#line-230" class="ident">spnegoNegTokenRespReject</a>)</code></span>
+<span class="codeline" id="line-389"><code>	<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-2118" class="ident">Error</a>(<label for="r118" class="ident">w</label>, <a href="#line-244" class="ident">UnauthorizedMsg</a>, <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/status.go.html#line-37" class="ident">StatusUnauthorized</a>)</code></span>
+<span class="codeline" id="line-390"><code>}</code></span>
+<span class="codeline" id="line-391"><code></code></span>
+<span class="codeline" id="line-392"><code><span class="keyword">func</span> spnegoResponseAcceptCompleted(<label for="r122" class="ident">s</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r123" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r124" class="ident">format</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r125" class="ident">v</label> ...<span class="keyword">interface</span>{}) {</code></span>
+<span class="codeline" id="line-393"><code>	<label for="r122" class="ident">s</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<label for="r124" class="ident">format</label>, <label for="r125" class="ident">v</label>...)</code></span>
+<span class="codeline" id="line-394"><code>	<label for="r123" class="ident">w</label>.<a href="../../../../../net/http/server.go.html#line-116" class="ident">Header</a>().<a href="../../../../../net/http/header.go.html#line-39" class="ident">Set</a>(<a href="#line-240" class="ident">HTTPHeaderAuthResponse</a>, <a href="#line-228" class="ident">spnegoNegTokenRespKRBAcceptCompleted</a>)</code></span>
+<span class="codeline" id="line-395"><code>}</code></span>
+<span class="codeline" id="line-396"><code></code></span>
+<span class="codeline" id="line-397"><code><span class="keyword">func</span> spnegoInternalServerError(<label for="r127" class="ident">s</label> *<a href="spnego.go.html#line-18" class="ident">SPNEGO</a>, <label for="r128" class="ident">w</label> <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-95" class="ident">ResponseWriter</a>, <label for="r129" class="ident">format</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r130" class="ident">v</label> ...<span class="keyword">interface</span>{}) {</code></span>
+<span class="codeline" id="line-398"><code>	<label for="r127" class="ident">s</label>.<a href="spnego.go.html#line-93" class="ident">Log</a>(<label for="r129" class="ident">format</label>, <label for="r130" class="ident">v</label>...)</code></span>
+<span class="codeline" id="line-399"><code>	<a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/server.go.html#line-2118" class="ident">Error</a>(<label for="r128" class="ident">w</label>, <span class="lit-string">"Internal Server Error"</span>, <a href="../../../../../../pkg/net/http.html" class="ident i6">http</a>.<a href="../../../../../net/http/status.go.html#line-66" class="ident">StatusInternalServerError</a>)</code></span>
+<span class="codeline" id="line-400"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

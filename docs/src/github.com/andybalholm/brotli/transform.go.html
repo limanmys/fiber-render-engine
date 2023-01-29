@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: transform.go in package github.com/andybalholm/brotli</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	transform.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/andybalholm/brotli.html">github.com/andybalholm/brotli</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> brotli</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-4"><code>	transformIdentity       = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-5"><code>	transformOmitLast1      = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-6"><code>	transformOmitLast2      = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-7"><code>	transformOmitLast3      = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-8"><code>	transformOmitLast4      = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-9"><code>	transformOmitLast5      = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-10"><code>	transformOmitLast6      = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-11"><code>	transformOmitLast7      = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-12"><code>	transformOmitLast8      = <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-13"><code>	transformOmitLast9      = <span class="lit-number">9</span></code></span>
+<span class="codeline" id="line-14"><code>	transformUppercaseFirst = <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-15"><code>	transformUppercaseAll   = <span class="lit-number">11</span></code></span>
+<span class="codeline" id="line-16"><code>	transformOmitFirst1     = <span class="lit-number">12</span></code></span>
+<span class="codeline" id="line-17"><code>	transformOmitFirst2     = <span class="lit-number">13</span></code></span>
+<span class="codeline" id="line-18"><code>	transformOmitFirst3     = <span class="lit-number">14</span></code></span>
+<span class="codeline" id="line-19"><code>	transformOmitFirst4     = <span class="lit-number">15</span></code></span>
+<span class="codeline" id="line-20"><code>	transformOmitFirst5     = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-21"><code>	transformOmitFirst6     = <span class="lit-number">17</span></code></span>
+<span class="codeline" id="line-22"><code>	transformOmitFirst7     = <span class="lit-number">18</span></code></span>
+<span class="codeline" id="line-23"><code>	transformOmitFirst8     = <span class="lit-number">19</span></code></span>
+<span class="codeline" id="line-24"><code>	transformOmitFirst9     = <span class="lit-number">20</span></code></span>
+<span class="codeline" id="line-25"><code>	transformShiftFirst     = <span class="lit-number">21</span></code></span>
+<span class="codeline" id="line-26"><code>	transformShiftAll       = <span class="lit-number">22</span> + <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a> - <span class="lit-number">22</span></code></span>
+<span class="codeline" id="line-27"><code>	numTransformTypes</code></span>
+<span class="codeline" id="line-28"><code>)</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="keyword">const</span> transformsMaxCutOff = <a href="#line-13" class="ident">transformOmitLast9</a></code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">type</span> transforms <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-33"><code>	prefix_suffix_size <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-34"><code>	prefix_suffix      []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-35"><code>	prefix_suffix_map  []<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a></code></span>
+<span class="codeline" id="line-36"><code>	num_transforms     <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-37"><code>	transforms         []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-38"><code>	params             []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-39"><code>	cutOffTransforms   [<a href="#line-30" class="ident">transformsMaxCutOff</a> + <span class="lit-number">1</span>]<a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="keyword">func</span> transformPrefixId(<label for="r1" class="ident">t</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r2" class="ident">I</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">return</span> <label for="r1" class="ident">t</label>.<a href="#line-37" class="ident">transforms</a>[(<label for="r2" class="ident">I</label>*<span class="lit-number">3</span>)+<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-44"><code>}</code></span>
+<span class="codeline" id="line-45"><code></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> transformType(<label for="r4" class="ident">t</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r5" class="ident">I</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">return</span> <label for="r4" class="ident">t</label>.<a href="#line-37" class="ident">transforms</a>[(<label for="r5" class="ident">I</label>*<span class="lit-number">3</span>)+<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">func</span> transformSuffixId(<label for="r7" class="ident">t</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r8" class="ident">I</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-51"><code>	<span class="keyword">return</span> <label for="r7" class="ident">t</label>.<a href="#line-37" class="ident">transforms</a>[(<label for="r8" class="ident">I</label>*<span class="lit-number">3</span>)+<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-52"><code>}</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code><span class="keyword">func</span> transformPrefix(<label for="r10" class="ident">t</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r11" class="ident">I</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">return</span> <label for="r10" class="ident">t</label>.<a href="#line-34" class="ident">prefix_suffix</a>[<label for="r10" class="ident">t</label>.<a href="#line-35" class="ident">prefix_suffix_map</a>[<a href="#line-42" class="ident">transformPrefixId</a>(<label for="r10" class="ident">t</label>, <label for="r11" class="ident">I</label>)]:]</code></span>
+<span class="codeline" id="line-56"><code>}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code><span class="keyword">func</span> transformSuffix(<label for="r13" class="ident">t</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r14" class="ident">I</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">return</span> <label for="r13" class="ident">t</label>.<a href="#line-34" class="ident">prefix_suffix</a>[<label for="r13" class="ident">t</label>.<a href="#line-35" class="ident">prefix_suffix_map</a>[<a href="#line-50" class="ident">transformSuffixId</a>(<label for="r13" class="ident">t</label>, <label for="r14" class="ident">I</label>)]:]</code></span>
+<span class="codeline" id="line-60"><code>}</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">/* RFC 7932 transforms string data */</span></code></span>
+<span class="codeline" id="line-63"><code><span class="keyword">const</span> kPrefixSuffix <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> = <span class="lit-string">"\001 \002, \010 of the \004 of \002s \001.\005 and \004 "</span> + <span class="lit-string">"in \001\"\004 to \002\"&gt;\001\n\002. \001]\005 for \003 a \006 "</span> + <span class="lit-string">"that \001'\006 with \006 from \004 by \001(\006. T"</span> + <span class="lit-string">"he \004 on \004 as \004 is \004ing \002\n\t\001:\003ed "</span> + <span class="lit-string">"\002=\"\004 at \003ly \001,\002='\005.com/\007. This \005"</span> + <span class="lit-string">" not \003er \003al \004ful \004ive \005less \004es"</span> + <span class="lit-string">"t \004ize \002\xc2\xa0\004ous \005 the \002e \000"</span></code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">var</span> kPrefixSuffixMap = [<span class="lit-number">50</span>]<a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>{</code></span>
+<span class="codeline" id="line-66"><code>	<span class="lit-number">0x00</span>,</code></span>
+<span class="codeline" id="line-67"><code>	<span class="lit-number">0x02</span>,</code></span>
+<span class="codeline" id="line-68"><code>	<span class="lit-number">0x05</span>,</code></span>
+<span class="codeline" id="line-69"><code>	<span class="lit-number">0x0E</span>,</code></span>
+<span class="codeline" id="line-70"><code>	<span class="lit-number">0x13</span>,</code></span>
+<span class="codeline" id="line-71"><code>	<span class="lit-number">0x16</span>,</code></span>
+<span class="codeline" id="line-72"><code>	<span class="lit-number">0x18</span>,</code></span>
+<span class="codeline" id="line-73"><code>	<span class="lit-number">0x1E</span>,</code></span>
+<span class="codeline" id="line-74"><code>	<span class="lit-number">0x23</span>,</code></span>
+<span class="codeline" id="line-75"><code>	<span class="lit-number">0x25</span>,</code></span>
+<span class="codeline" id="line-76"><code>	<span class="lit-number">0x2A</span>,</code></span>
+<span class="codeline" id="line-77"><code>	<span class="lit-number">0x2D</span>,</code></span>
+<span class="codeline" id="line-78"><code>	<span class="lit-number">0x2F</span>,</code></span>
+<span class="codeline" id="line-79"><code>	<span class="lit-number">0x32</span>,</code></span>
+<span class="codeline" id="line-80"><code>	<span class="lit-number">0x34</span>,</code></span>
+<span class="codeline" id="line-81"><code>	<span class="lit-number">0x3A</span>,</code></span>
+<span class="codeline" id="line-82"><code>	<span class="lit-number">0x3E</span>,</code></span>
+<span class="codeline" id="line-83"><code>	<span class="lit-number">0x45</span>,</code></span>
+<span class="codeline" id="line-84"><code>	<span class="lit-number">0x47</span>,</code></span>
+<span class="codeline" id="line-85"><code>	<span class="lit-number">0x4E</span>,</code></span>
+<span class="codeline" id="line-86"><code>	<span class="lit-number">0x55</span>,</code></span>
+<span class="codeline" id="line-87"><code>	<span class="lit-number">0x5A</span>,</code></span>
+<span class="codeline" id="line-88"><code>	<span class="lit-number">0x5C</span>,</code></span>
+<span class="codeline" id="line-89"><code>	<span class="lit-number">0x63</span>,</code></span>
+<span class="codeline" id="line-90"><code>	<span class="lit-number">0x68</span>,</code></span>
+<span class="codeline" id="line-91"><code>	<span class="lit-number">0x6D</span>,</code></span>
+<span class="codeline" id="line-92"><code>	<span class="lit-number">0x72</span>,</code></span>
+<span class="codeline" id="line-93"><code>	<span class="lit-number">0x77</span>,</code></span>
+<span class="codeline" id="line-94"><code>	<span class="lit-number">0x7A</span>,</code></span>
+<span class="codeline" id="line-95"><code>	<span class="lit-number">0x7C</span>,</code></span>
+<span class="codeline" id="line-96"><code>	<span class="lit-number">0x80</span>,</code></span>
+<span class="codeline" id="line-97"><code>	<span class="lit-number">0x83</span>,</code></span>
+<span class="codeline" id="line-98"><code>	<span class="lit-number">0x88</span>,</code></span>
+<span class="codeline" id="line-99"><code>	<span class="lit-number">0x8C</span>,</code></span>
+<span class="codeline" id="line-100"><code>	<span class="lit-number">0x8E</span>,</code></span>
+<span class="codeline" id="line-101"><code>	<span class="lit-number">0x91</span>,</code></span>
+<span class="codeline" id="line-102"><code>	<span class="lit-number">0x97</span>,</code></span>
+<span class="codeline" id="line-103"><code>	<span class="lit-number">0x9F</span>,</code></span>
+<span class="codeline" id="line-104"><code>	<span class="lit-number">0xA5</span>,</code></span>
+<span class="codeline" id="line-105"><code>	<span class="lit-number">0xA9</span>,</code></span>
+<span class="codeline" id="line-106"><code>	<span class="lit-number">0xAD</span>,</code></span>
+<span class="codeline" id="line-107"><code>	<span class="lit-number">0xB2</span>,</code></span>
+<span class="codeline" id="line-108"><code>	<span class="lit-number">0xB7</span>,</code></span>
+<span class="codeline" id="line-109"><code>	<span class="lit-number">0xBD</span>,</code></span>
+<span class="codeline" id="line-110"><code>	<span class="lit-number">0xC2</span>,</code></span>
+<span class="codeline" id="line-111"><code>	<span class="lit-number">0xC7</span>,</code></span>
+<span class="codeline" id="line-112"><code>	<span class="lit-number">0xCA</span>,</code></span>
+<span class="codeline" id="line-113"><code>	<span class="lit-number">0xCF</span>,</code></span>
+<span class="codeline" id="line-114"><code>	<span class="lit-number">0xD5</span>,</code></span>
+<span class="codeline" id="line-115"><code>	<span class="lit-number">0xD8</span>,</code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">/* RFC 7932 transforms */</span></code></span>
+<span class="codeline" id="line-119"><code><span class="keyword">var</span> kTransformsData = []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{</code></span>
+<span class="codeline" id="line-120"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-121"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-122"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-123"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-124"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-125"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-126"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-127"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-128"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-129"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-130"><code>	<a href="#line-16" class="ident">transformOmitFirst1</a>,</code></span>
+<span class="codeline" id="line-131"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-132"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-133"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-134"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-135"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-136"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-137"><code>	<span class="lit-number">47</span>,</code></span>
+<span class="codeline" id="line-138"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-139"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-140"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-141"><code>	<span class="lit-number">4</span>,</code></span>
+<span class="codeline" id="line-142"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-143"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-144"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-145"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-146"><code>	<span class="lit-number">3</span>,</code></span>
+<span class="codeline" id="line-147"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-148"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-149"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-150"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-151"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-152"><code>	<span class="lit-number">6</span>,</code></span>
+<span class="codeline" id="line-153"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-154"><code>	<a href="#line-17" class="ident">transformOmitFirst2</a>,</code></span>
+<span class="codeline" id="line-155"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-156"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-157"><code>	<a href="#line-5" class="ident">transformOmitLast1</a>,</code></span>
+<span class="codeline" id="line-158"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-159"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-160"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-161"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-162"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-163"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-164"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-165"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-166"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-167"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-168"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-169"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-170"><code>	<span class="lit-number">7</span>,</code></span>
+<span class="codeline" id="line-171"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-172"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-173"><code>	<span class="lit-number">9</span>,</code></span>
+<span class="codeline" id="line-174"><code>	<span class="lit-number">48</span>,</code></span>
+<span class="codeline" id="line-175"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-176"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-177"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-178"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-179"><code>	<span class="lit-number">8</span>,</code></span>
+<span class="codeline" id="line-180"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-181"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-182"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-183"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-184"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-185"><code>	<span class="lit-number">10</span>,</code></span>
+<span class="codeline" id="line-186"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-187"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-188"><code>	<span class="lit-number">11</span>,</code></span>
+<span class="codeline" id="line-189"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-190"><code>	<a href="#line-7" class="ident">transformOmitLast3</a>,</code></span>
+<span class="codeline" id="line-191"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-192"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-193"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-194"><code>	<span class="lit-number">13</span>,</code></span>
+<span class="codeline" id="line-195"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-196"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-197"><code>	<span class="lit-number">14</span>,</code></span>
+<span class="codeline" id="line-198"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-199"><code>	<a href="#line-18" class="ident">transformOmitFirst3</a>,</code></span>
+<span class="codeline" id="line-200"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-201"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-202"><code>	<a href="#line-6" class="ident">transformOmitLast2</a>,</code></span>
+<span class="codeline" id="line-203"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-204"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-205"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-206"><code>	<span class="lit-number">15</span>,</code></span>
+<span class="codeline" id="line-207"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-208"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-209"><code>	<span class="lit-number">16</span>,</code></span>
+<span class="codeline" id="line-210"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-211"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-212"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-213"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-214"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-215"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-216"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-217"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-218"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-219"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-220"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-221"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-222"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-223"><code>	<a href="#line-19" class="ident">transformOmitFirst4</a>,</code></span>
+<span class="codeline" id="line-224"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-225"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-226"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-227"><code>	<span class="lit-number">18</span>,</code></span>
+<span class="codeline" id="line-228"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-229"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-230"><code>	<span class="lit-number">17</span>,</code></span>
+<span class="codeline" id="line-231"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-232"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-233"><code>	<span class="lit-number">19</span>,</code></span>
+<span class="codeline" id="line-234"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-235"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-236"><code>	<span class="lit-number">20</span>,</code></span>
+<span class="codeline" id="line-237"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-238"><code>	<a href="#line-20" class="ident">transformOmitFirst5</a>,</code></span>
+<span class="codeline" id="line-239"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-240"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-241"><code>	<a href="#line-21" class="ident">transformOmitFirst6</a>,</code></span>
+<span class="codeline" id="line-242"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-243"><code>	<span class="lit-number">47</span>,</code></span>
+<span class="codeline" id="line-244"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-245"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-246"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-247"><code>	<a href="#line-8" class="ident">transformOmitLast4</a>,</code></span>
+<span class="codeline" id="line-248"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-249"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-250"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-251"><code>	<span class="lit-number">22</span>,</code></span>
+<span class="codeline" id="line-252"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-253"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-254"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-255"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-256"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-257"><code>	<span class="lit-number">23</span>,</code></span>
+<span class="codeline" id="line-258"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-259"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-260"><code>	<span class="lit-number">24</span>,</code></span>
+<span class="codeline" id="line-261"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-262"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-263"><code>	<span class="lit-number">25</span>,</code></span>
+<span class="codeline" id="line-264"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-265"><code>	<a href="#line-11" class="ident">transformOmitLast7</a>,</code></span>
+<span class="codeline" id="line-266"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-267"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-268"><code>	<a href="#line-5" class="ident">transformOmitLast1</a>,</code></span>
+<span class="codeline" id="line-269"><code>	<span class="lit-number">26</span>,</code></span>
+<span class="codeline" id="line-270"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-271"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-272"><code>	<span class="lit-number">27</span>,</code></span>
+<span class="codeline" id="line-273"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-274"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-275"><code>	<span class="lit-number">28</span>,</code></span>
+<span class="codeline" id="line-276"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-277"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-278"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-279"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-280"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-281"><code>	<span class="lit-number">29</span>,</code></span>
+<span class="codeline" id="line-282"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-283"><code>	<a href="#line-24" class="ident">transformOmitFirst9</a>,</code></span>
+<span class="codeline" id="line-284"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-285"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-286"><code>	<a href="#line-22" class="ident">transformOmitFirst7</a>,</code></span>
+<span class="codeline" id="line-287"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-288"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-289"><code>	<a href="#line-10" class="ident">transformOmitLast6</a>,</code></span>
+<span class="codeline" id="line-290"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-291"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-292"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-293"><code>	<span class="lit-number">21</span>,</code></span>
+<span class="codeline" id="line-294"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-295"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-296"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-297"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-298"><code>	<a href="#line-12" class="ident">transformOmitLast8</a>,</code></span>
+<span class="codeline" id="line-299"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-300"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-301"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-302"><code>	<span class="lit-number">31</span>,</code></span>
+<span class="codeline" id="line-303"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-304"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-305"><code>	<span class="lit-number">32</span>,</code></span>
+<span class="codeline" id="line-306"><code>	<span class="lit-number">47</span>,</code></span>
+<span class="codeline" id="line-307"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-308"><code>	<span class="lit-number">3</span>,</code></span>
+<span class="codeline" id="line-309"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-310"><code>	<a href="#line-9" class="ident">transformOmitLast5</a>,</code></span>
+<span class="codeline" id="line-311"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-312"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-313"><code>	<a href="#line-13" class="ident">transformOmitLast9</a>,</code></span>
+<span class="codeline" id="line-314"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-315"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-316"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-317"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-318"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-319"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-320"><code>	<span class="lit-number">8</span>,</code></span>
+<span class="codeline" id="line-321"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-322"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-323"><code>	<span class="lit-number">21</span>,</code></span>
+<span class="codeline" id="line-324"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-325"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-326"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-327"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-328"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-329"><code>	<span class="lit-number">10</span>,</code></span>
+<span class="codeline" id="line-330"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-331"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-332"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-333"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-334"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-335"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-336"><code>	<span class="lit-number">35</span>,</code></span>
+<span class="codeline" id="line-337"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-338"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-339"><code>	<span class="lit-number">47</span>,</code></span>
+<span class="codeline" id="line-340"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-341"><code>	<span class="lit-number">2</span>,</code></span>
+<span class="codeline" id="line-342"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-343"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-344"><code>	<span class="lit-number">17</span>,</code></span>
+<span class="codeline" id="line-345"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-346"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-347"><code>	<span class="lit-number">36</span>,</code></span>
+<span class="codeline" id="line-348"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-349"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-350"><code>	<span class="lit-number">33</span>,</code></span>
+<span class="codeline" id="line-351"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-352"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-353"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-354"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-355"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-356"><code>	<span class="lit-number">21</span>,</code></span>
+<span class="codeline" id="line-357"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-358"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-359"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-360"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-361"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-362"><code>	<span class="lit-number">37</span>,</code></span>
+<span class="codeline" id="line-363"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-364"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-365"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-366"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-367"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-368"><code>	<span class="lit-number">38</span>,</code></span>
+<span class="codeline" id="line-369"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-370"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-371"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-372"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-373"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-374"><code>	<span class="lit-number">39</span>,</code></span>
+<span class="codeline" id="line-375"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-376"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-377"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-378"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-379"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-380"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-381"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-382"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-383"><code>	<span class="lit-number">8</span>,</code></span>
+<span class="codeline" id="line-384"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-385"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-386"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-387"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-388"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-389"><code>	<span class="lit-number">21</span>,</code></span>
+<span class="codeline" id="line-390"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-391"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-392"><code>	<span class="lit-number">40</span>,</code></span>
+<span class="codeline" id="line-393"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-394"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-395"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-396"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-397"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-398"><code>	<span class="lit-number">41</span>,</code></span>
+<span class="codeline" id="line-399"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-400"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-401"><code>	<span class="lit-number">42</span>,</code></span>
+<span class="codeline" id="line-402"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-403"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-404"><code>	<span class="lit-number">17</span>,</code></span>
+<span class="codeline" id="line-405"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-406"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-407"><code>	<span class="lit-number">43</span>,</code></span>
+<span class="codeline" id="line-408"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-409"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-410"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-411"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-412"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-413"><code>	<span class="lit-number">10</span>,</code></span>
+<span class="codeline" id="line-414"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-415"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-416"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-417"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-418"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-419"><code>	<span class="lit-number">33</span>,</code></span>
+<span class="codeline" id="line-420"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-421"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-422"><code>	<span class="lit-number">44</span>,</code></span>
+<span class="codeline" id="line-423"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-424"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-425"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-426"><code>	<span class="lit-number">45</span>,</code></span>
+<span class="codeline" id="line-427"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-428"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-429"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-430"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-431"><code>	<span class="lit-number">33</span>,</code></span>
+<span class="codeline" id="line-432"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-433"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-434"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-435"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-436"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-437"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-438"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-439"><code>	<a href="#line-4" class="ident">transformIdentity</a>,</code></span>
+<span class="codeline" id="line-440"><code>	<span class="lit-number">46</span>,</code></span>
+<span class="codeline" id="line-441"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-442"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-443"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-444"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-445"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-446"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-447"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-448"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-449"><code>	<span class="lit-number">33</span>,</code></span>
+<span class="codeline" id="line-450"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-451"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-452"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-453"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-454"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-455"><code>	<span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-456"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-457"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-458"><code>	<span class="lit-number">33</span>,</code></span>
+<span class="codeline" id="line-459"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-460"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-461"><code>	<span class="lit-number">21</span>,</code></span>
+<span class="codeline" id="line-462"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-463"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-464"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-465"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-466"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-467"><code>	<span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-468"><code>	<span class="lit-number">49</span>,</code></span>
+<span class="codeline" id="line-469"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-470"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-471"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-472"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-473"><code>	<span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-474"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-475"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-476"><code>	<span class="lit-number">30</span>,</code></span>
+<span class="codeline" id="line-477"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-478"><code>	<a href="#line-15" class="ident">transformUppercaseAll</a>,</code></span>
+<span class="codeline" id="line-479"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-480"><code>	<span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-481"><code>	<a href="#line-14" class="ident">transformUppercaseFirst</a>,</code></span>
+<span class="codeline" id="line-482"><code>	<span class="lit-number">34</span>,</code></span>
+<span class="codeline" id="line-483"><code>}</code></span>
+<span class="codeline" id="line-484"><code></code></span>
+<span class="codeline" id="line-485"><code><span class="keyword">var</span> kBrotliTransforms = <a href="#line-32" class="ident">transforms</a>{</code></span>
+<span class="codeline" id="line-486"><code>	<span class="lit-number">217</span>,</code></span>
+<span class="codeline" id="line-487"><code>	[]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="#line-63" class="ident">kPrefixSuffix</a>),</code></span>
+<span class="codeline" id="line-488"><code>	<a href="#line-65" class="ident">kPrefixSuffixMap</a>[:],</code></span>
+<span class="codeline" id="line-489"><code>	<span class="lit-number">121</span>,</code></span>
+<span class="codeline" id="line-490"><code>	<a href="#line-119" class="ident">kTransformsData</a>,</code></span>
+<span class="codeline" id="line-491"><code>	<a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <span class="comment">/* no extra parameters */</span></code></span>
+<span class="codeline" id="line-492"><code>	[<a href="#line-30" class="ident">transformsMaxCutOff</a> + <span class="lit-number">1</span>]<a href="../../../../pkg/builtin.html#name-int16" class="ident">int16</a>{<span class="lit-number">0</span>, <span class="lit-number">12</span>, <span class="lit-number">27</span>, <span class="lit-number">23</span>, <span class="lit-number">42</span>, <span class="lit-number">63</span>, <span class="lit-number">56</span>, <span class="lit-number">48</span>, <span class="lit-number">59</span>, <span class="lit-number">64</span>},</code></span>
+<span class="codeline" id="line-493"><code>}</code></span>
+<span class="codeline" id="line-494"><code></code></span>
+<span class="codeline" id="line-495"><code><span class="keyword">func</span> getTransforms() *<a href="#line-32" class="ident">transforms</a> {</code></span>
+<span class="codeline" id="line-496"><code>	<span class="keyword">return</span> &amp;<a href="#line-485" class="ident">kBrotliTransforms</a></code></span>
+<span class="codeline" id="line-497"><code>}</code></span>
+<span class="codeline" id="line-498"><code></code></span>
+<span class="codeline" id="line-499"><code><span class="keyword">func</span> toUpperCase(<label for="r17" class="ident">p</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-500"><code>	<span class="keyword">if</span> <label for="r17" class="ident">p</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xC0</span> {</code></span>
+<span class="codeline" id="line-501"><code>		<span class="keyword">if</span> <label for="r17" class="ident">p</label>[<span class="lit-number">0</span>] &gt;= <span class="lit-number">'a'</span> &amp;&amp; <label for="r17" class="ident">p</label>[<span class="lit-number">0</span>] &lt;= <span class="lit-number">'z'</span> {</code></span>
+<span class="codeline" id="line-502"><code>			<label for="r17" class="ident">p</label>[<span class="lit-number">0</span>] ^= <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-503"><code>		}</code></span>
+<span class="codeline" id="line-504"><code></code></span>
+<span class="codeline" id="line-505"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-506"><code>	}</code></span>
+<span class="codeline" id="line-507"><code></code></span>
+<span class="codeline" id="line-508"><code>	<span class="comment">/* An overly simplified uppercasing model for UTF-8. */</span></code></span>
+<span class="codeline" id="line-509"><code>	<span class="keyword">if</span> <label for="r17" class="ident">p</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xE0</span> {</code></span>
+<span class="codeline" id="line-510"><code>		<label for="r17" class="ident">p</label>[<span class="lit-number">1</span>] ^= <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-511"><code>		<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-512"><code>	}</code></span>
+<span class="codeline" id="line-513"><code></code></span>
+<span class="codeline" id="line-514"><code>	<span class="comment">/* An arbitrary transform for three byte characters. */</span></code></span>
+<span class="codeline" id="line-515"><code>	<label for="r17" class="ident">p</label>[<span class="lit-number">2</span>] ^= <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-516"><code></code></span>
+<span class="codeline" id="line-517"><code>	<span class="keyword">return</span> <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-518"><code>}</code></span>
+<span class="codeline" id="line-519"><code></code></span>
+<span class="codeline" id="line-520"><code><span class="keyword">func</span> shiftTransform(<label for="r19" class="ident">word</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r20" class="ident">word_len</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r21" class="ident">parameter</label> <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-521"><code>	<span class="comment">/* Limited sign extension: scalar &lt; (1 &lt;&lt; 24). */</span></code></span>
+<span class="codeline" id="line-522"><code>	<span class="keyword">var</span> <label for="r22" class="ident">scalar</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> = (<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">parameter</label>) &amp; <span class="lit-number">0x7FFF</span>) + (<span class="lit-number">0x1000000</span> - (<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r21" class="ident">parameter</label>) &amp; <span class="lit-number">0x8000</span>))</code></span>
+<span class="codeline" id="line-523"><code>	<span class="keyword">if</span> <label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0x80</span> {</code></span>
+<span class="codeline" id="line-524"><code>		<span class="comment">/* 1-byte rune / 0sssssss / 7 bit scalar (ASCII). */</span></code></span>
+<span class="codeline" id="line-525"><code>		<label for="r22" class="ident">scalar</label> += <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-526"><code></code></span>
+<span class="codeline" id="line-527"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r22" class="ident">scalar</label> &amp; <span class="lit-number">0x7F</span>)</code></span>
+<span class="codeline" id="line-528"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-529"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xC0</span> {</code></span>
+<span class="codeline" id="line-530"><code>		<span class="comment">/* Continuation / 10AAAAAA. */</span></code></span>
+<span class="codeline" id="line-531"><code>		<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-532"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xE0</span> {</code></span>
+<span class="codeline" id="line-533"><code>		<span class="comment">/* 2-byte rune / 110sssss AAssssss / 11 bit scalar. */</span></code></span>
+<span class="codeline" id="line-534"><code>		<span class="keyword">if</span> <label for="r20" class="ident">word_len</label> &lt; <span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-535"><code>			<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-536"><code>		}</code></span>
+<span class="codeline" id="line-537"><code>		<label for="r22" class="ident">scalar</label> += <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0x3F</span> | (<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>]&amp;<span class="lit-number">0x1F</span>)&lt;&lt;<span class="lit-number">6</span>)</code></span>
+<span class="codeline" id="line-538"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-number">0xC0</span> | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">6</span>)&amp;<span class="lit-number">0x1F</span>)</code></span>
+<span class="codeline" id="line-539"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0xC0</span>) | <label for="r22" class="ident">scalar</label>&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-540"><code>		<span class="keyword">return</span> <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-541"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xF0</span> {</code></span>
+<span class="codeline" id="line-542"><code>		<span class="comment">/* 3-byte rune / 1110ssss AAssssss BBssssss / 16 bit scalar. */</span></code></span>
+<span class="codeline" id="line-543"><code>		<span class="keyword">if</span> <label for="r20" class="ident">word_len</label> &lt; <span class="lit-number">3</span> {</code></span>
+<span class="codeline" id="line-544"><code>			<span class="keyword">return</span> <label for="r20" class="ident">word_len</label></code></span>
+<span class="codeline" id="line-545"><code>		}</code></span>
+<span class="codeline" id="line-546"><code>		<label for="r22" class="ident">scalar</label> += <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>])&amp;<span class="lit-number">0x3F</span> | <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0x3F</span>)&lt;&lt;<span class="lit-number">6</span> | <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>]&amp;<span class="lit-number">0x0F</span>)&lt;&lt;<span class="lit-number">12</span></code></span>
+<span class="codeline" id="line-547"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-number">0xE0</span> | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">12</span>)&amp;<span class="lit-number">0x0F</span>)</code></span>
+<span class="codeline" id="line-548"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0xC0</span>) | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">6</span>)&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-549"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>]&amp;<span class="lit-number">0xC0</span>) | <label for="r22" class="ident">scalar</label>&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-550"><code>		<span class="keyword">return</span> <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-551"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] &lt; <span class="lit-number">0xF8</span> {</code></span>
+<span class="codeline" id="line-552"><code>		<span class="comment">/* 4-byte rune / 11110sss AAssssss BBssssss CCssssss / 21 bit scalar. */</span></code></span>
+<span class="codeline" id="line-553"><code>		<span class="keyword">if</span> <label for="r20" class="ident">word_len</label> &lt; <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-554"><code>			<span class="keyword">return</span> <label for="r20" class="ident">word_len</label></code></span>
+<span class="codeline" id="line-555"><code>		}</code></span>
+<span class="codeline" id="line-556"><code>		<label for="r22" class="ident">scalar</label> += <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">3</span>])&amp;<span class="lit-number">0x3F</span> | <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>]&amp;<span class="lit-number">0x3F</span>)&lt;&lt;<span class="lit-number">6</span> | <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0x3F</span>)&lt;&lt;<span class="lit-number">12</span> | <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>]&amp;<span class="lit-number">0x07</span>)&lt;&lt;<span class="lit-number">18</span></code></span>
+<span class="codeline" id="line-557"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">0</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-number">0xF0</span> | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">18</span>)&amp;<span class="lit-number">0x07</span>)</code></span>
+<span class="codeline" id="line-558"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">1</span>]&amp;<span class="lit-number">0xC0</span>) | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">12</span>)&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-559"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">2</span>]&amp;<span class="lit-number">0xC0</span>) | (<label for="r22" class="ident">scalar</label>&gt;&gt;<span class="lit-number">6</span>)&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-560"><code>		<label for="r19" class="ident">word</label>[<span class="lit-number">3</span>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r19" class="ident">word</label>[<span class="lit-number">3</span>]&amp;<span class="lit-number">0xC0</span>) | <label for="r22" class="ident">scalar</label>&amp;<span class="lit-number">0x3F</span>)</code></span>
+<span class="codeline" id="line-561"><code>		<span class="keyword">return</span> <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-562"><code>	}</code></span>
+<span class="codeline" id="line-563"><code></code></span>
+<span class="codeline" id="line-564"><code>	<span class="keyword">return</span> <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-565"><code>}</code></span>
+<span class="codeline" id="line-566"><code></code></span>
+<span class="codeline" id="line-567"><code><span class="keyword">func</span> transformDictionaryWord(<label for="r24" class="ident">dst</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r25" class="ident">word</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r26" class="ident">len</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r27" class="ident">trans</label> *<a href="#line-32" class="ident">transforms</a>, <label for="r28" class="ident">transform_idx</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-568"><code>	<span class="keyword">var</span> <label for="r29" class="ident">idx</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-569"><code>	<span class="keyword">var</span> <label for="r30" class="ident">prefix</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <a href="#line-54" class="ident">transformPrefix</a>(<label for="r27" class="ident">trans</label>, <label for="r28" class="ident">transform_idx</label>)</code></span>
+<span class="codeline" id="line-570"><code>	<span class="keyword">var</span> <label for="r31" class="ident">type_</label> <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <a href="#line-46" class="ident">transformType</a>(<label for="r27" class="ident">trans</label>, <label for="r28" class="ident">transform_idx</label>)</code></span>
+<span class="codeline" id="line-571"><code>	<span class="keyword">var</span> <label for="r32" class="ident">suffix</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <a href="#line-58" class="ident">transformSuffix</a>(<label for="r27" class="ident">trans</label>, <label for="r28" class="ident">transform_idx</label>)</code></span>
+<span class="codeline" id="line-572"><code>	{</code></span>
+<span class="codeline" id="line-573"><code>		<span class="keyword">var</span> <label for="r33" class="ident">prefix_len</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r30" class="ident">prefix</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-574"><code>		<label for="r30" class="ident">prefix</label> = <label for="r30" class="ident">prefix</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-575"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-576"><code>			<label for="r34" class="ident">tmp1</label> := <label for="r33" class="ident">prefix_len</label></code></span>
+<span class="codeline" id="line-577"><code>			<label for="r33" class="ident">prefix_len</label>--</code></span>
+<span class="codeline" id="line-578"><code>			<span class="keyword">if</span> <label for="r34" class="ident">tmp1</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-579"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-580"><code>			}</code></span>
+<span class="codeline" id="line-581"><code>			<label for="r24" class="ident">dst</label>[<label for="r29" class="ident">idx</label>] = <label for="r30" class="ident">prefix</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-582"><code>			<label for="r29" class="ident">idx</label>++</code></span>
+<span class="codeline" id="line-583"><code>			<label for="r30" class="ident">prefix</label> = <label for="r30" class="ident">prefix</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-584"><code>		}</code></span>
+<span class="codeline" id="line-585"><code>	}</code></span>
+<span class="codeline" id="line-586"><code>	{</code></span>
+<span class="codeline" id="line-587"><code>		<span class="keyword">var</span> <label for="r35" class="ident">t</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r31" class="ident">type_</label>)</code></span>
+<span class="codeline" id="line-588"><code>		<span class="keyword">var</span> <label for="r36" class="ident">i</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-589"><code>		<span class="keyword">if</span> <label for="r35" class="ident">t</label> &lt;= <a href="#line-13" class="ident">transformOmitLast9</a> {</code></span>
+<span class="codeline" id="line-590"><code>			<label for="r26" class="ident">len</label> -= <label for="r35" class="ident">t</label></code></span>
+<span class="codeline" id="line-591"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r35" class="ident">t</label> &gt;= <a href="#line-16" class="ident">transformOmitFirst1</a> &amp;&amp; <label for="r35" class="ident">t</label> &lt;= <a href="#line-24" class="ident">transformOmitFirst9</a> {</code></span>
+<span class="codeline" id="line-592"><code>			<span class="keyword">var</span> <label for="r37" class="ident">skip</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <label for="r35" class="ident">t</label> - (<a href="#line-16" class="ident">transformOmitFirst1</a> - <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-593"><code>			<label for="r25" class="ident">word</label> = <label for="r25" class="ident">word</label>[<label for="r37" class="ident">skip</label>:]</code></span>
+<span class="codeline" id="line-594"><code>			<label for="r26" class="ident">len</label> -= <label for="r37" class="ident">skip</label></code></span>
+<span class="codeline" id="line-595"><code>		}</code></span>
+<span class="codeline" id="line-596"><code></code></span>
+<span class="codeline" id="line-597"><code>		<span class="keyword">for</span> <label for="r36" class="ident">i</label> &lt; <label for="r26" class="ident">len</label> {</code></span>
+<span class="codeline" id="line-598"><code>			<label for="r24" class="ident">dst</label>[<label for="r29" class="ident">idx</label>] = <label for="r25" class="ident">word</label>[<label for="r36" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-599"><code>			<label for="r29" class="ident">idx</label>++</code></span>
+<span class="codeline" id="line-600"><code>			<label for="r36" class="ident">i</label>++</code></span>
+<span class="codeline" id="line-601"><code>		}</code></span>
+<span class="codeline" id="line-602"><code>		<span class="keyword">if</span> <label for="r35" class="ident">t</label> == <a href="#line-14" class="ident">transformUppercaseFirst</a> {</code></span>
+<span class="codeline" id="line-603"><code>			<a href="#line-499" class="ident">toUpperCase</a>(<label for="r24" class="ident">dst</label>[<label for="r29" class="ident">idx</label>-<label for="r26" class="ident">len</label>:])</code></span>
+<span class="codeline" id="line-604"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r35" class="ident">t</label> == <a href="#line-15" class="ident">transformUppercaseAll</a> {</code></span>
+<span class="codeline" id="line-605"><code>			<span class="keyword">var</span> <label for="r38" class="ident">uppercase</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <label for="r24" class="ident">dst</label></code></span>
+<span class="codeline" id="line-606"><code>			<label for="r38" class="ident">uppercase</label> = <label for="r38" class="ident">uppercase</label>[<label for="r29" class="ident">idx</label>-<label for="r26" class="ident">len</label>:]</code></span>
+<span class="codeline" id="line-607"><code>			<span class="keyword">for</span> <label for="r26" class="ident">len</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-608"><code>				<span class="keyword">var</span> <label for="r39" class="ident">step</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="#line-499" class="ident">toUpperCase</a>(<label for="r38" class="ident">uppercase</label>)</code></span>
+<span class="codeline" id="line-609"><code>				<label for="r38" class="ident">uppercase</label> = <label for="r38" class="ident">uppercase</label>[<label for="r39" class="ident">step</label>:]</code></span>
+<span class="codeline" id="line-610"><code>				<label for="r26" class="ident">len</label> -= <label for="r39" class="ident">step</label></code></span>
+<span class="codeline" id="line-611"><code>			}</code></span>
+<span class="codeline" id="line-612"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r35" class="ident">t</label> == <a href="#line-25" class="ident">transformShiftFirst</a> {</code></span>
+<span class="codeline" id="line-613"><code>			<span class="keyword">var</span> <label for="r40" class="ident">param</label> <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r27" class="ident">trans</label>.<a href="#line-38" class="ident">params</a>[<label for="r28" class="ident">transform_idx</label>*<span class="lit-number">2</span>]) + <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r27" class="ident">trans</label>.<a href="#line-38" class="ident">params</a>[<label for="r28" class="ident">transform_idx</label>*<span class="lit-number">2</span>+<span class="lit-number">1</span>])&lt;&lt;<span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-614"><code>			<a href="#line-520" class="ident">shiftTransform</a>(<label for="r24" class="ident">dst</label>[<label for="r29" class="ident">idx</label>-<label for="r26" class="ident">len</label>:], <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r26" class="ident">len</label>), <label for="r40" class="ident">param</label>)</code></span>
+<span class="codeline" id="line-615"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r35" class="ident">t</label> == <a href="#line-26" class="ident">transformShiftAll</a> {</code></span>
+<span class="codeline" id="line-616"><code>			<span class="keyword">var</span> <label for="r41" class="ident">param</label> <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a> = <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r27" class="ident">trans</label>.<a href="#line-38" class="ident">params</a>[<label for="r28" class="ident">transform_idx</label>*<span class="lit-number">2</span>]) + <a href="../../../../pkg/builtin.html#name-uint16" class="ident">uint16</a>(<label for="r27" class="ident">trans</label>.<a href="#line-38" class="ident">params</a>[<label for="r28" class="ident">transform_idx</label>*<span class="lit-number">2</span>+<span class="lit-number">1</span>])&lt;&lt;<span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-617"><code>			<span class="keyword">var</span> <label for="r42" class="ident">shift</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> = <label for="r24" class="ident">dst</label></code></span>
+<span class="codeline" id="line-618"><code>			<label for="r42" class="ident">shift</label> = <label for="r42" class="ident">shift</label>[<label for="r29" class="ident">idx</label>-<label for="r26" class="ident">len</label>:]</code></span>
+<span class="codeline" id="line-619"><code>			<span class="keyword">for</span> <label for="r26" class="ident">len</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-620"><code>				<span class="keyword">var</span> <label for="r43" class="ident">step</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="#line-520" class="ident">shiftTransform</a>(<label for="r42" class="ident">shift</label>, <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r26" class="ident">len</label>), <label for="r41" class="ident">param</label>)</code></span>
+<span class="codeline" id="line-621"><code>				<label for="r42" class="ident">shift</label> = <label for="r42" class="ident">shift</label>[<label for="r43" class="ident">step</label>:]</code></span>
+<span class="codeline" id="line-622"><code>				<label for="r26" class="ident">len</label> -= <label for="r43" class="ident">step</label></code></span>
+<span class="codeline" id="line-623"><code>			}</code></span>
+<span class="codeline" id="line-624"><code>		}</code></span>
+<span class="codeline" id="line-625"><code>	}</code></span>
+<span class="codeline" id="line-626"><code>	{</code></span>
+<span class="codeline" id="line-627"><code>		<span class="keyword">var</span> <label for="r44" class="ident">suffix_len</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> = <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r32" class="ident">suffix</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-628"><code>		<label for="r32" class="ident">suffix</label> = <label for="r32" class="ident">suffix</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-629"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-630"><code>			<label for="r45" class="ident">tmp2</label> := <label for="r44" class="ident">suffix_len</label></code></span>
+<span class="codeline" id="line-631"><code>			<label for="r44" class="ident">suffix_len</label>--</code></span>
+<span class="codeline" id="line-632"><code>			<span class="keyword">if</span> <label for="r45" class="ident">tmp2</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-633"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-634"><code>			}</code></span>
+<span class="codeline" id="line-635"><code>			<label for="r24" class="ident">dst</label>[<label for="r29" class="ident">idx</label>] = <label for="r32" class="ident">suffix</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-636"><code>			<label for="r29" class="ident">idx</label>++</code></span>
+<span class="codeline" id="line-637"><code>			<label for="r32" class="ident">suffix</label> = <label for="r32" class="ident">suffix</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-638"><code>		}</code></span>
+<span class="codeline" id="line-639"><code>		<span class="keyword">return</span> <label for="r29" class="ident">idx</label></code></span>
+<span class="codeline" id="line-640"><code>	}</code></span>
+<span class="codeline" id="line-641"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

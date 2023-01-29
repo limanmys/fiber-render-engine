@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: writer.go in package go.uber.org/zap</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	writer.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/go.uber.org/zap.html">go.uber.org/zap</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright (c) 2016-2022 Uber Technologies, Inc.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a copy</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// of this software and associated documentation files (the "Software"), to deal</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// in the Software without restriction, including without limitation the rights</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// copies of the Software, and to permit persons to whom the Software is</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// furnished to do so, subject to the following conditions:</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// The above copyright notice and this permission notice shall be included in</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// all copies or substantial portions of the Software.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// THE SOFTWARE.</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">package</span> zap</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-24"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-25"><code>	<label for="i1"><span class="lit-string i1">"io"</span></label></code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code>	<label for="i2"><span class="lit-string i2">"go.uber.org/zap/zapcore"</span></label></code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code>	<label for="i3"><span class="lit-string i3">"go.uber.org/multierr"</span></label></code></span>
+<span class="codeline" id="line-30"><code>)</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// Open is a high-level wrapper that takes a variadic number of URLs, opens or</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// creates each of the specified resources, and combines them into a locked</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// WriteSyncer. It also returns any error encountered and a function to close</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// any opened files.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Passing no URLs returns a no-op WriteSyncer. Zap handles URLs without a</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// scheme and URLs with the "file" scheme. Third-party code may register</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// factories for other schemes using RegisterSink.</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// URLs with the "file" scheme must use absolute paths on the local</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// filesystem. No user, password, port, fragments, or query parameters are</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// allowed, and the hostname must be empty or "localhost".</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// Since it's common to write logs to the local filesystem, URLs without a</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// scheme (e.g., "/var/log/foo.log") are treated as local file paths. Without</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// a scheme, the special paths "stdout" and "stderr" are interpreted as</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// os.Stdout and os.Stderr. When specified without a scheme, relative file</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// paths also work.</span></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-Open" class="ident">Open</a></label>(<label for="r1" class="ident">paths</label> ...<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) (<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>, <span class="keyword">func</span>(), <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-51"><code>	<label for="r2" class="ident">writers</label>, <label for="r3" class="ident">close</label>, <label for="r4" class="ident">err</label> := <a href="#line-60" class="ident">open</a>(<label for="r1" class="ident">paths</label>)</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-53"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-54"><code>	}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>	<label for="r5" class="ident">writer</label> := <a href="#line-93" class="ident">CombineWriteSyncers</a>(<label for="r2" class="ident">writers</label>...)</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">return</span> <label for="r5" class="ident">writer</label>, <label for="r3" class="ident">close</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-58"><code>}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code><span class="keyword">func</span> open(<label for="r7" class="ident">paths</label> []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) ([]<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>, <span class="keyword">func</span>(), <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r8" class="ident">writers</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r7" class="ident">paths</label>))</code></span>
+<span class="codeline" id="line-62"><code>	<label for="r9" class="ident">closers</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-104" class="ident">Closer</a>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r7" class="ident">paths</label>))</code></span>
+<span class="codeline" id="line-63"><code>	<label for="r10" class="ident">close</label> := <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-64"><code>		<span class="keyword">for</span> <label for="r11" class="ident">_</label>, <label for="r12" class="ident">c</label> := <span class="keyword">range</span> <label for="r9" class="ident">closers</label> {</code></span>
+<span class="codeline" id="line-65"><code>			<label for="r12" class="ident">c</label>.<a href="../../io/io.go.html#line-105" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-66"><code>		}</code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">var</span> <label for="r13" class="ident">openErr</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">for</span> <label for="r14" class="ident">_</label>, <label for="r15" class="ident">path</label> := <span class="keyword">range</span> <label for="r7" class="ident">paths</label> {</code></span>
+<span class="codeline" id="line-71"><code>		<label for="r16" class="ident">sink</label>, <label for="r17" class="ident">err</label> := <a href="sink.go.html#line-38" class="ident">_sinkRegistry</a>.<a href="sink.go.html#line-92" class="ident">newSink</a>(<label for="r15" class="ident">path</label>)</code></span>
+<span class="codeline" id="line-72"><code>		<span class="keyword">if</span> <label for="r17" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-73"><code>			<label for="r13" class="ident">openErr</label> = <a href="../../../pkg/go.uber.org/multierr.html" class="ident i3">multierr</a>.<a href="../multierr/error.go.html#line-470" class="ident">Append</a>(<label for="r13" class="ident">openErr</label>, <a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"open sink %q: %w"</span>, <label for="r15" class="ident">path</label>, <label for="r17" class="ident">err</label>))</code></span>
+<span class="codeline" id="line-74"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-75"><code>		}</code></span>
+<span class="codeline" id="line-76"><code>		<label for="r8" class="ident">writers</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">writers</label>, <label for="r16" class="ident">sink</label>)</code></span>
+<span class="codeline" id="line-77"><code>		<label for="r9" class="ident">closers</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r9" class="ident">closers</label>, <label for="r16" class="ident">sink</label>)</code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">if</span> <label for="r13" class="ident">openErr</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-80"><code>		<label for="r10" class="ident">close</label>()</code></span>
+<span class="codeline" id="line-81"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r13" class="ident">openErr</label></code></span>
+<span class="codeline" id="line-82"><code>	}</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">return</span> <label for="r8" class="ident">writers</label>, <label for="r10" class="ident">close</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-85"><code>}</code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// CombineWriteSyncers is a utility that combines multiple WriteSyncers into a</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">// single, locked WriteSyncer. If no inputs are supplied, it returns a no-op</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// WriteSyncer.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// It's provided purely as a convenience; the result is no different from</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// using zapcore.NewMultiWriteSyncer and zapcore.Lock individually.</span></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> <label for="r18" class="ident"><a href="../../../pkg/go.uber.org/zap.html#name-CombineWriteSyncers" class="ident">CombineWriteSyncers</a></label>(<label for="r19" class="ident">writers</label> ...<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a>) <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-32" class="ident">WriteSyncer</a> {</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r19" class="ident">writers</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-40" class="ident">AddSync</a>(<a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-584" class="ident">Discard</a>)</code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">return</span> <a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-56" class="ident">Lock</a>(<a href="../../../pkg/go.uber.org/zap/zapcore.html" class="ident i2">zapcore</a>.<a href="zapcore/write_syncer.go.html#line-90" class="ident">NewMultiWriteSyncer</a>(<label for="r19" class="ident">writers</label>...))</code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

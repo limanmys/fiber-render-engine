@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: goboringcrypto.h in package crypto/internal/boring</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	goboringcrypto.h
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/crypto/internal/boring.html">crypto/internal/boring</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copyright 2017 The Go Authors. All rights reserved.</code></span>
+<span class="codeline" id="line-2"><code>// Use of this source code is governed by a BSD-style</code></span>
+<span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>// This header file describes the BoringCrypto ABI as built for use in Go.</code></span>
+<span class="codeline" id="line-6"><code>// The BoringCrypto build for Go (which generates goboringcrypto_*.syso)</code></span>
+<span class="codeline" id="line-7"><code>// takes the standard libcrypto.a from BoringCrypto and adds the prefix</code></span>
+<span class="codeline" id="line-8"><code>// _goboringcrypto_ to every symbol, to avoid possible conflicts with</code></span>
+<span class="codeline" id="line-9"><code>// code wrapping a different BoringCrypto or OpenSSL.</code></span>
+<span class="codeline" id="line-10"><code>//</code></span>
+<span class="codeline" id="line-11"><code>// To make this header standalone (so that building Go does not require</code></span>
+<span class="codeline" id="line-12"><code>// having a full set of BoringCrypto headers), the struct details are not here.</code></span>
+<span class="codeline" id="line-13"><code>// Instead, while building the syso, we compile and run a C++ program</code></span>
+<span class="codeline" id="line-14"><code>// that checks that the sizes match. The program also checks (during compilation)</code></span>
+<span class="codeline" id="line-15"><code>// that all the function prototypes match the BoringCrypto equivalents.</code></span>
+<span class="codeline" id="line-16"><code>// The generation of the checking program depends on the declaration</code></span>
+<span class="codeline" id="line-17"><code>// forms used below (one line for most, multiline for enums).</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>#include &lt;stdlib.h&gt; // size_t</code></span>
+<span class="codeline" id="line-20"><code>#include &lt;stdint.h&gt; // uint8_t</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code>// This symbol is hidden in BoringCrypto and marked as a constructor,</code></span>
+<span class="codeline" id="line-23"><code>// but cmd/link's internal linking mode doesn't handle constructors.</code></span>
+<span class="codeline" id="line-24"><code>// Until it does, we've exported the symbol and can call it explicitly.</code></span>
+<span class="codeline" id="line-25"><code>// (If using external linking mode, it will therefore be called twice,</code></span>
+<span class="codeline" id="line-26"><code>// once explicitly and once as a constructor, but that's OK.)</code></span>
+<span class="codeline" id="line-27"><code>/*unchecked*/ void _goboringcrypto_BORINGSSL_bcm_power_on_self_test(void);</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code>// #include &lt;openssl/crypto.h&gt;</code></span>
+<span class="codeline" id="line-30"><code>int _goboringcrypto_FIPS_mode(void);</code></span>
+<span class="codeline" id="line-31"><code>void* _goboringcrypto_OPENSSL_malloc(size_t);</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>// #include &lt;openssl/rand.h&gt;</code></span>
+<span class="codeline" id="line-34"><code>int _goboringcrypto_RAND_bytes(uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code>// #include &lt;openssl/nid.h&gt;</code></span>
+<span class="codeline" id="line-37"><code>enum {</code></span>
+<span class="codeline" id="line-38"><code>	GO_NID_md5_sha1 = 114,</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>	GO_NID_secp224r1 = 713,</code></span>
+<span class="codeline" id="line-41"><code>	GO_NID_X9_62_prime256v1 = 415,</code></span>
+<span class="codeline" id="line-42"><code>	GO_NID_secp384r1 = 715,</code></span>
+<span class="codeline" id="line-43"><code>	GO_NID_secp521r1 = 716,</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code>	GO_NID_sha224 = 675,</code></span>
+<span class="codeline" id="line-46"><code>	GO_NID_sha256 = 672,</code></span>
+<span class="codeline" id="line-47"><code>	GO_NID_sha384 = 673,</code></span>
+<span class="codeline" id="line-48"><code>	GO_NID_sha512 = 674,</code></span>
+<span class="codeline" id="line-49"><code>};</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>// #include &lt;openssl/sha.h&gt;</code></span>
+<span class="codeline" id="line-52"><code>typedef struct GO_SHA_CTX { char data[96]; } GO_SHA_CTX;</code></span>
+<span class="codeline" id="line-53"><code>int _goboringcrypto_SHA1_Init(GO_SHA_CTX*);</code></span>
+<span class="codeline" id="line-54"><code>int _goboringcrypto_SHA1_Update(GO_SHA_CTX*, const void*, size_t);</code></span>
+<span class="codeline" id="line-55"><code>int _goboringcrypto_SHA1_Final(uint8_t*, GO_SHA_CTX*);</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>typedef struct GO_SHA256_CTX { char data[48+64]; } GO_SHA256_CTX;</code></span>
+<span class="codeline" id="line-58"><code>int _goboringcrypto_SHA224_Init(GO_SHA256_CTX*);</code></span>
+<span class="codeline" id="line-59"><code>int _goboringcrypto_SHA224_Update(GO_SHA256_CTX*, const void*, size_t);</code></span>
+<span class="codeline" id="line-60"><code>int _goboringcrypto_SHA224_Final(uint8_t*, GO_SHA256_CTX*);</code></span>
+<span class="codeline" id="line-61"><code>int _goboringcrypto_SHA256_Init(GO_SHA256_CTX*);</code></span>
+<span class="codeline" id="line-62"><code>int _goboringcrypto_SHA256_Update(GO_SHA256_CTX*, const void*, size_t);</code></span>
+<span class="codeline" id="line-63"><code>int _goboringcrypto_SHA256_Final(uint8_t*, GO_SHA256_CTX*);</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code>typedef struct GO_SHA512_CTX { char data[88+128]; } GO_SHA512_CTX;</code></span>
+<span class="codeline" id="line-66"><code>int _goboringcrypto_SHA384_Init(GO_SHA512_CTX*);</code></span>
+<span class="codeline" id="line-67"><code>int _goboringcrypto_SHA384_Update(GO_SHA512_CTX*, const void*, size_t);</code></span>
+<span class="codeline" id="line-68"><code>int _goboringcrypto_SHA384_Final(uint8_t*, GO_SHA512_CTX*);</code></span>
+<span class="codeline" id="line-69"><code>int _goboringcrypto_SHA512_Init(GO_SHA512_CTX*);</code></span>
+<span class="codeline" id="line-70"><code>int _goboringcrypto_SHA512_Update(GO_SHA512_CTX*, const void*, size_t);</code></span>
+<span class="codeline" id="line-71"><code>int _goboringcrypto_SHA512_Final(uint8_t*, GO_SHA512_CTX*);</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>// #include &lt;openssl/digest.h&gt;</code></span>
+<span class="codeline" id="line-74"><code>/*unchecked (opaque)*/ typedef struct GO_EVP_MD { char data[1]; } GO_EVP_MD;</code></span>
+<span class="codeline" id="line-75"><code>const GO_EVP_MD* _goboringcrypto_EVP_md4(void);</code></span>
+<span class="codeline" id="line-76"><code>const GO_EVP_MD* _goboringcrypto_EVP_md5(void);</code></span>
+<span class="codeline" id="line-77"><code>const GO_EVP_MD* _goboringcrypto_EVP_md5_sha1(void);</code></span>
+<span class="codeline" id="line-78"><code>const GO_EVP_MD* _goboringcrypto_EVP_sha1(void);</code></span>
+<span class="codeline" id="line-79"><code>const GO_EVP_MD* _goboringcrypto_EVP_sha224(void);</code></span>
+<span class="codeline" id="line-80"><code>const GO_EVP_MD* _goboringcrypto_EVP_sha256(void);</code></span>
+<span class="codeline" id="line-81"><code>const GO_EVP_MD* _goboringcrypto_EVP_sha384(void);</code></span>
+<span class="codeline" id="line-82"><code>const GO_EVP_MD* _goboringcrypto_EVP_sha512(void);</code></span>
+<span class="codeline" id="line-83"><code>int _goboringcrypto_EVP_MD_type(const GO_EVP_MD*);</code></span>
+<span class="codeline" id="line-84"><code>size_t _goboringcrypto_EVP_MD_size(const GO_EVP_MD*);</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code>// #include &lt;openssl/hmac.h&gt;</code></span>
+<span class="codeline" id="line-87"><code>typedef struct GO_HMAC_CTX { char data[104]; } GO_HMAC_CTX;</code></span>
+<span class="codeline" id="line-88"><code>void _goboringcrypto_HMAC_CTX_init(GO_HMAC_CTX*);</code></span>
+<span class="codeline" id="line-89"><code>void _goboringcrypto_HMAC_CTX_cleanup(GO_HMAC_CTX*);</code></span>
+<span class="codeline" id="line-90"><code>int _goboringcrypto_HMAC_Init(GO_HMAC_CTX*, const void*, int, const GO_EVP_MD*);</code></span>
+<span class="codeline" id="line-91"><code>int _goboringcrypto_HMAC_Update(GO_HMAC_CTX*, const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-92"><code>int _goboringcrypto_HMAC_Final(GO_HMAC_CTX*, uint8_t*, unsigned int*);</code></span>
+<span class="codeline" id="line-93"><code>size_t _goboringcrypto_HMAC_size(const GO_HMAC_CTX*);</code></span>
+<span class="codeline" id="line-94"><code>int _goboringcrypto_HMAC_CTX_copy_ex(GO_HMAC_CTX *dest, const GO_HMAC_CTX *src);</code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code>// #include &lt;openssl/aes.h&gt;</code></span>
+<span class="codeline" id="line-97"><code>typedef struct GO_AES_KEY { char data[244]; } GO_AES_KEY;</code></span>
+<span class="codeline" id="line-98"><code>int _goboringcrypto_AES_set_encrypt_key(const uint8_t*, unsigned int, GO_AES_KEY*);</code></span>
+<span class="codeline" id="line-99"><code>int _goboringcrypto_AES_set_decrypt_key(const uint8_t*, unsigned int, GO_AES_KEY*);</code></span>
+<span class="codeline" id="line-100"><code>void _goboringcrypto_AES_encrypt(const uint8_t*, uint8_t*, const GO_AES_KEY*);</code></span>
+<span class="codeline" id="line-101"><code>void _goboringcrypto_AES_decrypt(const uint8_t*, uint8_t*, const GO_AES_KEY*);</code></span>
+<span class="codeline" id="line-102"><code>void _goboringcrypto_AES_ctr128_encrypt(const uint8_t*, uint8_t*, size_t, const GO_AES_KEY*, uint8_t*, uint8_t*, unsigned int*);</code></span>
+<span class="codeline" id="line-103"><code>enum {</code></span>
+<span class="codeline" id="line-104"><code>	GO_AES_ENCRYPT = 1,</code></span>
+<span class="codeline" id="line-105"><code>	GO_AES_DECRYPT = 0</code></span>
+<span class="codeline" id="line-106"><code>};</code></span>
+<span class="codeline" id="line-107"><code>void _goboringcrypto_AES_cbc_encrypt(const uint8_t*, uint8_t*, size_t, const GO_AES_KEY*, uint8_t*, const int);</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code>// #include &lt;openssl/aead.h&gt;</code></span>
+<span class="codeline" id="line-110"><code>/*unchecked (opaque)*/ typedef struct GO_EVP_AEAD { char data[1]; } GO_EVP_AEAD;</code></span>
+<span class="codeline" id="line-111"><code>/*unchecked (opaque)*/ typedef struct GO_ENGINE { char data[1]; } GO_ENGINE;</code></span>
+<span class="codeline" id="line-112"><code>const GO_EVP_AEAD* _goboringcrypto_EVP_aead_aes_128_gcm(void);</code></span>
+<span class="codeline" id="line-113"><code>const GO_EVP_AEAD* _goboringcrypto_EVP_aead_aes_256_gcm(void);</code></span>
+<span class="codeline" id="line-114"><code>enum {</code></span>
+<span class="codeline" id="line-115"><code>	GO_EVP_AEAD_DEFAULT_TAG_LENGTH = 0</code></span>
+<span class="codeline" id="line-116"><code>};</code></span>
+<span class="codeline" id="line-117"><code>size_t _goboringcrypto_EVP_AEAD_key_length(const GO_EVP_AEAD*);</code></span>
+<span class="codeline" id="line-118"><code>size_t _goboringcrypto_EVP_AEAD_nonce_length(const GO_EVP_AEAD*);</code></span>
+<span class="codeline" id="line-119"><code>size_t _goboringcrypto_EVP_AEAD_max_overhead(const GO_EVP_AEAD*);</code></span>
+<span class="codeline" id="line-120"><code>size_t _goboringcrypto_EVP_AEAD_max_tag_len(const GO_EVP_AEAD*);</code></span>
+<span class="codeline" id="line-121"><code>typedef struct GO_EVP_AEAD_CTX { char data[600]; } GO_EVP_AEAD_CTX;</code></span>
+<span class="codeline" id="line-122"><code>void _goboringcrypto_EVP_AEAD_CTX_zero(GO_EVP_AEAD_CTX*);</code></span>
+<span class="codeline" id="line-123"><code>int _goboringcrypto_EVP_AEAD_CTX_init(GO_EVP_AEAD_CTX*, const GO_EVP_AEAD*, const uint8_t*, size_t, size_t, GO_ENGINE*);</code></span>
+<span class="codeline" id="line-124"><code>void _goboringcrypto_EVP_AEAD_CTX_cleanup(GO_EVP_AEAD_CTX*);</code></span>
+<span class="codeline" id="line-125"><code>int _goboringcrypto_EVP_AEAD_CTX_seal(const GO_EVP_AEAD_CTX*, uint8_t*, size_t*, size_t, const uint8_t*, size_t, const uint8_t*, size_t, const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-126"><code>int _goboringcrypto_EVP_AEAD_CTX_open(const GO_EVP_AEAD_CTX*, uint8_t*, size_t*, size_t, const uint8_t*, size_t, const uint8_t*, size_t, const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-127"><code>const GO_EVP_AEAD* _goboringcrypto_EVP_aead_aes_128_gcm_tls12(void);</code></span>
+<span class="codeline" id="line-128"><code>const GO_EVP_AEAD* _goboringcrypto_EVP_aead_aes_256_gcm_tls12(void);</code></span>
+<span class="codeline" id="line-129"><code>enum go_evp_aead_direction_t {</code></span>
+<span class="codeline" id="line-130"><code>	go_evp_aead_open = 0,</code></span>
+<span class="codeline" id="line-131"><code>	go_evp_aead_seal = 1</code></span>
+<span class="codeline" id="line-132"><code>};</code></span>
+<span class="codeline" id="line-133"><code>int _goboringcrypto_EVP_AEAD_CTX_init_with_direction(GO_EVP_AEAD_CTX*, const GO_EVP_AEAD*, const uint8_t*, size_t, size_t, enum go_evp_aead_direction_t);</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code>// #include &lt;openssl/bn.h&gt;</code></span>
+<span class="codeline" id="line-136"><code>/*unchecked (opaque)*/ typedef struct GO_BN_CTX { char data[1]; } GO_BN_CTX;</code></span>
+<span class="codeline" id="line-137"><code>typedef struct GO_BIGNUM { char data[24]; } GO_BIGNUM;</code></span>
+<span class="codeline" id="line-138"><code>GO_BIGNUM* _goboringcrypto_BN_new(void);</code></span>
+<span class="codeline" id="line-139"><code>void _goboringcrypto_BN_free(GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-140"><code>unsigned _goboringcrypto_BN_num_bits(const GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-141"><code>unsigned _goboringcrypto_BN_num_bytes(const GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-142"><code>int _goboringcrypto_BN_is_negative(const GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-143"><code>GO_BIGNUM* _goboringcrypto_BN_bin2bn(const uint8_t*, size_t, GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-144"><code>GO_BIGNUM* _goboringcrypto_BN_le2bn(const uint8_t*, size_t, GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-145"><code>size_t _goboringcrypto_BN_bn2bin(const GO_BIGNUM*, uint8_t*);</code></span>
+<span class="codeline" id="line-146"><code>int _goboringcrypto_BN_bn2le_padded(uint8_t*, size_t, const GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-147"><code></code></span>
+<span class="codeline" id="line-148"><code>// #include &lt;openssl/ec.h&gt;</code></span>
+<span class="codeline" id="line-149"><code>/*unchecked (opaque)*/ typedef struct GO_EC_GROUP { char data[1]; } GO_EC_GROUP;</code></span>
+<span class="codeline" id="line-150"><code>GO_EC_GROUP* _goboringcrypto_EC_GROUP_new_by_curve_name(int);</code></span>
+<span class="codeline" id="line-151"><code>void _goboringcrypto_EC_GROUP_free(GO_EC_GROUP*);</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code>/*unchecked (opaque)*/ typedef struct GO_EC_POINT { char data[1]; } GO_EC_POINT;</code></span>
+<span class="codeline" id="line-154"><code>GO_EC_POINT* _goboringcrypto_EC_POINT_new(const GO_EC_GROUP*);</code></span>
+<span class="codeline" id="line-155"><code>void _goboringcrypto_EC_POINT_free(GO_EC_POINT*);</code></span>
+<span class="codeline" id="line-156"><code>int _goboringcrypto_EC_POINT_get_affine_coordinates_GFp(const GO_EC_GROUP*, const GO_EC_POINT*, GO_BIGNUM*, GO_BIGNUM*, GO_BN_CTX*);</code></span>
+<span class="codeline" id="line-157"><code>int _goboringcrypto_EC_POINT_set_affine_coordinates_GFp(const GO_EC_GROUP*, GO_EC_POINT*, const GO_BIGNUM*, const GO_BIGNUM*, GO_BN_CTX*);</code></span>
+<span class="codeline" id="line-158"><code></code></span>
+<span class="codeline" id="line-159"><code>// #include &lt;openssl/ec_key.h&gt;</code></span>
+<span class="codeline" id="line-160"><code>/*unchecked (opaque)*/ typedef struct GO_EC_KEY { char data[1]; } GO_EC_KEY;</code></span>
+<span class="codeline" id="line-161"><code>GO_EC_KEY* _goboringcrypto_EC_KEY_new(void);</code></span>
+<span class="codeline" id="line-162"><code>GO_EC_KEY* _goboringcrypto_EC_KEY_new_by_curve_name(int);</code></span>
+<span class="codeline" id="line-163"><code>void _goboringcrypto_EC_KEY_free(GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-164"><code>const GO_EC_GROUP* _goboringcrypto_EC_KEY_get0_group(const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-165"><code>int _goboringcrypto_EC_KEY_generate_key_fips(GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-166"><code>int _goboringcrypto_EC_KEY_set_private_key(GO_EC_KEY*, const GO_BIGNUM*);</code></span>
+<span class="codeline" id="line-167"><code>int _goboringcrypto_EC_KEY_set_public_key(GO_EC_KEY*, const GO_EC_POINT*);</code></span>
+<span class="codeline" id="line-168"><code>int _goboringcrypto_EC_KEY_is_opaque(const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-169"><code>const GO_BIGNUM* _goboringcrypto_EC_KEY_get0_private_key(const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-170"><code>const GO_EC_POINT* _goboringcrypto_EC_KEY_get0_public_key(const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-171"><code>// TODO: EC_KEY_check_fips?</code></span>
+<span class="codeline" id="line-172"><code></code></span>
+<span class="codeline" id="line-173"><code>// #include &lt;openssl/ecdsa.h&gt;</code></span>
+<span class="codeline" id="line-174"><code>typedef struct GO_ECDSA_SIG { char data[16]; } GO_ECDSA_SIG;</code></span>
+<span class="codeline" id="line-175"><code>GO_ECDSA_SIG* _goboringcrypto_ECDSA_SIG_new(void);</code></span>
+<span class="codeline" id="line-176"><code>void _goboringcrypto_ECDSA_SIG_free(GO_ECDSA_SIG*);</code></span>
+<span class="codeline" id="line-177"><code>GO_ECDSA_SIG* _goboringcrypto_ECDSA_do_sign(const uint8_t*, size_t, const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-178"><code>int _goboringcrypto_ECDSA_do_verify(const uint8_t*, size_t, const GO_ECDSA_SIG*, const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-179"><code>int _goboringcrypto_ECDSA_sign(int, const uint8_t*, size_t, uint8_t*, unsigned int*, const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-180"><code>size_t _goboringcrypto_ECDSA_size(const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-181"><code>int _goboringcrypto_ECDSA_verify(int, const uint8_t*, size_t, const uint8_t*, size_t, const GO_EC_KEY*);</code></span>
+<span class="codeline" id="line-182"><code></code></span>
+<span class="codeline" id="line-183"><code>// #include &lt;openssl/rsa.h&gt;</code></span>
+<span class="codeline" id="line-184"><code></code></span>
+<span class="codeline" id="line-185"><code>// Note: order of struct fields here is unchecked.</code></span>
+<span class="codeline" id="line-186"><code>typedef struct GO_RSA { void *meth; GO_BIGNUM *n, *e, *d, *p, *q, *dmp1, *dmq1, *iqmp; char data[160]; } GO_RSA;</code></span>
+<span class="codeline" id="line-187"><code>/*unchecked (opaque)*/ typedef struct GO_BN_GENCB { char data[1]; } GO_BN_GENCB;</code></span>
+<span class="codeline" id="line-188"><code>GO_RSA* _goboringcrypto_RSA_new(void);</code></span>
+<span class="codeline" id="line-189"><code>void _goboringcrypto_RSA_free(GO_RSA*);</code></span>
+<span class="codeline" id="line-190"><code>void _goboringcrypto_RSA_get0_key(const GO_RSA*, const GO_BIGNUM **n, const GO_BIGNUM **e, const GO_BIGNUM **d);</code></span>
+<span class="codeline" id="line-191"><code>void _goboringcrypto_RSA_get0_factors(const GO_RSA*, const GO_BIGNUM **p, const GO_BIGNUM **q);</code></span>
+<span class="codeline" id="line-192"><code>void _goboringcrypto_RSA_get0_crt_params(const GO_RSA*, const GO_BIGNUM **dmp1, const GO_BIGNUM **dmp2, const GO_BIGNUM **iqmp);</code></span>
+<span class="codeline" id="line-193"><code>int _goboringcrypto_RSA_generate_key_ex(GO_RSA*, int, const GO_BIGNUM*, GO_BN_GENCB*);</code></span>
+<span class="codeline" id="line-194"><code>int _goboringcrypto_RSA_generate_key_fips(GO_RSA*, int, GO_BN_GENCB*);</code></span>
+<span class="codeline" id="line-195"><code>enum {</code></span>
+<span class="codeline" id="line-196"><code>	GO_RSA_PKCS1_PADDING = 1,</code></span>
+<span class="codeline" id="line-197"><code>	GO_RSA_NO_PADDING = 3,</code></span>
+<span class="codeline" id="line-198"><code>	GO_RSA_PKCS1_OAEP_PADDING = 4,</code></span>
+<span class="codeline" id="line-199"><code>	GO_RSA_PKCS1_PSS_PADDING = 6,</code></span>
+<span class="codeline" id="line-200"><code>};</code></span>
+<span class="codeline" id="line-201"><code>int _goboringcrypto_RSA_encrypt(GO_RSA*, size_t *out_len, uint8_t *out, size_t max_out, const uint8_t *in, size_t in_len, int padding);</code></span>
+<span class="codeline" id="line-202"><code>int _goboringcrypto_RSA_decrypt(GO_RSA*, size_t *out_len, uint8_t *out, size_t max_out, const uint8_t *in, size_t in_len, int padding);</code></span>
+<span class="codeline" id="line-203"><code>int _goboringcrypto_RSA_sign(int hash_nid, const uint8_t* in, unsigned int in_len, uint8_t *out, unsigned int *out_len, GO_RSA*);</code></span>
+<span class="codeline" id="line-204"><code>int _goboringcrypto_RSA_sign_pss_mgf1(GO_RSA*, size_t *out_len, uint8_t *out, size_t max_out, const uint8_t *in, size_t in_len, const GO_EVP_MD *md, const GO_EVP_MD *mgf1_md, int salt_len);</code></span>
+<span class="codeline" id="line-205"><code>int _goboringcrypto_RSA_sign_raw(GO_RSA*, size_t *out_len, uint8_t *out, size_t max_out, const uint8_t *in, size_t in_len, int padding);</code></span>
+<span class="codeline" id="line-206"><code>int _goboringcrypto_RSA_verify(int hash_nid, const uint8_t *msg, size_t msg_len, const uint8_t *sig, size_t sig_len, GO_RSA*);</code></span>
+<span class="codeline" id="line-207"><code>int _goboringcrypto_RSA_verify_pss_mgf1(GO_RSA*, const uint8_t *msg, size_t msg_len, const GO_EVP_MD *md, const GO_EVP_MD *mgf1_md, int salt_len, const uint8_t *sig, size_t sig_len);</code></span>
+<span class="codeline" id="line-208"><code>int _goboringcrypto_RSA_verify_raw(GO_RSA*, size_t *out_len, uint8_t *out, size_t max_out, const uint8_t *in, size_t in_len, int padding);</code></span>
+<span class="codeline" id="line-209"><code>unsigned _goboringcrypto_RSA_size(const GO_RSA*);</code></span>
+<span class="codeline" id="line-210"><code>int _goboringcrypto_RSA_is_opaque(const GO_RSA*);</code></span>
+<span class="codeline" id="line-211"><code>int _goboringcrypto_RSA_check_key(const GO_RSA*);</code></span>
+<span class="codeline" id="line-212"><code>int _goboringcrypto_RSA_check_fips(GO_RSA*);</code></span>
+<span class="codeline" id="line-213"><code>GO_RSA* _goboringcrypto_RSA_public_key_from_bytes(const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-214"><code>GO_RSA* _goboringcrypto_RSA_private_key_from_bytes(const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-215"><code>int _goboringcrypto_RSA_public_key_to_bytes(uint8_t**, size_t*, const GO_RSA*);</code></span>
+<span class="codeline" id="line-216"><code>int _goboringcrypto_RSA_private_key_to_bytes(uint8_t**, size_t*, const GO_RSA*);</code></span>
+<span class="codeline" id="line-217"><code></code></span>
+<span class="codeline" id="line-218"><code>// #include &lt;openssl/evp.h&gt;</code></span>
+<span class="codeline" id="line-219"><code>/*unchecked (opaque)*/ typedef struct GO_EVP_PKEY { char data[1]; } GO_EVP_PKEY;</code></span>
+<span class="codeline" id="line-220"><code>GO_EVP_PKEY* _goboringcrypto_EVP_PKEY_new(void);</code></span>
+<span class="codeline" id="line-221"><code>void _goboringcrypto_EVP_PKEY_free(GO_EVP_PKEY*);</code></span>
+<span class="codeline" id="line-222"><code>int _goboringcrypto_EVP_PKEY_set1_RSA(GO_EVP_PKEY*, GO_RSA*);</code></span>
+<span class="codeline" id="line-223"><code></code></span>
+<span class="codeline" id="line-224"><code>/*unchecked (opaque)*/ typedef struct GO_EVP_PKEY_CTX { char data[1]; } GO_EVP_PKEY_CTX;</code></span>
+<span class="codeline" id="line-225"><code></code></span>
+<span class="codeline" id="line-226"><code>GO_EVP_PKEY_CTX* _goboringcrypto_EVP_PKEY_CTX_new(GO_EVP_PKEY*, GO_ENGINE*);</code></span>
+<span class="codeline" id="line-227"><code>void _goboringcrypto_EVP_PKEY_CTX_free(GO_EVP_PKEY_CTX*);</code></span>
+<span class="codeline" id="line-228"><code>int _goboringcrypto_EVP_PKEY_CTX_set0_rsa_oaep_label(GO_EVP_PKEY_CTX*, uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-229"><code>int _goboringcrypto_EVP_PKEY_CTX_set_rsa_oaep_md(GO_EVP_PKEY_CTX*, const GO_EVP_MD*);</code></span>
+<span class="codeline" id="line-230"><code>int _goboringcrypto_EVP_PKEY_CTX_set_rsa_padding(GO_EVP_PKEY_CTX*, int padding);</code></span>
+<span class="codeline" id="line-231"><code>int _goboringcrypto_EVP_PKEY_decrypt(GO_EVP_PKEY_CTX*, uint8_t*, size_t*, const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-232"><code>int _goboringcrypto_EVP_PKEY_encrypt(GO_EVP_PKEY_CTX*, uint8_t*, size_t*, const uint8_t*, size_t);</code></span>
+<span class="codeline" id="line-233"><code>int _goboringcrypto_EVP_PKEY_decrypt_init(GO_EVP_PKEY_CTX*);</code></span>
+<span class="codeline" id="line-234"><code>int _goboringcrypto_EVP_PKEY_encrypt_init(GO_EVP_PKEY_CTX*);</code></span>
+<span class="codeline" id="line-235"><code>int _goboringcrypto_EVP_PKEY_CTX_set_rsa_mgf1_md(GO_EVP_PKEY_CTX*, const GO_EVP_MD*);</code></span>
+<span class="codeline" id="line-236"><code>int _goboringcrypto_EVP_PKEY_CTX_set_rsa_pss_saltlen(GO_EVP_PKEY_CTX*, int);</code></span>
+<span class="codeline" id="line-237"><code>int _goboringcrypto_EVP_PKEY_sign_init(GO_EVP_PKEY_CTX*);</code></span>
+<span class="codeline" id="line-238"><code>int _goboringcrypto_EVP_PKEY_verify_init(GO_EVP_PKEY_CTX*);</code></span>
+<span class="codeline" id="line-239"><code>int _goboringcrypto_EVP_PKEY_sign(GO_EVP_PKEY_CTX*, uint8_t*, size_t*, const uint8_t*, size_t);</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

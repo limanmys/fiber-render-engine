@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: embed</title>
+<link href="../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>embed</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../index.html#pkg-embed">embed</a><i> (on <a href="https://pkg.go.dev/embed" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../dep/embed.html">4 packages</a>, and imported by <a href="../dep/embed.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">   <a href="../src/embed/embed.go.html#doc">#d</a> <a href="../src/embed/embed.go.html">embed.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package embed provides access to files embedded in the running Go program.
+		
+		Go source files that import "embed" can use the //go:embed directive
+		to initialize a variable of type string, []byte, or FS with the contents of
+		files read from the package directory or subdirectories at compile time.
+		
+		For example, here are three ways to embed a file named hello.txt
+		and then print its contents at run time.
+		
+		Embedding one file into a string:
+		
+			import _ "embed"
+		
+			//go:embed hello.txt
+			var s string
+			print(s)
+		
+		Embedding one file into a slice of bytes:
+		
+			import _ "embed"
+		
+			//go:embed hello.txt
+			var b []byte
+			print(string(b))
+		
+		Embedded one or more files into a file system:
+		
+			import "embed"
+		
+			//go:embed hello.txt
+			var f embed.FS
+			data, _ := f.ReadFile("hello.txt")
+			print(string(data))
+		
+		# Directives
+		
+		A //go:embed directive above a variable declaration specifies which files to embed,
+		using one or more path.Match patterns.
+		
+		The directive must immediately precede a line containing the declaration of a single variable.
+		Only blank lines and ‘//’ line comments are permitted between the directive and the declaration.
+		
+		The type of the variable must be a string type, or a slice of a byte type,
+		or FS (or an alias of FS).
+		
+		For example:
+		
+			package server
+		
+			import "embed"
+		
+			// content holds our static web server content.
+			//go:embed image/* template/*
+			//go:embed html/index.html
+			var content embed.FS
+		
+		The Go build system will recognize the directives and arrange for the declared variable
+		(in the example above, content) to be populated with the matching files from the file system.
+		
+		The //go:embed directive accepts multiple space-separated patterns for
+		brevity, but it can also be repeated, to avoid very long lines when there are
+		many patterns. The patterns are interpreted relative to the package directory
+		containing the source file. The path separator is a forward slash, even on
+		Windows systems. Patterns may not contain ‘.’ or ‘..’ or empty path elements,
+		nor may they begin or end with a slash. To match everything in the current
+		directory, use ‘*’ instead of ‘.’. To allow for naming files with spaces in
+		their names, patterns can be written as Go double-quoted or back-quoted
+		string literals.
+		
+		If a pattern names a directory, all files in the subtree rooted at that directory are
+		embedded (recursively), except that files with names beginning with ‘.’ or ‘_’
+		are excluded. So the variable in the above example is almost equivalent to:
+		
+			// content is our static web server content.
+			//go:embed image template html/index.html
+			var content embed.FS
+		
+		The difference is that ‘image/*’ embeds ‘image/.tempfile’ while ‘image’ does not.
+		Neither embeds ‘image/dir/.tempfile’.
+		
+		If a pattern begins with the prefix ‘all:’, then the rule for walking directories is changed
+		to include those files beginning with ‘.’ or ‘_’. For example, ‘all:image’ embeds
+		both ‘image/.tempfile’ and ‘image/dir/.tempfile’.
+		
+		The //go:embed directive can be used with both exported and unexported variables,
+		depending on whether the package wants to make the data available to other packages.
+		It can only be used with variables at package scope, not with local variables.
+		
+		Patterns must not match files outside the package's module, such as ‘.git/*’ or symbolic links.
+		Patterns must not match files whose names include the special punctuation characters  " * &lt; &gt; ? ` ' | / \ and :.
+		Matches for empty directories are ignored. After that, each pattern in a //go:embed line
+		must match at least one file or non-empty directory.
+		
+		If any patterns are invalid or have invalid matches, the build will fail.
+		
+		# Strings and Bytes
+		
+		The //go:embed line for a variable of type string or []byte can have only a single pattern,
+		and that pattern can match only a single file. The string or []byte is initialized with
+		the contents of that file.
+		
+		The //go:embed directive requires importing "embed", even when using a string or []byte.
+		In source files that don't refer to embed.FS, use a blank import (import _ "embed").
+		
+		# File Systems
+		
+		For embedding a single file, a variable of type string or []byte is often best.
+		The FS type enables embedding a tree of files, such as a directory of static
+		web server content, as in the example above.
+		
+		FS implements the io/fs package's FS interface, so it can be used with any package that
+		understands file systems, including net/http, text/template, and html/template.
+		
+		For example, given the content variable in the example above, we can write:
+		
+			http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
+		
+			template.ParseFS(content, "*.tmpl")
+		
+		# Tools
+		
+		To support tools that analyze Go packages, the patterns found in //go:embed lines
+		are available in “go list” output. See the EmbedPatterns, TestEmbedPatterns,
+		and XTestEmbedPatterns fields in the “go help list” output.</span></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content"></label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"embed"
+			"log"
+			"net/http"
+		)
+		
+		//go:embed internal/embedtest/testdata/*.txt
+		var content embed.FS
+		
+		func main() {
+			mutex := http.NewServeMux()
+			mutex.Handle("/", http.FileServer(http.FS(content)))
+			err := http.ListenAndServe(":8080", mutex)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (only one)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-FS" data-popularity="300">	<input type='checkbox' class="fold" id="FS-fold-content"><label for="FS-fold-content"> type <a href="../src/embed/embed.go.html#line-148">FS</a> <i>(struct)</i></label><span id='FS-fold-content-docs' class="fold-docs">
+<span class="md-text">		An FS is a read-only collection of files, usually initialized with a //go:embed directive.
+		When declared without a //go:embed directive, an FS is an empty file system.
+		
+		An FS is a read-only value, so it is safe to use from multiple goroutines
+		simultaneously and also safe to assign values of type FS to each other.
+		
+		FS implements fs.FS, so it can be used with any package that understands
+		file system interfaces, including net/http, text/template, and html/template.
+		
+		See the package documentation for more details about initializing an FS.</span>
+
+		<input type='checkbox' class="fold" id="FS-fold-methods"><label for="FS-fold-methods">Methods (<i>total 3</i>)</label><span id='FS-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="FS-fold-method-Open"><label for="FS-fold-method-Open">( FS) <a href="../src/embed/embed.go.html#line-301">Open</a>(name <a href="builtin.html#name-string">string</a>) (<a href="io/fs.html">fs</a>.<a href="io/fs.html#name-File">File</a>, <a href="builtin.html#name-error">error</a>)</label><span id='FS-fold-method-Open-docs' class="fold-docs">
+<span class="md-text">				Open opens the named file for reading and returns it as an fs.File.
+				
+				The returned file implements io.Seeker when the file is not a directory.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FS-fold-method-ReadDir"><label for="FS-fold-method-ReadDir">( FS) <a href="../src/embed/embed.go.html#line-313">ReadDir</a>(name <a href="builtin.html#name-string">string</a>) ([]<a href="io/fs.html">fs</a>.<a href="io/fs.html#name-DirEntry">DirEntry</a>, <a href="builtin.html#name-error">error</a>)</label><span id='FS-fold-method-ReadDir-docs' class="fold-docs">
+<span class="md-text">				ReadDir reads and returns the entire named directory.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="FS-fold-method-ReadFile"><label for="FS-fold-method-ReadFile">( FS) <a href="../src/embed/embed.go.html#line-330">ReadFile</a>(name <a href="builtin.html#name-string">string</a>) ([]<a href="builtin.html#name-byte">byte</a>, <a href="builtin.html#name-error">error</a>)</label><span id='FS-fold-method-ReadFile-docs' class="fold-docs">
+<span class="md-text">				ReadFile reads and returns the content of the named file.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="FS-fold-impls"><label for="FS-fold-impls">Implements (<i>at least 3</i>)</label><span id='FS-fold-impls-items' class="fold-items"><span>
+			 FS : io/fs.<a href="io/fs.html#name-FS">FS</a></span><span>
+			 FS : io/fs.<a href="io/fs.html#name-ReadDirFS">ReadDirFS</a></span><span>
+			 FS : io/fs.<a href="io/fs.html#name-ReadFileFS">ReadFileFS</a></span></span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

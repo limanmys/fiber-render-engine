@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: rand_unix.go in package crypto/rand</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	rand_unix.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/crypto/rand.html">crypto/rand</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2010 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//go:build unix</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// Unix cryptographically secure pseudorandom number</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// generator.</span></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="keyword">package</span> rand</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-13"><code>	<label for="i0"><span class="lit-string i0">"crypto/internal/boring"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i2"><span class="lit-string i2">"io"</span></label></code></span>
+<span class="codeline" id="line-16"><code>	<label for="i3"><span class="lit-string i3">"os"</span></label></code></span>
+<span class="codeline" id="line-17"><code>	<label for="i4"><span class="lit-string i4">"sync"</span></label></code></span>
+<span class="codeline" id="line-18"><code>	<label for="i5"><span class="lit-string i5">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-19"><code>	<label for="i6"><span class="lit-string i6">"syscall"</span></label></code></span>
+<span class="codeline" id="line-20"><code>	<label for="i7"><span class="lit-string i7">"time"</span></label></code></span>
+<span class="codeline" id="line-21"><code>)</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">const</span> urandomDevice = <span class="lit-string">"/dev/urandom"</span></code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">if</span> <a href="../../../pkg/crypto/internal/boring.html" class="ident i0">boring</a>.<a href="../internal/boring/doc.go.html#line-14" class="ident">Enabled</a> {</code></span>
+<span class="codeline" id="line-27"><code>		<a href="rand.go.html#line-20" class="ident">Reader</a> = <a href="../../../pkg/crypto/internal/boring.html" class="ident i0">boring</a>.<a href="../internal/boring/notboring.go.html#line-36" class="ident">RandReader</a></code></span>
+<span class="codeline" id="line-28"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-29"><code>	}</code></span>
+<span class="codeline" id="line-30"><code>	<a href="rand.go.html#line-20" class="ident">Reader</a> = &amp;<a href="#line-34" class="ident">reader</a>{}</code></span>
+<span class="codeline" id="line-31"><code>}</code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// A reader satisfies reads by reading from urandomDevice</span></code></span>
+<span class="codeline" id="line-34"><code><span class="keyword">type</span> reader <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-35"><code>	f    <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-36"><code>	mu   <a href="../../../pkg/sync.html" class="ident i4">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-37"><code>	used <a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a> <span class="comment">// Atomic: 0 - never used, 1 - used, but f == nil, 2 - used, and f != nil</span></code></span>
+<span class="codeline" id="line-38"><code>}</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// altGetRandom if non-nil specifies an OS-specific function to get</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// urandom-style randomness.</span></code></span>
+<span class="codeline" id="line-42"><code><span class="keyword">var</span> altGetRandom <span class="keyword">func</span>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (err <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="keyword">func</span> warnBlocked() {</code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../pkg/builtin.html#name-println" class="ident">println</a>(<span class="lit-string">"crypto/rand: blocked for 60 seconds waiting to read random data from the kernel"</span>)</code></span>
+<span class="codeline" id="line-46"><code>}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> (<label for="r2" class="ident">r</label> *<a href="#line-34" class="ident">reader</a>) <label for="r3" class="ident">Read</label>(<label for="r4" class="ident">b</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r5" class="ident">n</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r6" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../pkg/crypto/internal/boring.html" class="ident i0">boring</a>.<a href="../internal/boring/notboring.go.html#line-21" class="ident">Unreachable</a>()</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">if</span> <a href="../../../pkg/sync/atomic.html" class="ident i5">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-89" class="ident">CompareAndSwapUint32</a>(&amp;<label for="r2" class="ident">r</label>.<a href="#line-37" class="ident">used</a>, <span class="lit-number">0</span>, <span class="lit-number">1</span>) {</code></span>
+<span class="codeline" id="line-51"><code>		<span class="comment">// First use of randomness. Start timer to warn about</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">		// being blocked on entropy not being available.</span></code></span>
+<span class="codeline" id="line-53"><code>		<label for="r7" class="ident">t</label> := <a href="../../../pkg/time.html" class="ident i7">time</a>.<a href="../../time/sleep.go.html#line-163" class="ident">AfterFunc</a>(<a href="../../../pkg/time.html" class="ident i7">time</a>.<a href="../../time/time.go.html#line-615" class="ident">Minute</a>, <a href="#line-44" class="ident">warnBlocked</a>)</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">defer</span> <label for="r7" class="ident">t</label>.<a href="../../time/sleep.go.html#line-77" class="ident">Stop</a>()</code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">if</span> <a href="#line-42" class="ident">altGetRandom</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <a href="#line-42" class="ident">altGetRandom</a>(<label for="r4" class="ident">b</label>) == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-57"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">b</label>), <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">if</span> <a href="../../../pkg/sync/atomic.html" class="ident i5">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-126" class="ident">LoadUint32</a>(&amp;<label for="r2" class="ident">r</label>.<a href="#line-37" class="ident">used</a>) != <span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-60"><code>		<label for="r2" class="ident">r</label>.<a href="#line-36" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-61"><code>		<span class="keyword">if</span> <a href="../../../pkg/sync/atomic.html" class="ident i5">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-126" class="ident">LoadUint32</a>(&amp;<label for="r2" class="ident">r</label>.<a href="#line-37" class="ident">used</a>) != <span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-62"><code>			<label for="r8" class="ident">f</label>, <label for="r9" class="ident">err</label> := <a href="../../../pkg/os.html" class="ident i3">os</a>.<a href="../../os/file.go.html#line-316" class="ident">Open</a>(<a href="#line-23" class="ident">urandomDevice</a>)</code></span>
+<span class="codeline" id="line-63"><code>			<span class="keyword">if</span> <label for="r9" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-64"><code>				<label for="r2" class="ident">r</label>.<a href="#line-36" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-65"><code>				<span class="keyword">return</span> <span class="lit-number">0</span>, <label for="r9" class="ident">err</label></code></span>
+<span class="codeline" id="line-66"><code>			}</code></span>
+<span class="codeline" id="line-67"><code>			<label for="r2" class="ident">r</label>.<a href="#line-35" class="ident">f</a> = <a href="#line-77" class="ident">hideAgainReader</a>{<label for="r8" class="ident">f</label>}</code></span>
+<span class="codeline" id="line-68"><code>			<a href="../../../pkg/sync/atomic.html" class="ident i5">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-144" class="ident">StoreUint32</a>(&amp;<label for="r2" class="ident">r</label>.<a href="#line-37" class="ident">used</a>, <span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-69"><code>		}</code></span>
+<span class="codeline" id="line-70"><code>		<label for="r2" class="ident">r</label>.<a href="#line-36" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-71"><code>	}</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">return</span> <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-350" class="ident">ReadFull</a>(<label for="r2" class="ident">r</label>.<a href="#line-35" class="ident">f</a>, <label for="r4" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-73"><code>}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">// hideAgainReader masks EAGAIN reads from /dev/urandom.</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">// See golang.org/issue/9205</span></code></span>
+<span class="codeline" id="line-77"><code><span class="keyword">type</span> hideAgainReader <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-78"><code>	r <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-79"><code>}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code><span class="keyword">func</span> (<label for="r10" class="ident">hr</label> <a href="#line-77" class="ident">hideAgainReader</a>) <label for="r11" class="ident">Read</label>(<label for="r12" class="ident">p</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<label for="r13" class="ident">n</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r14" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-82"><code>	<label for="r13" class="ident">n</label>, <label for="r14" class="ident">err</label> = <label for="r10" class="ident">hr</label>.<a href="#line-78" class="ident">r</a>.<a href="../../io/io.go.html#line-84" class="ident">Read</a>(<label for="r12" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/wrap.go.html#line-40" class="ident">Is</a>(<label for="r14" class="ident">err</label>, <a href="../../../pkg/syscall.html" class="ident i6">syscall</a>.<a href="../../syscall/zerrors_linux_amd64.go.html#line-1212" class="ident">EAGAIN</a>) {</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r14" class="ident">err</label> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-85"><code>	}</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

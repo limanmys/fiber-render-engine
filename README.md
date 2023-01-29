@@ -9,3 +9,9 @@ This repository contains Liman's render engine. Render engine's purpose is runni
 - High performance SSH tunneling for unix socket
 - File uploading to remote servers
 - SSH, SFTP, SMB, SSH Tunnel, WinRM connection options
+
+#### Generate documents
+
+```
+golds -gen -dir=docs -wdpkgs-listing=solo --compact -nouses -source-code-reading=rich .
+```

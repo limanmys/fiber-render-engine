@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: position.go in package go/token</title>
+<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	position.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/go/token.html">go/token</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124],
+input[id=r125]:checked ~pre label[for=r125],
+input[id=r126]:checked ~pre label[for=r126],
+input[id=r127]:checked ~pre label[for=r127],
+input[id=r128]:checked ~pre label[for=r128],
+input[id=r129]:checked ~pre label[for=r129],
+input[id=r130]:checked ~pre label[for=r130],
+input[id=r131]:checked ~pre label[for=r131],
+input[id=r132]:checked ~pre label[for=r132],
+input[id=r133]:checked ~pre label[for=r133],
+input[id=r134]:checked ~pre label[for=r134],
+input[id=r135]:checked ~pre label[for=r135]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="r125" type="radio" name="g"/>
+<input id="r126" type="radio" name="g"/>
+<input id="r127" type="radio" name="g"/>
+<input id="r128" type="radio" name="g"/>
+<input id="r129" type="radio" name="g"/>
+<input id="r130" type="radio" name="g"/>
+<input id="r131" type="radio" name="g"/>
+<input id="r132" type="radio" name="g"/>
+<input id="r133" type="radio" name="g"/>
+<input id="r134" type="radio" name="g"/>
+<input id="r135" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2010 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> token</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"sort"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"sync"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-12"><code>)</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// -----------------------------------------------------------------------------</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Positions</span></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// Position describes an arbitrary source position</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// including the file, line, and column location.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// A Position is valid if the line number is &gt; 0.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">type</span> <a href="../../../pkg/go/token.html#name-Position" class="ident">Position</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-21"><code>	Filename <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="comment">// filename, if any</span></code></span>
+<span class="codeline" id="line-22"><code>	Offset   <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// offset, starting at 0</span></code></span>
+<span class="codeline" id="line-23"><code>	Line     <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// line number, starting at 1</span></code></span>
+<span class="codeline" id="line-24"><code>	Column   <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// column number, starting at 1 (byte count)</span></code></span>
+<span class="codeline" id="line-25"><code>}</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// IsValid reports whether the position is valid.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">func</span> (<label for="r0" class="ident">pos</label> *<a href="#line-20" class="ident">Position</a>) <label for="r1" class="ident">IsValid</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> { <span class="keyword">return</span> <label for="r0" class="ident">pos</label>.<a href="#line-23" class="ident">Line</a> &gt; <span class="lit-number">0</span> }</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// String returns a string in one of several forms:</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">//	file:line:column    valid position with file name</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">//	file:line           valid position with file name but no column (column == 0)</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">//	line:column         valid position without file name</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//	line                valid position without file name and no column (column == 0)</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//	file                invalid position with file name</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//	-                   invalid position without file name</span></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">func</span> (<label for="r2" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) <label for="r3" class="ident">String</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-39"><code>	<label for="r4" class="ident">s</label> := <label for="r2" class="ident">pos</label>.<a href="#line-21" class="ident">Filename</a></code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">if</span> <label for="r2" class="ident">pos</label>.<a href="#line-28" class="ident">IsValid</a>() {</code></span>
+<span class="codeline" id="line-41"><code>		<span class="keyword">if</span> <label for="r4" class="ident">s</label> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-42"><code>			<label for="r4" class="ident">s</label> += <span class="lit-string">":"</span></code></span>
+<span class="codeline" id="line-43"><code>		}</code></span>
+<span class="codeline" id="line-44"><code>		<label for="r4" class="ident">s</label> += <a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%d"</span>, <label for="r2" class="ident">pos</label>.<a href="#line-23" class="ident">Line</a>)</code></span>
+<span class="codeline" id="line-45"><code>		<span class="keyword">if</span> <label for="r2" class="ident">pos</label>.<a href="#line-24" class="ident">Column</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-46"><code>			<label for="r4" class="ident">s</label> += <a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">":%d"</span>, <label for="r2" class="ident">pos</label>.<a href="#line-24" class="ident">Column</a>)</code></span>
+<span class="codeline" id="line-47"><code>		}</code></span>
+<span class="codeline" id="line-48"><code>	}</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">if</span> <label for="r4" class="ident">s</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-50"><code>		<label for="r4" class="ident">s</label> = <span class="lit-string">"-"</span></code></span>
+<span class="codeline" id="line-51"><code>	}</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">return</span> <label for="r4" class="ident">s</label></code></span>
+<span class="codeline" id="line-53"><code>}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// Pos is a compact encoding of a source position within a file set.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// It can be converted into a Position for a more convenient, but much</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// larger, representation.</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">// The Pos value for a given file is a number in the range [base, base+size],</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">// where base and size are specified when a file is added to the file set.</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// The difference between a Pos value and the corresponding file base</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// corresponds to the byte offset of that position (represented by the Pos value)</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// from the beginning of the file. Thus, the file base offset is the Pos value</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">// representing the first byte in the file.</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// To create the Pos value for a specific source offset (measured in bytes),</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// first add the respective file to the current file set using FileSet.AddFile</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// and then call File.Pos(offset) for that file. Given a Pos value p</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// for a specific file set fset, the corresponding Position value is</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// obtained by calling fset.Position(p).</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">// Pos values can be compared directly with the usual comparison operators:</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">// If two Pos values p and q are in the same file, comparing p and q is</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// equivalent to comparing the respective source file offsets. If p and q</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">// are in different files, p &lt; q is true if the file implied by p was added</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">// to the respective file set before the file implied by q.</span></code></span>
+<span class="codeline" id="line-77"><code><span class="keyword">type</span> <a href="../../../pkg/go/token.html#name-Pos" class="ident">Pos</a> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">// The zero value for Pos is NoPos; there is no file and line information</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// associated with it, and NoPos.IsValid() is false. NoPos is always</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// smaller than any other Pos value. The corresponding Position value</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// for NoPos is the zero value for Position.</span></code></span>
+<span class="codeline" id="line-83"><code><span class="keyword">const</span> <a href="../../../pkg/go/token.html#name-NoPos" class="ident">NoPos</a> <a href="#line-77" class="ident">Pos</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">// IsValid reports whether the position is valid.</span></code></span>
+<span class="codeline" id="line-86"><code><span class="keyword">func</span> (<label for="r5" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) <label for="r6" class="ident">IsValid</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-87"><code>	<span class="keyword">return</span> <label for="r5" class="ident">p</label> != <a href="#line-83" class="ident">NoPos</a></code></span>
+<span class="codeline" id="line-88"><code>}</code></span>
+<span class="codeline" id="line-89"><code></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">// -----------------------------------------------------------------------------</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// File</span></code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">// A File is a handle for a file belonging to a FileSet.</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// A File has a name, size, and line offset table.</span></code></span>
+<span class="codeline" id="line-95"><code><span class="keyword">type</span> <a href="../../../pkg/go/token.html#name-File" class="ident">File</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-96"><code>	name <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="comment">// file name as provided to AddFile</span></code></span>
+<span class="codeline" id="line-97"><code>	base <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// Pos value range for this file is [base...base+size]</span></code></span>
+<span class="codeline" id="line-98"><code>	size <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// file size as provided to AddFile</span></code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code>	<span class="comment">// lines and infos are protected by mutex</span></code></span>
+<span class="codeline" id="line-101"><code>	mutex <a href="../../../pkg/sync.html" class="ident i2">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-102"><code>	lines []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a> <span class="comment">// lines contains the offset of the first character for each line (the first entry is always 0)</span></code></span>
+<span class="codeline" id="line-103"><code>	infos []<a href="#line-225" class="ident">lineInfo</a></code></span>
+<span class="codeline" id="line-104"><code>}</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">// Name returns the file name of file f as registered with AddFile.</span></code></span>
+<span class="codeline" id="line-107"><code><span class="keyword">func</span> (<label for="r7" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r8" class="ident">Name</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">return</span> <label for="r7" class="ident">f</label>.<a href="#line-96" class="ident">name</a></code></span>
+<span class="codeline" id="line-109"><code>}</code></span>
+<span class="codeline" id="line-110"><code></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// Base returns the base offset of file f as registered with AddFile.</span></code></span>
+<span class="codeline" id="line-112"><code><span class="keyword">func</span> (<label for="r9" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r10" class="ident">Base</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">return</span> <label for="r9" class="ident">f</label>.<a href="#line-97" class="ident">base</a></code></span>
+<span class="codeline" id="line-114"><code>}</code></span>
+<span class="codeline" id="line-115"><code></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// Size returns the size of file f as registered with AddFile.</span></code></span>
+<span class="codeline" id="line-117"><code><span class="keyword">func</span> (<label for="r11" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r12" class="ident">Size</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-118"><code>	<span class="keyword">return</span> <label for="r11" class="ident">f</label>.<a href="#line-98" class="ident">size</a></code></span>
+<span class="codeline" id="line-119"><code>}</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">// LineCount returns the number of lines in file f.</span></code></span>
+<span class="codeline" id="line-122"><code><span class="keyword">func</span> (<label for="r13" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r14" class="ident">LineCount</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-123"><code>	<label for="r13" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-124"><code>	<label for="r15" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>)</code></span>
+<span class="codeline" id="line-125"><code>	<label for="r13" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-126"><code>	<span class="keyword">return</span> <label for="r15" class="ident">n</label></code></span>
+<span class="codeline" id="line-127"><code>}</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">// AddLine adds the line offset for a new line.</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// The line offset must be larger than the offset for the previous line</span></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">// and smaller than the file size; otherwise the line offset is ignored.</span></code></span>
+<span class="codeline" id="line-132"><code><span class="keyword">func</span> (<label for="r16" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r17" class="ident">AddLine</label>(<label for="r18" class="ident">offset</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-133"><code>	<label for="r16" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">if</span> <label for="r19" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r16" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>); (<label for="r19" class="ident">i</label> == <span class="lit-number">0</span> || <label for="r16" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[<label for="r19" class="ident">i</label>-<span class="lit-number">1</span>] &lt; <label for="r18" class="ident">offset</label>) &amp;&amp; <label for="r18" class="ident">offset</label> &lt; <label for="r16" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-135"><code>		<label for="r16" class="ident">f</label>.<a href="#line-102" class="ident">lines</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r16" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>, <label for="r18" class="ident">offset</label>)</code></span>
+<span class="codeline" id="line-136"><code>	}</code></span>
+<span class="codeline" id="line-137"><code>	<label for="r16" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-138"><code>}</code></span>
+<span class="codeline" id="line-139"><code></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">// MergeLine merges a line with the following line. It is akin to replacing</span></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// the newline character at the end of the line with a space (to not change the</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">// remaining offsets). To obtain the line number, consult e.g. Position.Line.</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">// MergeLine will panic if given an invalid line number.</span></code></span>
+<span class="codeline" id="line-144"><code><span class="keyword">func</span> (<label for="r20" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r21" class="ident">MergeLine</label>(<label for="r22" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-145"><code>	<span class="keyword">if</span> <label for="r22" class="ident">line</label> &lt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-146"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid line number %d (should be &gt;= 1)"</span>, <label for="r22" class="ident">line</label>))</code></span>
+<span class="codeline" id="line-147"><code>	}</code></span>
+<span class="codeline" id="line-148"><code>	<label for="r20" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-149"><code>	<span class="keyword">defer</span> <label for="r20" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-150"><code>	<span class="keyword">if</span> <label for="r22" class="ident">line</label> &gt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>) {</code></span>
+<span class="codeline" id="line-151"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid line number %d (should be &lt; %d)"</span>, <label for="r22" class="ident">line</label>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>)))</code></span>
+<span class="codeline" id="line-152"><code>	}</code></span>
+<span class="codeline" id="line-153"><code>	<span class="comment">// To merge the line numbered &lt;line&gt; with the line numbered &lt;line+1&gt;,</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">	// we need to remove the entry in lines corresponding to the line</span></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">	// numbered &lt;line+1&gt;. The entry in lines corresponding to the line</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">	// numbered &lt;line+1&gt; is located at index &lt;line&gt;, since indices in lines</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">	// are 0-based and line numbers are 1-based.</span></code></span>
+<span class="codeline" id="line-158"><code>	<a href="../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[<label for="r22" class="ident">line</label>:], <label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[<label for="r22" class="ident">line</label>+<span class="lit-number">1</span>:])</code></span>
+<span class="codeline" id="line-159"><code>	<label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a> = <label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r20" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>)-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-160"><code>}</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">// SetLines sets the line offsets for a file and reports whether it succeeded.</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">// The line offsets are the offsets of the first character of each line;</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">// for instance for the content "ab\nc\n" the line offsets are {0, 3}.</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">// An empty file has an empty line offset table.</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">// Each line offset must be larger than the offset for the previous line</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">// and smaller than the file size; otherwise SetLines fails and returns</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">// false.</span></code></span>
+<span class="codeline" id="line-169"><code><span class="comment">// Callers must not mutate the provided slice after SetLines returns.</span></code></span>
+<span class="codeline" id="line-170"><code><span class="keyword">func</span> (<label for="r23" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r24" class="ident">SetLines</label>(<label for="r25" class="ident">lines</label> []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-171"><code>	<span class="comment">// verify validity of lines table</span></code></span>
+<span class="codeline" id="line-172"><code>	<label for="r26" class="ident">size</label> := <label for="r23" class="ident">f</label>.<a href="#line-98" class="ident">size</a></code></span>
+<span class="codeline" id="line-173"><code>	<span class="keyword">for</span> <label for="r27" class="ident">i</label>, <label for="r28" class="ident">offset</label> := <span class="keyword">range</span> <label for="r25" class="ident">lines</label> {</code></span>
+<span class="codeline" id="line-174"><code>		<span class="keyword">if</span> <label for="r27" class="ident">i</label> &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r28" class="ident">offset</label> &lt;= <label for="r25" class="ident">lines</label>[<label for="r27" class="ident">i</label>-<span class="lit-number">1</span>] || <label for="r26" class="ident">size</label> &lt;= <label for="r28" class="ident">offset</label> {</code></span>
+<span class="codeline" id="line-175"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-176"><code>		}</code></span>
+<span class="codeline" id="line-177"><code>	}</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code>	<span class="comment">// set lines table</span></code></span>
+<span class="codeline" id="line-180"><code>	<label for="r23" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-181"><code>	<label for="r23" class="ident">f</label>.<a href="#line-102" class="ident">lines</a> = <label for="r25" class="ident">lines</label></code></span>
+<span class="codeline" id="line-182"><code>	<label for="r23" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-183"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-184"><code>}</code></span>
+<span class="codeline" id="line-185"><code></code></span>
+<span class="codeline" id="line-186"><code><span class="comment">// SetLinesForContent sets the line offsets for the given file content.</span></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">// It ignores position-altering //line comments.</span></code></span>
+<span class="codeline" id="line-188"><code><span class="keyword">func</span> (<label for="r29" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r30" class="ident">SetLinesForContent</label>(<label for="r31" class="ident">content</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-189"><code>	<span class="keyword">var</span> <label for="r32" class="ident">lines</label> []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-190"><code>	<label for="r33" class="ident">line</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-191"><code>	<span class="keyword">for</span> <label for="r34" class="ident">offset</label>, <label for="r35" class="ident">b</label> := <span class="keyword">range</span> <label for="r31" class="ident">content</label> {</code></span>
+<span class="codeline" id="line-192"><code>		<span class="keyword">if</span> <label for="r33" class="ident">line</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-193"><code>			<label for="r32" class="ident">lines</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r32" class="ident">lines</label>, <label for="r33" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-194"><code>		}</code></span>
+<span class="codeline" id="line-195"><code>		<label for="r33" class="ident">line</label> = -<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-196"><code>		<span class="keyword">if</span> <label for="r35" class="ident">b</label> == <span class="lit-number">'\n'</span> {</code></span>
+<span class="codeline" id="line-197"><code>			<label for="r33" class="ident">line</label> = <label for="r34" class="ident">offset</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-198"><code>		}</code></span>
+<span class="codeline" id="line-199"><code>	}</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code>	<span class="comment">// set lines table</span></code></span>
+<span class="codeline" id="line-202"><code>	<label for="r29" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-203"><code>	<label for="r29" class="ident">f</label>.<a href="#line-102" class="ident">lines</a> = <label for="r32" class="ident">lines</label></code></span>
+<span class="codeline" id="line-204"><code>	<label for="r29" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-205"><code>}</code></span>
+<span class="codeline" id="line-206"><code></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">// LineStart returns the Pos value of the start of the specified line.</span></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">// It ignores any alternative positions set using AddLineColumnInfo.</span></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">// LineStart panics if the 1-based line number is invalid.</span></code></span>
+<span class="codeline" id="line-210"><code><span class="keyword">func</span> (<label for="r36" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r37" class="ident">LineStart</label>(<label for="r38" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="#line-77" class="ident">Pos</a> {</code></span>
+<span class="codeline" id="line-211"><code>	<span class="keyword">if</span> <label for="r38" class="ident">line</label> &lt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-212"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid line number %d (should be &gt;= 1)"</span>, <label for="r38" class="ident">line</label>))</code></span>
+<span class="codeline" id="line-213"><code>	}</code></span>
+<span class="codeline" id="line-214"><code>	<label for="r36" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-215"><code>	<span class="keyword">defer</span> <label for="r36" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-216"><code>	<span class="keyword">if</span> <label for="r38" class="ident">line</label> &gt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r36" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>) {</code></span>
+<span class="codeline" id="line-217"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid line number %d (should be &lt; %d)"</span>, <label for="r38" class="ident">line</label>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r36" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>)))</code></span>
+<span class="codeline" id="line-218"><code>	}</code></span>
+<span class="codeline" id="line-219"><code>	<span class="keyword">return</span> <a href="#line-77" class="ident">Pos</a>(<label for="r36" class="ident">f</label>.<a href="#line-97" class="ident">base</a> + <label for="r36" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[<label for="r38" class="ident">line</label>-<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-220"><code>}</code></span>
+<span class="codeline" id="line-221"><code></code></span>
+<span class="codeline" id="line-222"><code><span class="comment">// A lineInfo object describes alternative file, line, and column</span></code></span>
+<span class="codeline" id="line-223"><code><span class="comment">// number information (such as provided via a //line directive)</span></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">// for a given file offset.</span></code></span>
+<span class="codeline" id="line-225"><code><span class="keyword">type</span> lineInfo <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-226"><code>	<span class="comment">// fields are exported to make them accessible to gob</span></code></span>
+<span class="codeline" id="line-227"><code>	Offset       <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-228"><code>	Filename     <a href="../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-229"><code>	Line, Column <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-230"><code>}</code></span>
+<span class="codeline" id="line-231"><code></code></span>
+<span class="codeline" id="line-232"><code><span class="comment">// AddLineInfo is like AddLineColumnInfo with a column = 1 argument.</span></code></span>
+<span class="codeline" id="line-233"><code><span class="comment">// It is here for backward-compatibility for code prior to Go 1.11.</span></code></span>
+<span class="codeline" id="line-234"><code><span class="keyword">func</span> (<label for="r39" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r40" class="ident">AddLineInfo</label>(<label for="r41" class="ident">offset</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r42" class="ident">filename</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r43" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-235"><code>	<label for="r39" class="ident">f</label>.<a href="#line-246" class="ident">AddLineColumnInfo</a>(<label for="r41" class="ident">offset</label>, <label for="r42" class="ident">filename</label>, <label for="r43" class="ident">line</label>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-236"><code>}</code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">// AddLineColumnInfo adds alternative file, line, and column number</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">// information for a given file offset. The offset must be larger</span></code></span>
+<span class="codeline" id="line-240"><code><span class="comment">// than the offset for the previously added alternative line info</span></code></span>
+<span class="codeline" id="line-241"><code><span class="comment">// and smaller than the file size; otherwise the information is</span></code></span>
+<span class="codeline" id="line-242"><code><span class="comment">// ignored.</span></code></span>
+<span class="codeline" id="line-243"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-244"><code><span class="comment">// AddLineColumnInfo is typically used to register alternative position</span></code></span>
+<span class="codeline" id="line-245"><code><span class="comment">// information for line directives such as //line filename:line:column.</span></code></span>
+<span class="codeline" id="line-246"><code><span class="keyword">func</span> (<label for="r44" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r45" class="ident">AddLineColumnInfo</label>(<label for="r46" class="ident">offset</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r47" class="ident">filename</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r48" class="ident">line</label>, <label for="r49" class="ident">column</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-247"><code>	<label for="r44" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-248"><code>	<span class="keyword">if</span> <label for="r50" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r44" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>); <label for="r50" class="ident">i</label> == <span class="lit-number">0</span> || <label for="r44" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>[<label for="r50" class="ident">i</label>-<span class="lit-number">1</span>].<a href="#line-227" class="ident">Offset</a> &lt; <label for="r46" class="ident">offset</label> &amp;&amp; <label for="r46" class="ident">offset</label> &lt; <label for="r44" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-249"><code>		<label for="r44" class="ident">f</label>.<a href="#line-103" class="ident">infos</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r44" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>, <a href="#line-225" class="ident">lineInfo</a>{<label for="r46" class="ident">offset</label>, <label for="r47" class="ident">filename</label>, <label for="r48" class="ident">line</label>, <label for="r49" class="ident">column</label>})</code></span>
+<span class="codeline" id="line-250"><code>	}</code></span>
+<span class="codeline" id="line-251"><code>	<label for="r44" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-252"><code>}</code></span>
+<span class="codeline" id="line-253"><code></code></span>
+<span class="codeline" id="line-254"><code><span class="comment">// Pos returns the Pos value for the given file offset;</span></code></span>
+<span class="codeline" id="line-255"><code><span class="comment">// the offset must be &lt;= f.Size().</span></code></span>
+<span class="codeline" id="line-256"><code><span class="comment">// f.Pos(f.Offset(p)) == p.</span></code></span>
+<span class="codeline" id="line-257"><code><span class="keyword">func</span> (<label for="r51" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r52" class="ident">Pos</label>(<label for="r53" class="ident">offset</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="#line-77" class="ident">Pos</a> {</code></span>
+<span class="codeline" id="line-258"><code>	<span class="keyword">if</span> <label for="r53" class="ident">offset</label> &gt; <label for="r51" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-259"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid file offset %d (should be &lt;= %d)"</span>, <label for="r53" class="ident">offset</label>, <label for="r51" class="ident">f</label>.<a href="#line-98" class="ident">size</a>))</code></span>
+<span class="codeline" id="line-260"><code>	}</code></span>
+<span class="codeline" id="line-261"><code>	<span class="keyword">return</span> <a href="#line-77" class="ident">Pos</a>(<label for="r51" class="ident">f</label>.<a href="#line-97" class="ident">base</a> + <label for="r53" class="ident">offset</label>)</code></span>
+<span class="codeline" id="line-262"><code>}</code></span>
+<span class="codeline" id="line-263"><code></code></span>
+<span class="codeline" id="line-264"><code><span class="comment">// Offset returns the offset for the given file position p;</span></code></span>
+<span class="codeline" id="line-265"><code><span class="comment">// p must be a valid Pos value in that file.</span></code></span>
+<span class="codeline" id="line-266"><code><span class="comment">// f.Offset(f.Pos(offset)) == offset.</span></code></span>
+<span class="codeline" id="line-267"><code><span class="keyword">func</span> (<label for="r54" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r55" class="ident">Offset</label>(<label for="r56" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-268"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r56" class="ident">p</label>) &lt; <label for="r54" class="ident">f</label>.<a href="#line-97" class="ident">base</a> || <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r56" class="ident">p</label>) &gt; <label for="r54" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r54" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-269"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid Pos value %d (should be in [%d, %d])"</span>, <label for="r56" class="ident">p</label>, <label for="r54" class="ident">f</label>.<a href="#line-97" class="ident">base</a>, <label for="r54" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r54" class="ident">f</label>.<a href="#line-98" class="ident">size</a>))</code></span>
+<span class="codeline" id="line-270"><code>	}</code></span>
+<span class="codeline" id="line-271"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r56" class="ident">p</label>) - <label for="r54" class="ident">f</label>.<a href="#line-97" class="ident">base</a></code></span>
+<span class="codeline" id="line-272"><code>}</code></span>
+<span class="codeline" id="line-273"><code></code></span>
+<span class="codeline" id="line-274"><code><span class="comment">// Line returns the line number for the given file position p;</span></code></span>
+<span class="codeline" id="line-275"><code><span class="comment">// p must be a Pos value in that file or NoPos.</span></code></span>
+<span class="codeline" id="line-276"><code><span class="keyword">func</span> (<label for="r57" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r58" class="ident">Line</label>(<label for="r59" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-277"><code>	<span class="keyword">return</span> <label for="r57" class="ident">f</label>.<a href="#line-343" class="ident">Position</a>(<label for="r59" class="ident">p</label>).<a href="#line-23" class="ident">Line</a></code></span>
+<span class="codeline" id="line-278"><code>}</code></span>
+<span class="codeline" id="line-279"><code></code></span>
+<span class="codeline" id="line-280"><code><span class="keyword">func</span> searchLineInfos(<label for="r61" class="ident">a</label> []<a href="#line-225" class="ident">lineInfo</a>, <label for="r62" class="ident">x</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-281"><code>	<span class="keyword">return</span> <a href="../../../pkg/sort.html" class="ident i1">sort</a>.<a href="../../sort/search.go.html#line-58" class="ident">Search</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r61" class="ident">a</label>), <span class="keyword">func</span>(<label for="r63" class="ident">i</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> { <span class="keyword">return</span> <label for="r61" class="ident">a</label>[<label for="r63" class="ident">i</label>].<a href="#line-227" class="ident">Offset</a> &gt; <label for="r62" class="ident">x</label> }) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-282"><code>}</code></span>
+<span class="codeline" id="line-283"><code></code></span>
+<span class="codeline" id="line-284"><code><span class="comment">// unpack returns the filename and line and column number for a file offset.</span></code></span>
+<span class="codeline" id="line-285"><code><span class="comment">// If adjusted is set, unpack will return the filename and line information</span></code></span>
+<span class="codeline" id="line-286"><code><span class="comment">// possibly adjusted by //line comments; otherwise those comments are ignored.</span></code></span>
+<span class="codeline" id="line-287"><code><span class="keyword">func</span> (<label for="r64" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r65" class="ident">unpack</label>(<label for="r66" class="ident">offset</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r67" class="ident">adjusted</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) (<label for="r68" class="ident">filename</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r69" class="ident">line</label>, <label for="r70" class="ident">column</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-288"><code>	<label for="r64" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-289"><code>	<span class="keyword">defer</span> <label for="r64" class="ident">f</label>.<a href="#line-101" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-290"><code>	<label for="r68" class="ident">filename</label> = <label for="r64" class="ident">f</label>.<a href="#line-96" class="ident">name</a></code></span>
+<span class="codeline" id="line-291"><code>	<span class="keyword">if</span> <label for="r71" class="ident">i</label> := <a href="#line-511" class="ident">searchInts</a>(<label for="r64" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>, <label for="r66" class="ident">offset</label>); <label for="r71" class="ident">i</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-292"><code>		<label for="r69" class="ident">line</label>, <label for="r70" class="ident">column</label> = <label for="r71" class="ident">i</label>+<span class="lit-number">1</span>, <label for="r66" class="ident">offset</label>-<label for="r64" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>[<label for="r71" class="ident">i</label>]+<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-293"><code>	}</code></span>
+<span class="codeline" id="line-294"><code>	<span class="keyword">if</span> <label for="r67" class="ident">adjusted</label> &amp;&amp; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r64" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-295"><code>		<span class="comment">// few files have extra line infos</span></code></span>
+<span class="codeline" id="line-296"><code>		<span class="keyword">if</span> <label for="r72" class="ident">i</label> := <a href="#line-280" class="ident">searchLineInfos</a>(<label for="r64" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>, <label for="r66" class="ident">offset</label>); <label for="r72" class="ident">i</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-297"><code>			<label for="r73" class="ident">alt</label> := &amp;<label for="r64" class="ident">f</label>.<a href="#line-103" class="ident">infos</a>[<label for="r72" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-298"><code>			<label for="r68" class="ident">filename</label> = <label for="r73" class="ident">alt</label>.<a href="#line-228" class="ident">Filename</a></code></span>
+<span class="codeline" id="line-299"><code>			<span class="keyword">if</span> <label for="r74" class="ident">i</label> := <a href="#line-511" class="ident">searchInts</a>(<label for="r64" class="ident">f</label>.<a href="#line-102" class="ident">lines</a>, <label for="r73" class="ident">alt</label>.<a href="#line-227" class="ident">Offset</a>); <label for="r74" class="ident">i</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-300"><code>				<span class="comment">// i+1 is the line at which the alternative position was recorded</span></code></span>
+<span class="codeline" id="line-301"><code>				<label for="r75" class="ident">d</label> := <label for="r69" class="ident">line</label> - (<label for="r74" class="ident">i</label> + <span class="lit-number">1</span>) <span class="comment">// line distance from alternative position base</span></code></span>
+<span class="codeline" id="line-302"><code>				<label for="r69" class="ident">line</label> = <label for="r73" class="ident">alt</label>.<a href="#line-229" class="ident">Line</a> + <label for="r75" class="ident">d</label></code></span>
+<span class="codeline" id="line-303"><code>				<span class="keyword">if</span> <label for="r73" class="ident">alt</label>.<a href="#line-229" class="ident">Column</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-304"><code>					<span class="comment">// alternative column is unknown =&gt; relative column is unknown</span></code></span>
+<span class="codeline" id="line-305"><code><span class="comment">					// (the current specification for line directives requires</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">					// this to apply until the next PosBase/line directive,</span></code></span>
+<span class="codeline" id="line-307"><code><span class="comment">					// not just until the new newline)</span></code></span>
+<span class="codeline" id="line-308"><code>					<label for="r70" class="ident">column</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-309"><code>				} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r75" class="ident">d</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-310"><code>					<span class="comment">// the alternative position base is on the current line</span></code></span>
+<span class="codeline" id="line-311"><code><span class="comment">					// =&gt; column is relative to alternative column</span></code></span>
+<span class="codeline" id="line-312"><code>					<label for="r70" class="ident">column</label> = <label for="r73" class="ident">alt</label>.<a href="#line-229" class="ident">Column</a> + (<label for="r66" class="ident">offset</label> - <label for="r73" class="ident">alt</label>.<a href="#line-227" class="ident">Offset</a>)</code></span>
+<span class="codeline" id="line-313"><code>				}</code></span>
+<span class="codeline" id="line-314"><code>			}</code></span>
+<span class="codeline" id="line-315"><code>		}</code></span>
+<span class="codeline" id="line-316"><code>	}</code></span>
+<span class="codeline" id="line-317"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-318"><code>}</code></span>
+<span class="codeline" id="line-319"><code></code></span>
+<span class="codeline" id="line-320"><code><span class="keyword">func</span> (<label for="r76" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r77" class="ident">position</label>(<label for="r78" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>, <label for="r79" class="ident">adjusted</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) (<label for="r80" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) {</code></span>
+<span class="codeline" id="line-321"><code>	<label for="r81" class="ident">offset</label> := <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r78" class="ident">p</label>) - <label for="r76" class="ident">f</label>.<a href="#line-97" class="ident">base</a></code></span>
+<span class="codeline" id="line-322"><code>	<label for="r80" class="ident">pos</label>.<a href="#line-22" class="ident">Offset</a> = <label for="r81" class="ident">offset</label></code></span>
+<span class="codeline" id="line-323"><code>	<label for="r80" class="ident">pos</label>.<a href="#line-21" class="ident">Filename</a>, <label for="r80" class="ident">pos</label>.<a href="#line-23" class="ident">Line</a>, <label for="r80" class="ident">pos</label>.<a href="#line-24" class="ident">Column</a> = <label for="r76" class="ident">f</label>.<a href="#line-287" class="ident">unpack</a>(<label for="r81" class="ident">offset</label>, <label for="r79" class="ident">adjusted</label>)</code></span>
+<span class="codeline" id="line-324"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-325"><code>}</code></span>
+<span class="codeline" id="line-326"><code></code></span>
+<span class="codeline" id="line-327"><code><span class="comment">// PositionFor returns the Position value for the given file position p.</span></code></span>
+<span class="codeline" id="line-328"><code><span class="comment">// If adjusted is set, the position may be adjusted by position-altering</span></code></span>
+<span class="codeline" id="line-329"><code><span class="comment">// //line comments; otherwise those comments are ignored.</span></code></span>
+<span class="codeline" id="line-330"><code><span class="comment">// p must be a Pos value in f or NoPos.</span></code></span>
+<span class="codeline" id="line-331"><code><span class="keyword">func</span> (<label for="r82" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r83" class="ident">PositionFor</label>(<label for="r84" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>, <label for="r85" class="ident">adjusted</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) (<label for="r86" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) {</code></span>
+<span class="codeline" id="line-332"><code>	<span class="keyword">if</span> <label for="r84" class="ident">p</label> != <a href="#line-83" class="ident">NoPos</a> {</code></span>
+<span class="codeline" id="line-333"><code>		<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r84" class="ident">p</label>) &lt; <label for="r82" class="ident">f</label>.<a href="#line-97" class="ident">base</a> || <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r84" class="ident">p</label>) &gt; <label for="r82" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r82" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-334"><code>			<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid Pos value %d (should be in [%d, %d])"</span>, <label for="r84" class="ident">p</label>, <label for="r82" class="ident">f</label>.<a href="#line-97" class="ident">base</a>, <label for="r82" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r82" class="ident">f</label>.<a href="#line-98" class="ident">size</a>))</code></span>
+<span class="codeline" id="line-335"><code>		}</code></span>
+<span class="codeline" id="line-336"><code>		<label for="r86" class="ident">pos</label> = <label for="r82" class="ident">f</label>.<a href="#line-320" class="ident">position</a>(<label for="r84" class="ident">p</label>, <label for="r85" class="ident">adjusted</label>)</code></span>
+<span class="codeline" id="line-337"><code>	}</code></span>
+<span class="codeline" id="line-338"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-339"><code>}</code></span>
+<span class="codeline" id="line-340"><code></code></span>
+<span class="codeline" id="line-341"><code><span class="comment">// Position returns the Position value for the given file position p.</span></code></span>
+<span class="codeline" id="line-342"><code><span class="comment">// Calling f.Position(p) is equivalent to calling f.PositionFor(p, true).</span></code></span>
+<span class="codeline" id="line-343"><code><span class="keyword">func</span> (<label for="r87" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) <label for="r88" class="ident">Position</label>(<label for="r89" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) (<label for="r90" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) {</code></span>
+<span class="codeline" id="line-344"><code>	<span class="keyword">return</span> <label for="r87" class="ident">f</label>.<a href="#line-331" class="ident">PositionFor</a>(<label for="r89" class="ident">p</label>, <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>)</code></span>
+<span class="codeline" id="line-345"><code>}</code></span>
+<span class="codeline" id="line-346"><code></code></span>
+<span class="codeline" id="line-347"><code><span class="comment">// -----------------------------------------------------------------------------</span></code></span>
+<span class="codeline" id="line-348"><code><span class="comment">// FileSet</span></code></span>
+<span class="codeline" id="line-349"><code></code></span>
+<span class="codeline" id="line-350"><code><span class="comment">// A FileSet represents a set of source files.</span></code></span>
+<span class="codeline" id="line-351"><code><span class="comment">// Methods of file sets are synchronized; multiple goroutines</span></code></span>
+<span class="codeline" id="line-352"><code><span class="comment">// may invoke them concurrently.</span></code></span>
+<span class="codeline" id="line-353"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-354"><code><span class="comment">// The byte offsets for each file in a file set are mapped into</span></code></span>
+<span class="codeline" id="line-355"><code><span class="comment">// distinct (integer) intervals, one interval [base, base+size]</span></code></span>
+<span class="codeline" id="line-356"><code><span class="comment">// per file. Base represents the first byte in the file, and size</span></code></span>
+<span class="codeline" id="line-357"><code><span class="comment">// is the corresponding file size. A Pos value is a value in such</span></code></span>
+<span class="codeline" id="line-358"><code><span class="comment">// an interval. By determining the interval a Pos value belongs</span></code></span>
+<span class="codeline" id="line-359"><code><span class="comment">// to, the file, its file base, and thus the byte offset (position)</span></code></span>
+<span class="codeline" id="line-360"><code><span class="comment">// the Pos value is representing can be computed.</span></code></span>
+<span class="codeline" id="line-361"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-362"><code><span class="comment">// When adding a new file, a file base must be provided. That can</span></code></span>
+<span class="codeline" id="line-363"><code><span class="comment">// be any integer value that is past the end of any interval of any</span></code></span>
+<span class="codeline" id="line-364"><code><span class="comment">// file already in the file set. For convenience, FileSet.Base provides</span></code></span>
+<span class="codeline" id="line-365"><code><span class="comment">// such a value, which is simply the end of the Pos interval of the most</span></code></span>
+<span class="codeline" id="line-366"><code><span class="comment">// recently added file, plus one. Unless there is a need to extend an</span></code></span>
+<span class="codeline" id="line-367"><code><span class="comment">// interval later, using the FileSet.Base should be used as argument</span></code></span>
+<span class="codeline" id="line-368"><code><span class="comment">// for FileSet.AddFile.</span></code></span>
+<span class="codeline" id="line-369"><code><span class="keyword">type</span> <a href="../../../pkg/go/token.html#name-FileSet" class="ident">FileSet</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-370"><code>	mutex <a href="../../../pkg/sync.html" class="ident i2">sync</a>.<a href="../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a>         <span class="comment">// protects the file set</span></code></span>
+<span class="codeline" id="line-371"><code>	base  <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>                  <span class="comment">// base offset for the next file</span></code></span>
+<span class="codeline" id="line-372"><code>	files []*<a href="#line-95" class="ident">File</a>              <span class="comment">// list of files in the order added to the set</span></code></span>
+<span class="codeline" id="line-373"><code>	last  <a href="../../../pkg/sync/atomic.html" class="ident i3">atomic</a>.<a href="../../sync/atomic/type.go.html#line-39" class="ident">Pointer</a>[<a href="#line-95" class="ident">File</a>] <span class="comment">// cache of last file looked up</span></code></span>
+<span class="codeline" id="line-374"><code>}</code></span>
+<span class="codeline" id="line-375"><code></code></span>
+<span class="codeline" id="line-376"><code><span class="comment">// NewFileSet creates a new file set.</span></code></span>
+<span class="codeline" id="line-377"><code><span class="keyword">func</span> <label for="r91" class="ident"><a href="../../../pkg/go/token.html#name-NewFileSet" class="ident">NewFileSet</a></label>() *<a href="#line-369" class="ident">FileSet</a> {</code></span>
+<span class="codeline" id="line-378"><code>	<span class="keyword">return</span> &amp;<a href="#line-369" class="ident">FileSet</a>{</code></span>
+<span class="codeline" id="line-379"><code>		<a href="#line-371" class="ident">base</a>: <span class="lit-number">1</span>, <span class="comment">// 0 == NoPos</span></code></span>
+<span class="codeline" id="line-380"><code>	}</code></span>
+<span class="codeline" id="line-381"><code>}</code></span>
+<span class="codeline" id="line-382"><code></code></span>
+<span class="codeline" id="line-383"><code><span class="comment">// Base returns the minimum base offset that must be provided to</span></code></span>
+<span class="codeline" id="line-384"><code><span class="comment">// AddFile when adding the next file.</span></code></span>
+<span class="codeline" id="line-385"><code><span class="keyword">func</span> (<label for="r92" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r93" class="ident">Base</label>() <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-386"><code>	<label for="r92" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-387"><code>	<label for="r94" class="ident">b</label> := <label for="r92" class="ident">s</label>.<a href="#line-371" class="ident">base</a></code></span>
+<span class="codeline" id="line-388"><code>	<label for="r92" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-389"><code>	<span class="keyword">return</span> <label for="r94" class="ident">b</label></code></span>
+<span class="codeline" id="line-390"><code></code></span>
+<span class="codeline" id="line-391"><code>}</code></span>
+<span class="codeline" id="line-392"><code></code></span>
+<span class="codeline" id="line-393"><code><span class="comment">// AddFile adds a new file with a given filename, base offset, and file size</span></code></span>
+<span class="codeline" id="line-394"><code><span class="comment">// to the file set s and returns the file. Multiple files may have the same</span></code></span>
+<span class="codeline" id="line-395"><code><span class="comment">// name. The base offset must not be smaller than the FileSet's Base(), and</span></code></span>
+<span class="codeline" id="line-396"><code><span class="comment">// size must not be negative. As a special case, if a negative base is provided,</span></code></span>
+<span class="codeline" id="line-397"><code><span class="comment">// the current value of the FileSet's Base() is used instead.</span></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">// Adding the file will set the file set's Base() value to base + size + 1</span></code></span>
+<span class="codeline" id="line-400"><code><span class="comment">// as the minimum base value for the next file. The following relationship</span></code></span>
+<span class="codeline" id="line-401"><code><span class="comment">// exists between a Pos value p for a given file offset offs:</span></code></span>
+<span class="codeline" id="line-402"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-403"><code><span class="comment">//	int(p) = base + offs</span></code></span>
+<span class="codeline" id="line-404"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-405"><code><span class="comment">// with offs in the range [0, size] and thus p in the range [base, base+size].</span></code></span>
+<span class="codeline" id="line-406"><code><span class="comment">// For convenience, File.Pos may be used to create file-specific position</span></code></span>
+<span class="codeline" id="line-407"><code><span class="comment">// values from a file offset.</span></code></span>
+<span class="codeline" id="line-408"><code><span class="keyword">func</span> (<label for="r95" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r96" class="ident">AddFile</label>(<label for="r97" class="ident">filename</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r98" class="ident">base</label>, <label for="r99" class="ident">size</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) *<a href="#line-95" class="ident">File</a> {</code></span>
+<span class="codeline" id="line-409"><code>	<span class="comment">// Allocate f outside the critical section.</span></code></span>
+<span class="codeline" id="line-410"><code>	<label for="r100" class="ident">f</label> := &amp;<a href="#line-95" class="ident">File</a>{<a href="#line-96" class="ident">name</a>: <label for="r97" class="ident">filename</label>, <a href="#line-98" class="ident">size</a>: <label for="r99" class="ident">size</label>, <a href="#line-102" class="ident">lines</a>: []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">0</span>}}</code></span>
+<span class="codeline" id="line-411"><code></code></span>
+<span class="codeline" id="line-412"><code>	<label for="r95" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-413"><code>	<span class="keyword">defer</span> <label for="r95" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-414"><code>	<span class="keyword">if</span> <label for="r98" class="ident">base</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-415"><code>		<label for="r98" class="ident">base</label> = <label for="r95" class="ident">s</label>.<a href="#line-371" class="ident">base</a></code></span>
+<span class="codeline" id="line-416"><code>	}</code></span>
+<span class="codeline" id="line-417"><code>	<span class="keyword">if</span> <label for="r98" class="ident">base</label> &lt; <label for="r95" class="ident">s</label>.<a href="#line-371" class="ident">base</a> {</code></span>
+<span class="codeline" id="line-418"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid base %d (should be &gt;= %d)"</span>, <label for="r98" class="ident">base</label>, <label for="r95" class="ident">s</label>.<a href="#line-371" class="ident">base</a>))</code></span>
+<span class="codeline" id="line-419"><code>	}</code></span>
+<span class="codeline" id="line-420"><code>	<label for="r100" class="ident">f</label>.<a href="#line-97" class="ident">base</a> = <label for="r98" class="ident">base</label></code></span>
+<span class="codeline" id="line-421"><code>	<span class="keyword">if</span> <label for="r99" class="ident">size</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-422"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<a href="../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"invalid size %d (should be &gt;= 0)"</span>, <label for="r99" class="ident">size</label>))</code></span>
+<span class="codeline" id="line-423"><code>	}</code></span>
+<span class="codeline" id="line-424"><code>	<span class="comment">// base &gt;= s.base &amp;&amp; size &gt;= 0</span></code></span>
+<span class="codeline" id="line-425"><code>	<label for="r98" class="ident">base</label> += <label for="r99" class="ident">size</label> + <span class="lit-number">1</span> <span class="comment">// +1 because EOF also has a position</span></code></span>
+<span class="codeline" id="line-426"><code>	<span class="keyword">if</span> <label for="r98" class="ident">base</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-427"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"token.Pos offset overflow (&gt; 2G of source code in file set)"</span>)</code></span>
+<span class="codeline" id="line-428"><code>	}</code></span>
+<span class="codeline" id="line-429"><code>	<span class="comment">// add the file to the file set</span></code></span>
+<span class="codeline" id="line-430"><code>	<label for="r95" class="ident">s</label>.<a href="#line-371" class="ident">base</a> = <label for="r98" class="ident">base</label></code></span>
+<span class="codeline" id="line-431"><code>	<label for="r95" class="ident">s</label>.<a href="#line-372" class="ident">files</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r95" class="ident">s</label>.<a href="#line-372" class="ident">files</a>, <label for="r100" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-432"><code>	<label for="r95" class="ident">s</label>.<a href="#line-373" class="ident">last</a>.<a href="../../sync/atomic/type.go.html#line-48" class="ident">Store</a>(<label for="r100" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-433"><code>	<span class="keyword">return</span> <label for="r100" class="ident">f</label></code></span>
+<span class="codeline" id="line-434"><code>}</code></span>
+<span class="codeline" id="line-435"><code></code></span>
+<span class="codeline" id="line-436"><code><span class="comment">// Iterate calls f for the files in the file set in the order they were added</span></code></span>
+<span class="codeline" id="line-437"><code><span class="comment">// until f returns false.</span></code></span>
+<span class="codeline" id="line-438"><code><span class="keyword">func</span> (<label for="r101" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r102" class="ident">Iterate</label>(<label for="r103" class="ident">f</label> <span class="keyword">func</span>(*<a href="#line-95" class="ident">File</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-439"><code>	<span class="keyword">for</span> <label for="r104" class="ident">i</label> := <span class="lit-number">0</span>; ; <label for="r104" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-440"><code>		<span class="keyword">var</span> <label for="r105" class="ident">file</label> *<a href="#line-95" class="ident">File</a></code></span>
+<span class="codeline" id="line-441"><code>		<label for="r101" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-442"><code>		<span class="keyword">if</span> <label for="r104" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r101" class="ident">s</label>.<a href="#line-372" class="ident">files</a>) {</code></span>
+<span class="codeline" id="line-443"><code>			<label for="r105" class="ident">file</label> = <label for="r101" class="ident">s</label>.<a href="#line-372" class="ident">files</a>[<label for="r104" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-444"><code>		}</code></span>
+<span class="codeline" id="line-445"><code>		<label for="r101" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-446"><code>		<span class="keyword">if</span> <label for="r105" class="ident">file</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> || !<label for="r103" class="ident">f</label>(<label for="r105" class="ident">file</label>) {</code></span>
+<span class="codeline" id="line-447"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-448"><code>		}</code></span>
+<span class="codeline" id="line-449"><code>	}</code></span>
+<span class="codeline" id="line-450"><code>}</code></span>
+<span class="codeline" id="line-451"><code></code></span>
+<span class="codeline" id="line-452"><code><span class="keyword">func</span> searchFiles(<label for="r107" class="ident">a</label> []*<a href="#line-95" class="ident">File</a>, <label for="r108" class="ident">x</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-453"><code>	<span class="keyword">return</span> <a href="../../../pkg/sort.html" class="ident i1">sort</a>.<a href="../../sort/search.go.html#line-58" class="ident">Search</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">a</label>), <span class="keyword">func</span>(<label for="r109" class="ident">i</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> { <span class="keyword">return</span> <label for="r107" class="ident">a</label>[<label for="r109" class="ident">i</label>].<a href="#line-97" class="ident">base</a> &gt; <label for="r108" class="ident">x</label> }) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-454"><code>}</code></span>
+<span class="codeline" id="line-455"><code></code></span>
+<span class="codeline" id="line-456"><code><span class="keyword">func</span> (<label for="r110" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r111" class="ident">file</label>(<label for="r112" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) *<a href="#line-95" class="ident">File</a> {</code></span>
+<span class="codeline" id="line-457"><code>	<span class="comment">// common case: p is in last file.</span></code></span>
+<span class="codeline" id="line-458"><code>	<span class="keyword">if</span> <label for="r113" class="ident">f</label> := <label for="r110" class="ident">s</label>.<a href="#line-373" class="ident">last</a>.<a href="../../sync/atomic/type.go.html#line-45" class="ident">Load</a>(); <label for="r113" class="ident">f</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r113" class="ident">f</label>.<a href="#line-97" class="ident">base</a> &lt;= <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r112" class="ident">p</label>) &amp;&amp; <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r112" class="ident">p</label>) &lt;= <label for="r113" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r113" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-459"><code>		<span class="keyword">return</span> <label for="r113" class="ident">f</label></code></span>
+<span class="codeline" id="line-460"><code>	}</code></span>
+<span class="codeline" id="line-461"><code></code></span>
+<span class="codeline" id="line-462"><code>	<label for="r110" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-463"><code>	<span class="keyword">defer</span> <label for="r110" class="ident">s</label>.<a href="#line-370" class="ident">mutex</a>.<a href="../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-464"><code></code></span>
+<span class="codeline" id="line-465"><code>	<span class="comment">// p is not in last file - search all files</span></code></span>
+<span class="codeline" id="line-466"><code>	<span class="keyword">if</span> <label for="r114" class="ident">i</label> := <a href="#line-452" class="ident">searchFiles</a>(<label for="r110" class="ident">s</label>.<a href="#line-372" class="ident">files</a>, <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r112" class="ident">p</label>)); <label for="r114" class="ident">i</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-467"><code>		<label for="r115" class="ident">f</label> := <label for="r110" class="ident">s</label>.<a href="#line-372" class="ident">files</a>[<label for="r114" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-468"><code>		<span class="comment">// f.base &lt;= int(p) by definition of searchFiles</span></code></span>
+<span class="codeline" id="line-469"><code>		<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r112" class="ident">p</label>) &lt;= <label for="r115" class="ident">f</label>.<a href="#line-97" class="ident">base</a>+<label for="r115" class="ident">f</label>.<a href="#line-98" class="ident">size</a> {</code></span>
+<span class="codeline" id="line-470"><code>			<span class="comment">// Update cache of last file. A race is ok,</span></code></span>
+<span class="codeline" id="line-471"><code><span class="comment">			// but an exclusive lock causes heavy contention.</span></code></span>
+<span class="codeline" id="line-472"><code>			<label for="r110" class="ident">s</label>.<a href="#line-373" class="ident">last</a>.<a href="../../sync/atomic/type.go.html#line-48" class="ident">Store</a>(<label for="r115" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-473"><code>			<span class="keyword">return</span> <label for="r115" class="ident">f</label></code></span>
+<span class="codeline" id="line-474"><code>		}</code></span>
+<span class="codeline" id="line-475"><code>	}</code></span>
+<span class="codeline" id="line-476"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-477"><code>}</code></span>
+<span class="codeline" id="line-478"><code></code></span>
+<span class="codeline" id="line-479"><code><span class="comment">// File returns the file that contains the position p.</span></code></span>
+<span class="codeline" id="line-480"><code><span class="comment">// If no such file is found (for instance for p == NoPos),</span></code></span>
+<span class="codeline" id="line-481"><code><span class="comment">// the result is nil.</span></code></span>
+<span class="codeline" id="line-482"><code><span class="keyword">func</span> (<label for="r116" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r117" class="ident">File</label>(<label for="r118" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) (<label for="r119" class="ident">f</label> *<a href="#line-95" class="ident">File</a>) {</code></span>
+<span class="codeline" id="line-483"><code>	<span class="keyword">if</span> <label for="r118" class="ident">p</label> != <a href="#line-83" class="ident">NoPos</a> {</code></span>
+<span class="codeline" id="line-484"><code>		<label for="r119" class="ident">f</label> = <label for="r116" class="ident">s</label>.<a href="#line-456" class="ident">file</a>(<label for="r118" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-485"><code>	}</code></span>
+<span class="codeline" id="line-486"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-487"><code>}</code></span>
+<span class="codeline" id="line-488"><code></code></span>
+<span class="codeline" id="line-489"><code><span class="comment">// PositionFor converts a Pos p in the fileset into a Position value.</span></code></span>
+<span class="codeline" id="line-490"><code><span class="comment">// If adjusted is set, the position may be adjusted by position-altering</span></code></span>
+<span class="codeline" id="line-491"><code><span class="comment">// //line comments; otherwise those comments are ignored.</span></code></span>
+<span class="codeline" id="line-492"><code><span class="comment">// p must be a Pos value in s or NoPos.</span></code></span>
+<span class="codeline" id="line-493"><code><span class="keyword">func</span> (<label for="r120" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r121" class="ident">PositionFor</label>(<label for="r122" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>, <label for="r123" class="ident">adjusted</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) (<label for="r124" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) {</code></span>
+<span class="codeline" id="line-494"><code>	<span class="keyword">if</span> <label for="r122" class="ident">p</label> != <a href="#line-83" class="ident">NoPos</a> {</code></span>
+<span class="codeline" id="line-495"><code>		<span class="keyword">if</span> <label for="r125" class="ident">f</label> := <label for="r120" class="ident">s</label>.<a href="#line-456" class="ident">file</a>(<label for="r122" class="ident">p</label>); <label for="r125" class="ident">f</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-496"><code>			<span class="keyword">return</span> <label for="r125" class="ident">f</label>.<a href="#line-320" class="ident">position</a>(<label for="r122" class="ident">p</label>, <label for="r123" class="ident">adjusted</label>)</code></span>
+<span class="codeline" id="line-497"><code>		}</code></span>
+<span class="codeline" id="line-498"><code>	}</code></span>
+<span class="codeline" id="line-499"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-500"><code>}</code></span>
+<span class="codeline" id="line-501"><code></code></span>
+<span class="codeline" id="line-502"><code><span class="comment">// Position converts a Pos p in the fileset into a Position value.</span></code></span>
+<span class="codeline" id="line-503"><code><span class="comment">// Calling s.Position(p) is equivalent to calling s.PositionFor(p, true).</span></code></span>
+<span class="codeline" id="line-504"><code><span class="keyword">func</span> (<label for="r126" class="ident">s</label> *<a href="#line-369" class="ident">FileSet</a>) <label for="r127" class="ident">Position</label>(<label for="r128" class="ident">p</label> <a href="#line-77" class="ident">Pos</a>) (<label for="r129" class="ident">pos</label> <a href="#line-20" class="ident">Position</a>) {</code></span>
+<span class="codeline" id="line-505"><code>	<span class="keyword">return</span> <label for="r126" class="ident">s</label>.<a href="#line-493" class="ident">PositionFor</a>(<label for="r128" class="ident">p</label>, <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>)</code></span>
+<span class="codeline" id="line-506"><code>}</code></span>
+<span class="codeline" id="line-507"><code></code></span>
+<span class="codeline" id="line-508"><code><span class="comment">// -----------------------------------------------------------------------------</span></code></span>
+<span class="codeline" id="line-509"><code><span class="comment">// Helper functions</span></code></span>
+<span class="codeline" id="line-510"><code></code></span>
+<span class="codeline" id="line-511"><code><span class="keyword">func</span> searchInts(<label for="r131" class="ident">a</label> []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r132" class="ident">x</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-512"><code>	<span class="comment">// This function body is a manually inlined version of:</span></code></span>
+<span class="codeline" id="line-513"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-514"><code><span class="comment">	//   return sort.Search(len(a), func(i int) bool { return a[i] &gt; x }) - 1</span></code></span>
+<span class="codeline" id="line-515"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-516"><code><span class="comment">	// With better compiler optimizations, this may not be needed in the</span></code></span>
+<span class="codeline" id="line-517"><code><span class="comment">	// future, but at the moment this change improves the go/printer</span></code></span>
+<span class="codeline" id="line-518"><code><span class="comment">	// benchmark performance by ~30%. This has a direct impact on the</span></code></span>
+<span class="codeline" id="line-519"><code><span class="comment">	// speed of gofmt and thus seems worthwhile (2011-04-29).</span></code></span>
+<span class="codeline" id="line-520"><code><span class="comment">	// TODO(gri): Remove this when compilers have caught up.</span></code></span>
+<span class="codeline" id="line-521"><code>	<label for="r133" class="ident">i</label>, <label for="r134" class="ident">j</label> := <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r131" class="ident">a</label>)</code></span>
+<span class="codeline" id="line-522"><code>	<span class="keyword">for</span> <label for="r133" class="ident">i</label> &lt; <label for="r134" class="ident">j</label> {</code></span>
+<span class="codeline" id="line-523"><code>		<label for="r135" class="ident">h</label> := <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r133" class="ident">i</label>+<label for="r134" class="ident">j</label>) &gt;&gt; <span class="lit-number">1</span>) <span class="comment">// avoid overflow when computing h</span></code></span>
+<span class="codeline" id="line-524"><code>		<span class="comment">// i ≤ h &lt; j</span></code></span>
+<span class="codeline" id="line-525"><code>		<span class="keyword">if</span> <label for="r131" class="ident">a</label>[<label for="r135" class="ident">h</label>] &lt;= <label for="r132" class="ident">x</label> {</code></span>
+<span class="codeline" id="line-526"><code>			<label for="r133" class="ident">i</label> = <label for="r135" class="ident">h</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-527"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-528"><code>			<label for="r134" class="ident">j</label> = <label for="r135" class="ident">h</label></code></span>
+<span class="codeline" id="line-529"><code>		}</code></span>
+<span class="codeline" id="line-530"><code>	}</code></span>
+<span class="codeline" id="line-531"><code>	<span class="keyword">return</span> <label for="r133" class="ident">i</label> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-532"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

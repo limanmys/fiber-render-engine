@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: query.go in package gorm.io/gorm/callbacks</title>
+<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	query.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/gorm.io/gorm/callbacks.html">gorm.io/gorm/callbacks</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> callbacks</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"reflect"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"sort"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"strings"</span></label></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i4"><span class="lit-string i4">"gorm.io/gorm"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i5"><span class="lit-string i5">"gorm.io/gorm/clause"</span></label></code></span>
+<span class="codeline" id="line-11"><code>)</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/gorm.io/gorm/callbacks.html#name-Query" class="ident">Query</a></label>(<label for="r1" class="ident">db</label> *<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-91" class="ident">DB</a>) {</code></span>
+<span class="codeline" id="line-14"><code>	<span class="keyword">if</span> <label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-93" class="ident">Error</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-15"><code>		<a href="#line-31" class="ident">BuildQuerySQL</a>(<label for="r1" class="ident">db</label>)</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code>		<span class="keyword">if</span> !<label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-33" class="ident">DryRun</a> &amp;&amp; <label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-93" class="ident">Error</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-18"><code>			<label for="r2" class="ident">rows</label>, <label for="r3" class="ident">err</label> := <label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-38" class="ident">ConnPool</a>.<a href="../interfaces.go.html#line-37" class="ident">QueryContext</a>(<label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-40" class="ident">Context</a>, <label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-43" class="ident">SQL</a>.<a href="../../../strings/builder.go.html#line-47" class="ident">String</a>(), <label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-44" class="ident">Vars</a>...)</code></span>
+<span class="codeline" id="line-19"><code>			<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-20"><code>				<label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<label for="r3" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-21"><code>				<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-22"><code>			}</code></span>
+<span class="codeline" id="line-23"><code>			<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-24"><code>				<label for="r1" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<label for="r2" class="ident">rows</label>.<a href="../../../database/sql/sql.go.html#line-3303" class="ident">Close</a>())</code></span>
+<span class="codeline" id="line-25"><code>			}()</code></span>
+<span class="codeline" id="line-26"><code>			<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../scan.go.html#line-108" class="ident">Scan</a>(<label for="r2" class="ident">rows</label>, <label for="r1" class="ident">db</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-27"><code>		}</code></span>
+<span class="codeline" id="line-28"><code>	}</code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../pkg/gorm.io/gorm/callbacks.html#name-BuildQuerySQL" class="ident">BuildQuerySQL</a></label>(<label for="r5" class="ident">db</label> *<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-91" class="ident">DB</a>) {</code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-33"><code>		<span class="keyword">for</span> <label for="r6" class="ident">_</label>, <label for="r7" class="ident">c</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-32" class="ident">QueryClauses</a> {</code></span>
+<span class="codeline" id="line-34"><code>			<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-262" class="ident">AddClause</a>(<label for="r7" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-35"><code>		}</code></span>
+<span class="codeline" id="line-36"><code>	}</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-43" class="ident">SQL</a>.<a href="../../../strings/builder.go.html#line-52" class="ident">Len</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-39"><code>		<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-43" class="ident">SQL</a>.<a href="../../../strings/builder.go.html#line-76" class="ident">Grow</a>(<span class="lit-number">100</span>)</code></span>
+<span class="codeline" id="line-40"><code>		<label for="r8" class="ident">clauseSelect</label> := <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/select.go.html#line-4" class="ident">Select</a>{<a href="../clause/select.go.html#line-5" class="ident">Distinct</a>: <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-32" class="ident">Distinct</a>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>		<span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../../pkg/reflect.html" class="ident i1">reflect</a>.<a href="../../../reflect/type.go.html#line-269" class="ident">Struct</a> &amp;&amp; <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-2525" class="ident">Type</a>() == <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-20" class="ident">ModelType</a> {</code></span>
+<span class="codeline" id="line-43"><code>			<span class="keyword">var</span> <label for="r9" class="ident">conds</label> []<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-11" class="ident">Expression</a></code></span>
+<span class="codeline" id="line-44"><code>			<span class="keyword">for</span> <label for="r10" class="ident">_</label>, <label for="r11" class="ident">primaryField</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-24" class="ident">PrimaryFields</a> {</code></span>
+<span class="codeline" id="line-45"><code>				<span class="keyword">if</span> <label for="r12" class="ident">v</label>, <label for="r13" class="ident">isZero</label> := <label for="r11" class="ident">primaryField</label>.<a href="../schema/field.go.html#line-86" class="ident">ValueOf</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-40" class="ident">Context</a>, <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>); !<label for="r13" class="ident">isZero</label> {</code></span>
+<span class="codeline" id="line-46"><code>					<label for="r9" class="ident">conds</label> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r9" class="ident">conds</label>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-239" class="ident">Eq</a>{<a href="../clause/expression.go.html#line-240" class="ident">Column</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-25" class="ident">Table</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r11" class="ident">primaryField</label>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>}, <a href="../clause/expression.go.html#line-241" class="ident">Value</a>: <label for="r12" class="ident">v</label>})</code></span>
+<span class="codeline" id="line-47"><code>				}</code></span>
+<span class="codeline" id="line-48"><code>			}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>			<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r9" class="ident">conds</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-51"><code>				<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-262" class="ident">AddClause</a>(<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/where.go.html#line-13" class="ident">Where</a>{<a href="../clause/where.go.html#line-14" class="ident">Exprs</a>: <label for="r9" class="ident">conds</label>})</code></span>
+<span class="codeline" id="line-52"><code>			}</code></span>
+<span class="codeline" id="line-53"><code>		}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-33" class="ident">Selects</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-56"><code>			<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-33" class="ident">Selects</a>))</code></span>
+<span class="codeline" id="line-57"><code>			<span class="keyword">for</span> <label for="r14" class="ident">idx</label>, <label for="r15" class="ident">name</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-33" class="ident">Selects</a> {</code></span>
+<span class="codeline" id="line-58"><code>				<span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-59"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>[<label for="r14" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r15" class="ident">name</label>, <a href="../clause/clause.go.html#line-80" class="ident">Raw</a>: <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>}</code></span>
+<span class="codeline" id="line-60"><code>				} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r16" class="ident">f</label> := <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-60" class="ident">LookUpField</a>(<label for="r15" class="ident">name</label>); <label for="r16" class="ident">f</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-61"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>[<label for="r14" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r16" class="ident">f</label>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>}</code></span>
+<span class="codeline" id="line-62"><code>				} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-63"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>[<label for="r14" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r15" class="ident">name</label>, <a href="../clause/clause.go.html#line-80" class="ident">Raw</a>: <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>}</code></span>
+<span class="codeline" id="line-64"><code>				}</code></span>
+<span class="codeline" id="line-65"><code>			}</code></span>
+<span class="codeline" id="line-66"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-34" class="ident">Omits</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-67"><code>			<label for="r17" class="ident">selectColumns</label>, <label for="r18" class="ident">_</label> := <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-664" class="ident">SelectAndOmitColumns</a>(<a href="../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
+<span class="codeline" id="line-68"><code>			<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>, <span class="lit-number">0</span>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a>))</code></span>
+<span class="codeline" id="line-69"><code>			<span class="keyword">for</span> <label for="r19" class="ident">_</label>, <label for="r20" class="ident">dbName</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a> {</code></span>
+<span class="codeline" id="line-70"><code>				<span class="keyword">if</span> <label for="r21" class="ident">v</label>, <label for="r22" class="ident">ok</label> := <label for="r17" class="ident">selectColumns</label>[<label for="r20" class="ident">dbName</label>]; (<label for="r22" class="ident">ok</label> &amp;&amp; <label for="r21" class="ident">v</label>) || !<label for="r22" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-71"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-25" class="ident">Table</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r20" class="ident">dbName</label>})</code></span>
+<span class="codeline" id="line-72"><code>				}</code></span>
+<span class="codeline" id="line-73"><code>			}</code></span>
+<span class="codeline" id="line-74"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() {</code></span>
+<span class="codeline" id="line-75"><code>			<label for="r23" class="ident">queryFields</label> := <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-47" class="ident">QueryFields</a></code></span>
+<span class="codeline" id="line-76"><code>			<span class="keyword">if</span> !<label for="r23" class="ident">queryFields</label> {</code></span>
+<span class="codeline" id="line-77"><code>				<span class="keyword">switch</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-1608" class="ident">Kind</a>() {</code></span>
+<span class="codeline" id="line-78"><code>				<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i1">reflect</a>.<a href="../../../reflect/type.go.html#line-269" class="ident">Struct</a>:</code></span>
+<span class="codeline" id="line-79"><code>					<label for="r23" class="ident">queryFields</label> = <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-2525" class="ident">Type</a>() != <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-20" class="ident">ModelType</a></code></span>
+<span class="codeline" id="line-80"><code>				<span class="keyword">case</span> <a href="../../../../pkg/reflect.html" class="ident i1">reflect</a>.<a href="../../../reflect/type.go.html#line-267" class="ident">Slice</a>:</code></span>
+<span class="codeline" id="line-81"><code>					<label for="r23" class="ident">queryFields</label> = <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a>.<a href="../../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../../reflect/type.go.html#line-160" class="ident">Elem</a>() != <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-20" class="ident">ModelType</a></code></span>
+<span class="codeline" id="line-82"><code>				}</code></span>
+<span class="codeline" id="line-83"><code>			}</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code>			<span class="keyword">if</span> <label for="r23" class="ident">queryFields</label> {</code></span>
+<span class="codeline" id="line-86"><code>				<label for="r24" class="ident">stmt</label> := <a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../statement.go.html#line-22" class="ident">Statement</a>{<a href="../statement.go.html#line-23" class="ident">DB</a>: <label for="r5" class="ident">db</label>}</code></span>
+<span class="codeline" id="line-87"><code>				<span class="comment">// smaller struct</span></code></span>
+<span class="codeline" id="line-88"><code>				<span class="keyword">if</span> <label for="r25" class="ident">err</label> := <label for="r24" class="ident">stmt</label>.<a href="../statement.go.html#line-480" class="ident">Parse</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-28" class="ident">Dest</a>); <label for="r25" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; (<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-47" class="ident">QueryFields</a> || <label for="r24" class="ident">stmt</label>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-20" class="ident">ModelType</a> != <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-20" class="ident">ModelType</a>) {</code></span>
+<span class="codeline" id="line-89"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r24" class="ident">stmt</label>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a>))</code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code>					<span class="keyword">for</span> <label for="r26" class="ident">idx</label>, <label for="r27" class="ident">dbName</label> := <span class="keyword">range</span> <label for="r24" class="ident">stmt</label>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a> {</code></span>
+<span class="codeline" id="line-92"><code>						<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>[<label for="r26" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-25" class="ident">Table</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r27" class="ident">dbName</label>}</code></span>
+<span class="codeline" id="line-93"><code>					}</code></span>
+<span class="codeline" id="line-94"><code>				}</code></span>
+<span class="codeline" id="line-95"><code>			}</code></span>
+<span class="codeline" id="line-96"><code>		}</code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code>		<span class="comment">// inline joins</span></code></span>
+<span class="codeline" id="line-99"><code>		<label for="r28" class="ident">fromClause</label> := <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/from.go.html#line-4" class="ident">From</a>{}</code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">if</span> <label for="r29" class="ident">v</label>, <label for="r30" class="ident">ok</label> := <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-30" class="ident">Clauses</a>[<span class="lit-string">"FROM"</span>].<a href="../clause/clause.go.html#line-31" class="ident">Expression</a>.(<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/from.go.html#line-4" class="ident">From</a>); <label for="r30" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-101"><code>			<label for="r28" class="ident">fromClause</label> = <label for="r29" class="ident">v</label></code></span>
+<span class="codeline" id="line-102"><code>		}</code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-35" class="ident">Joins</a>) != <span class="lit-number">0</span> || <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a>) != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-105"><code>			<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-33" class="ident">Selects</a>) == <span class="lit-number">0</span> &amp;&amp; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-34" class="ident">Omits</a>) == <span class="lit-number">0</span> &amp;&amp; <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-106"><code>				<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a>))</code></span>
+<span class="codeline" id="line-107"><code>				<span class="keyword">for</span> <label for="r31" class="ident">idx</label>, <label for="r32" class="ident">dbName</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a> {</code></span>
+<span class="codeline" id="line-108"><code>					<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>[<label for="r31" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-25" class="ident">Table</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r32" class="ident">dbName</label>}</code></span>
+<span class="codeline" id="line-109"><code>				}</code></span>
+<span class="codeline" id="line-110"><code>			}</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>			<span class="keyword">for</span> <label for="r33" class="ident">_</label>, <label for="r34" class="ident">join</label> := <span class="keyword">range</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-35" class="ident">Joins</a> {</code></span>
+<span class="codeline" id="line-113"><code>				<span class="keyword">if</span> <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-114"><code>					<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/joins.go.html#line-13" class="ident">Join</a>{</code></span>
+<span class="codeline" id="line-115"><code>						<a href="../clause/joins.go.html#line-18" class="ident">Expression</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-79" class="ident">NamedExpr</a>{<a href="../clause/expression.go.html#line-80" class="ident">SQL</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-52" class="ident">Name</a>, <a href="../clause/expression.go.html#line-81" class="ident">Vars</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-53" class="ident">Conds</a>},</code></span>
+<span class="codeline" id="line-116"><code>					})</code></span>
+<span class="codeline" id="line-117"><code>				} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r35" class="ident">relation</label>, <label for="r36" class="ident">ok</label> := <label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-30" class="ident">Relationships</a>.<a href="../schema/relationship.go.html#line-29" class="ident">Relations</a>[<label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-52" class="ident">Name</a>]; <label for="r36" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-118"><code>					<label for="r37" class="ident">tableAliasName</label> := <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-33" class="ident">Name</a></code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code>					<label for="r38" class="ident">columnStmt</label> := <a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../statement.go.html#line-22" class="ident">Statement</a>{</code></span>
+<span class="codeline" id="line-121"><code>						<a href="../statement.go.html#line-25" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>, <a href="../statement.go.html#line-23" class="ident">DB</a>: <label for="r5" class="ident">db</label>, <a href="../statement.go.html#line-39" class="ident">Schema</a>: <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-39" class="ident">FieldSchema</a>,</code></span>
+<span class="codeline" id="line-122"><code>						<a href="../statement.go.html#line-33" class="ident">Selects</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-55" class="ident">Selects</a>, <a href="../statement.go.html#line-34" class="ident">Omits</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-56" class="ident">Omits</a>,</code></span>
+<span class="codeline" id="line-123"><code>					}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code>					<label for="r39" class="ident">selectColumns</label>, <label for="r40" class="ident">restricted</label> := <label for="r38" class="ident">columnStmt</label>.<a href="../statement.go.html#line-664" class="ident">SelectAndOmitColumns</a>(<a href="../../../../pkg/builtin.html#name-false" class="ident">false</a>, <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
+<span class="codeline" id="line-126"><code>					<span class="keyword">for</span> <label for="r41" class="ident">_</label>, <label for="r42" class="ident">s</label> := <span class="keyword">range</span> <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-39" class="ident">FieldSchema</a>.<a href="../schema/schema.go.html#line-23" class="ident">DBNames</a> {</code></span>
+<span class="codeline" id="line-127"><code>						<span class="keyword">if</span> <label for="r43" class="ident">v</label>, <label for="r44" class="ident">ok</label> := <label for="r39" class="ident">selectColumns</label>[<label for="r42" class="ident">s</label>]; (<label for="r44" class="ident">ok</label> &amp;&amp; <label for="r43" class="ident">v</label>) || (!<label for="r44" class="ident">ok</label> &amp;&amp; !<label for="r40" class="ident">restricted</label>) {</code></span>
+<span class="codeline" id="line-128"><code>							<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">clauseSelect</label>.<a href="../clause/select.go.html#line-6" class="ident">Columns</a>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{</code></span>
+<span class="codeline" id="line-129"><code>								<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>,</code></span>
+<span class="codeline" id="line-130"><code>								<a href="../clause/clause.go.html#line-78" class="ident">Name</a>:  <label for="r42" class="ident">s</label>,</code></span>
+<span class="codeline" id="line-131"><code>								<a href="../clause/clause.go.html#line-79" class="ident">Alias</a>: <label for="r37" class="ident">tableAliasName</label> + <span class="lit-string">"__"</span> + <label for="r42" class="ident">s</label>,</code></span>
+<span class="codeline" id="line-132"><code>							})</code></span>
+<span class="codeline" id="line-133"><code>						}</code></span>
+<span class="codeline" id="line-134"><code>					}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code>					<label for="r45" class="ident">exprs</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-11" class="ident">Expression</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-37" class="ident">References</a>))</code></span>
+<span class="codeline" id="line-137"><code>					<span class="keyword">for</span> <label for="r46" class="ident">idx</label>, <label for="r47" class="ident">ref</label> := <span class="keyword">range</span> <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-37" class="ident">References</a> {</code></span>
+<span class="codeline" id="line-138"><code>						<span class="keyword">if</span> <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-54" class="ident">OwnPrimaryKey</a> {</code></span>
+<span class="codeline" id="line-139"><code>							<label for="r45" class="ident">exprs</label>[<label for="r46" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-239" class="ident">Eq</a>{</code></span>
+<span class="codeline" id="line-140"><code>								<a href="../clause/expression.go.html#line-240" class="ident">Column</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-66" class="ident">CurrentTable</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-51" class="ident">PrimaryKey</a>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>},</code></span>
+<span class="codeline" id="line-141"><code>								<a href="../clause/expression.go.html#line-241" class="ident">Value</a>:  <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-53" class="ident">ForeignKey</a>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>},</code></span>
+<span class="codeline" id="line-142"><code>							}</code></span>
+<span class="codeline" id="line-143"><code>						} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-144"><code>							<span class="keyword">if</span> <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-52" class="ident">PrimaryValue</a> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-145"><code>								<label for="r45" class="ident">exprs</label>[<label for="r46" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-239" class="ident">Eq</a>{</code></span>
+<span class="codeline" id="line-146"><code>									<a href="../clause/expression.go.html#line-240" class="ident">Column</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-66" class="ident">CurrentTable</a>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-53" class="ident">ForeignKey</a>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>},</code></span>
+<span class="codeline" id="line-147"><code>									<a href="../clause/expression.go.html#line-241" class="ident">Value</a>:  <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-51" class="ident">PrimaryKey</a>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>},</code></span>
+<span class="codeline" id="line-148"><code>								}</code></span>
+<span class="codeline" id="line-149"><code>							} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-150"><code>								<label for="r45" class="ident">exprs</label>[<label for="r46" class="ident">idx</label>] = <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-239" class="ident">Eq</a>{</code></span>
+<span class="codeline" id="line-151"><code>									<a href="../clause/expression.go.html#line-240" class="ident">Column</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-76" class="ident">Column</a>{<a href="../clause/clause.go.html#line-77" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>, <a href="../clause/clause.go.html#line-78" class="ident">Name</a>: <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-53" class="ident">ForeignKey</a>.<a href="../schema/field.go.html#line-55" class="ident">DBName</a>},</code></span>
+<span class="codeline" id="line-152"><code>									<a href="../clause/expression.go.html#line-241" class="ident">Value</a>:  <label for="r47" class="ident">ref</label>.<a href="../schema/relationship.go.html#line-52" class="ident">PrimaryValue</a>,</code></span>
+<span class="codeline" id="line-153"><code>								}</code></span>
+<span class="codeline" id="line-154"><code>							}</code></span>
+<span class="codeline" id="line-155"><code>						}</code></span>
+<span class="codeline" id="line-156"><code>					}</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code>					{</code></span>
+<span class="codeline" id="line-159"><code>						<label for="r48" class="ident">onStmt</label> := <a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../statement.go.html#line-22" class="ident">Statement</a>{<a href="../statement.go.html#line-25" class="ident">Table</a>: <label for="r37" class="ident">tableAliasName</label>, <a href="../statement.go.html#line-23" class="ident">DB</a>: <label for="r5" class="ident">db</label>, <a href="../statement.go.html#line-30" class="ident">Clauses</a>: <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-26" class="ident">Clause</a>{}}</code></span>
+<span class="codeline" id="line-160"><code>						<span class="keyword">for</span> <label for="r49" class="ident">_</label>, <label for="r50" class="ident">c</label> := <span class="keyword">range</span> <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-39" class="ident">FieldSchema</a>.<a href="../schema/schema.go.html#line-32" class="ident">QueryClauses</a> {</code></span>
+<span class="codeline" id="line-161"><code>							<label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-262" class="ident">AddClause</a>(<label for="r50" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-162"><code>						}</code></span>
+<span class="codeline" id="line-163"><code></code></span>
+<span class="codeline" id="line-164"><code>						<span class="keyword">if</span> <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-54" class="ident">On</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-165"><code>							<label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-262" class="ident">AddClause</a>(<label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-54" class="ident">On</a>)</code></span>
+<span class="codeline" id="line-166"><code>						}</code></span>
+<span class="codeline" id="line-167"><code></code></span>
+<span class="codeline" id="line-168"><code>						<span class="keyword">if</span> <label for="r51" class="ident">cs</label>, <label for="r52" class="ident">ok</label> := <label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-30" class="ident">Clauses</a>[<span class="lit-string">"WHERE"</span>]; <label for="r52" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-169"><code>							<span class="keyword">if</span> <label for="r53" class="ident">where</label>, <label for="r54" class="ident">ok</label> := <label for="r51" class="ident">cs</label>.<a href="../clause/clause.go.html#line-31" class="ident">Expression</a>.(<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/where.go.html#line-13" class="ident">Where</a>); <label for="r54" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-170"><code>								<label for="r53" class="ident">where</label>.<a href="../clause/where.go.html#line-23" class="ident">Build</a>(&amp;<label for="r48" class="ident">onStmt</label>)</code></span>
+<span class="codeline" id="line-171"><code></code></span>
+<span class="codeline" id="line-172"><code>								<span class="keyword">if</span> <label for="r55" class="ident">onSQL</label> := <label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-43" class="ident">SQL</a>.<a href="../../../strings/builder.go.html#line-47" class="ident">String</a>(); <label for="r55" class="ident">onSQL</label> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-173"><code>									<label for="r56" class="ident">vars</label> := <label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-44" class="ident">Vars</a></code></span>
+<span class="codeline" id="line-174"><code>									<span class="keyword">for</span> <label for="r57" class="ident">idx</label>, <label for="r58" class="ident">v</label> := <span class="keyword">range</span> <label for="r56" class="ident">vars</label> {</code></span>
+<span class="codeline" id="line-175"><code>										<label for="r59" class="ident">bindvar</label> := <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/builder.go.html#line-15" class="ident">Builder</a>{}</code></span>
+<span class="codeline" id="line-176"><code>										<label for="r48" class="ident">onStmt</label>.<a href="../statement.go.html#line-44" class="ident">Vars</a> = <label for="r56" class="ident">vars</label>[<span class="lit-number">0</span> : <label for="r57" class="ident">idx</label>+<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-177"><code>										<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-56" class="ident">Dialector</a>.<a href="../interfaces.go.html#line-18" class="ident">BindVarTo</a>(&amp;<label for="r59" class="ident">bindvar</label>, &amp;<label for="r48" class="ident">onStmt</label>, <label for="r58" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-178"><code>										<label for="r55" class="ident">onSQL</label> = <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-1003" class="ident">Replace</a>(<label for="r55" class="ident">onSQL</label>, <label for="r59" class="ident">bindvar</label>.<a href="../../../strings/builder.go.html#line-47" class="ident">String</a>(), <span class="lit-string">"?"</span>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-179"><code>									}</code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code>									<label for="r45" class="ident">exprs</label> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r45" class="ident">exprs</label>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-21" class="ident">Expr</a>{<a href="../clause/expression.go.html#line-22" class="ident">SQL</a>: <label for="r55" class="ident">onSQL</label>, <a href="../clause/expression.go.html#line-23" class="ident">Vars</a>: <label for="r56" class="ident">vars</label>})</code></span>
+<span class="codeline" id="line-182"><code>								}</code></span>
+<span class="codeline" id="line-183"><code>							}</code></span>
+<span class="codeline" id="line-184"><code>						}</code></span>
+<span class="codeline" id="line-185"><code>					}</code></span>
+<span class="codeline" id="line-186"><code></code></span>
+<span class="codeline" id="line-187"><code>					<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/joins.go.html#line-13" class="ident">Join</a>{</code></span>
+<span class="codeline" id="line-188"><code>						<a href="../clause/joins.go.html#line-14" class="ident">Type</a>:  <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-57" class="ident">JoinType</a>,</code></span>
+<span class="codeline" id="line-189"><code>						<a href="../clause/joins.go.html#line-15" class="ident">Table</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-84" class="ident">Table</a>{<a href="../clause/clause.go.html#line-85" class="ident">Name</a>: <label for="r35" class="ident">relation</label>.<a href="../schema/relationship.go.html#line-39" class="ident">FieldSchema</a>.<a href="../schema/schema.go.html#line-21" class="ident">Table</a>, <a href="../clause/clause.go.html#line-86" class="ident">Alias</a>: <label for="r37" class="ident">tableAliasName</label>},</code></span>
+<span class="codeline" id="line-190"><code>						<a href="../clause/joins.go.html#line-16" class="ident">ON</a>:    <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/where.go.html#line-13" class="ident">Where</a>{<a href="../clause/where.go.html#line-14" class="ident">Exprs</a>: <label for="r45" class="ident">exprs</label>},</code></span>
+<span class="codeline" id="line-191"><code>					})</code></span>
+<span class="codeline" id="line-192"><code>				} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-193"><code>					<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r28" class="ident">fromClause</label>.<a href="../clause/from.go.html#line-6" class="ident">Joins</a>, <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/joins.go.html#line-13" class="ident">Join</a>{</code></span>
+<span class="codeline" id="line-194"><code>						<a href="../clause/joins.go.html#line-18" class="ident">Expression</a>: <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/expression.go.html#line-79" class="ident">NamedExpr</a>{<a href="../clause/expression.go.html#line-80" class="ident">SQL</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-52" class="ident">Name</a>, <a href="../clause/expression.go.html#line-81" class="ident">Vars</a>: <label for="r34" class="ident">join</label>.<a href="../statement.go.html#line-53" class="ident">Conds</a>},</code></span>
+<span class="codeline" id="line-195"><code>					})</code></span>
+<span class="codeline" id="line-196"><code>				}</code></span>
+<span class="codeline" id="line-197"><code>			}</code></span>
+<span class="codeline" id="line-198"><code></code></span>
+<span class="codeline" id="line-199"><code>			<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-262" class="ident">AddClause</a>(<label for="r28" class="ident">fromClause</label>)</code></span>
+<span class="codeline" id="line-200"><code>			<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-35" class="ident">Joins</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-201"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-202"><code>			<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-275" class="ident">AddClauseIfNotExists</a>(<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/from.go.html#line-4" class="ident">From</a>{})</code></span>
+<span class="codeline" id="line-203"><code>		}</code></span>
+<span class="codeline" id="line-204"><code></code></span>
+<span class="codeline" id="line-205"><code>		<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-275" class="ident">AddClauseIfNotExists</a>(<label for="r8" class="ident">clauseSelect</label>)</code></span>
+<span class="codeline" id="line-206"><code></code></span>
+<span class="codeline" id="line-207"><code>		<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-461" class="ident">Build</a>(<label for="r5" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-31" class="ident">BuildClauses</a>...)</code></span>
+<span class="codeline" id="line-208"><code>	}</code></span>
+<span class="codeline" id="line-209"><code>}</code></span>
+<span class="codeline" id="line-210"><code></code></span>
+<span class="codeline" id="line-211"><code><span class="keyword">func</span> <label for="r60" class="ident"><a href="../../../../pkg/gorm.io/gorm/callbacks.html#name-Preload" class="ident">Preload</a></label>(<label for="r61" class="ident">db</label> *<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-91" class="ident">DB</a>) {</code></span>
+<span class="codeline" id="line-212"><code>	<span class="keyword">if</span> <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-93" class="ident">Error</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-213"><code>		<span class="keyword">if</span> <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-214"><code>			<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"%w when using preload"</span>, <a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../errors.go.html#line-23" class="ident">ErrModelValueRequired</a>))</code></span>
+<span class="codeline" id="line-215"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-216"><code>		}</code></span>
+<span class="codeline" id="line-217"><code></code></span>
+<span class="codeline" id="line-218"><code>		<label for="r62" class="ident">preloadMap</label> := <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<span class="keyword">interface</span>{}{}</code></span>
+<span class="codeline" id="line-219"><code>		<span class="keyword">for</span> <label for="r63" class="ident">name</label> := <span class="keyword">range</span> <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a> {</code></span>
+<span class="codeline" id="line-220"><code>			<label for="r64" class="ident">preloadFields</label> := <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-308" class="ident">Split</a>(<label for="r63" class="ident">name</label>, <span class="lit-string">"."</span>)</code></span>
+<span class="codeline" id="line-221"><code>			<span class="keyword">if</span> <label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>] == <a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-67" class="ident">Associations</a> {</code></span>
+<span class="codeline" id="line-222"><code>				<span class="keyword">for</span> <label for="r65" class="ident">_</label>, <label for="r66" class="ident">rel</label> := <span class="keyword">range</span> <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-30" class="ident">Relationships</a>.<a href="../schema/relationship.go.html#line-29" class="ident">Relations</a> {</code></span>
+<span class="codeline" id="line-223"><code>					<span class="keyword">if</span> <label for="r66" class="ident">rel</label>.<a href="../schema/relationship.go.html#line-38" class="ident">Schema</a> == <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> {</code></span>
+<span class="codeline" id="line-224"><code>						<span class="keyword">if</span> <label for="r67" class="ident">_</label>, <label for="r68" class="ident">ok</label> := <label for="r62" class="ident">preloadMap</label>[<label for="r66" class="ident">rel</label>.<a href="../schema/relationship.go.html#line-33" class="ident">Name</a>]; !<label for="r68" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-225"><code>							<label for="r62" class="ident">preloadMap</label>[<label for="r66" class="ident">rel</label>.<a href="../schema/relationship.go.html#line-33" class="ident">Name</a>] = <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<span class="keyword">interface</span>{}{}</code></span>
+<span class="codeline" id="line-226"><code>						}</code></span>
+<span class="codeline" id="line-227"><code></code></span>
+<span class="codeline" id="line-228"><code>						<span class="keyword">if</span> <label for="r69" class="ident">value</label> := <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-981" class="ident">TrimPrefix</a>(<a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-981" class="ident">TrimPrefix</a>(<label for="r63" class="ident">name</label>, <label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>]), <span class="lit-string">"."</span>); <label for="r69" class="ident">value</label> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-229"><code>							<label for="r62" class="ident">preloadMap</label>[<label for="r66" class="ident">rel</label>.<a href="../schema/relationship.go.html#line-33" class="ident">Name</a>][<label for="r69" class="ident">value</label>] = <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a>[<label for="r63" class="ident">name</label>]</code></span>
+<span class="codeline" id="line-230"><code>						}</code></span>
+<span class="codeline" id="line-231"><code>					}</code></span>
+<span class="codeline" id="line-232"><code>				}</code></span>
+<span class="codeline" id="line-233"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-234"><code>				<span class="keyword">if</span> <label for="r70" class="ident">_</label>, <label for="r71" class="ident">ok</label> := <label for="r62" class="ident">preloadMap</label>[<label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>]]; !<label for="r71" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-235"><code>					<label for="r62" class="ident">preloadMap</label>[<label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>]] = <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>][]<span class="keyword">interface</span>{}{}</code></span>
+<span class="codeline" id="line-236"><code>				}</code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code>				<span class="keyword">if</span> <label for="r72" class="ident">value</label> := <a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-981" class="ident">TrimPrefix</a>(<a href="../../../../pkg/strings.html" class="ident i3">strings</a>.<a href="../../../strings/strings.go.html#line-981" class="ident">TrimPrefix</a>(<label for="r63" class="ident">name</label>, <label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>]), <span class="lit-string">"."</span>); <label for="r72" class="ident">value</label> != <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-239"><code>					<label for="r62" class="ident">preloadMap</label>[<label for="r64" class="ident">preloadFields</label>[<span class="lit-number">0</span>]][<label for="r72" class="ident">value</label>] = <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a>[<label for="r63" class="ident">name</label>]</code></span>
+<span class="codeline" id="line-240"><code>				}</code></span>
+<span class="codeline" id="line-241"><code>			}</code></span>
+<span class="codeline" id="line-242"><code>		}</code></span>
+<span class="codeline" id="line-243"><code></code></span>
+<span class="codeline" id="line-244"><code>		<label for="r73" class="ident">preloadNames</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <span class="lit-number">0</span>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r62" class="ident">preloadMap</label>))</code></span>
+<span class="codeline" id="line-245"><code>		<span class="keyword">for</span> <label for="r74" class="ident">key</label> := <span class="keyword">range</span> <label for="r62" class="ident">preloadMap</label> {</code></span>
+<span class="codeline" id="line-246"><code>			<label for="r73" class="ident">preloadNames</label> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r73" class="ident">preloadNames</label>, <label for="r74" class="ident">key</label>)</code></span>
+<span class="codeline" id="line-247"><code>		}</code></span>
+<span class="codeline" id="line-248"><code>		<a href="../../../../pkg/sort.html" class="ident i2">sort</a>.<a href="../../../sort/sort.go.html#line-164" class="ident">Strings</a>(<label for="r73" class="ident">preloadNames</label>)</code></span>
+<span class="codeline" id="line-249"><code></code></span>
+<span class="codeline" id="line-250"><code>		<label for="r75" class="ident">preloadDB</label> := <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-215" class="ident">Session</a>(&amp;<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-100" class="ident">Session</a>{<a href="../gorm.go.html#line-111" class="ident">Context</a>: <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-40" class="ident">Context</a>, <a href="../gorm.go.html#line-103" class="ident">NewDB</a>: <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>, <a href="../gorm.go.html#line-105" class="ident">SkipHooks</a>: <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-42" class="ident">SkipHooks</a>, <a href="../gorm.go.html#line-104" class="ident">Initialized</a>: <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a>})</code></span>
+<span class="codeline" id="line-251"><code>		<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-37" class="ident">Settings</a>.<a href="../../../sync/map.go.html#line-327" class="ident">Range</a>(<span class="keyword">func</span>(<label for="r76" class="ident">k</label>, <label for="r77" class="ident">v</label> <span class="keyword">interface</span>{}) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-252"><code>			<label for="r75" class="ident">preloadDB</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-37" class="ident">Settings</a>.<a href="../../../sync/map.go.html#line-144" class="ident">Store</a>(<label for="r76" class="ident">k</label>, <label for="r77" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-253"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-254"><code>		})</code></span>
+<span class="codeline" id="line-255"><code></code></span>
+<span class="codeline" id="line-256"><code>		<span class="keyword">if</span> <label for="r78" class="ident">err</label> := <label for="r75" class="ident">preloadDB</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-480" class="ident">Parse</a>(<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-28" class="ident">Dest</a>); <label for="r78" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-257"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-258"><code>		}</code></span>
+<span class="codeline" id="line-259"><code>		<label for="r75" class="ident">preloadDB</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a> = <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-29" class="ident">ReflectValue</a></code></span>
+<span class="codeline" id="line-260"><code></code></span>
+<span class="codeline" id="line-261"><code>		<span class="keyword">for</span> <label for="r79" class="ident">_</label>, <label for="r80" class="ident">name</label> := <span class="keyword">range</span> <label for="r73" class="ident">preloadNames</label> {</code></span>
+<span class="codeline" id="line-262"><code>			<span class="keyword">if</span> <label for="r81" class="ident">rel</label> := <label for="r75" class="ident">preloadDB</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-30" class="ident">Relationships</a>.<a href="../schema/relationship.go.html#line-29" class="ident">Relations</a>[<label for="r80" class="ident">name</label>]; <label for="r81" class="ident">rel</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-263"><code>				<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<a href="preload.go.html#line-13" class="ident">preload</a>(<label for="r75" class="ident">preloadDB</label>.<a href="../chainable_api.go.html#line-64" class="ident">Table</a>(<span class="lit-string">""</span>).<a href="../gorm.go.html#line-215" class="ident">Session</a>(&amp;<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-100" class="ident">Session</a>{<a href="../gorm.go.html#line-111" class="ident">Context</a>: <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-40" class="ident">Context</a>, <a href="../gorm.go.html#line-105" class="ident">SkipHooks</a>: <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-42" class="ident">SkipHooks</a>}), <label for="r81" class="ident">rel</label>, <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a>[<label for="r80" class="ident">name</label>], <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-36" class="ident">Preloads</a>[<a href="../../../../pkg/gorm.io/gorm/clause.html" class="ident i5">clause</a>.<a href="../clause/clause.go.html#line-67" class="ident">Associations</a>]...), <label for="r62" class="ident">preloadMap</label>[<label for="r80" class="ident">name</label>]))</code></span>
+<span class="codeline" id="line-264"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-265"><code>				<label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<a href="../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"%s: %w for schema %s"</span>, <label for="r80" class="ident">name</label>, <a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../errors.go.html#line-19" class="ident">ErrUnsupportedRelation</a>, <label for="r61" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-19" class="ident">Name</a>))</code></span>
+<span class="codeline" id="line-266"><code>			}</code></span>
+<span class="codeline" id="line-267"><code>		}</code></span>
+<span class="codeline" id="line-268"><code>	}</code></span>
+<span class="codeline" id="line-269"><code>}</code></span>
+<span class="codeline" id="line-270"><code></code></span>
+<span class="codeline" id="line-271"><code><span class="keyword">func</span> <label for="r82" class="ident"><a href="../../../../pkg/gorm.io/gorm/callbacks.html#name-AfterQuery" class="ident">AfterQuery</a></label>(<label for="r83" class="ident">db</label> *<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-91" class="ident">DB</a>) {</code></span>
+<span class="codeline" id="line-272"><code>	<span class="keyword">if</span> <label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-93" class="ident">Error</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; !<label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-42" class="ident">SkipHooks</a> &amp;&amp; <label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-95" class="ident">Statement</a>.<a href="../statement.go.html#line-39" class="ident">Schema</a>.<a href="../schema/schema.go.html#line-39" class="ident">AfterFind</a> &amp;&amp; <label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-94" class="ident">RowsAffected</a> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-273"><code>		<a href="callmethod.go.html#line-9" class="ident">callMethod</a>(<label for="r83" class="ident">db</label>, <span class="keyword">func</span>(<label for="r84" class="ident">value</label> <span class="keyword">interface</span>{}, <label for="r85" class="ident">tx</label> *<a href="../../../../pkg/gorm.io/gorm.html" class="ident i4">gorm</a>.<a href="../gorm.go.html#line-91" class="ident">DB</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-274"><code>			<span class="keyword">if</span> <label for="r86" class="ident">i</label>, <label for="r87" class="ident">ok</label> := <label for="r84" class="ident">value</label>.(<a href="interfaces.go.html#line-37" class="ident">AfterFindInterface</a>); <label for="r87" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-275"><code>				<label for="r83" class="ident">db</label>.<a href="../gorm.go.html#line-349" class="ident">AddError</a>(<label for="r86" class="ident">i</label>.<a href="interfaces.go.html#line-38" class="ident">AfterFind</a>(<label for="r85" class="ident">tx</label>))</code></span>
+<span class="codeline" id="line-276"><code>				<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-277"><code>			}</code></span>
+<span class="codeline" id="line-278"><code>			<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-279"><code>		})</code></span>
+<span class="codeline" id="line-280"><code>	}</code></span>
+<span class="codeline" id="line-281"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>
