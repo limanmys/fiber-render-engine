@@ -9,6 +9,7 @@ import (
 	"github.com/alessio/shellescape"
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
+	"github.com/limanmys/render-engine/internal/auth"
 	"github.com/limanmys/render-engine/internal/constants"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -92,6 +93,19 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		"log_id":          params.LogID,
 		"ajax":            "true",
 		"apiRoute":        "/extensionRun",
+	}
+
+	if user.AuthType == "keycloak" {
+		err = auth.RefreshTokenIfNecessary(user.ID)
+		if err != nil {
+			return "", err
+		}
+
+		token, err := auth.GetOauth2Token(user.ID)
+		if err != nil {
+			return "", err
+		}
+		extensionData["keycloak_auth"] = token.AccessToken
 	}
 
 	secureKey, err := os.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
