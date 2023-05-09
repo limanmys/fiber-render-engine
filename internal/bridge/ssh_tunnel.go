@@ -55,6 +55,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 			return 0
 		}
 
+	OL:
 		for {
 			if t.Started {
 				break
@@ -62,8 +63,9 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 
 			select {
 			case <-ch:
-				break
+				break OL
 			default:
+				time.Sleep(5 * time.Millisecond)
 				continue
 			}
 		}
@@ -112,6 +114,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 
 	hasError := sshTunnel.Start()
 	if !hasError {
+	L:
 		for {
 			if sshTunnel.Started {
 				break
@@ -119,8 +122,9 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 
 			select {
 			case <-ch:
-				break
+				break L
 			default:
+				time.Sleep(5 * time.Millisecond)
 				continue
 			}
 		}
@@ -182,10 +186,10 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *b
 			})
 			if err != nil {
 				once.Do(func() {
+					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
 					t.errHandler()
 					t.Stop()
 					*hasError = true
-					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
 					wg.Done()
 				})
 				return
@@ -205,8 +209,8 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *b
 			}
 			if err != nil {
 				once.Do(func() {
-					t.errHandler()
 					t.log.Errorw("bind error", "details", fmt.Sprintf("%v, %v", t, err))
+					t.errHandler()
 					t.Stop()
 					*hasError = true
 					wg.Done()
@@ -237,10 +241,10 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup, hasError *b
 				cn1, err := ln.Accept()
 				if err != nil {
 					once.Do(func() {
+						t.log.Errorw("accept error", "details", fmt.Sprintf("%v, %v", t, err))
 						t.Stop()
 						*hasError = true
 						t.errHandler()
-						t.log.Errorw("accept error", "details", fmt.Sprintf("%v, %v", t, err))
 						wg.Done()
 					})
 					return

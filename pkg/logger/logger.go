@@ -2,8 +2,10 @@ package logger
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/limanmys/render-engine/pkg/helpers"
 	"go.uber.org/zap"
 )
 
@@ -21,13 +23,16 @@ func InitLogger() {
 	// https://gist.github.com/rnyrnyrny/a6dc926ae11951b753ecd66c00695397
 
 	cfg := zap.NewProductionConfig()
-	cfg.DisableStacktrace = true
+	debugMode, err := strconv.ParseBool(helpers.Env("APP_DEBUG", "false"))
+	if err != nil {
+		panic(err)
+	}
+	cfg.DisableStacktrace = debugMode
 	cfg.OutputPaths = []string{
 		"stdout",
 		"/liman/logs/liman_new.log",
 	}
 
-	var err error
 	logger, err = cfg.Build()
 	if err != nil {
 		log.Fatalf("can't initialize zap logger: %v", err)

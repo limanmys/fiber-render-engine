@@ -48,6 +48,7 @@ func Clean() {
 			default:
 				_, _, err := session.SSH.SendRequest("keepalive@liman.dev", true, nil)
 				if err != nil {
+					closeSession(session, key)
 					logger.Sugar().Warnw("error when sending request")
 				}
 
@@ -93,6 +94,7 @@ func Clean() {
 			default:
 				_, _, err := tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
 				if err != nil {
+					closeTunnel(tunnel, key)
 					logger.Sugar().Warnw("error when sending request")
 				}
 
@@ -109,7 +111,7 @@ func Clean() {
 		}
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(10 * time.Second)
 	go Clean()
 }
 
