@@ -54,6 +54,7 @@ require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alessio/shellescape v1.4.1
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect

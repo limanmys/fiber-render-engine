@@ -4,6 +4,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/limanmys/render-engine/pkg/helpers"
 	"golang.org/x/crypto/ssh"
 )
@@ -24,7 +25,19 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 		return nil, err
 	}
 
-	conn, err := ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+	var conn *ssh.Client
+	err = retry.Do(
+		func() error {
+			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(5),
+		retry.Delay(1*time.Second),
+	)
+
 	if err != nil {
 		return nil, err
 	}
@@ -53,10 +66,18 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 		return nil, err
 	}
 
-	conn, err := ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
-	if err != nil {
-		return nil, err
-	}
+	var conn *ssh.Client
+	err = retry.Do(
+		func() error {
+			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(5),
+		retry.Delay(1*time.Second),
+	)
 
 	return conn, nil
 }
@@ -77,10 +98,18 @@ func VerifySSH(username, password, host, port string) bool {
 		return false
 	}
 
-	conn, err := ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
-	if err != nil {
-		return false
-	}
+	var conn *ssh.Client
+	err = retry.Do(
+		func() error {
+			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(5),
+		retry.Delay(1*time.Second),
+	)
 
 	defer conn.Close()
 	return true
@@ -107,7 +136,18 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 		return false
 	}
 
-	conn, err := ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+	var conn *ssh.Client
+	err = retry.Do(
+		func() error {
+			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+		retry.Attempts(5),
+		retry.Delay(1*time.Second),
+	)
 	if err != nil {
 		return false
 	}

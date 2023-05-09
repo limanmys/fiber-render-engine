@@ -64,6 +64,8 @@ func (t *TunnelPool) Get(remoteHost, remotePort, username string) (*Tunnel, erro
 
 // Set Tunnel connection to pool
 func (t *TunnelPool) Set(remoteHost, remotePort, username string, tunnel *Tunnel) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	Tunnels[remoteHost+":"+remotePort+":"+username] = tunnel
 }
 
