@@ -11,7 +11,7 @@ import (
 // Clean clears long standing sessions from memory
 func Clean() {
 	now := time.Now()
-	for key, session := range Connections {
+	for key, session := range GetConnections().connections {
 		if now.Sub(session.LastConnection).Seconds() > 266 {
 			closeSession(session, key)
 			continue
@@ -65,7 +65,7 @@ func Clean() {
 		}
 	}
 
-	for key, tunnel := range Tunnels {
+	for key, tunnel := range GetTunnels().connections {
 		if now.Sub(tunnel.LastConnection).Seconds() > 266 {
 			closeTunnel(tunnel, key)
 			continue
@@ -116,17 +116,17 @@ func Clean() {
 }
 
 func closeSession(s *Session, key string) {
-	s.Mutex.Lock()
+	defer s.Unlock()
+	s.Lock()
 	s.CloseAllConnections()
-	s.Mutex.Unlock()
 
-	Connections.Delete(key)
+	GetConnections().Delete(key)
 }
 
 func closeTunnel(t *Tunnel, key string) {
-	t.Mutex.Lock()
+	defer t.Unlock()
+	t.Lock()
 	t.Stop()
-	t.Mutex.Unlock()
 
-	Tunnels.Delete(key)
+	GetTunnels().Delete(key)
 }

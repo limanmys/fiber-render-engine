@@ -37,17 +37,14 @@ type Tunnel struct {
 
 	Port           int
 	LastConnection time.Time
-	Mutex          sync.Mutex
 	Started        bool
-}
 
-var mut sync.Mutex = sync.Mutex{}
+	sync.Mutex
+}
 
 // CreateTunnel starts a new tunnel instance and sets it into TunnelPool
 func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) int {
-	mut.Lock()
-	defer mut.Unlock()
-
+	// 30 sec timeout on creating tunnel
 	ch := make(chan int)
 	time.AfterFunc(30*time.Second, func() {
 		ch <- 1
@@ -68,7 +65,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 			case <-ch:
 				break startedLoop
 			default:
-				time.Sleep(5 * time.Millisecond)
+				time.Sleep(30 * time.Millisecond)
 				continue
 			}
 		}
