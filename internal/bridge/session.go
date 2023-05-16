@@ -25,7 +25,6 @@ type Session struct {
 	SFTP           *sftp.Client
 	SMB            *smb2.Session
 	WinRM          *winrm.Client
-	Mutex          sync.Mutex
 	LastConnection time.Time
 	WindowsLetter  string
 	WindowsPath    string
@@ -33,6 +32,8 @@ type Session struct {
 	IpAddr         string
 	Port           string
 	password       string
+
+	sync.Mutex
 }
 
 // CloseAllConnections closes all connections on session

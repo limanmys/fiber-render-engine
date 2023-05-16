@@ -12,14 +12,14 @@ import (
 
 // GetSession gets session from memory and if does not exists creates a new one
 func GetSession(userID, serverID, host string) (*Session, error) {
-	session, err := Connections.Get(userID, serverID)
+	session, err := Sessions.Get(userID, serverID)
 	if err != nil {
 		session = &Session{}
 		isConnected := session.CreateShell(userID, serverID, host)
 		if !isConnected {
 			return nil, logger.FiberError(fiber.StatusForbidden, "cannot connect to server")
 		}
-		Connections.Set(userID, serverID, session)
+		Sessions.Set(userID, serverID, session)
 	}
 
 	session.LastConnection = time.Now()

@@ -7,18 +7,23 @@ import (
 	"time"
 )
 
-type Pool map[string]*Session
-type TunnelPool map[string]*Tunnel
+type Pool struct {
+	Connections map[string]*Session
+	sync.Mutex
+}
+type TunnelPool struct {
+	Connections map[string]*Tunnel
+	sync.Mutex
+}
 
 var (
-	Connections Pool       = make(Pool)
-	Tunnels     TunnelPool = make(TunnelPool)
-	mutex       sync.Mutex
+	Sessions Pool       = Pool{Connections: make(map[string]*Session)}
+	Tunnels  TunnelPool = TunnelPool{Connections: make(map[string]*Tunnel)}
 )
 
 // Get connection from pool
 func (p *Pool) Get(userID, serverID string) (*Session, error) {
-	if conn, ok := Connections[userID+serverID]; ok {
+	if conn, ok := p.Connections[userID+serverID]; ok {
 		return conn, nil
 	} else {
 		return nil, errors.New("connection does not exist")
@@ -27,12 +32,14 @@ func (p *Pool) Get(userID, serverID string) (*Session, error) {
 
 // Set connection on pool
 func (p *Pool) Set(userID, serverID string, session *Session) {
-	Connections[userID+serverID] = session
+	p.Lock()
+	defer p.Unlock()
+	p.Connections[userID+serverID] = session
 }
 
 // GetRaw connection object from pool
 func (p *Pool) GetRaw(userID, remoteHost, username string) (*Session, error) {
-	if conn, ok := Connections[userID+remoteHost+username]; ok {
+	if conn, ok := p.Connections[userID+remoteHost+username]; ok {
 		conn.LastConnection = time.Now()
 		return conn, nil
 	} else {
@@ -42,19 +49,21 @@ func (p *Pool) GetRaw(userID, remoteHost, username string) (*Session, error) {
 
 // SetRaw connection object on pool
 func (p *Pool) SetRaw(userID, remoteHost, username string, session *Session) {
-	Connections[userID+remoteHost+username] = session
+	p.Lock()
+	defer p.Unlock()
+	p.Connections[userID+remoteHost+username] = session
 }
 
 // Delete connection object from pool
 func (p *Pool) Delete(key string) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	delete(Connections, key)
+	p.Lock()
+	defer p.Unlock()
+	delete(p.Connections, key)
 }
 
 // Get Tunnel connection from pool
 func (t *TunnelPool) Get(remoteHost, remotePort, username string) (*Tunnel, error) {
-	if tunnel, ok := Tunnels[remoteHost+":"+remotePort+":"+username]; ok {
+	if tunnel, ok := Tunnels.Connections[remoteHost+":"+remotePort+":"+username]; ok {
 		tunnel.LastConnection = time.Now()
 		return tunnel, nil
 	} else {
@@ -64,16 +73,16 @@ func (t *TunnelPool) Get(remoteHost, remotePort, username string) (*Tunnel, erro
 
 // Set Tunnel connection to pool
 func (t *TunnelPool) Set(remoteHost, remotePort, username string, tunnel *Tunnel) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	Tunnels[remoteHost+":"+remotePort+":"+username] = tunnel
+	t.Lock()
+	defer t.Unlock()
+	Tunnels.Connections[remoteHost+":"+remotePort+":"+username] = tunnel
 }
 
 // Delete Tunnel connection from pool
 func (t *TunnelPool) Delete(key string) {
-	mutex.Lock()
-	defer mutex.Unlock()
-	delete(Tunnels, key)
+	t.Lock()
+	defer t.Unlock()
+	delete(Tunnels.Connections, key)
 }
 
 // VerifyAuth verifies key when connecting

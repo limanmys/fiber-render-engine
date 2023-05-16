@@ -54,7 +54,7 @@ func OutsideCommandRunner(c *fiber.Ctx) error {
 		}
 	}
 
-	session, err := bridge.Connections.GetRaw(
+	session, err := bridge.Sessions.GetRaw(
 		c.Locals("user_id").(string),
 		c.FormValue("remote_host"),
 		c.FormValue("username"),
@@ -70,7 +70,7 @@ func OutsideCommandRunner(c *fiber.Ctx) error {
 		)
 
 		if isCreated {
-			bridge.Connections.SetRaw(
+			bridge.Sessions.SetRaw(
 				c.Locals("user_id").(string),
 				c.FormValue("remote_host"),
 				c.FormValue("username"),
@@ -88,7 +88,7 @@ func OutsideCommandRunner(c *fiber.Ctx) error {
 
 	if c.FormValue("disconnect") == "1" {
 		session.CloseAllConnections()
-		bridge.Connections.Delete(c.Locals("user_id").(string) + c.FormValue("remote_host") + c.FormValue("username"))
+		bridge.Sessions.Delete(c.Locals("user_id").(string) + c.FormValue("remote_host") + c.FormValue("username"))
 	}
 
 	return c.SendString(output)
