@@ -65,13 +65,9 @@ func Clean() {
 		}
 	}
 
-	for _, tunnel := range Tunnels.Connections {
-		if now.Sub(tunnel.LastConnection).Seconds() > 266 {
-			closeTunnel(tunnel)
-			continue
-		}
-
-		if tunnel.SshClient == nil {
+	for key, tunnel := range Tunnels.Connections {
+		if now.Sub(tunnel.LastConnection).Seconds() > 266 || tunnel.SshClient == nil {
+			closeTunnel(tunnel, key)
 			continue
 		}
 
@@ -81,7 +77,7 @@ func Clean() {
 			10*time.Second,
 		)
 		if err != nil {
-			closeTunnel(tunnel)
+			closeTunnel(tunnel, key)
 			continue
 		}
 
@@ -94,7 +90,7 @@ func Clean() {
 			default:
 				_, _, err := tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
 				if err != nil {
-					closeTunnel(tunnel)
+					closeTunnel(tunnel, key)
 					logger.Sugar().Warnw("error when sending request")
 				}
 
@@ -106,7 +102,7 @@ func Clean() {
 		case <-ch:
 			continue
 		case <-time.After(10 * time.Second):
-			closeTunnel(tunnel)
+			closeTunnel(tunnel, key)
 			continue
 		}
 	}
@@ -118,15 +114,13 @@ func Clean() {
 func closeSession(s *Session, key string) {
 	s.Mutex.Lock()
 	s.CloseAllConnections()
-	s.Mutex.Unlock()
-
 	Sessions.Delete(key)
+	s.Mutex.Unlock()
 }
 
-func closeTunnel(t *Tunnel) {
+func closeTunnel(t *Tunnel, key string) {
 	t.Mutex.Lock()
 	t.Stop()
+	Tunnels.Delete(key)
 	t.Mutex.Unlock()
-
-	t.errHandler()
 }

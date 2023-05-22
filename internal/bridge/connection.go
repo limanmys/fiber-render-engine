@@ -82,7 +82,8 @@ func (t *TunnelPool) Set(remoteHost, remotePort, username string, tunnel *Tunnel
 func (t *TunnelPool) Delete(key string) {
 	t.Lock()
 	defer t.Unlock()
-	delete(Tunnels.Connections, key)
+	t.Connections[key] = nil
+	delete(t.Connections, key)
 }
 
 // VerifyAuth verifies key when connecting
