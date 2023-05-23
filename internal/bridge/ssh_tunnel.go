@@ -55,6 +55,8 @@ func (t *Tunnel) Start() {
 func (t *Tunnel) Stop() {
 	t.Started = false
 	t.log.Infow("collapsed tunnel", "details", t)
+	t.SshClient.Conn.Close()
+	t.SshClient.Close()
 	t.cancel()
 }
 
@@ -155,8 +157,12 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 			}
 		}()
 
-		<-ctx.Done()
-		return
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(30 * time.Second):
+			fmt.Printf("(%v) retrying...\n", t)
+		}
 	}
 }
 

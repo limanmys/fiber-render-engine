@@ -88,8 +88,9 @@ func Clean() {
 			case <-ch:
 				return
 			default:
-				_, _, err := tunnel.SshClient.SendRequest("keepalive@liman.dev", true, nil)
+				_, _, err := tunnel.SshClient.SendRequest("keepalive@openssh.com", true, nil)
 				if err != nil {
+					tunnel.SshClient.Close()
 					closeTunnel(tunnel, key)
 					logger.Sugar().Warnw("error when sending request")
 				}
