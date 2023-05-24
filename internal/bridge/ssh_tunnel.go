@@ -55,8 +55,9 @@ func (t *Tunnel) Start() {
 func (t *Tunnel) Stop() {
 	t.Started = false
 	t.log.Infow("collapsed tunnel", "details", t)
-	t.SshClient.Conn.Close()
-	t.SshClient.Close()
+	if t.SshClient != nil {
+		t.SshClient.Close()
+	}
 	t.cancel()
 }
 

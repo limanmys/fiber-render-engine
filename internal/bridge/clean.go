@@ -90,7 +90,9 @@ func Clean() {
 			default:
 				_, _, err := tunnel.SshClient.SendRequest("keepalive@openssh.com", true, nil)
 				if err != nil {
-					tunnel.SshClient.Close()
+					if tunnel.SshClient != nil {
+						tunnel.SshClient.Close()
+					}
 					closeTunnel(tunnel, key)
 					logger.Sugar().Warnw("error when sending request")
 				}
