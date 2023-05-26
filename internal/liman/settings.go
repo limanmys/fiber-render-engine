@@ -1,6 +1,8 @@
 package liman
 
 import (
+	"encoding/json"
+
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -16,15 +18,15 @@ func GetSettings(user *models.User, server *models.Server, extension *models.Ext
 	}
 
 	// Determine which global variables exists
-	var extensionKeys []string
-	var globalVars []string
+	extensionKeys := make(map[string]any)
+	globalVars := make(map[string]any)
 	for _, setting := range extJson["database"].([]interface{}) {
 		isGlobal := setting.(map[string]interface{})["global"]
 		if isGlobal != nil && isGlobal.(bool) {
-			globalVars = append(globalVars, setting.(map[string]interface{})["variable"].(string))
+			globalVars[setting.(map[string]interface{})["variable"].(string)] = setting
 		}
 
-		extensionKeys = append(extensionKeys, setting.(map[string]interface{})["variable"].(string))
+		extensionKeys[setting.(map[string]interface{})["variable"].(string)] = setting
 	}
 
 	settings := []*models.Settings{}
@@ -33,22 +35,39 @@ func GetSettings(user *models.User, server *models.Server, extension *models.Ext
 	decryptionKey := helpers.Env("APP_KEY", "") + user.ID + server.ID
 
 	// Get user_settings for user and decrypt it
+	searchKeys := []string{}
+	for key := range extensionKeys {
+		searchKeys = append(searchKeys, key)
+	}
 	database.Connection().Find(
 		&settings,
 		"name IN ? AND user_id = ? AND server_id = ?",
-		extensionKeys,
+		searchKeys,
 		user.ID,
 		server.ID,
 	)
 	for _, setting := range settings {
 		results[setting.Name] = aes256.Decrypt(setting.Value, decryptionKey)
+		if extensionKeys[setting.Name].(map[string]any)["type"].(string) == "server" {
+			serverObject, err := GetServer(&models.Server{ID: results[setting.Name]})
+			if err != nil {
+				serverObject = &models.Server{}
+			}
+
+			serverJson, _ := json.Marshal(serverObject)
+			results[setting.Name] = string(serverJson)
+		}
 	}
 
 	// Search global variables shared between users
+	searchKeys = []string{}
+	for key := range globalVars {
+		searchKeys = append(searchKeys, key)
+	}
 	database.Connection().Find(
 		&settings,
 		"name IN ? AND server_id = ?",
-		globalVars,
+		searchKeys,
 		server.ID,
 	)
 	for _, setting := range settings {
@@ -57,6 +76,15 @@ func GetSettings(user *models.User, server *models.Server, extension *models.Ext
 		}
 
 		results[setting.Name] = aes256.Decrypt(setting.Value, helpers.Env("APP_KEY", "")+setting.UserID+setting.ServerID)
+		if extensionKeys[setting.Name].(map[string]any)["type"].(string) == "server" {
+			serverObject, err := GetServer(&models.Server{ID: results[setting.Name]})
+			if err != nil {
+				serverObject = &models.Server{}
+			}
+
+			serverJson, _ := json.Marshal(serverObject)
+			results[setting.Name] = string(serverJson)
+		}
 	}
 
 	return results, nil
