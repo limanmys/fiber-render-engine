@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/limanmys/render-engine/app/handlers"
 )
 
@@ -40,4 +41,7 @@ func Install(app *fiber.App) {
 
 	// external api proxy
 	app.Post("/externalAPI", handlers.ExternalAPI)
+
+	// metrics
+	app.Get("/metrics", monitor.New())
 }
