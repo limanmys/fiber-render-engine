@@ -87,7 +87,7 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 					}
 					return nil
 				},
-				retry.Attempts(5),
+				retry.Attempts(20),
 				retry.Delay(1*time.Second),
 			)
 
@@ -198,7 +198,7 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 			}
 			return nil
 		},
-		retry.Attempts(5),
+		retry.Attempts(20),
 		retry.Delay(1*time.Second),
 	)
 	if err != nil {

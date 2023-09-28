@@ -34,7 +34,7 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 			}
 			return nil
 		},
-		retry.Attempts(5),
+		retry.Attempts(20),
 		retry.Delay(1*time.Second),
 	)
 
@@ -75,7 +75,7 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 			}
 			return nil
 		},
-		retry.Attempts(5),
+		retry.Attempts(20),
 		retry.Delay(1*time.Second),
 	)
 
@@ -107,7 +107,7 @@ func VerifySSH(username, password, host, port string) bool {
 			}
 			return nil
 		},
-		retry.Attempts(5),
+		retry.Attempts(20),
 		retry.Delay(1*time.Second),
 	)
 
@@ -145,7 +145,7 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 			}
 			return nil
 		},
-		retry.Attempts(5),
+		retry.Attempts(20),
 		retry.Delay(1*time.Second),
 	)
 	if err != nil {
