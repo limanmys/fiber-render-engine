@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -44,7 +45,6 @@ type Tunnel struct {
 
 // Start starts binding to remote end and return error if exists any
 func (t *Tunnel) Start() {
-	t.ctx, t.cancel = context.WithCancel(context.Background())
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 	go t.bindTunnel(t.ctx, &wg)
@@ -83,6 +83,11 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 						Timeout:         5 * time.Second,
 					})
 					if err != nil {
+						if strings.Contains(err.Error(), "unable to authenticate") {
+							t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
+							t.Stop()
+							return retry.Unrecoverable(err)
+						}
 						return err
 					}
 					return nil
@@ -132,6 +137,43 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 				<-bindCtx.Done()
 				ln.Close()
 			}()
+
+			// Dial once to make sure the connection is established.
+			var cn2 net.Conn
+			t.Started = false
+			err = retry.Do(
+				func() error {
+					switch t.mode {
+					case '>':
+						cn2, err = cl.Dial(t.dialType, t.dialAddr)
+					case '<':
+						cn2, err = net.Dial(t.dialType, t.dialAddr)
+					}
+
+					if err != nil {
+						if strings.Contains(err.Error(), "open failed") {
+							return retry.Unrecoverable(err)
+						}
+						return err
+					}
+					cn2.Close()
+					return nil
+				},
+				retry.Attempts(2),
+				retry.Delay(1*time.Second),
+			)
+
+			if err != nil {
+				once.Do(func() {
+					t.Started = false
+					t.Port = 0
+					t.Stop()
+					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
+					t.errHandler()
+				})
+				return
+			}
+			// Dial ends
 
 			t.Started = true
 			t.log.Infow("binded tunnel", "details", t)
@@ -194,11 +236,14 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 			}
 
 			if err != nil {
+				if strings.Contains(err.Error(), "open failed") {
+					return retry.Unrecoverable(err)
+				}
 				return err
 			}
 			return nil
 		},
-		retry.Attempts(20),
+		retry.Attempts(2),
 		retry.Delay(1*time.Second),
 	)
 	if err != nil {
@@ -256,16 +301,16 @@ func (t *Tunnel) String() string {
 
 // CreateTunnel starts a new tunnel instance and sets it into TunnelPool
 func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) int {
-	// Creating a tunnel cannot exceed 30 seconds
+	// Creating a tunnel cannot exceed 25 seconds
 	ch := make(chan int)
-	time.AfterFunc(30*time.Second, func() {
+	time.AfterFunc(25*time.Second, func() {
 		ch <- 1
 	})
 
 	// Check if a tunnel exists with this remoteHost, remotePort and username
 	t, err := Tunnels.Get(remoteHost, remotePort, username)
 
-	// Check if existing tunnel started, if not wait until starts (max: 30sec)
+	// Check if existing tunnel started, if not wait until starts (max: 25sec)
 	if err == nil {
 		if t.password != password {
 			return 0
@@ -280,8 +325,10 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 			select {
 			case <-ch:
 				break startedLoop
+			case <-t.ctx.Done():
+				break startedLoop
 			default:
-				time.Sleep(5 * time.Millisecond)
+				time.Sleep(10 * time.Millisecond)
 				continue
 			}
 		}
@@ -305,6 +352,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 		dialType = "unix"
 	}
 
+	ctx, cancel := context.WithCancel(context.Background())
 	sshTunnel := &Tunnel{
 		auth:     []ssh.AuthMethod{ssh.RetryableAuthMethod(ssh.Password(password), 3)},
 		hostKeys: ssh.InsecureIgnoreHostKey(),
@@ -322,10 +370,13 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 		Port:           port,
 		LastConnection: time.Now(),
 		Started:        false,
+		ctx:            ctx,
+		cancel:         cancel,
 	}
-	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
 
-	sshTunnel.Start()
+	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
+	go sshTunnel.Start()
+
 loop:
 	for {
 		if sshTunnel.Started {
@@ -335,6 +386,8 @@ loop:
 		select {
 		case <-ch:
 			break loop
+		case <-sshTunnel.ctx.Done():
+			break loop
 		default:
 			time.Sleep(10 * time.Millisecond)
 			continue
@@ -342,8 +395,9 @@ loop:
 	}
 
 	if !sshTunnel.Started {
+		cancel()
 		return 0
 	}
 
-	return port
+	return sshTunnel.Port
 }

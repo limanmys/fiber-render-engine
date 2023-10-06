@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"net"
+	"strings"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -17,7 +18,7 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 			ssh.Password(password),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 10,
+		Timeout:         time.Second * 5,
 	}
 
 	ipAddress, err := helpers.ResolveIP(host)
@@ -30,11 +31,14 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 		func() error {
 			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
 			if err != nil {
+				if strings.Contains(err.Error(), "unable to authenticate") {
+					return retry.Unrecoverable(err)
+				}
 				return err
 			}
 			return nil
 		},
-		retry.Attempts(20),
+		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
 
@@ -58,7 +62,7 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 			ssh.PublicKeys(key),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 10,
+		Timeout:         time.Second * 5,
 	}
 
 	ipAddress, err := helpers.ResolveIP(host)
@@ -71,11 +75,14 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 		func() error {
 			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
 			if err != nil {
+				if strings.Contains(err.Error(), "unable to authenticate") {
+					return retry.Unrecoverable(err)
+				}
 				return err
 			}
 			return nil
 		},
-		retry.Attempts(20),
+		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
 
@@ -90,7 +97,7 @@ func VerifySSH(username, password, host, port string) bool {
 			ssh.Password(password),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 10,
+		Timeout:         time.Second * 5,
 	}
 
 	ipAddress, err := helpers.ResolveIP(host)
@@ -103,11 +110,14 @@ func VerifySSH(username, password, host, port string) bool {
 		func() error {
 			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
 			if err != nil {
+				if strings.Contains(err.Error(), "unable to authenticate") {
+					return retry.Unrecoverable(err)
+				}
 				return err
 			}
 			return nil
 		},
-		retry.Attempts(20),
+		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
 
@@ -128,7 +138,7 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 			ssh.PublicKeys(key),
 		},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 10,
+		Timeout:         time.Second * 5,
 	}
 
 	ipAddress, err := helpers.ResolveIP(host)
@@ -141,11 +151,14 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 		func() error {
 			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
 			if err != nil {
+				if strings.Contains(err.Error(), "unable to authenticate") {
+					return retry.Unrecoverable(err)
+				}
 				return err
 			}
 			return nil
 		},
-		retry.Attempts(20),
+		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
 	if err != nil {
