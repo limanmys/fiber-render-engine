@@ -268,6 +268,7 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 		defer cancel()
 		if _, err := io.Copy(cn1, cn2); err != nil {
 			once.Do(func() {
+				t.Stop()
 				t.errHandler()
 				t.log.Errorw("connection error", "details", fmt.Sprintf("%v, %v", t, err))
 			})
@@ -278,6 +279,7 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 		defer cancel()
 		if _, err := io.Copy(cn2, cn1); err != nil {
 			once.Do(func() {
+				t.Stop()
 				t.errHandler()
 				t.log.Errorw("connection error", "details", fmt.Sprintf("%v, %v", t, err))
 			})
