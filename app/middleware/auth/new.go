@@ -41,5 +41,18 @@ func authorization(c *fiber.Ctx) error {
 		return c.Next()
 	}
 
+	if len(string(c.Request().Header.Peek("Authorization"))) > 0 {
+		user, err := liman.AuthWithToken(
+			strings.Trim(string(c.Request().Header.Peek("Authorization")), ""),
+		)
+
+		if err != nil {
+			return logger.FiberError(fiber.StatusUnauthorized, err.Error())
+		}
+
+		c.Locals("user_id", user)
+		return c.Next()
+	}
+
 	return logger.FiberError(fiber.StatusUnauthorized, "authorization token is missing")
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/bridge"
+	"github.com/limanmys/render-engine/internal/file"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/internal/sandbox"
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -23,37 +24,12 @@ func PutFile(c *fiber.Ctx) error {
 		}
 	}
 
-	server, err := liman.GetServer(&models.Server{ID: c.FormValue("server_id")})
-	if err != nil {
-		return err
-	}
-
-	session, err := bridge.GetSession(
+	_, err := file.PutFileHandler(
 		c.Locals("user_id").(string),
-		server.ID,
-		server.IPAddress,
+		c.FormValue("server_id"),
+		c.FormValue("remote_path"),
+		c.FormValue("local_path"),
 	)
-	if err != nil {
-		return err
-	}
-
-	established := session.CreateFileConnection(
-		c.Locals("user_id").(string),
-		server.ID,
-		server.IPAddress,
-	)
-	if !established {
-		return logger.FiberError(fiber.StatusServiceUnavailable, "cannot establish file connection")
-	}
-
-	remotePath := ""
-	if server.Os == "linux" {
-		remotePath = "/tmp/" + filepath.Base(c.FormValue("remote_path"))
-	} else {
-		remotePath = session.WindowsPath + c.FormValue("remote_path")
-	}
-
-	err = session.Put(c.FormValue("local_path"), remotePath)
 	if err != nil {
 		return err
 	}

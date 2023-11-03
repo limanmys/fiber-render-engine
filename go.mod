@@ -4,15 +4,15 @@ go 1.19
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.8.0
-	github.com/go-resty/resty/v2 v2.9.1
-	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/go-resty/resty/v2 v2.10.0
+	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/gofiber/helmet/v2 v2.2.26
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.4.0
 	github.com/joho/godotenv v1.5.1
 	go.uber.org/zap v1.26.0
-	gorm.io/driver/mysql v1.5.1
-	gorm.io/driver/postgres v1.5.2
-	gorm.io/gorm v1.25.4
+	gorm.io/driver/mysql v1.5.2
+	gorm.io/driver/postgres v1.5.4
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -33,7 +33,7 @@ require (
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/masterzen/simplexml v0.0.0-20190410153822-31eea3082786 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
@@ -47,21 +47,22 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/goleak v1.2.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 )
 
 require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/alessio/shellescape v1.4.2
-	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible
+	github.com/dariubs/gorm-jsonb v0.1.5
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/hirochachacha/go-smb2 v1.1.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.17.0 // indirect
+	github.com/klauspost/compress v1.17.2 // indirect
 	github.com/masterzen/winrm v0.0.0-20230926183142-a7fbe840deba
 	github.com/mervick/aes-everywhere/go/aes256 v0.0.0-20220903070135-f13ed3789ae1
 	github.com/phayes/freeport v0.0.0-20220201140144-74d24b5ae9f5

@@ -33,7 +33,7 @@ func Install(app *fiber.App) {
 	// extensionDb
 	app.Post("/setExtensionDb", handlers.SetExtensionDb)
 
-	// logger: deprecate on liman v2
+	// logger
 	app.Post("/sendLog", handlers.ExtensionLogger)
 
 	// background job
@@ -44,4 +44,8 @@ func Install(app *fiber.App) {
 
 	// metrics
 	app.Get("/metrics", monitor.New())
+
+	// queue handler
+	queueHandler := handlers.NewQueueHandler()
+	app.Post("/queue", queueHandler.Create)
 }

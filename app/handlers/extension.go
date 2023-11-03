@@ -133,7 +133,6 @@ func ExtensionLogger(c *fiber.Ctx) error {
 		"request_details", formData,
 	)
 
-	// TODO: complete and handle mail_tags at the end
 	return c.Type("json").SendString(`{
 		"status":  200,
 		"message": "log added successfully"
