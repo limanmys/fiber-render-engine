@@ -1,5 +1,11 @@
 package constants
 
+import (
+	"time"
+
+	"github.com/go-co-op/gocron"
+)
+
 const (
 	LIMAN_PATH            = "/liman"
 	CORE_PATH             = LIMAN_PATH + "/server"
@@ -11,4 +17,10 @@ const (
 	SANDBOX_PATH          = LIMAN_PATH + "/sandbox/php/index.php"
 	KEYS_PATH             = LIMAN_PATH + "/keys"
 	CERT_PATH             = LIMAN_PATH + "/certs"
+)
+
+var (
+	location, _ = time.LoadLocation("Europe/Istanbul")
+
+	GLOBAL_SCHEDULER = gocron.NewScheduler(location)
 )
