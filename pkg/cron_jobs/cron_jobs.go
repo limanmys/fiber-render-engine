@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/constants"
+	"github.com/limanmys/render-engine/internal/database"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/internal/sandbox"
 	"github.com/limanmys/render-engine/internal/user_token"
@@ -61,11 +62,7 @@ func RegisterAndRun(cj *models.CronJob) error {
 		}
 		// Set form values as map
 		formValues := make(map[string]string)
-		// Unmarshal payload to map
-		if err := json.Unmarshal(marshalledPayload, &formValues); err != nil {
-			cj.UpdateAsFailed(err.Error())
-			return
-		}
+		formValues["data"] = string(marshalledPayload)
 
 		// Generate token for user
 		token, err := user_token.Create(cj.UserID.String())
@@ -82,7 +79,7 @@ func RegisterAndRun(cj *models.CronJob) error {
 			extension,
 			credentials,
 			&models.CommandParams{
-				TargetFunction: "",
+				TargetFunction: cj.Target,
 				Locale:         helpers.Env("APP_LANG", "tr"),
 				Extension:      cj.ExtensionID.String(),
 				Server:         cj.ServerID.String(),
@@ -101,9 +98,36 @@ func RegisterAndRun(cj *models.CronJob) error {
 		}
 
 		linux.Execute(command)
+		cj.UpdateAsDone()
 	})
 	if err != nil {
 		return err
+	}
+
+	constants.GLOBAL_SCHEDULER.StartAsync()
+
+	return nil
+}
+
+func Delete(id *uuid.UUID) error {
+	// Remove cronjob from global scheduler
+	if err := constants.GLOBAL_SCHEDULER.RemoveByTag(id.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InitCronJobs() error {
+	var cronjobs []*models.CronJob
+	if err := database.Connection().Find(&cronjobs).Error; err != nil {
+		return err
+	}
+
+	for _, cronjob := range cronjobs {
+		if err := RegisterAndRun(cronjob); err != nil {
+			cronjob.UpdateAsFailed(err.Error())
+		}
 	}
 
 	return nil

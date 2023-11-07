@@ -35,7 +35,7 @@ func Create(user_id string) (string, error) {
 		return token, nil
 	}
 	// Get token update date
-	updateDate, err := time.Parse("02-01-2006 15:04:05", token.UpdatedAt)
+	updateDate, err := time.Parse(time.RFC3339, token.UpdatedAt)
 	if err != nil {
 		return "", err
 	}

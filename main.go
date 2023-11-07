@@ -7,6 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/limanmys/render-engine/internal/bridge"
 	"github.com/limanmys/render-engine/internal/constants"
+	"github.com/limanmys/render-engine/pkg/cron_jobs"
 	"github.com/limanmys/render-engine/pkg/linux"
 	"github.com/limanmys/render-engine/pkg/logger"
 	"github.com/limanmys/render-engine/pkg/utils"
@@ -36,6 +37,9 @@ func main() {
 
 	// Clean long standing sessions from memory
 	go bridge.Clean()
+
+	// Init cronjobs
+	go cron_jobs.InitCronJobs()
 
 	// Start web server
 	utils.CreateServer()

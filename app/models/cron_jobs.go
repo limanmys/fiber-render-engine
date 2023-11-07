@@ -5,14 +5,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/limanmys/render-engine/internal/database"
-	"gorm.io/gorm"
 )
 
 type CronJob struct {
-	ID        *uuid.UUID     `json:"id" gorm:"primary_key,type:uuid"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	ID        *uuid.UUID `json:"id" gorm:"primary_key,type:uuid"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 
 	ExtensionID *uuid.UUID `json:"extension_id"`
 	UserID      *uuid.UUID `json:"user_id"`
@@ -22,9 +20,14 @@ type CronJob struct {
 	Payload string `json:"payload"`
 	Day     int    `json:"day"`
 	Time    string `json:"time"`
+	Target  string `json:"target"`
 
 	Message string `json:"message"` // Last run message
 	Status  Status `json:"status"`  // Last run status
+}
+
+func (CronJob) TableName() string {
+	return "cronjobs"
 }
 
 func NewCronJob() *CronJob {
