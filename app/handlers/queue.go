@@ -149,8 +149,12 @@ func (h *QueueHandler) Delete(c *fiber.Ctx) error {
 		return errors.New("invalid server id")
 	}
 
+	if c.FormValue("queue_type") == "" {
+		return errors.New("invalid queue type")
+	}
+
 	if err := h.db.Model(&models.Queue{}).
-		Where("type = ?", "report").
+		Where("type = ?", c.FormValue("queue_type")).
 		Where("id = ?", uid_).
 		Where("data->>'extension_id' ?", extension_id).
 		Where("data->>'server_id' ?", server_id).
