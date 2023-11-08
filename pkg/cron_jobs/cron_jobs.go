@@ -1,7 +1,7 @@
 package cron_jobs
 
 import (
-	"encoding/json"
+	b64 "encoding/base64"
 	"time"
 
 	"github.com/google/uuid"
@@ -54,15 +54,9 @@ func RegisterAndRun(cj *models.CronJob) error {
 			}
 		}
 
-		// Parse payload
-		marshalledPayload, err := json.Marshal(cj.Payload)
-		if err != nil {
-			cj.UpdateAsFailed(err.Error())
-			return
-		}
-		// Set form values as map
+		// Encode to b64 and set as form value
 		formValues := make(map[string]string)
-		formValues["data"] = string(marshalledPayload)
+		formValues["data"] = b64.StdEncoding.EncodeToString([]byte(cj.Payload))
 
 		// Generate token for user
 		token, err := user_token.Create(cj.UserID.String())
@@ -97,8 +91,8 @@ func RegisterAndRun(cj *models.CronJob) error {
 			return
 		}
 
-		linux.Execute(command)
-		cj.UpdateAsDone()
+		output := linux.Execute(command)
+		cj.UpdateAsDone(output)
 	})
 	if err != nil {
 		return err

@@ -24,6 +24,7 @@ type CronJob struct {
 
 	Message string `json:"message"` // Last run message
 	Status  Status `json:"status"`  // Last run status
+	Output  string `json:"output"`  // Last run output
 }
 
 func (CronJob) TableName() string {
@@ -40,6 +41,14 @@ func NewCronJob() *CronJob {
 	}
 }
 
+func (cj *CronJob) UpdateAsProcessing() {
+	cj.Status = StatusProcessing
+	cj.Message = "Cronjob processing."
+	cj.Output = "-"
+
+	database.Connection().Model(cj).Save(cj)
+}
+
 func (cj *CronJob) UpdateAsFailed(message string) {
 	cj.Status = StatusFailed
 	cj.Message = message
@@ -47,15 +56,8 @@ func (cj *CronJob) UpdateAsFailed(message string) {
 	database.Connection().Model(cj).Save(cj)
 }
 
-func (cj *CronJob) UpdateAsProcessing() {
-	cj.Status = StatusProcessing
-	cj.Message = "Cronjob processing."
-
-	database.Connection().Model(cj).Save(cj)
-}
-
-func (cj *CronJob) UpdateAsDone() {
-	cj.Status = StatusPending
+func (cj *CronJob) UpdateAsDone(output string) {
+	cj.Status = StatusDone
 	cj.Message = "CronJob completed successfully. Waiting for next run."
 
 	database.Connection().Model(cj).Save(cj)
