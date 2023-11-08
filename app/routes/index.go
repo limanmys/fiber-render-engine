@@ -48,4 +48,9 @@ func Install(app *fiber.App) {
 	// queue handler
 	queueHandler := handlers.NewQueueHandler()
 	app.Post("/queue", queueHandler.Create)
+
+	// cronjob
+	app.Post("/cronjobs", handlers.CreateCronJob)
+	app.Get("/cronjobs", handlers.IndexCronJobs)
+	app.Delete("/cronjobs/:id", handlers.DeleteCronJob)
 }
