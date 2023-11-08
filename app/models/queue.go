@@ -13,6 +13,7 @@ type Operation string
 type Status string
 
 const (
+	OperationReport  Operation = "report"
 	OperationCreate  Operation = "create"
 	OperationUpdate  Operation = "update"
 	OperationInstall Operation = "install"
@@ -26,12 +27,13 @@ const (
 // Queue structure of Queue object
 type Queue struct {
 	ID        string          `json:"id"`
+	CreatedAt time.Time       `json:"created_at"`
+	UpdatedAt time.Time       `json:"updated_at"`
 	Type      Operation       `json:"type"`
 	Status    Status          `json:"status"`
 	Data      gormjsonb.JSONB `json:"data" gorm:"type:jsonb;index,type:gin"`
+	Path      string          `json:"path"`
 	Error     string          `json:"error"`
-	CreatedAt time.Time       `json:"created_at"`
-	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 func (Queue) TableName() string {
@@ -60,5 +62,11 @@ func (q *Queue) UpdateStatus(status Status) {
 func (q *Queue) UpdateError(err string) {
 	q.Error = err
 	q.Status = StatusFailed
+	database.Connection().Model(q).Save(q)
+}
+
+func (q *Queue) UpdateAsDone(path string) {
+	q.Path = path
+	q.Status = StatusDone
 	database.Connection().Model(q).Save(q)
 }
