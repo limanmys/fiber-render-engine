@@ -2,6 +2,7 @@ package process_queue
 
 import (
 	b64 "encoding/base64"
+	"encoding/json"
 	"strings"
 
 	"github.com/google/uuid"
@@ -95,8 +96,27 @@ func (c CreateReport) Process() error {
 		return err
 	}
 
+	type limanResponse struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	}
+
+	var response limanResponse
 	output := linux.Execute(command)
 
-	c.Queue.UpdateAsDone(strings.TrimSpace(strings.ReplaceAll(output, "\"", "")))
+	if err := json.Unmarshal([]byte(output), &response); err != nil {
+		// Update job as failed
+		c.Queue.UpdateError(err.Error())
+		return err
+	}
+
+	if response.Status != 200 {
+		// Update job as failed
+		c.Queue.UpdateError(response.Message)
+	} else {
+		// Update job as done
+		c.Queue.UpdateAsDone(strings.TrimSpace(strings.ReplaceAll(output, "\"", "")))
+	}
+
 	return nil
 }
