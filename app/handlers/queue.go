@@ -111,12 +111,16 @@ func (h *QueueHandler) Index(c *fiber.Ctx) error {
 		return errors.New("invalid server id")
 	}
 
+	if c.FormValue("queue_type") == "" {
+		return errors.New("invalid queue type")
+	}
+
 	var queues []*models.Queue
 	if err := h.db.Model(&models.Queue{}).
-		Where("type = ?", "report").
+		Where("type = ?", c.Params("queue_type")).
 		Where("data->>'extension_id' ?", extension_id).
-		Where("data->>'extension_id' ?", server_id).
-		Where("data->>'extension_id' ?", user_id).Find(&queues).Error; err != nil {
+		Where("data->>'server_id' ?", server_id).
+		Where("data->>'user_id' ?", user_id).Find(&queues).Error; err != nil {
 		return err
 	}
 
@@ -149,8 +153,8 @@ func (h *QueueHandler) Delete(c *fiber.Ctx) error {
 		Where("type = ?", "report").
 		Where("id = ?", uid_).
 		Where("data->>'extension_id' ?", extension_id).
-		Where("data->>'extension_id' ?", server_id).
-		Where("data->>'extension_id' ?", user_id).Delete(models.Queue{}).Error; err != nil {
+		Where("data->>'server_id' ?", server_id).
+		Where("data->>'user_id' ?", user_id).Delete(models.Queue{}).Error; err != nil {
 		return err
 	}
 
