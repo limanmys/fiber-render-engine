@@ -116,11 +116,11 @@ func (h *QueueHandler) Index(c *fiber.Ctx) error {
 	}
 
 	var queues []*models.Queue
-	if err := h.db.Model(&models.Queue{}).
-		Where("type = ?", c.Params("queue_type")).
-		Where("data->>'extension_id' ?", extension_id).
-		Where("data->>'server_id' ?", server_id).
-		Where("data->>'user_id' ?", user_id).Find(&queues).Error; err != nil {
+	if err := h.db.Debug().Model(&models.Queue{}).
+		Where("type = ?", c.FormValue("queue_type")).
+		Where("data->>'extension_id' = ?", extension_id).
+		Where("data->>'server_id' = ?", server_id).
+		Where("data->>'user_id' = ?", user_id).Find(&queues).Error; err != nil {
 		return err
 	}
 
@@ -156,9 +156,9 @@ func (h *QueueHandler) Delete(c *fiber.Ctx) error {
 	if err := h.db.Model(&models.Queue{}).
 		Where("type = ?", c.FormValue("queue_type")).
 		Where("id = ?", uid_).
-		Where("data->>'extension_id' ?", extension_id).
-		Where("data->>'server_id' ?", server_id).
-		Where("data->>'user_id' ?", user_id).Delete(models.Queue{}).Error; err != nil {
+		Where("data->>'extension_id' = ?", extension_id).
+		Where("data->>'server_id' = ?", server_id).
+		Where("data->>'user_id' = ?", user_id).Delete(models.Queue{}).Error; err != nil {
 		return err
 	}
 

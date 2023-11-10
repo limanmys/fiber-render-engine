@@ -106,7 +106,7 @@ func (c CreateReport) Process() error {
 
 	if err := json.Unmarshal([]byte(output), &response); err != nil {
 		// Update job as failed
-		c.Queue.UpdateError(err.Error())
+		c.Queue.UpdateError("error when unmarshalling json, output: " + output)
 		return err
 	}
 
@@ -115,7 +115,7 @@ func (c CreateReport) Process() error {
 		c.Queue.UpdateError(response.Message)
 	} else {
 		// Update job as done
-		c.Queue.UpdateAsDone(strings.TrimSpace(strings.ReplaceAll(output, "\"", "")))
+		c.Queue.UpdateAsDone(strings.TrimSpace(strings.ReplaceAll(response.Message, "\"", "")))
 	}
 
 	return nil

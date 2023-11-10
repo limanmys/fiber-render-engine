@@ -58,6 +58,7 @@ func (cj *CronJob) UpdateAsFailed(message string) {
 
 func (cj *CronJob) UpdateAsDone(output string) {
 	cj.Status = StatusDone
+	cj.Output = output
 	cj.Message = "CronJob completed successfully. Waiting for next run."
 
 	database.Connection().Model(cj).Save(cj)
