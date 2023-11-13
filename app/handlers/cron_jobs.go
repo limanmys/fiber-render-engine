@@ -10,6 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/cron_jobs"
 )
 
+// CreateCronJob creates new cron job
 func CreateCronJob(c *fiber.Ctx) error {
 	// Parse payload
 	var payload models.CronJob
@@ -56,6 +57,7 @@ func CreateCronJob(c *fiber.Ctx) error {
 	return c.JSON("Cronjob registered successfully.")
 }
 
+// IndexCronJobs lists all cron jobs
 func IndexCronJobs(c *fiber.Ctx) error {
 	// Set empty variable for later use
 	var cronjobs []*models.CronJob
@@ -67,6 +69,7 @@ func IndexCronJobs(c *fiber.Ctx) error {
 	return c.JSON(cronjobs)
 }
 
+// DeleteCronJob deletes specified cron job
 func DeleteCronJob(c *fiber.Ctx) error {
 	// Parse uuid
 	uid_, err := uuid.Parse(c.Params("id"))

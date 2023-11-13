@@ -24,6 +24,7 @@ func NewQueueHandler() *QueueHandler {
 	}
 }
 
+// Create creates new queue
 func (h *QueueHandler) Create(c *fiber.Ctx) error {
 	var formData map[string]string
 	queue := &models.Queue{}
@@ -95,6 +96,7 @@ func (h *QueueHandler) Create(c *fiber.Ctx) error {
 	return c.JSON(queue)
 }
 
+// Index lists all queues
 func (h *QueueHandler) Index(c *fiber.Ctx) error {
 	extension_id, err := uuid.Parse(c.FormValue("extension_id"))
 	if err != nil {
@@ -116,7 +118,7 @@ func (h *QueueHandler) Index(c *fiber.Ctx) error {
 	}
 
 	var queues []*models.Queue
-	if err := h.db.Debug().Model(&models.Queue{}).
+	if err := h.db.Model(&models.Queue{}).
 		Where("type = ?", c.FormValue("queue_type")).
 		Where("data->>'extension_id' = ?", extension_id).
 		Where("data->>'server_id' = ?", server_id).
@@ -127,6 +129,7 @@ func (h *QueueHandler) Index(c *fiber.Ctx) error {
 	return c.JSON(queues)
 }
 
+// Delete deletes specified queue
 func (h *QueueHandler) Delete(c *fiber.Ctx) error {
 	// Parse uuid
 	uid_, err := uuid.Parse(c.Params("id"))
