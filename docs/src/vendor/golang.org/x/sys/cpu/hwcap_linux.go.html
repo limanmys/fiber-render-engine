@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: hwcap_linux.go in package vendor/golang.org/x/sys/cpu</title>
-<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -21,7 +21,10 @@ input[id=r1]:checked ~pre label[for=r1],
 input[id=r2]:checked ~pre label[for=r2],
 input[id=r3]:checked ~pre label[for=r3],
 input[id=r4]:checked ~pre label[for=r4],
-input[id=r5]:checked ~pre label[for=r5]
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0
 {background: brown; color: #eed;}
@@ -31,6 +34,9 @@ input[id=i0]:checked ~pre .i0
 <input id="r3" type="radio" name="g"/>
 <input id="r4" type="radio" name="g"/>
 <input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 
 <pre class="line-numbers">
@@ -60,39 +66,54 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-24"><code><span class="keyword">var</span> hwCap2 <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
 <span class="codeline" id="line-25"><code></code></span>
 <span class="codeline" id="line-26"><code><span class="keyword">func</span> readHWCAP() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-27"><code>	<label for="r1" class="ident">buf</label>, <label for="r2" class="ident">err</label> := <a href="../../../../../../pkg/io/ioutil.html" class="ident i0">ioutil</a>.<a href="../../../../../io/ioutil/ioutil.go.html#line-36" class="ident">ReadFile</a>(<a href="#line-15" class="ident">procAuxv</a>)</code></span>
-<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> <label for="r2" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-29"><code>		<span class="comment">// e.g. on android /proc/self/auxv is not accessible, so silently</span></code></span>
-<span class="codeline" id="line-30"><code><span class="comment">		// ignore the error and leave Initialized = false. On some</span></code></span>
-<span class="codeline" id="line-31"><code><span class="comment">		// architectures (e.g. arm64) doinit() implements a fallback</span></code></span>
-<span class="codeline" id="line-32"><code><span class="comment">		// readout and will set Initialized = true again.</span></code></span>
-<span class="codeline" id="line-33"><code>		<span class="keyword">return</span> <label for="r2" class="ident">err</label></code></span>
-<span class="codeline" id="line-34"><code>	}</code></span>
-<span class="codeline" id="line-35"><code>	<label for="r3" class="ident">bo</label> := <a href="byteorder.go.html#line-44" class="ident">hostByteOrder</a>()</code></span>
-<span class="codeline" id="line-36"><code>	<span class="keyword">for</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">buf</label>) &gt;= <span class="lit-number">2</span>*(<a href="#line-17" class="ident">uintSize</a>/<span class="lit-number">8</span>) {</code></span>
-<span class="codeline" id="line-37"><code>		<span class="keyword">var</span> <label for="r4" class="ident">tag</label>, <label for="r5" class="ident">val</label> <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
-<span class="codeline" id="line-38"><code>		<span class="keyword">switch</span> <a href="#line-17" class="ident">uintSize</a> {</code></span>
-<span class="codeline" id="line-39"><code>		<span class="keyword">case</span> <span class="lit-number">32</span>:</code></span>
-<span class="codeline" id="line-40"><code>			<label for="r4" class="ident">tag</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r3" class="ident">bo</label>.<a href="byteorder.go.html#line-13" class="ident">Uint32</a>(<label for="r1" class="ident">buf</label>[<span class="lit-number">0</span>:]))</code></span>
-<span class="codeline" id="line-41"><code>			<label for="r5" class="ident">val</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r3" class="ident">bo</label>.<a href="byteorder.go.html#line-13" class="ident">Uint32</a>(<label for="r1" class="ident">buf</label>[<span class="lit-number">4</span>:]))</code></span>
-<span class="codeline" id="line-42"><code>			<label for="r1" class="ident">buf</label> = <label for="r1" class="ident">buf</label>[<span class="lit-number">8</span>:]</code></span>
-<span class="codeline" id="line-43"><code>		<span class="keyword">case</span> <span class="lit-number">64</span>:</code></span>
-<span class="codeline" id="line-44"><code>			<label for="r4" class="ident">tag</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r3" class="ident">bo</label>.<a href="byteorder.go.html#line-14" class="ident">Uint64</a>(<label for="r1" class="ident">buf</label>[<span class="lit-number">0</span>:]))</code></span>
-<span class="codeline" id="line-45"><code>			<label for="r5" class="ident">val</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r3" class="ident">bo</label>.<a href="byteorder.go.html#line-14" class="ident">Uint64</a>(<label for="r1" class="ident">buf</label>[<span class="lit-number">8</span>:]))</code></span>
-<span class="codeline" id="line-46"><code>			<label for="r1" class="ident">buf</label> = <label for="r1" class="ident">buf</label>[<span class="lit-number">16</span>:]</code></span>
-<span class="codeline" id="line-47"><code>		}</code></span>
-<span class="codeline" id="line-48"><code>		<span class="keyword">switch</span> <label for="r4" class="ident">tag</label> {</code></span>
-<span class="codeline" id="line-49"><code>		<span class="keyword">case</span> <a href="#line-12" class="ident">_AT_HWCAP</a>:</code></span>
-<span class="codeline" id="line-50"><code>			<a href="#line-23" class="ident">hwCap</a> = <label for="r5" class="ident">val</label></code></span>
-<span class="codeline" id="line-51"><code>		<span class="keyword">case</span> <a href="#line-13" class="ident">_AT_HWCAP2</a>:</code></span>
-<span class="codeline" id="line-52"><code>			<a href="#line-24" class="ident">hwCap2</a> = <label for="r5" class="ident">val</label></code></span>
-<span class="codeline" id="line-53"><code>		}</code></span>
-<span class="codeline" id="line-54"><code>	}</code></span>
-<span class="codeline" id="line-55"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-56"><code>}</code></span>
+<span class="codeline" id="line-27"><code>	<span class="comment">// For Go 1.21+, get auxv from the Go runtime.</span></code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> <label for="r1" class="ident">a</label> := <a href="runtime_auxv.go.html#line-11" class="ident">getAuxv</a>(); <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">a</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-29"><code>		<span class="keyword">for</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">a</label>) &gt;= <span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-30"><code>			<label for="r2" class="ident">tag</label>, <label for="r3" class="ident">val</label> := <label for="r1" class="ident">a</label>[<span class="lit-number">0</span>], <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r1" class="ident">a</label>[<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-31"><code>			<label for="r1" class="ident">a</label> = <label for="r1" class="ident">a</label>[<span class="lit-number">2</span>:]</code></span>
+<span class="codeline" id="line-32"><code>			<span class="keyword">switch</span> <label for="r2" class="ident">tag</label> {</code></span>
+<span class="codeline" id="line-33"><code>			<span class="keyword">case</span> <a href="#line-12" class="ident">_AT_HWCAP</a>:</code></span>
+<span class="codeline" id="line-34"><code>				<a href="#line-23" class="ident">hwCap</a> = <label for="r3" class="ident">val</label></code></span>
+<span class="codeline" id="line-35"><code>			<span class="keyword">case</span> <a href="#line-13" class="ident">_AT_HWCAP2</a>:</code></span>
+<span class="codeline" id="line-36"><code>				<a href="#line-24" class="ident">hwCap2</a> = <label for="r3" class="ident">val</label></code></span>
+<span class="codeline" id="line-37"><code>			}</code></span>
+<span class="codeline" id="line-38"><code>		}</code></span>
+<span class="codeline" id="line-39"><code>		<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-40"><code>	}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>	<label for="r4" class="ident">buf</label>, <label for="r5" class="ident">err</label> := <a href="../../../../../../pkg/io/ioutil.html" class="ident i0">ioutil</a>.<a href="../../../../../io/ioutil/ioutil.go.html#line-36" class="ident">ReadFile</a>(<a href="#line-15" class="ident">procAuxv</a>)</code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">if</span> <label for="r5" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-44"><code>		<span class="comment">// e.g. on android /proc/self/auxv is not accessible, so silently</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">		// ignore the error and leave Initialized = false. On some</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">		// architectures (e.g. arm64) doinit() implements a fallback</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">		// readout and will set Initialized = true again.</span></code></span>
+<span class="codeline" id="line-48"><code>		<span class="keyword">return</span> <label for="r5" class="ident">err</label></code></span>
+<span class="codeline" id="line-49"><code>	}</code></span>
+<span class="codeline" id="line-50"><code>	<label for="r6" class="ident">bo</label> := <a href="byteorder.go.html#line-44" class="ident">hostByteOrder</a>()</code></span>
+<span class="codeline" id="line-51"><code>	<span class="keyword">for</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">buf</label>) &gt;= <span class="lit-number">2</span>*(<a href="#line-17" class="ident">uintSize</a>/<span class="lit-number">8</span>) {</code></span>
+<span class="codeline" id="line-52"><code>		<span class="keyword">var</span> <label for="r7" class="ident">tag</label>, <label for="r8" class="ident">val</label> <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-53"><code>		<span class="keyword">switch</span> <a href="#line-17" class="ident">uintSize</a> {</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">case</span> <span class="lit-number">32</span>:</code></span>
+<span class="codeline" id="line-55"><code>			<label for="r7" class="ident">tag</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r6" class="ident">bo</label>.<a href="byteorder.go.html#line-13" class="ident">Uint32</a>(<label for="r4" class="ident">buf</label>[<span class="lit-number">0</span>:]))</code></span>
+<span class="codeline" id="line-56"><code>			<label for="r8" class="ident">val</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r6" class="ident">bo</label>.<a href="byteorder.go.html#line-13" class="ident">Uint32</a>(<label for="r4" class="ident">buf</label>[<span class="lit-number">4</span>:]))</code></span>
+<span class="codeline" id="line-57"><code>			<label for="r4" class="ident">buf</label> = <label for="r4" class="ident">buf</label>[<span class="lit-number">8</span>:]</code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">case</span> <span class="lit-number">64</span>:</code></span>
+<span class="codeline" id="line-59"><code>			<label for="r7" class="ident">tag</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r6" class="ident">bo</label>.<a href="byteorder.go.html#line-14" class="ident">Uint64</a>(<label for="r4" class="ident">buf</label>[<span class="lit-number">0</span>:]))</code></span>
+<span class="codeline" id="line-60"><code>			<label for="r8" class="ident">val</label> = <a href="../../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r6" class="ident">bo</label>.<a href="byteorder.go.html#line-14" class="ident">Uint64</a>(<label for="r4" class="ident">buf</label>[<span class="lit-number">8</span>:]))</code></span>
+<span class="codeline" id="line-61"><code>			<label for="r4" class="ident">buf</label> = <label for="r4" class="ident">buf</label>[<span class="lit-number">16</span>:]</code></span>
+<span class="codeline" id="line-62"><code>		}</code></span>
+<span class="codeline" id="line-63"><code>		<span class="keyword">switch</span> <label for="r7" class="ident">tag</label> {</code></span>
+<span class="codeline" id="line-64"><code>		<span class="keyword">case</span> <a href="#line-12" class="ident">_AT_HWCAP</a>:</code></span>
+<span class="codeline" id="line-65"><code>			<a href="#line-23" class="ident">hwCap</a> = <label for="r8" class="ident">val</label></code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">case</span> <a href="#line-13" class="ident">_AT_HWCAP2</a>:</code></span>
+<span class="codeline" id="line-67"><code>			<a href="#line-24" class="ident">hwCap2</a> = <label for="r8" class="ident">val</label></code></span>
+<span class="codeline" id="line-68"><code>		}</code></span>
+<span class="codeline" id="line-69"><code>	}</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-71"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

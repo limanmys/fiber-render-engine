@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: log.go in package github.com/gofiber/fiber/v2/log</title>
+<link href="../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	log.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html">github.com/gofiber/fiber/v2/log</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> log</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"context"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"io"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"log"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i4"><span class="lit-string i4">"os"</span></label></code></span>
+<span class="codeline" id="line-9"><code>)</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">var</span> logger <a href="#line-63" class="ident">AllLogger</a> = &amp;<a href="default.go.html#line-16" class="ident">defaultLogger</a>{</code></span>
+<span class="codeline" id="line-12"><code>	<a href="default.go.html#line-17" class="ident">stdlog</a>: <a href="../../../../../../pkg/log.html" class="ident i3">log</a>.<a href="../../../../../log/log.go.html#line-71" class="ident">New</a>(<a href="../../../../../../pkg/os.html" class="ident i4">os</a>.<a href="../../../../../os/file.go.html#line-67" class="ident">Stderr</a>, <span class="lit-string">""</span>, <a href="../../../../../../pkg/log.html" class="ident i3">log</a>.<a href="../../../../../log/log.go.html#line-50" class="ident">LstdFlags</a>|<a href="../../../../../../pkg/log.html" class="ident i3">log</a>.<a href="../../../../../log/log.go.html#line-47" class="ident">Lshortfile</a>|<a href="../../../../../../pkg/log.html" class="ident i3">log</a>.<a href="../../../../../log/log.go.html#line-45" class="ident">Lmicroseconds</a>),</code></span>
+<span class="codeline" id="line-13"><code>	<a href="default.go.html#line-19" class="ident">depth</a>:  <span class="lit-number">4</span>,</code></span>
+<span class="codeline" id="line-14"><code>}</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// Logger is a logger interface that provides logging function with levels.</span></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-Logger" class="ident">Logger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-18"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Trace" class="ident">Trace</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-19"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Debug" class="ident">Debug</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Info" class="ident">Info</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Warn" class="ident">Warn</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-22"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Error" class="ident">Error</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-23"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Fatal" class="ident">Fatal</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-24"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.Logger.html#name-Panic" class="ident">Panic</a>(v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-25"><code>}</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// FormatLogger is a logger interface that output logs with a format.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-FormatLogger" class="ident">FormatLogger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-29"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Tracef" class="ident">Tracef</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-30"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Debugf" class="ident">Debugf</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-31"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Infof" class="ident">Infof</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-32"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Warnf" class="ident">Warnf</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Errorf" class="ident">Errorf</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-34"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Fatalf" class="ident">Fatalf</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-35"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.FormatLogger.html#name-Panicf" class="ident">Panicf</a>(format <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, v ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-36"><code>}</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// WithLogger is a logger interface that output logs with a message and key-value pairs.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-WithLogger" class="ident">WithLogger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Tracew" class="ident">Tracew</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Debugw" class="ident">Debugw</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Infow" class="ident">Infow</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Warnw" class="ident">Warnw</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Errorw" class="ident">Errorw</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Fatalw" class="ident">Fatalw</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.WithLogger.html#name-Panicw" class="ident">Panicw</a>(msg <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>, keysAndValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-47"><code>}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-CommonLogger" class="ident">CommonLogger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-50"><code>	<a href="#line-17" class="ident">Logger</a></code></span>
+<span class="codeline" id="line-51"><code>	<a href="#line-28" class="ident">FormatLogger</a></code></span>
+<span class="codeline" id="line-52"><code>	<a href="#line-39" class="ident">WithLogger</a></code></span>
+<span class="codeline" id="line-53"><code>}</code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// ControlLogger provides methods to config a logger.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-ControlLogger" class="ident">ControlLogger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.ControlLogger.html#name-SetLevel" class="ident">SetLevel</a>(<a href="#line-72" class="ident">Level</a>)</code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.ControlLogger.html#name-SetOutput" class="ident">SetOutput</a>(<a href="../../../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../../../io/io.go.html#line-99" class="ident">Writer</a>)</code></span>
+<span class="codeline" id="line-59"><code>}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// AllLogger is the combination of Logger, FormatLogger, CtxLogger and ControlLogger.</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// Custom extensions can be made through AllLogger</span></code></span>
+<span class="codeline" id="line-63"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-AllLogger" class="ident">AllLogger</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-64"><code>	<a href="#line-49" class="ident">CommonLogger</a></code></span>
+<span class="codeline" id="line-65"><code>	<a href="#line-56" class="ident">ControlLogger</a></code></span>
+<span class="codeline" id="line-66"><code>	<a href="../../../../../../imp/github.com/gofiber/fiber/v2/log.AllLogger.html#name-WithContext" class="ident">WithContext</a>(ctx <a href="../../../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../../../context/context.go.html#line-68" class="ident">Context</a>) <a href="#line-49" class="ident">CommonLogger</a></code></span>
+<span class="codeline" id="line-67"><code>}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// Level defines the priority of a log message.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// When a logger is configured with a level, any log message with a lower</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">// log level (smaller by integer comparison) will not be output.</span></code></span>
+<span class="codeline" id="line-72"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-Level" class="ident">Level</a> <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// The levels of logs.</span></code></span>
+<span class="codeline" id="line-75"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-76"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelTrace" class="ident">LevelTrace</a> <a href="#line-72" class="ident">Level</a> = <a href="../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-77"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelDebug" class="ident">LevelDebug</a></code></span>
+<span class="codeline" id="line-78"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelInfo" class="ident">LevelInfo</a></code></span>
+<span class="codeline" id="line-79"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelWarn" class="ident">LevelWarn</a></code></span>
+<span class="codeline" id="line-80"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelError" class="ident">LevelError</a></code></span>
+<span class="codeline" id="line-81"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelFatal" class="ident">LevelFatal</a></code></span>
+<span class="codeline" id="line-82"><code>	<a href="../../../../../../pkg/github.com/gofiber/fiber/v2/log.html#name-LevelPanic" class="ident">LevelPanic</a></code></span>
+<span class="codeline" id="line-83"><code>)</code></span>
+<span class="codeline" id="line-84"><code></code></span>
+<span class="codeline" id="line-85"><code><span class="keyword">var</span> strs = []<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
+<span class="codeline" id="line-86"><code>	<span class="lit-string">"[Trace] "</span>,</code></span>
+<span class="codeline" id="line-87"><code>	<span class="lit-string">"[Debug] "</span>,</code></span>
+<span class="codeline" id="line-88"><code>	<span class="lit-string">"[Info] "</span>,</code></span>
+<span class="codeline" id="line-89"><code>	<span class="lit-string">"[Warn] "</span>,</code></span>
+<span class="codeline" id="line-90"><code>	<span class="lit-string">"[Error] "</span>,</code></span>
+<span class="codeline" id="line-91"><code>	<span class="lit-string">"[Fatal] "</span>,</code></span>
+<span class="codeline" id="line-92"><code>	<span class="lit-string">"[Panic] "</span>,</code></span>
+<span class="codeline" id="line-93"><code>}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code><span class="keyword">func</span> (<label for="r0" class="ident">lv</label> <a href="#line-72" class="ident">Level</a>) <label for="r1" class="ident">toString</label>() <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">if</span> <label for="r0" class="ident">lv</label> &gt;= <a href="#line-76" class="ident">LevelTrace</a> &amp;&amp; <label for="r0" class="ident">lv</label> &lt;= <a href="#line-82" class="ident">LevelPanic</a> {</code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">return</span> <a href="#line-85" class="ident">strs</a>[<label for="r0" class="ident">lv</label>]</code></span>
+<span class="codeline" id="line-98"><code>	}</code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../../fmt/print.go.html#line-237" class="ident">Sprintf</a>(<span class="lit-string">"[?%d] "</span>, <label for="r0" class="ident">lv</label>)</code></span>
+<span class="codeline" id="line-100"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

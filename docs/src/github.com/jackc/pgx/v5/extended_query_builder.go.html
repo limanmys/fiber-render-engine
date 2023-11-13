@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: extended_query_builder.go in package github.com/jackc/pgx/v5</title>
-<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -68,12 +68,16 @@ input[id=r48]:checked ~pre label[for=r48],
 input[id=r49]:checked ~pre label[for=r49],
 input[id=r50]:checked ~pre label[for=r50],
 input[id=r51]:checked ~pre label[for=r51],
-input[id=r52]:checked ~pre label[for=r52]
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0,
 input[id=i1]:checked ~pre .i1,
 input[id=i2]:checked ~pre .i2,
-input[id=i3]:checked ~pre .i3
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -128,219 +132,237 @@ input[id=i3]:checked ~pre .i3
 <input id="r50" type="radio" name="g"/>
 <input id="r51" type="radio" name="g"/>
 <input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 <input id="i1" type="radio" name="i"/>
 <input id="i2" type="radio" name="i"/>
 <input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="keyword">package</span> pgx</code></span>
 <span class="codeline" id="line-2"><code></code></span>
 <span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
-<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
-<span class="codeline" id="line-5"><code></code></span>
-<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"github.com/jackc/pgx/v5/internal/anynil"</span></label></code></span>
-<span class="codeline" id="line-7"><code>	<label for="i2"><span class="lit-string i2">"github.com/jackc/pgx/v5/pgconn"</span></label></code></span>
-<span class="codeline" id="line-8"><code>	<label for="i3"><span class="lit-string i3">"github.com/jackc/pgx/v5/pgtype"</span></label></code></span>
-<span class="codeline" id="line-9"><code>)</code></span>
-<span class="codeline" id="line-10"><code></code></span>
-<span class="codeline" id="line-11"><code><span class="comment">// ExtendedQueryBuilder is used to choose the parameter formats, to format the parameters and to choose the result</span></code></span>
-<span class="codeline" id="line-12"><code><span class="comment">// formats for an extended query.</span></code></span>
-<span class="codeline" id="line-13"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/jackc/pgx/v5.html#name-ExtendedQueryBuilder" class="ident">ExtendedQueryBuilder</a> <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-14"><code>	ParamValues     [][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-15"><code>	paramValueBytes []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-16"><code>	ParamFormats    []<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
-<span class="codeline" id="line-17"><code>	ResultFormats   []<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
-<span class="codeline" id="line-18"><code>}</code></span>
-<span class="codeline" id="line-19"><code></code></span>
-<span class="codeline" id="line-20"><code><span class="comment">// Build sets ParamValues, ParamFormats, and ResultFormats for use with *PgConn.ExecParams or *PgConn.ExecPrepared. If</span></code></span>
-<span class="codeline" id="line-21"><code><span class="comment">// sd is nil then QueryExecModeExec behavior will be used.</span></code></span>
-<span class="codeline" id="line-22"><code><span class="keyword">func</span> (<label for="r0" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r1" class="ident">Build</label>(<label for="r2" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-187" class="ident">Map</a>, <label for="r3" class="ident">sd</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgconn.html" class="ident i2">pgconn</a>.<a href="pgconn/pgconn.go.html#line-750" class="ident">StatementDescription</a>, <label for="r4" class="ident">args</label> []<a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-23"><code>	<label for="r0" class="ident">eqb</label>.<a href="#line-92" class="ident">reset</a>()</code></span>
-<span class="codeline" id="line-24"><code></code></span>
-<span class="codeline" id="line-25"><code>	<a href="../../../../../pkg/github.com/jackc/pgx/v5/internal/anynil.html" class="ident i1">anynil</a>.<a href="internal/anynil/anynil.go.html#line-30" class="ident">NormalizeSlice</a>(<label for="r4" class="ident">args</label>)</code></span>
-<span class="codeline" id="line-26"><code></code></span>
-<span class="codeline" id="line-27"><code>	<span class="keyword">if</span> <label for="r3" class="ident">sd</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-28"><code>		<span class="keyword">return</span> <label for="r0" class="ident">eqb</label>.<a href="#line-161" class="ident">appendParamsForQueryExecModeExec</a>(<label for="r2" class="ident">m</label>, <label for="r4" class="ident">args</label>)</code></span>
-<span class="codeline" id="line-29"><code>	}</code></span>
-<span class="codeline" id="line-30"><code></code></span>
-<span class="codeline" id="line-31"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-753" class="ident">ParamOIDs</a>) != <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">args</label>) {</code></span>
-<span class="codeline" id="line-32"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"mismatched param and argument count"</span>)</code></span>
-<span class="codeline" id="line-33"><code>	}</code></span>
-<span class="codeline" id="line-34"><code></code></span>
-<span class="codeline" id="line-35"><code>	<span class="keyword">for</span> <label for="r5" class="ident">i</label> := <span class="keyword">range</span> <label for="r4" class="ident">args</label> {</code></span>
-<span class="codeline" id="line-36"><code>		<label for="r6" class="ident">err</label> := <label for="r0" class="ident">eqb</label>.<a href="#line-52" class="ident">appendParam</a>(<label for="r2" class="ident">m</label>, <label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-753" class="ident">ParamOIDs</a>[<label for="r5" class="ident">i</label>], -<span class="lit-number">1</span>, <label for="r4" class="ident">args</label>[<label for="r5" class="ident">i</label>])</code></span>
-<span class="codeline" id="line-37"><code>		<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-38"><code>			<label for="r6" class="ident">err</label> = <a href="../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"failed to encode args[%d]: %v"</span>, <label for="r5" class="ident">i</label>, <label for="r6" class="ident">err</label>)</code></span>
-<span class="codeline" id="line-39"><code>			<span class="keyword">return</span> <label for="r6" class="ident">err</label></code></span>
-<span class="codeline" id="line-40"><code>		}</code></span>
-<span class="codeline" id="line-41"><code>	}</code></span>
-<span class="codeline" id="line-42"><code></code></span>
-<span class="codeline" id="line-43"><code>	<span class="keyword">for</span> <label for="r7" class="ident">i</label> := <span class="keyword">range</span> <label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-754" class="ident">Fields</a> {</code></span>
-<span class="codeline" id="line-44"><code>		<label for="r0" class="ident">eqb</label>.<a href="#line-87" class="ident">appendResultFormat</a>(<label for="r2" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-471" class="ident">FormatCodeForOID</a>(<label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-754" class="ident">Fields</a>[<label for="r7" class="ident">i</label>].<a href="pgconn/pgconn.go.html#line-724" class="ident">DataTypeOID</a>))</code></span>
-<span class="codeline" id="line-45"><code>	}</code></span>
-<span class="codeline" id="line-46"><code></code></span>
-<span class="codeline" id="line-47"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-48"><code>}</code></span>
-<span class="codeline" id="line-49"><code></code></span>
-<span class="codeline" id="line-50"><code><span class="comment">// appendParam appends a parameter to the query. format may be -1 to automatically choose the format. If arg is nil it</span></code></span>
-<span class="codeline" id="line-51"><code><span class="comment">// must be an untyped nil.</span></code></span>
-<span class="codeline" id="line-52"><code><span class="keyword">func</span> (<label for="r8" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-187" class="ident">Map</a>, <label for="r11" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r12" class="ident">format</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <label for="r13" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-53"><code>	<span class="keyword">if</span> <label for="r12" class="ident">format</label> == -<span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-54"><code>		<label for="r14" class="ident">preferredFormat</label> := <label for="r8" class="ident">eqb</label>.<a href="#line-139" class="ident">chooseParameterFormatCode</a>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r13" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-55"><code>		<label for="r15" class="ident">preferredErr</label> := <label for="r8" class="ident">eqb</label>.<label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r14" class="ident">preferredFormat</label>, <label for="r13" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-56"><code>		<span class="keyword">if</span> <label for="r15" class="ident">preferredErr</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-57"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-58"><code>		}</code></span>
-<span class="codeline" id="line-59"><code></code></span>
-<span class="codeline" id="line-60"><code>		<span class="keyword">var</span> <label for="r16" class="ident">otherFormat</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
-<span class="codeline" id="line-61"><code>		<span class="keyword">if</span> <label for="r14" class="ident">preferredFormat</label> == <a href="values.go.html#line-13" class="ident">TextFormatCode</a> {</code></span>
-<span class="codeline" id="line-62"><code>			<label for="r16" class="ident">otherFormat</label> = <a href="values.go.html#line-14" class="ident">BinaryFormatCode</a></code></span>
-<span class="codeline" id="line-63"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-64"><code>			<label for="r16" class="ident">otherFormat</label> = <a href="values.go.html#line-13" class="ident">TextFormatCode</a></code></span>
-<span class="codeline" id="line-65"><code>		}</code></span>
-<span class="codeline" id="line-66"><code></code></span>
-<span class="codeline" id="line-67"><code>		<label for="r17" class="ident">otherErr</label> := <label for="r8" class="ident">eqb</label>.<label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r16" class="ident">otherFormat</label>, <label for="r13" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-68"><code>		<span class="keyword">if</span> <label for="r17" class="ident">otherErr</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-69"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-70"><code>		}</code></span>
-<span class="codeline" id="line-71"><code></code></span>
-<span class="codeline" id="line-72"><code>		<span class="keyword">return</span> <label for="r15" class="ident">preferredErr</label> <span class="comment">// return the error from the preferred format</span></code></span>
-<span class="codeline" id="line-73"><code>	}</code></span>
-<span class="codeline" id="line-74"><code></code></span>
-<span class="codeline" id="line-75"><code>	<label for="r18" class="ident">v</label>, <label for="r19" class="ident">err</label> := <label for="r8" class="ident">eqb</label>.<a href="#line-114" class="ident">encodeExtendedParamValue</a>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r12" class="ident">format</label>, <label for="r13" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r19" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-77"><code>		<span class="keyword">return</span> <label for="r19" class="ident">err</label></code></span>
-<span class="codeline" id="line-78"><code>	}</code></span>
-<span class="codeline" id="line-79"><code></code></span>
-<span class="codeline" id="line-80"><code>	<label for="r8" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a>, <label for="r12" class="ident">format</label>)</code></span>
-<span class="codeline" id="line-81"><code>	<label for="r8" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a>, <label for="r18" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-82"><code></code></span>
-<span class="codeline" id="line-83"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-84"><code>}</code></span>
-<span class="codeline" id="line-85"><code></code></span>
-<span class="codeline" id="line-86"><code><span class="comment">// appendResultFormat appends a result format to the query.</span></code></span>
-<span class="codeline" id="line-87"><code><span class="keyword">func</span> (<label for="r20" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r21" class="ident">appendResultFormat</label>(<label for="r22" class="ident">format</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>) {</code></span>
-<span class="codeline" id="line-88"><code>	<label for="r20" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r20" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a>, <label for="r22" class="ident">format</label>)</code></span>
-<span class="codeline" id="line-89"><code>}</code></span>
-<span class="codeline" id="line-90"><code></code></span>
-<span class="codeline" id="line-91"><code><span class="comment">// reset readies eqb to build another query.</span></code></span>
-<span class="codeline" id="line-92"><code><span class="keyword">func</span> (<label for="r23" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r24" class="ident">reset</label>() {</code></span>
-<span class="codeline" id="line-93"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-94"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-95"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-96"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-97"><code></code></span>
-<span class="codeline" id="line-98"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a>) &gt; <span class="lit-number">64</span> {</code></span>
-<span class="codeline" id="line-99"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-14" class="ident">ParamValues</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
-<span class="codeline" id="line-100"><code>	}</code></span>
-<span class="codeline" id="line-101"><code></code></span>
-<span class="codeline" id="line-102"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a>) &gt; <span class="lit-number">256</span> {</code></span>
-<span class="codeline" id="line-103"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">256</span>)</code></span>
-<span class="codeline" id="line-104"><code>	}</code></span>
-<span class="codeline" id="line-105"><code></code></span>
-<span class="codeline" id="line-106"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a>) &gt; <span class="lit-number">64</span> {</code></span>
-<span class="codeline" id="line-107"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">ParamFormats</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
-<span class="codeline" id="line-108"><code>	}</code></span>
-<span class="codeline" id="line-109"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a>) &gt; <span class="lit-number">64</span> {</code></span>
-<span class="codeline" id="line-110"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ResultFormats</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
-<span class="codeline" id="line-111"><code>	}</code></span>
-<span class="codeline" id="line-112"><code>}</code></span>
-<span class="codeline" id="line-113"><code></code></span>
-<span class="codeline" id="line-114"><code><span class="keyword">func</span> (<label for="r25" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r26" class="ident">encodeExtendedParamValue</label>(<label for="r27" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-187" class="ident">Map</a>, <label for="r28" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r29" class="ident">formatCode</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <label for="r30" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-115"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/github.com/jackc/pgx/v5/internal/anynil.html" class="ident i1">anynil</a>.<a href="internal/anynil/anynil.go.html#line-6" class="ident">Is</a>(<label for="r30" class="ident">arg</label>) {</code></span>
-<span class="codeline" id="line-116"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-117"><code>	}</code></span>
-<span class="codeline" id="line-118"><code></code></span>
-<span class="codeline" id="line-119"><code>	<span class="keyword">if</span> <label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-120"><code>		<label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">128</span>)</code></span>
-<span class="codeline" id="line-121"><code>	}</code></span>
-<span class="codeline" id="line-122"><code></code></span>
-<span class="codeline" id="line-123"><code>	<label for="r31" class="ident">pos</label> := <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a>)</code></span>
-<span class="codeline" id="line-124"><code></code></span>
-<span class="codeline" id="line-125"><code>	<label for="r32" class="ident">buf</label>, <label for="r33" class="ident">err</label> := <label for="r27" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-1968" class="ident">Encode</a>(<label for="r28" class="ident">oid</label>, <label for="r29" class="ident">formatCode</label>, <label for="r30" class="ident">arg</label>, <label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a>)</code></span>
-<span class="codeline" id="line-126"><code>	<span class="keyword">if</span> <label for="r33" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-127"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r33" class="ident">err</label></code></span>
-<span class="codeline" id="line-128"><code>	}</code></span>
-<span class="codeline" id="line-129"><code>	<span class="keyword">if</span> <label for="r32" class="ident">buf</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-130"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-131"><code>	}</code></span>
-<span class="codeline" id="line-132"><code>	<label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a> = <label for="r32" class="ident">buf</label></code></span>
-<span class="codeline" id="line-133"><code>	<span class="keyword">return</span> <label for="r25" class="ident">eqb</label>.<a href="#line-15" class="ident">paramValueBytes</a>[<label for="r31" class="ident">pos</label>:], <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-134"><code>}</code></span>
-<span class="codeline" id="line-135"><code></code></span>
-<span class="codeline" id="line-136"><code><span class="comment">// chooseParameterFormatCode determines the correct format code for an</span></code></span>
-<span class="codeline" id="line-137"><code><span class="comment">// argument to a prepared statement. It defaults to TextFormatCode if no</span></code></span>
-<span class="codeline" id="line-138"><code><span class="comment">// determination can be made.</span></code></span>
-<span class="codeline" id="line-139"><code><span class="keyword">func</span> (<label for="r34" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r35" class="ident">chooseParameterFormatCode</label>(<label for="r36" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-187" class="ident">Map</a>, <label for="r37" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r38" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a> {</code></span>
-<span class="codeline" id="line-140"><code>	<span class="keyword">switch</span> <label for="r38" class="ident">arg</label>.(<span class="keyword">type</span>) {</code></span>
-<span class="codeline" id="line-141"><code>	<span class="keyword">case</span> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, *<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>:</code></span>
-<span class="codeline" id="line-142"><code>		<span class="keyword">return</span> <a href="values.go.html#line-13" class="ident">TextFormatCode</a></code></span>
-<span class="codeline" id="line-143"><code>	}</code></span>
-<span class="codeline" id="line-144"><code></code></span>
-<span class="codeline" id="line-145"><code>	<span class="keyword">return</span> <label for="r36" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-471" class="ident">FormatCodeForOID</a>(<label for="r37" class="ident">oid</label>)</code></span>
-<span class="codeline" id="line-146"><code>}</code></span>
-<span class="codeline" id="line-147"><code></code></span>
-<span class="codeline" id="line-148"><code><span class="comment">// appendParamsForQueryExecModeExec appends the args to eqb.</span></code></span>
-<span class="codeline" id="line-149"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-150"><code><span class="comment">// Parameters must be encoded in the text format because of differences in type conversion between timestamps and</span></code></span>
-<span class="codeline" id="line-151"><code><span class="comment">// dates. In QueryExecModeExec we don't know what the actual PostgreSQL type is. To determine the type we use the</span></code></span>
-<span class="codeline" id="line-152"><code><span class="comment">// Go type to OID type mapping registered by RegisterDefaultPgType. However, the Go time.Time represents both</span></code></span>
-<span class="codeline" id="line-153"><code><span class="comment">// PostgreSQL timestamp[tz] and date. To use the binary format we would need to also specify what the PostgreSQL</span></code></span>
-<span class="codeline" id="line-154"><code><span class="comment">// type OID is. But that would mean telling PostgreSQL that we have sent a timestamp[tz] when what is needed is a date.</span></code></span>
-<span class="codeline" id="line-155"><code><span class="comment">// This means that the value is converted from text to timestamp[tz] to date. This means it does a time zone conversion</span></code></span>
-<span class="codeline" id="line-156"><code><span class="comment">// before converting it to date. This means that dates can be shifted by one day. In text format without that double</span></code></span>
-<span class="codeline" id="line-157"><code><span class="comment">// type conversion it takes the date directly and ignores time zone (i.e. it works).</span></code></span>
-<span class="codeline" id="line-158"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-159"><code><span class="comment">// Given that the whole point of QueryExecModeExec is to operate without having to know the PostgreSQL types there is</span></code></span>
-<span class="codeline" id="line-160"><code><span class="comment">// no way to safely use binary or to specify the parameter OIDs.</span></code></span>
-<span class="codeline" id="line-161"><code><span class="keyword">func</span> (<label for="r39" class="ident">eqb</label> *<a href="#line-13" class="ident">ExtendedQueryBuilder</a>) <label for="r40" class="ident">appendParamsForQueryExecModeExec</label>(<label for="r41" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-187" class="ident">Map</a>, <label for="r42" class="ident">args</label> []<a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-162"><code>	<span class="keyword">for</span> <label for="r43" class="ident">_</label>, <label for="r44" class="ident">arg</label> := <span class="keyword">range</span> <label for="r42" class="ident">args</label> {</code></span>
-<span class="codeline" id="line-163"><code>		<span class="keyword">if</span> <label for="r44" class="ident">arg</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-164"><code>			<label for="r45" class="ident">err</label> := <label for="r39" class="ident">eqb</label>.<a href="#line-52" class="ident">appendParam</a>(<label for="r41" class="ident">m</label>, <span class="lit-number">0</span>, <a href="values.go.html#line-13" class="ident">TextFormatCode</a>, <label for="r44" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-165"><code>			<span class="keyword">if</span> <label for="r45" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-166"><code>				<span class="keyword">return</span> <label for="r45" class="ident">err</label></code></span>
-<span class="codeline" id="line-167"><code>			}</code></span>
-<span class="codeline" id="line-168"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-169"><code>			<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> := <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-460" class="ident">TypeForValue</a>(<label for="r44" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-170"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-171"><code>				<span class="keyword">var</span> <label for="r48" class="ident">tv</label> <a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/text.go.html#line-13" class="ident">TextValuer</a></code></span>
-<span class="codeline" id="line-172"><code>				<span class="keyword">if</span> <label for="r48" class="ident">tv</label>, <label for="r47" class="ident">ok</label> = <label for="r44" class="ident">arg</label>.(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/text.go.html#line-13" class="ident">TextValuer</a>); <label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-173"><code>					<label for="r49" class="ident">t</label>, <label for="r50" class="ident">err</label> := <label for="r48" class="ident">tv</label>.<a href="pgtype/text.go.html#line-14" class="ident">TextValue</a>()</code></span>
-<span class="codeline" id="line-174"><code>					<span class="keyword">if</span> <label for="r50" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-175"><code>						<span class="keyword">return</span> <label for="r50" class="ident">err</label></code></span>
-<span class="codeline" id="line-176"><code>					}</code></span>
-<span class="codeline" id="line-177"><code></code></span>
-<span class="codeline" id="line-178"><code>					<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> = <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-438" class="ident">TypeForOID</a>(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-23" class="ident">TextOID</a>)</code></span>
-<span class="codeline" id="line-179"><code>					<span class="keyword">if</span> <label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-180"><code>						<label for="r44" class="ident">arg</label> = <label for="r49" class="ident">t</label></code></span>
-<span class="codeline" id="line-181"><code>					}</code></span>
-<span class="codeline" id="line-182"><code>				}</code></span>
-<span class="codeline" id="line-183"><code>			}</code></span>
-<span class="codeline" id="line-184"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-185"><code>				<span class="keyword">var</span> <label for="r51" class="ident">str</label> <a href="../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../fmt/print.go.html#line-62" class="ident">Stringer</a></code></span>
-<span class="codeline" id="line-186"><code>				<span class="keyword">if</span> <label for="r51" class="ident">str</label>, <label for="r47" class="ident">ok</label> = <label for="r44" class="ident">arg</label>.(<a href="../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../fmt/print.go.html#line-62" class="ident">Stringer</a>); <label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-187"><code>					<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> = <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-438" class="ident">TypeForOID</a>(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i3">pgtype</a>.<a href="pgtype/pgtype.go.html#line-23" class="ident">TextOID</a>)</code></span>
-<span class="codeline" id="line-188"><code>					<span class="keyword">if</span> <label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-189"><code>						<label for="r44" class="ident">arg</label> = <label for="r51" class="ident">str</label>.<a href="../../../../fmt/print.go.html#line-63" class="ident">String</a>()</code></span>
-<span class="codeline" id="line-190"><code>					}</code></span>
-<span class="codeline" id="line-191"><code>				}</code></span>
-<span class="codeline" id="line-192"><code>			}</code></span>
-<span class="codeline" id="line-193"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-194"><code>				<span class="keyword">return</span> &amp;<a href="conn.go.html#line-540" class="ident">unknownArgumentTypeQueryExecModeExecError</a>{<a href="conn.go.html#line-541" class="ident">arg</a>: <label for="r44" class="ident">arg</label>}</code></span>
-<span class="codeline" id="line-195"><code>			}</code></span>
-<span class="codeline" id="line-196"><code>			<label for="r52" class="ident">err</label> := <label for="r39" class="ident">eqb</label>.<a href="#line-52" class="ident">appendParam</a>(<label for="r41" class="ident">m</label>, <label for="r46" class="ident">dt</label>.<a href="pgtype/pgtype.go.html#line-182" class="ident">OID</a>, <a href="values.go.html#line-13" class="ident">TextFormatCode</a>, <label for="r44" class="ident">arg</label>)</code></span>
-<span class="codeline" id="line-197"><code>			<span class="keyword">if</span> <label for="r52" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-198"><code>				<span class="keyword">return</span> <label for="r52" class="ident">err</label></code></span>
-<span class="codeline" id="line-199"><code>			}</code></span>
-<span class="codeline" id="line-200"><code>		}</code></span>
-<span class="codeline" id="line-201"><code>	}</code></span>
-<span class="codeline" id="line-202"><code></code></span>
-<span class="codeline" id="line-203"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-204"><code>}</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"database/sql/driver"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i2"><span class="lit-string i2">"github.com/jackc/pgx/v5/internal/anynil"</span></label></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i3"><span class="lit-string i3">"github.com/jackc/pgx/v5/pgconn"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i4"><span class="lit-string i4">"github.com/jackc/pgx/v5/pgtype"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// ExtendedQueryBuilder is used to choose the parameter formats, to format the parameters and to choose the result</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// formats for an extended query.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/jackc/pgx/v5.html#name-ExtendedQueryBuilder" class="ident">ExtendedQueryBuilder</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-15"><code>	ParamValues     [][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-16"><code>	paramValueBytes []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-17"><code>	ParamFormats    []<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-18"><code>	ResultFormats   []<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-19"><code>}</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// Build sets ParamValues, ParamFormats, and ResultFormats for use with *PgConn.ExecParams or *PgConn.ExecPrepared. If</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// sd is nil then QueryExecModeExec behavior will be used.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">func</span> (<label for="r0" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r1" class="ident">Build</label>(<label for="r2" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-190" class="ident">Map</a>, <label for="r3" class="ident">sd</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgconn.html" class="ident i3">pgconn</a>.<a href="pgconn/pgconn.go.html#line-800" class="ident">StatementDescription</a>, <label for="r4" class="ident">args</label> []<a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-24"><code>	<label for="r0" class="ident">eqb</label>.<a href="#line-93" class="ident">reset</a>()</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../../../pkg/github.com/jackc/pgx/v5/internal/anynil.html" class="ident i2">anynil</a>.<a href="internal/anynil/anynil.go.html#line-30" class="ident">NormalizeSlice</a>(<label for="r4" class="ident">args</label>)</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> <label for="r3" class="ident">sd</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-29"><code>		<span class="keyword">return</span> <label for="r0" class="ident">eqb</label>.<a href="#line-162" class="ident">appendParamsForQueryExecModeExec</a>(<label for="r2" class="ident">m</label>, <label for="r4" class="ident">args</label>)</code></span>
+<span class="codeline" id="line-30"><code>	}</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-803" class="ident">ParamOIDs</a>) != <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">args</label>) {</code></span>
+<span class="codeline" id="line-33"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"mismatched param and argument count"</span>)</code></span>
+<span class="codeline" id="line-34"><code>	}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code>	<span class="keyword">for</span> <label for="r5" class="ident">i</label> := <span class="keyword">range</span> <label for="r4" class="ident">args</label> {</code></span>
+<span class="codeline" id="line-37"><code>		<label for="r6" class="ident">err</label> := <label for="r0" class="ident">eqb</label>.<a href="#line-53" class="ident">appendParam</a>(<label for="r2" class="ident">m</label>, <label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-803" class="ident">ParamOIDs</a>[<label for="r5" class="ident">i</label>], -<span class="lit-number">1</span>, <label for="r4" class="ident">args</label>[<label for="r5" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-38"><code>		<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-39"><code>			<label for="r6" class="ident">err</label> = <a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"failed to encode args[%d]: %v"</span>, <label for="r5" class="ident">i</label>, <label for="r6" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-40"><code>			<span class="keyword">return</span> <label for="r6" class="ident">err</label></code></span>
+<span class="codeline" id="line-41"><code>		}</code></span>
+<span class="codeline" id="line-42"><code>	}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">for</span> <label for="r7" class="ident">i</label> := <span class="keyword">range</span> <label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-804" class="ident">Fields</a> {</code></span>
+<span class="codeline" id="line-45"><code>		<label for="r0" class="ident">eqb</label>.<a href="#line-88" class="ident">appendResultFormat</a>(<label for="r2" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-327" class="ident">FormatCodeForOID</a>(<label for="r3" class="ident">sd</label>.<a href="pgconn/pgconn.go.html#line-804" class="ident">Fields</a>[<label for="r7" class="ident">i</label>].<a href="pgconn/pgconn.go.html#line-774" class="ident">DataTypeOID</a>))</code></span>
+<span class="codeline" id="line-46"><code>	}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// appendParam appends a parameter to the query. format may be -1 to automatically choose the format. If arg is nil it</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// must be an untyped nil.</span></code></span>
+<span class="codeline" id="line-53"><code><span class="keyword">func</span> (<label for="r8" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-190" class="ident">Map</a>, <label for="r11" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r12" class="ident">format</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <label for="r13" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">if</span> <label for="r12" class="ident">format</label> == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-55"><code>		<label for="r14" class="ident">preferredFormat</label> := <label for="r8" class="ident">eqb</label>.<a href="#line-140" class="ident">chooseParameterFormatCode</a>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r13" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-56"><code>		<label for="r15" class="ident">preferredErr</label> := <label for="r8" class="ident">eqb</label>.<label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r14" class="ident">preferredFormat</label>, <label for="r13" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-57"><code>		<span class="keyword">if</span> <label for="r15" class="ident">preferredErr</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-58"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-59"><code>		}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code>		<span class="keyword">var</span> <label for="r16" class="ident">otherFormat</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a></code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">if</span> <label for="r14" class="ident">preferredFormat</label> == <a href="values.go.html#line-13" class="ident">TextFormatCode</a> {</code></span>
+<span class="codeline" id="line-63"><code>			<label for="r16" class="ident">otherFormat</label> = <a href="values.go.html#line-14" class="ident">BinaryFormatCode</a></code></span>
+<span class="codeline" id="line-64"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-65"><code>			<label for="r16" class="ident">otherFormat</label> = <a href="values.go.html#line-13" class="ident">TextFormatCode</a></code></span>
+<span class="codeline" id="line-66"><code>		}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code>		<label for="r17" class="ident">otherErr</label> := <label for="r8" class="ident">eqb</label>.<label for="r9" class="ident">appendParam</label>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r16" class="ident">otherFormat</label>, <label for="r13" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-69"><code>		<span class="keyword">if</span> <label for="r17" class="ident">otherErr</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-70"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-71"><code>		}</code></span>
+<span class="codeline" id="line-72"><code></code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">return</span> <label for="r15" class="ident">preferredErr</label> <span class="comment">// return the error from the preferred format</span></code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code>	<label for="r18" class="ident">v</label>, <label for="r19" class="ident">err</label> := <label for="r8" class="ident">eqb</label>.<a href="#line-115" class="ident">encodeExtendedParamValue</a>(<label for="r10" class="ident">m</label>, <label for="r11" class="ident">oid</label>, <label for="r12" class="ident">format</label>, <label for="r13" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">if</span> <label for="r19" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-78"><code>		<span class="keyword">return</span> <label for="r19" class="ident">err</label></code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code>	<label for="r8" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a>, <label for="r12" class="ident">format</label>)</code></span>
+<span class="codeline" id="line-82"><code>	<label for="r8" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r8" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a>, <label for="r18" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-85"><code>}</code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">// appendResultFormat appends a result format to the query.</span></code></span>
+<span class="codeline" id="line-88"><code><span class="keyword">func</span> (<label for="r20" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r21" class="ident">appendResultFormat</label>(<label for="r22" class="ident">format</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>) {</code></span>
+<span class="codeline" id="line-89"><code>	<label for="r20" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a> = <a href="../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r20" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a>, <label for="r22" class="ident">format</label>)</code></span>
+<span class="codeline" id="line-90"><code>}</code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// reset readies eqb to build another query.</span></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> (<label for="r23" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r24" class="ident">reset</label>() {</code></span>
+<span class="codeline" id="line-94"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-95"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-96"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-97"><code>	<label for="r23" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a> = <label for="r23" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a>[<span class="lit-number">0</span>:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-98"><code></code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a>) &gt; <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-100"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-15" class="ident">ParamValues</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([][]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
+<span class="codeline" id="line-101"><code>	}</code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a>) &gt; <span class="lit-number">256</span> {</code></span>
+<span class="codeline" id="line-104"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">256</span>)</code></span>
+<span class="codeline" id="line-105"><code>	}</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a>) &gt; <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-108"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-17" class="ident">ParamFormats</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
+<span class="codeline" id="line-109"><code>	}</code></span>
+<span class="codeline" id="line-110"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r23" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a>) &gt; <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-111"><code>		<label for="r23" class="ident">eqb</label>.<a href="#line-18" class="ident">ResultFormats</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <span class="lit-number">0</span>, <span class="lit-number">64</span>)</code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code>}</code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code><span class="keyword">func</span> (<label for="r25" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r26" class="ident">encodeExtendedParamValue</label>(<label for="r27" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-190" class="ident">Map</a>, <label for="r28" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r29" class="ident">formatCode</label> <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a>, <label for="r30" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/github.com/jackc/pgx/v5/internal/anynil.html" class="ident i2">anynil</a>.<a href="internal/anynil/anynil.go.html#line-6" class="ident">Is</a>(<label for="r30" class="ident">arg</label>) {</code></span>
+<span class="codeline" id="line-117"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-118"><code>	}</code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code>	<span class="keyword">if</span> <label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-121"><code>		<label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a> = <a href="../../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">128</span>)</code></span>
+<span class="codeline" id="line-122"><code>	}</code></span>
+<span class="codeline" id="line-123"><code></code></span>
+<span class="codeline" id="line-124"><code>	<label for="r31" class="ident">pos</label> := <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a>)</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code>	<label for="r32" class="ident">buf</label>, <label for="r33" class="ident">err</label> := <label for="r27" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-1896" class="ident">Encode</a>(<label for="r28" class="ident">oid</label>, <label for="r29" class="ident">formatCode</label>, <label for="r30" class="ident">arg</label>, <label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a>)</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">if</span> <label for="r33" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-128"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r33" class="ident">err</label></code></span>
+<span class="codeline" id="line-129"><code>	}</code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">if</span> <label for="r32" class="ident">buf</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-132"><code>	}</code></span>
+<span class="codeline" id="line-133"><code>	<label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a> = <label for="r32" class="ident">buf</label></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">return</span> <label for="r25" class="ident">eqb</label>.<a href="#line-16" class="ident">paramValueBytes</a>[<label for="r31" class="ident">pos</label>:], <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-135"><code>}</code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">// chooseParameterFormatCode determines the correct format code for an</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">// argument to a prepared statement. It defaults to TextFormatCode if no</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">// determination can be made.</span></code></span>
+<span class="codeline" id="line-140"><code><span class="keyword">func</span> (<label for="r34" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r35" class="ident">chooseParameterFormatCode</label>(<label for="r36" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-190" class="ident">Map</a>, <label for="r37" class="ident">oid</label> <a href="../../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r38" class="ident">arg</label> <a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-int16" class="ident">int16</a> {</code></span>
+<span class="codeline" id="line-141"><code>	<span class="keyword">switch</span> <label for="r38" class="ident">arg</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">case</span> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, *<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>:</code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">return</span> <a href="values.go.html#line-13" class="ident">TextFormatCode</a></code></span>
+<span class="codeline" id="line-144"><code>	}</code></span>
+<span class="codeline" id="line-145"><code></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">return</span> <label for="r36" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-327" class="ident">FormatCodeForOID</a>(<label for="r37" class="ident">oid</label>)</code></span>
+<span class="codeline" id="line-147"><code>}</code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">// appendParamsForQueryExecModeExec appends the args to eqb.</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">// Parameters must be encoded in the text format because of differences in type conversion between timestamps and</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">// dates. In QueryExecModeExec we don't know what the actual PostgreSQL type is. To determine the type we use the</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">// Go type to OID type mapping registered by RegisterDefaultPgType. However, the Go time.Time represents both</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">// PostgreSQL timestamp[tz] and date. To use the binary format we would need to also specify what the PostgreSQL</span></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">// type OID is. But that would mean telling PostgreSQL that we have sent a timestamp[tz] when what is needed is a date.</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">// This means that the value is converted from text to timestamp[tz] to date. This means it does a time zone conversion</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">// before converting it to date. This means that dates can be shifted by one day. In text format without that double</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// type conversion it takes the date directly and ignores time zone (i.e. it works).</span></code></span>
+<span class="codeline" id="line-159"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">// Given that the whole point of QueryExecModeExec is to operate without having to know the PostgreSQL types there is</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">// no way to safely use binary or to specify the parameter OIDs.</span></code></span>
+<span class="codeline" id="line-162"><code><span class="keyword">func</span> (<label for="r39" class="ident">eqb</label> *<a href="#line-14" class="ident">ExtendedQueryBuilder</a>) <label for="r40" class="ident">appendParamsForQueryExecModeExec</label>(<label for="r41" class="ident">m</label> *<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-190" class="ident">Map</a>, <label for="r42" class="ident">args</label> []<a href="../../../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-163"><code>	<span class="keyword">for</span> <label for="r43" class="ident">_</label>, <label for="r44" class="ident">arg</label> := <span class="keyword">range</span> <label for="r42" class="ident">args</label> {</code></span>
+<span class="codeline" id="line-164"><code>		<span class="keyword">if</span> <label for="r44" class="ident">arg</label> == <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-165"><code>			<label for="r45" class="ident">err</label> := <label for="r39" class="ident">eqb</label>.<a href="#line-53" class="ident">appendParam</a>(<label for="r41" class="ident">m</label>, <span class="lit-number">0</span>, <a href="values.go.html#line-13" class="ident">TextFormatCode</a>, <label for="r44" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-166"><code>			<span class="keyword">if</span> <label for="r45" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-167"><code>				<span class="keyword">return</span> <label for="r45" class="ident">err</label></code></span>
+<span class="codeline" id="line-168"><code>			}</code></span>
+<span class="codeline" id="line-169"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-170"><code>			<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> := <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-312" class="ident">TypeForValue</a>(<label for="r44" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-171"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-172"><code>				<span class="keyword">var</span> <label for="r48" class="ident">tv</label> <a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/text.go.html#line-13" class="ident">TextValuer</a></code></span>
+<span class="codeline" id="line-173"><code>				<span class="keyword">if</span> <label for="r48" class="ident">tv</label>, <label for="r47" class="ident">ok</label> = <label for="r44" class="ident">arg</label>.(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/text.go.html#line-13" class="ident">TextValuer</a>); <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-174"><code>					<label for="r49" class="ident">t</label>, <label for="r50" class="ident">err</label> := <label for="r48" class="ident">tv</label>.<a href="pgtype/text.go.html#line-14" class="ident">TextValue</a>()</code></span>
+<span class="codeline" id="line-175"><code>					<span class="keyword">if</span> <label for="r50" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-176"><code>						<span class="keyword">return</span> <label for="r50" class="ident">err</label></code></span>
+<span class="codeline" id="line-177"><code>					}</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code>					<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> = <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-281" class="ident">TypeForOID</a>(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-23" class="ident">TextOID</a>)</code></span>
+<span class="codeline" id="line-180"><code>					<span class="keyword">if</span> <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-181"><code>						<label for="r44" class="ident">arg</label> = <label for="r49" class="ident">t</label></code></span>
+<span class="codeline" id="line-182"><code>					}</code></span>
+<span class="codeline" id="line-183"><code>				}</code></span>
+<span class="codeline" id="line-184"><code>			}</code></span>
+<span class="codeline" id="line-185"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-186"><code>				<span class="keyword">var</span> <label for="r51" class="ident">dv</label> <a href="../../../../../pkg/database/sql/driver.html" class="ident i0">driver</a>.<a href="../../../../database/sql/driver/types.go.html#line-39" class="ident">Valuer</a></code></span>
+<span class="codeline" id="line-187"><code>				<span class="keyword">if</span> <label for="r51" class="ident">dv</label>, <label for="r47" class="ident">ok</label> = <label for="r44" class="ident">arg</label>.(<a href="../../../../../pkg/database/sql/driver.html" class="ident i0">driver</a>.<a href="../../../../database/sql/driver/types.go.html#line-39" class="ident">Valuer</a>); <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-188"><code>					<label for="r52" class="ident">v</label>, <label for="r53" class="ident">err</label> := <label for="r51" class="ident">dv</label>.<a href="../../../../database/sql/driver/types.go.html#line-42" class="ident">Value</a>()</code></span>
+<span class="codeline" id="line-189"><code>					<span class="keyword">if</span> <label for="r53" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-190"><code>						<span class="keyword">return</span> <label for="r53" class="ident">err</label></code></span>
+<span class="codeline" id="line-191"><code>					}</code></span>
+<span class="codeline" id="line-192"><code>					<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> = <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-312" class="ident">TypeForValue</a>(<label for="r52" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-193"><code>					<span class="keyword">if</span> <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-194"><code>						<label for="r44" class="ident">arg</label> = <label for="r52" class="ident">v</label></code></span>
+<span class="codeline" id="line-195"><code>					}</code></span>
+<span class="codeline" id="line-196"><code>				}</code></span>
+<span class="codeline" id="line-197"><code>			}</code></span>
+<span class="codeline" id="line-198"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-199"><code>				<span class="keyword">var</span> <label for="r54" class="ident">str</label> <a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/print.go.html#line-63" class="ident">Stringer</a></code></span>
+<span class="codeline" id="line-200"><code>				<span class="keyword">if</span> <label for="r54" class="ident">str</label>, <label for="r47" class="ident">ok</label> = <label for="r44" class="ident">arg</label>.(<a href="../../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../../fmt/print.go.html#line-63" class="ident">Stringer</a>); <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-201"><code>					<label for="r46" class="ident">dt</label>, <label for="r47" class="ident">ok</label> = <label for="r41" class="ident">m</label>.<a href="pgtype/pgtype.go.html#line-281" class="ident">TypeForOID</a>(<a href="../../../../../pkg/github.com/jackc/pgx/v5/pgtype.html" class="ident i4">pgtype</a>.<a href="pgtype/pgtype.go.html#line-23" class="ident">TextOID</a>)</code></span>
+<span class="codeline" id="line-202"><code>					<span class="keyword">if</span> <label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-203"><code>						<label for="r44" class="ident">arg</label> = <label for="r54" class="ident">str</label>.<a href="../../../../fmt/print.go.html#line-64" class="ident">String</a>()</code></span>
+<span class="codeline" id="line-204"><code>					}</code></span>
+<span class="codeline" id="line-205"><code>				}</code></span>
+<span class="codeline" id="line-206"><code>			}</code></span>
+<span class="codeline" id="line-207"><code>			<span class="keyword">if</span> !<label for="r47" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-208"><code>				<span class="keyword">return</span> &amp;<a href="conn.go.html#line-538" class="ident">unknownArgumentTypeQueryExecModeExecError</a>{<a href="conn.go.html#line-539" class="ident">arg</a>: <label for="r44" class="ident">arg</label>}</code></span>
+<span class="codeline" id="line-209"><code>			}</code></span>
+<span class="codeline" id="line-210"><code>			<label for="r55" class="ident">err</label> := <label for="r39" class="ident">eqb</label>.<a href="#line-53" class="ident">appendParam</a>(<label for="r41" class="ident">m</label>, <label for="r46" class="ident">dt</label>.<a href="pgtype/pgtype.go.html#line-185" class="ident">OID</a>, <a href="values.go.html#line-13" class="ident">TextFormatCode</a>, <label for="r44" class="ident">arg</label>)</code></span>
+<span class="codeline" id="line-211"><code>			<span class="keyword">if</span> <label for="r55" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-212"><code>				<span class="keyword">return</span> <label for="r55" class="ident">err</label></code></span>
+<span class="codeline" id="line-213"><code>			}</code></span>
+<span class="codeline" id="line-214"><code>		}</code></span>
+<span class="codeline" id="line-215"><code>	}</code></span>
+<span class="codeline" id="line-216"><code></code></span>
+<span class="codeline" id="line-217"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-218"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

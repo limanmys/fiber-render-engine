@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: symtabinl.go in package runtime</title>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	symtabinl.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/runtime.html">runtime</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2023 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> runtime</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"internal/abi"</span></label></code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// inlinedCall is the encoding of entries in the FUNCDATA_InlTree table.</span></code></span>
+<span class="codeline" id="line-10"><code><span class="keyword">type</span> inlinedCall <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-11"><code>	funcID    <a href="../../pkg/internal/abi.html" class="ident i0">abi</a>.<a href="../internal/abi/symtab.go.html#line-36" class="ident">FuncID</a> <span class="comment">// type of the called function</span></code></span>
+<span class="codeline" id="line-12"><code>	_         [<span class="lit-number">3</span>]<a href="../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-13"><code>	nameOff   <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a> <span class="comment">// offset into pclntab for name of called function</span></code></span>
+<span class="codeline" id="line-14"><code>	parentPc  <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a> <span class="comment">// position of an instruction whose source position is the call site (offset from entry)</span></code></span>
+<span class="codeline" id="line-15"><code>	startLine <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a> <span class="comment">// line number of start of function (func keyword/TEXT directive)</span></code></span>
+<span class="codeline" id="line-16"><code>}</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// An inlineUnwinder iterates over the stack of inlined calls at a PC by</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// decoding the inline table. The last step of iteration is always the frame of</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// the physical function, so there's always at least one frame.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// This is typically used as:</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//	for u, uf := newInlineUnwinder(...); uf.valid(); uf = u.next(uf) { ... }</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// Implementation note: This is used in contexts that disallow write barriers.</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// Hence, the constructor returns this by value and pointer receiver methods</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// must not mutate pointer fields. Also, we keep the mutable state in a separate</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// struct mostly to keep both structs SSA-able, which generates much better</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// code.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">type</span> inlineUnwinder <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-32"><code>	f       <a href="symtab.go.html#line-743" class="ident">funcInfo</a></code></span>
+<span class="codeline" id="line-33"><code>	cache   *<a href="symtab.go.html#line-824" class="ident">pcvalueCache</a></code></span>
+<span class="codeline" id="line-34"><code>	inlTree *[<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">20</span>]<a href="#line-10" class="ident">inlinedCall</a></code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// An inlineFrame is a position in an inlineUnwinder.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">type</span> inlineFrame <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-39"><code>	<span class="comment">// pc is the PC giving the file/line metadata of the current frame. This is</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">	// always a "call PC" (not a "return PC"). This is 0 when the iterator is</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">	// exhausted.</span></code></span>
+<span class="codeline" id="line-42"><code>	pc <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a></code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code>	<span class="comment">// index is the index of the current record in inlTree, or -1 if we are in</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">	// the outermost function.</span></code></span>
+<span class="codeline" id="line-46"><code>	index <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a></code></span>
+<span class="codeline" id="line-47"><code>}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// newInlineUnwinder creates an inlineUnwinder initially set to the inner-most</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// inlined frame at PC. PC should be a "call PC" (not a "return PC").</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// This unwinder uses non-strict handling of PC because it's assumed this is</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// only ever used for symbolic debugging. If things go really wrong, it'll just</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// fall back to the outermost frame.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">func</span> newInlineUnwinder(<label for="r1" class="ident">f</label> <a href="symtab.go.html#line-743" class="ident">funcInfo</a>, <label for="r2" class="ident">pc</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>, <label for="r3" class="ident">cache</label> *<a href="symtab.go.html#line-824" class="ident">pcvalueCache</a>) (<a href="#line-31" class="ident">inlineUnwinder</a>, <a href="#line-38" class="ident">inlineFrame</a>) {</code></span>
+<span class="codeline" id="line-56"><code>	<label for="r4" class="ident">inldata</label> := <a href="symtab.go.html#line-1052" class="ident">funcdata</a>(<label for="r1" class="ident">f</label>, <a href="../../pkg/internal/abi.html" class="ident i0">abi</a>.<a href="../internal/abi/symtab.go.html#line-84" class="ident">FUNCDATA_InlTree</a>)</code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">if</span> <label for="r4" class="ident">inldata</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">return</span> <a href="#line-31" class="ident">inlineUnwinder</a>{<a href="#line-32" class="ident">f</a>: <label for="r1" class="ident">f</label>}, <a href="#line-38" class="ident">inlineFrame</a>{<a href="#line-42" class="ident">pc</a>: <label for="r2" class="ident">pc</label>, <a href="#line-46" class="ident">index</a>: -<span class="lit-number">1</span>}</code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code>	<label for="r5" class="ident">inlTree</label> := (*[<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">20</span>]<a href="#line-10" class="ident">inlinedCall</a>)(<label for="r4" class="ident">inldata</label>)</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r6" class="ident">u</label> := <a href="#line-31" class="ident">inlineUnwinder</a>{<a href="#line-32" class="ident">f</a>: <label for="r1" class="ident">f</label>, <a href="#line-33" class="ident">cache</a>: <label for="r3" class="ident">cache</label>, <a href="#line-34" class="ident">inlTree</a>: <label for="r5" class="ident">inlTree</label>}</code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">return</span> <label for="r6" class="ident">u</label>, <label for="r6" class="ident">u</label>.<a href="#line-65" class="ident">resolveInternal</a>(<label for="r2" class="ident">pc</label>)</code></span>
+<span class="codeline" id="line-63"><code>}</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">func</span> (<label for="r7" class="ident">u</label> *<a href="#line-31" class="ident">inlineUnwinder</a>) <label for="r8" class="ident">resolveInternal</label>(<label for="r9" class="ident">pc</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) <a href="#line-38" class="ident">inlineFrame</a> {</code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">return</span> <a href="#line-38" class="ident">inlineFrame</a>{</code></span>
+<span class="codeline" id="line-67"><code>		<a href="#line-42" class="ident">pc</a>: <label for="r9" class="ident">pc</label>,</code></span>
+<span class="codeline" id="line-68"><code>		<span class="comment">// Conveniently, this returns -1 if there's an error, which is the same</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">		// value we use for the outermost frame.</span></code></span>
+<span class="codeline" id="line-70"><code>		<a href="#line-46" class="ident">index</a>: <a href="symtab.go.html#line-1033" class="ident">pcdatavalue1</a>(<label for="r7" class="ident">u</label>.<a href="#line-32" class="ident">f</a>, <a href="../../pkg/internal/abi.html" class="ident i0">abi</a>.<a href="../internal/abi/symtab.go.html#line-78" class="ident">PCDATA_InlTreeIndex</a>, <label for="r9" class="ident">pc</label>, <label for="r7" class="ident">u</label>.<a href="#line-33" class="ident">cache</a>, <a href="../../pkg/builtin.html#name-false" class="ident">false</a>),</code></span>
+<span class="codeline" id="line-71"><code>	}</code></span>
+<span class="codeline" id="line-72"><code>}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r10" class="ident">uf</label> <a href="#line-38" class="ident">inlineFrame</a>) <label for="r11" class="ident">valid</label>() <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">return</span> <label for="r10" class="ident">uf</label>.<a href="#line-42" class="ident">pc</a> != <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-76"><code>}</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">// next returns the frame representing uf's logical caller.</span></code></span>
+<span class="codeline" id="line-79"><code><span class="keyword">func</span> (<label for="r12" class="ident">u</label> *<a href="#line-31" class="ident">inlineUnwinder</a>) <label for="r13" class="ident">next</label>(<label for="r14" class="ident">uf</label> <a href="#line-38" class="ident">inlineFrame</a>) <a href="#line-38" class="ident">inlineFrame</a> {</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <label for="r14" class="ident">uf</label>.<a href="#line-46" class="ident">index</a> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-81"><code>		<label for="r14" class="ident">uf</label>.<a href="#line-42" class="ident">pc</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-82"><code>		<span class="keyword">return</span> <label for="r14" class="ident">uf</label></code></span>
+<span class="codeline" id="line-83"><code>	}</code></span>
+<span class="codeline" id="line-84"><code>	<label for="r15" class="ident">parentPc</label> := <label for="r12" class="ident">u</label>.<a href="#line-34" class="ident">inlTree</a>[<label for="r14" class="ident">uf</label>.<a href="#line-46" class="ident">index</a>].<a href="#line-14" class="ident">parentPc</a></code></span>
+<span class="codeline" id="line-85"><code>	<span class="keyword">return</span> <label for="r12" class="ident">u</label>.<a href="#line-65" class="ident">resolveInternal</a>(<label for="r12" class="ident">u</label>.<a href="#line-32" class="ident">f</a>.<a href="symtab.go.html#line-762" class="ident">entry</a>() + <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r15" class="ident">parentPc</label>))</code></span>
+<span class="codeline" id="line-86"><code>}</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">// isInlined returns whether uf is an inlined frame.</span></code></span>
+<span class="codeline" id="line-89"><code><span class="keyword">func</span> (<label for="r16" class="ident">u</label> *<a href="#line-31" class="ident">inlineUnwinder</a>) <label for="r17" class="ident">isInlined</label>(<label for="r18" class="ident">uf</label> <a href="#line-38" class="ident">inlineFrame</a>) <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-90"><code>	<span class="keyword">return</span> <label for="r18" class="ident">uf</label>.<a href="#line-46" class="ident">index</a> &gt;= <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-91"><code>}</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">// srcFunc returns the srcFunc representing the given frame.</span></code></span>
+<span class="codeline" id="line-94"><code><span class="keyword">func</span> (<label for="r19" class="ident">u</label> *<a href="#line-31" class="ident">inlineUnwinder</a>) <label for="r20" class="ident">srcFunc</label>(<label for="r21" class="ident">uf</label> <a href="#line-38" class="ident">inlineFrame</a>) <a href="symtab.go.html#line-803" class="ident">srcFunc</a> {</code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">if</span> <label for="r21" class="ident">uf</label>.<a href="#line-46" class="ident">index</a> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-96"><code>		<span class="keyword">return</span> <label for="r19" class="ident">u</label>.<a href="#line-32" class="ident">f</a>.<a href="symtab.go.html#line-810" class="ident">srcFunc</a>()</code></span>
+<span class="codeline" id="line-97"><code>	}</code></span>
+<span class="codeline" id="line-98"><code>	<label for="r22" class="ident">t</label> := &amp;<label for="r19" class="ident">u</label>.<a href="#line-34" class="ident">inlTree</a>[<label for="r21" class="ident">uf</label>.<a href="#line-46" class="ident">index</a>]</code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">return</span> <a href="symtab.go.html#line-803" class="ident">srcFunc</a>{</code></span>
+<span class="codeline" id="line-100"><code>		<label for="r19" class="ident">u</label>.<a href="#line-32" class="ident">f</a>.<a href="symtab.go.html#line-745" class="ident">datap</a>,</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r22" class="ident">t</label>.<a href="#line-13" class="ident">nameOff</a>,</code></span>
+<span class="codeline" id="line-102"><code>		<label for="r22" class="ident">t</label>.<a href="#line-15" class="ident">startLine</a>,</code></span>
+<span class="codeline" id="line-103"><code>		<label for="r22" class="ident">t</label>.<a href="#line-11" class="ident">funcID</a>,</code></span>
+<span class="codeline" id="line-104"><code>	}</code></span>
+<span class="codeline" id="line-105"><code>}</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">// fileLine returns the file name and line number of the call within the given</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">// frame. As a convenience, for the innermost frame, it returns the file and</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">// line of the PC this unwinder was started at (often this is a call to another</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// physical function).</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// It returns "?", 0 if something goes wrong.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="keyword">func</span> (<label for="r23" class="ident">u</label> *<a href="#line-31" class="ident">inlineUnwinder</a>) <label for="r24" class="ident">fileLine</label>(<label for="r25" class="ident">uf</label> <a href="#line-38" class="ident">inlineFrame</a>) (<label for="r26" class="ident">file</label> <a href="../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r27" class="ident">line</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-114"><code>	<label for="r26" class="ident">file</label>, <label for="r28" class="ident">line32</label> := <a href="symtab.go.html#line-974" class="ident">funcline1</a>(<label for="r23" class="ident">u</label>.<a href="#line-32" class="ident">f</a>, <label for="r25" class="ident">uf</label>.<a href="#line-42" class="ident">pc</a>, <a href="../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">return</span> <label for="r26" class="ident">file</label>, <a href="../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r28" class="ident">line32</label>)</code></span>
+<span class="codeline" id="line-116"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

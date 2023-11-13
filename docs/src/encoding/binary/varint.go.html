@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: varint.go in package encoding/binary</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -225,41 +225,50 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-123"><code>	<span class="keyword">return</span> <label for="r25" class="ident">x</label>, <label for="r24" class="ident">n</label></code></span>
 <span class="codeline" id="line-124"><code>}</code></span>
 <span class="codeline" id="line-125"><code></code></span>
-<span class="codeline" id="line-126"><code><span class="keyword">var</span> overflow = <a href="../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"binary: varint overflows a 64-bit integer"</span>)</code></span>
+<span class="codeline" id="line-126"><code><span class="keyword">var</span> errOverflow = <a href="../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"binary: varint overflows a 64-bit integer"</span>)</code></span>
 <span class="codeline" id="line-127"><code></code></span>
 <span class="codeline" id="line-128"><code><span class="comment">// ReadUvarint reads an encoded unsigned integer from r and returns it as a uint64.</span></code></span>
-<span class="codeline" id="line-129"><code><span class="keyword">func</span> <label for="r26" class="ident"><a href="../../../pkg/encoding/binary.html#name-ReadUvarint" class="ident">ReadUvarint</a></label>(<label for="r27" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-259" class="ident">ByteReader</a>) (<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-130"><code>	<span class="keyword">var</span> <label for="r28" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
-<span class="codeline" id="line-131"><code>	<span class="keyword">var</span> <label for="r29" class="ident">s</label> <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
-<span class="codeline" id="line-132"><code>	<span class="keyword">for</span> <label for="r30" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r30" class="ident">i</label> &lt; <a href="#line-36" class="ident">MaxVarintLen64</a>; <label for="r30" class="ident">i</label>++ {</code></span>
-<span class="codeline" id="line-133"><code>		<label for="r31" class="ident">b</label>, <label for="r32" class="ident">err</label> := <label for="r27" class="ident">r</label>.<a href="../../io/io.go.html#line-260" class="ident">ReadByte</a>()</code></span>
-<span class="codeline" id="line-134"><code>		<span class="keyword">if</span> <label for="r32" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-135"><code>			<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <label for="r32" class="ident">err</label></code></span>
-<span class="codeline" id="line-136"><code>		}</code></span>
-<span class="codeline" id="line-137"><code>		<span class="keyword">if</span> <label for="r31" class="ident">b</label> &lt; <span class="lit-number">0x80</span> {</code></span>
-<span class="codeline" id="line-138"><code>			<span class="keyword">if</span> <label for="r30" class="ident">i</label> == <a href="#line-36" class="ident">MaxVarintLen64</a>-<span class="lit-number">1</span> &amp;&amp; <label for="r31" class="ident">b</label> &gt; <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-139"><code>				<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <a href="#line-126" class="ident">overflow</a></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">// The error is EOF only if no bytes were read.</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// If an EOF happens after reading some but not all the bytes,</span></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">// ReadUvarint returns io.ErrUnexpectedEOF.</span></code></span>
+<span class="codeline" id="line-132"><code><span class="keyword">func</span> <label for="r26" class="ident"><a href="../../../pkg/encoding/binary.html#name-ReadUvarint" class="ident">ReadUvarint</a></label>(<label for="r27" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-262" class="ident">ByteReader</a>) (<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">var</span> <label for="r28" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">var</span> <label for="r29" class="ident">s</label> <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-135"><code>	<span class="keyword">for</span> <label for="r30" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r30" class="ident">i</label> &lt; <a href="#line-36" class="ident">MaxVarintLen64</a>; <label for="r30" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-136"><code>		<label for="r31" class="ident">b</label>, <label for="r32" class="ident">err</label> := <label for="r27" class="ident">r</label>.<a href="../../io/io.go.html#line-263" class="ident">ReadByte</a>()</code></span>
+<span class="codeline" id="line-137"><code>		<span class="keyword">if</span> <label for="r32" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-138"><code>			<span class="keyword">if</span> <label for="r30" class="ident">i</label> &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r32" class="ident">err</label> == <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-139"><code>				<label for="r32" class="ident">err</label> = <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
 <span class="codeline" id="line-140"><code>			}</code></span>
-<span class="codeline" id="line-141"><code>			<span class="keyword">return</span> <label for="r28" class="ident">x</label> | <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r31" class="ident">b</label>)&lt;&lt;<label for="r29" class="ident">s</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-141"><code>			<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <label for="r32" class="ident">err</label></code></span>
 <span class="codeline" id="line-142"><code>		}</code></span>
-<span class="codeline" id="line-143"><code>		<label for="r28" class="ident">x</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r31" class="ident">b</label>&amp;<span class="lit-number">0x7f</span>) &lt;&lt; <label for="r29" class="ident">s</label></code></span>
-<span class="codeline" id="line-144"><code>		<label for="r29" class="ident">s</label> += <span class="lit-number">7</span></code></span>
-<span class="codeline" id="line-145"><code>	}</code></span>
-<span class="codeline" id="line-146"><code>	<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <a href="#line-126" class="ident">overflow</a></code></span>
-<span class="codeline" id="line-147"><code>}</code></span>
-<span class="codeline" id="line-148"><code></code></span>
-<span class="codeline" id="line-149"><code><span class="comment">// ReadVarint reads an encoded signed integer from r and returns it as an int64.</span></code></span>
-<span class="codeline" id="line-150"><code><span class="keyword">func</span> <label for="r33" class="ident"><a href="../../../pkg/encoding/binary.html#name-ReadVarint" class="ident">ReadVarint</a></label>(<label for="r34" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-259" class="ident">ByteReader</a>) (<a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-151"><code>	<label for="r35" class="ident">ux</label>, <label for="r36" class="ident">err</label> := <a href="#line-129" class="ident">ReadUvarint</a>(<label for="r34" class="ident">r</label>) <span class="comment">// ok to continue in presence of error</span></code></span>
-<span class="codeline" id="line-152"><code>	<label for="r37" class="ident">x</label> := <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r35" class="ident">ux</label> &gt;&gt; <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-153"><code>	<span class="keyword">if</span> <label for="r35" class="ident">ux</label>&amp;<span class="lit-number">1</span> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-154"><code>		<label for="r37" class="ident">x</label> = ^<label for="r37" class="ident">x</label></code></span>
-<span class="codeline" id="line-155"><code>	}</code></span>
-<span class="codeline" id="line-156"><code>	<span class="keyword">return</span> <label for="r37" class="ident">x</label>, <label for="r36" class="ident">err</label></code></span>
-<span class="codeline" id="line-157"><code>}</code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">if</span> <label for="r31" class="ident">b</label> &lt; <span class="lit-number">0x80</span> {</code></span>
+<span class="codeline" id="line-144"><code>			<span class="keyword">if</span> <label for="r30" class="ident">i</label> == <a href="#line-36" class="ident">MaxVarintLen64</a>-<span class="lit-number">1</span> &amp;&amp; <label for="r31" class="ident">b</label> &gt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-145"><code>				<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <a href="#line-126" class="ident">errOverflow</a></code></span>
+<span class="codeline" id="line-146"><code>			}</code></span>
+<span class="codeline" id="line-147"><code>			<span class="keyword">return</span> <label for="r28" class="ident">x</label> | <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r31" class="ident">b</label>)&lt;&lt;<label for="r29" class="ident">s</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-148"><code>		}</code></span>
+<span class="codeline" id="line-149"><code>		<label for="r28" class="ident">x</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r31" class="ident">b</label>&amp;<span class="lit-number">0x7f</span>) &lt;&lt; <label for="r29" class="ident">s</label></code></span>
+<span class="codeline" id="line-150"><code>		<label for="r29" class="ident">s</label> += <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-151"><code>	}</code></span>
+<span class="codeline" id="line-152"><code>	<span class="keyword">return</span> <label for="r28" class="ident">x</label>, <a href="#line-126" class="ident">errOverflow</a></code></span>
+<span class="codeline" id="line-153"><code>}</code></span>
+<span class="codeline" id="line-154"><code></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">// ReadVarint reads an encoded signed integer from r and returns it as an int64.</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">// The error is EOF only if no bytes were read.</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">// If an EOF happens after reading some but not all the bytes,</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// ReadVarint returns io.ErrUnexpectedEOF.</span></code></span>
+<span class="codeline" id="line-159"><code><span class="keyword">func</span> <label for="r33" class="ident"><a href="../../../pkg/encoding/binary.html#name-ReadVarint" class="ident">ReadVarint</a></label>(<label for="r34" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i1">io</a>.<a href="../../io/io.go.html#line-262" class="ident">ByteReader</a>) (<a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-160"><code>	<label for="r35" class="ident">ux</label>, <label for="r36" class="ident">err</label> := <a href="#line-132" class="ident">ReadUvarint</a>(<label for="r34" class="ident">r</label>) <span class="comment">// ok to continue in presence of error</span></code></span>
+<span class="codeline" id="line-161"><code>	<label for="r37" class="ident">x</label> := <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r35" class="ident">ux</label> &gt;&gt; <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-162"><code>	<span class="keyword">if</span> <label for="r35" class="ident">ux</label>&amp;<span class="lit-number">1</span> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-163"><code>		<label for="r37" class="ident">x</label> = ^<label for="r37" class="ident">x</label></code></span>
+<span class="codeline" id="line-164"><code>	}</code></span>
+<span class="codeline" id="line-165"><code>	<span class="keyword">return</span> <label for="r37" class="ident">x</label>, <label for="r36" class="ident">err</label></code></span>
+<span class="codeline" id="line-166"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

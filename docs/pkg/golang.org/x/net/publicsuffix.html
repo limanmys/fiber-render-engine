@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: golang.org/x/net/publicsuffix</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>publicsuffix</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../../index.html#pkg-golang.org/x/net/publicsuffix">golang.org/x/net/publicsuffix</a><i> (on <a href="https://pkg.go.dev/golang.org/x/net/publicsuffix" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../../dep/golang.org/x/net/publicsuffix.html">4 packages</a>, and imported by <a href="../../../../dep/golang.org/x/net/publicsuffix.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">  <a href="../../../../src/golang.org/x/net/publicsuffix/list.go.html#doc">d</a> <a href="../../../../src/golang.org/x/net/publicsuffix/list.go.html">list.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package publicsuffix provides a public suffix list based on data from
+		https://publicsuffix.org/
+		
+		A public suffix is one under which Internet users can directly register
+		names. It is related to, but different from, a TLD (top level domain).
+		
+		"com" is a TLD (top level domain). Top level means it has no dots.
+		
+		"com" is also a public suffix. Amazon and Google have registered different
+		siblings under that domain: "amazon.com" and "google.com".
+		
+		"au" is another TLD, again because it has no dots. But it's not "amazon.au".
+		Instead, it's "amazon.com.au".
+		
+		"com.au" isn't an actual TLD, because it's not at the top level (it has
+		dots). But it is an eTLD (effective TLD), because that's the branching point
+		for domain name registrars.
+		
+		Another name for "an eTLD" is "a public suffix". Often, what's more of
+		interest is the eTLD+1, or one more label than the public suffix. For
+		example, browsers partition read/write access to HTTP cookies according to
+		the eTLD+1. Web pages served from "amazon.com.au" can't read cookies from
+		"google.com.au", but web pages served from "maps.google.com" can share
+		cookies from "www.google.com", so you don't have to sign into Google Maps
+		separately from signing into Google Web Search. Note that all four of those
+		domains have 3 labels and 2 dots. The first two domains are each an eTLD+1,
+		the last two are not (but share the same eTLD+1: "google.com").
+		
+		All of these domains have the same eTLD+1:
+		  - "www.books.amazon.co.uk"
+		  - "books.amazon.co.uk"
+		  - "amazon.co.uk"
+		
+		Specifically, the eTLD+1 is "amazon.co.uk", because the eTLD is "co.uk".
+		
+		There is no closed form algorithm to calculate the eTLD of a domain.
+		Instead, the calculation is data driven. This package provides a
+		pre-compiled snapshot of Mozilla's PSL (Public Suffix List) data at
+		https://publicsuffix.org/</span>
+</span>
+	<span class="nodocs">    <a href="../../../../src/golang.org/x/net/publicsuffix/table.go.html">table.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">PublicSuffix_manager</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"strings"
+		
+			"golang.org/x/net/publicsuffix"
+		)
+		
+		func main() {
+			domains := []string{
+				"amazon.co.uk",
+				"books.amazon.co.uk",
+				"www.books.amazon.co.uk",
+				"amazon.com",
+				"",
+				"example0.debian.net",
+				"example1.debian.org",
+				"",
+				"golang.dev",
+				"golang.net",
+				"play.golang.org",
+				"gophers.in.space.museum",
+				"",
+				"0emm.com",
+				"a.0emm.com",
+				"b.c.d.0emm.com",
+				"",
+				"there.is.no.such-tld",
+				"",
+				// Examples from the PublicSuffix function's documentation.
+				"foo.org",
+				"foo.co.uk",
+				"foo.dyndns.org",
+				"foo.blogspot.co.uk",
+				"cromulent",
+			}
+		
+			for _, domain := range domains {
+				if domain == "" {
+					fmt.Println("&gt;")
+					continue
+				}
+				eTLD, icann := publicsuffix.PublicSuffix(domain)
+		
+				// Only ICANN managed domains can have a single label. Privately
+				// managed domains must have multiple labels.
+				manager := "Unmanaged"
+				if icann {
+					manager = "ICANN Managed"
+				} else if strings.IndexByte(eTLD, '.') &gt;= 0 {
+					manager = "Privately Managed"
+				}
+		
+				fmt.Printf("&gt; %24s%16s  is  %s\n", domain, eTLD, manager)
+			}
+		
+		}
+</span>
+</div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-EffectiveTLDPlusOne">	<input type='checkbox' class="fold" id="EffectiveTLDPlusOne-fold-content"><label for="EffectiveTLDPlusOne-fold-content"> func <a href="../../../../src/golang.org/x/net/publicsuffix/list.go.html#line-168">EffectiveTLDPlusOne</a>(domain <a href="../../../builtin.html#name-string">string</a>) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='EffectiveTLDPlusOne-fold-content-docs' class="fold-docs">
+<span class="md-text">		EffectiveTLDPlusOne returns the effective top level domain plus one more
+		label. For example, the eTLD+1 for "foo.bar.golang.org" is "golang.org".</span>
+
+</span></div><div class="anchor value-res" id="name-PublicSuffix">	<input type='checkbox' class="fold" id="PublicSuffix-fold-content"><label for="PublicSuffix-fold-content"> func <a href="../../../../src/golang.org/x/net/publicsuffix/list.go.html#line-86">PublicSuffix</a>(domain <a href="../../../builtin.html#name-string">string</a>) (publicSuffix <a href="../../../builtin.html#name-string">string</a>, icann <a href="../../../builtin.html#name-bool">bool</a>)</label><span id='PublicSuffix-fold-content-docs' class="fold-docs">
+<span class="md-text">		PublicSuffix returns the public suffix of the domain using a copy of the
+		publicsuffix.org database compiled into the library.
+		
+		icann is whether the public suffix is managed by the Internet Corporation
+		for Assigned Names and Numbers. If not, the public suffix is either a
+		privately managed domain (and in practice, not a top level domain) or an
+		unmanaged top level domain (and not explicitly mentioned in the
+		publicsuffix.org list). For example, "foo.org" and "foo.co.uk" are ICANN
+		domains, "foo.dyndns.org" and "foo.blogspot.co.uk" are private domains and
+		"cromulent" is an unmanaged top level domain.
+		
+		Use cases for distinguishing ICANN domains like "foo.com" from private
+		domains like "foo.appspot.com" can be found at
+		https://wiki.mozilla.org/Public_Suffix_List/Use_Cases</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (only one)</i></span></span>
+
+<div class="anchor value-res" id="name-List">	<input type='checkbox' class="fold" id="List-fold-content"><label for="List-fold-content">  var <a href="../../../../src/golang.org/x/net/publicsuffix/list.go.html#line-59">List</a> <a href="../../../net/http/cookiejar.html">cookiejar</a>.<a href="../../../net/http/cookiejar.html#name-PublicSuffixList">PublicSuffixList</a></label><span id='List-fold-content-docs' class="fold-docs">
+<span class="md-text">		List implements the cookiejar.PublicSuffixList interface by calling the
+		PublicSuffix function.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

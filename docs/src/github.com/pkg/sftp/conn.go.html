@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: conn.go in package github.com/pkg/sftp</title>
-<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -68,10 +68,7 @@ input[id=r48]:checked ~pre label[for=r48],
 input[id=r49]:checked ~pre label[for=r49],
 input[id=r50]:checked ~pre label[for=r50],
 input[id=r51]:checked ~pre label[for=r51],
-input[id=r52]:checked ~pre label[for=r52],
-input[id=r53]:checked ~pre label[for=r53],
-input[id=r54]:checked ~pre label[for=r54],
-input[id=r55]:checked ~pre label[for=r55]
+input[id=r52]:checked ~pre label[for=r52]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0,
 input[id=i1]:checked ~pre .i1,
@@ -131,9 +128,6 @@ input[id=i3]:checked ~pre .i3
 <input id="r50" type="radio" name="g"/>
 <input id="r51" type="radio" name="g"/>
 <input id="r52" type="radio" name="g"/>
-<input id="r53" type="radio" name="g"/>
-<input id="r54" type="radio" name="g"/>
-<input id="r55" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 <input id="i1" type="radio" name="i"/>
 <input id="i2" type="radio" name="i"/>
@@ -152,186 +146,180 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-10"><code><span class="comment">// conn implements a bidirectional channel on which client and server</span></code></span>
 <span class="codeline" id="line-11"><code><span class="comment">// connections are multiplexed.</span></code></span>
 <span class="codeline" id="line-12"><code><span class="keyword">type</span> conn <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-13"><code>	<a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-83" class="ident">Reader</a></code></span>
-<span class="codeline" id="line-14"><code>	<a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-140" class="ident">WriteCloser</a></code></span>
+<span class="codeline" id="line-13"><code>	<a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-86" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-143" class="ident">WriteCloser</a></code></span>
 <span class="codeline" id="line-15"><code>	<span class="comment">// this is the same allocator used in packet manager</span></code></span>
 <span class="codeline" id="line-16"><code>	alloc      *<a href="allocator.go.html#line-7" class="ident">allocator</a></code></span>
 <span class="codeline" id="line-17"><code>	<a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/mutex.go.html#line-34" class="ident">Mutex</a> <span class="comment">// used to serialise writes to sendPacket</span></code></span>
 <span class="codeline" id="line-18"><code>}</code></span>
 <span class="codeline" id="line-19"><code></code></span>
 <span class="codeline" id="line-20"><code><span class="comment">// the orderID is used in server mode if the allocator is enabled.</span></code></span>
-<span class="codeline" id="line-21"><code><span class="comment">// For the client mode just pass 0</span></code></span>
-<span class="codeline" id="line-22"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r1" class="ident">recvPacket</label>(<label for="r2" class="ident">orderID</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>, []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-23"><code>	<span class="keyword">return</span> <a href="packet.go.html#line-261" class="ident">recvPacket</a>(<label for="r0" class="ident">c</label>, <label for="r0" class="ident">c</label>.<a href="#line-16" class="ident">alloc</a>, <label for="r2" class="ident">orderID</label>)</code></span>
-<span class="codeline" id="line-24"><code>}</code></span>
-<span class="codeline" id="line-25"><code></code></span>
-<span class="codeline" id="line-26"><code><span class="keyword">func</span> (<label for="r3" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r4" class="ident">sendPacket</label>(<label for="r5" class="ident">m</label> <a href="../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../encoding/encoding.go.html#line-18" class="ident">BinaryMarshaler</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-27"><code>	<label for="r3" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-28"><code>	<span class="keyword">defer</span> <label for="r3" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-29"><code></code></span>
-<span class="codeline" id="line-30"><code>	<span class="keyword">return</span> <a href="packet.go.html#line-233" class="ident">sendPacket</a>(<label for="r3" class="ident">c</label>, <label for="r5" class="ident">m</label>)</code></span>
-<span class="codeline" id="line-31"><code>}</code></span>
-<span class="codeline" id="line-32"><code></code></span>
-<span class="codeline" id="line-33"><code><span class="keyword">func</span> (<label for="r6" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r7" class="ident">Close</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-34"><code>	<label for="r6" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-35"><code>	<span class="keyword">defer</span> <label for="r6" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-36"><code>	<span class="keyword">return</span> <label for="r6" class="ident">c</label>.<a href="#line-14" class="ident">WriteCloser</a>.<a href="../../../io/io.go.html#line-105" class="ident">Close</a>()</code></span>
-<span class="codeline" id="line-37"><code>}</code></span>
-<span class="codeline" id="line-38"><code></code></span>
-<span class="codeline" id="line-39"><code><span class="keyword">type</span> clientConn <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-40"><code>	<a href="#line-12" class="ident">conn</a></code></span>
-<span class="codeline" id="line-41"><code>	wg <a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/waitgroup.go.html#line-23" class="ident">WaitGroup</a></code></span>
-<span class="codeline" id="line-42"><code></code></span>
-<span class="codeline" id="line-43"><code>	<a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/mutex.go.html#line-34" class="ident">Mutex</a>                          <span class="comment">// protects inflight</span></code></span>
-<span class="codeline" id="line-44"><code>	inflight   <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>]<span class="keyword">chan</span>&lt;- <a href="#line-126" class="ident">result</a> <span class="comment">// outstanding requests</span></code></span>
-<span class="codeline" id="line-45"><code></code></span>
-<span class="codeline" id="line-46"><code>	closed <span class="keyword">chan</span> <span class="keyword">struct</span>{}</code></span>
-<span class="codeline" id="line-47"><code>	err    <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-48"><code>}</code></span>
-<span class="codeline" id="line-49"><code></code></span>
-<span class="codeline" id="line-50"><code><span class="comment">// Wait blocks until the conn has shut down, and return the error</span></code></span>
-<span class="codeline" id="line-51"><code><span class="comment">// causing the shutdown. It can be called concurrently from multiple</span></code></span>
-<span class="codeline" id="line-52"><code><span class="comment">// goroutines.</span></code></span>
-<span class="codeline" id="line-53"><code><span class="keyword">func</span> (<label for="r8" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r9" class="ident">Wait</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-54"><code>	&lt;-<label for="r8" class="ident">c</label>.<a href="#line-46" class="ident">closed</a></code></span>
-<span class="codeline" id="line-55"><code>	<span class="keyword">return</span> <label for="r8" class="ident">c</label>.<a href="#line-47" class="ident">err</a></code></span>
-<span class="codeline" id="line-56"><code>}</code></span>
-<span class="codeline" id="line-57"><code></code></span>
-<span class="codeline" id="line-58"><code><span class="comment">// Close closes the SFTP session.</span></code></span>
-<span class="codeline" id="line-59"><code><span class="keyword">func</span> (<label for="r10" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r11" class="ident">Close</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-60"><code>	<span class="keyword">defer</span> <label for="r10" class="ident">c</label>.<a href="#line-41" class="ident">wg</a>.<a href="../../../sync/waitgroup.go.html#line-112" class="ident">Wait</a>()</code></span>
-<span class="codeline" id="line-61"><code>	<span class="keyword">return</span> <label for="r10" class="ident">c</label>.<a href="#line-40" class="ident">conn</a>.<a href="#line-33" class="ident">Close</a>()</code></span>
-<span class="codeline" id="line-62"><code>}</code></span>
-<span class="codeline" id="line-63"><code></code></span>
-<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r12" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r13" class="ident">loop</label>() {</code></span>
-<span class="codeline" id="line-65"><code>	<span class="keyword">defer</span> <label for="r12" class="ident">c</label>.<a href="#line-41" class="ident">wg</a>.<a href="../../../sync/waitgroup.go.html#line-107" class="ident">Done</a>()</code></span>
-<span class="codeline" id="line-66"><code>	<label for="r14" class="ident">err</label> := <label for="r12" class="ident">c</label>.<a href="#line-74" class="ident">recv</a>()</code></span>
-<span class="codeline" id="line-67"><code>	<span class="keyword">if</span> <label for="r14" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-68"><code>		<label for="r12" class="ident">c</label>.<a href="#line-165" class="ident">broadcastErr</a>(<label for="r14" class="ident">err</label>)</code></span>
-<span class="codeline" id="line-69"><code>	}</code></span>
-<span class="codeline" id="line-70"><code>}</code></span>
-<span class="codeline" id="line-71"><code></code></span>
-<span class="codeline" id="line-72"><code><span class="comment">// recv continuously reads from the server and forwards responses to the</span></code></span>
-<span class="codeline" id="line-73"><code><span class="comment">// appropriate channel.</span></code></span>
-<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r15" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r16" class="ident">recv</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-75"><code>	<span class="keyword">defer</span> <label for="r15" class="ident">c</label>.<a href="#line-40" class="ident">conn</a>.<a href="#line-33" class="ident">Close</a>()</code></span>
-<span class="codeline" id="line-76"><code></code></span>
-<span class="codeline" id="line-77"><code>	<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-78"><code>		<label for="r17" class="ident">typ</label>, <label for="r18" class="ident">data</label>, <label for="r19" class="ident">err</label> := <label for="r15" class="ident">c</label>.<a href="#line-22" class="ident">recvPacket</a>(<span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-79"><code>		<span class="keyword">if</span> <label for="r19" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-80"><code>			<span class="keyword">return</span> <label for="r19" class="ident">err</label></code></span>
-<span class="codeline" id="line-81"><code>		}</code></span>
-<span class="codeline" id="line-82"><code>		<label for="r20" class="ident">sid</label>, <label for="r21" class="ident">_</label>, <label for="r19" class="ident">err</label> := <a href="packet.go.html#line-122" class="ident">unmarshalUint32Safe</a>(<label for="r18" class="ident">data</label>)</code></span>
-<span class="codeline" id="line-83"><code>		<span class="keyword">if</span> <label for="r19" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-84"><code>			<span class="keyword">return</span> <label for="r19" class="ident">err</label></code></span>
-<span class="codeline" id="line-85"><code>		}</code></span>
-<span class="codeline" id="line-86"><code></code></span>
-<span class="codeline" id="line-87"><code>		<label for="r22" class="ident">ch</label>, <label for="r23" class="ident">ok</label> := <label for="r15" class="ident">c</label>.<a href="#line-115" class="ident">getChannel</a>(<label for="r20" class="ident">sid</label>)</code></span>
-<span class="codeline" id="line-88"><code>		<span class="keyword">if</span> !<label for="r23" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-89"><code>			<span class="comment">// This is an unexpected occurrence. Send the error</span></code></span>
-<span class="codeline" id="line-90"><code><span class="comment">			// back to all listeners so that they terminate</span></code></span>
-<span class="codeline" id="line-91"><code><span class="comment">			// gracefully.</span></code></span>
-<span class="codeline" id="line-92"><code>			<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-17" class="ident">Errorf</a>(<span class="lit-string">"sid not found: %d"</span>, <label for="r20" class="ident">sid</label>)</code></span>
-<span class="codeline" id="line-93"><code>		}</code></span>
-<span class="codeline" id="line-94"><code></code></span>
-<span class="codeline" id="line-95"><code>		<label for="r22" class="ident">ch</label> &lt;- <a href="#line-126" class="ident">result</a>{<a href="#line-127" class="ident">typ</a>: <label for="r17" class="ident">typ</label>, <a href="#line-128" class="ident">data</a>: <label for="r18" class="ident">data</label>}</code></span>
-<span class="codeline" id="line-96"><code>	}</code></span>
-<span class="codeline" id="line-97"><code>}</code></span>
-<span class="codeline" id="line-98"><code></code></span>
-<span class="codeline" id="line-99"><code><span class="keyword">func</span> (<label for="r24" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r25" class="ident">putChannel</label>(<label for="r26" class="ident">ch</label> <span class="keyword">chan</span>&lt;- <a href="#line-126" class="ident">result</a>, <label for="r27" class="ident">sid</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-100"><code>	<label for="r24" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-101"><code>	<span class="keyword">defer</span> <label for="r24" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-102"><code></code></span>
-<span class="codeline" id="line-103"><code>	<a href="../../../runtime/chan.go.html#line-713"><span class="keyword">select</span></a> {</code></span>
-<span class="codeline" id="line-104"><code>	<span class="keyword">case</span> <a href="../../../runtime/chan.go.html#line-441">&lt;-</a><label for="r24" class="ident">c</label>.<a href="#line-46" class="ident">closed</a>:</code></span>
-<span class="codeline" id="line-105"><code>		<span class="comment">// already closed with broadcastErr, return error on chan.</span></code></span>
-<span class="codeline" id="line-106"><code>		<label for="r26" class="ident">ch</label> &lt;- <a href="#line-126" class="ident">result</a>{<a href="#line-129" class="ident">err</a>: <a href="request-errors.go.html#line-16" class="ident">ErrSSHFxConnectionLost</a>}</code></span>
-<span class="codeline" id="line-107"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-108"><code>	<span class="keyword">default</span>:</code></span>
-<span class="codeline" id="line-109"><code>	}</code></span>
-<span class="codeline" id="line-110"><code></code></span>
-<span class="codeline" id="line-111"><code>	<label for="r24" class="ident">c</label>.<a href="#line-44" class="ident">inflight</a>[<label for="r27" class="ident">sid</label>] = <label for="r26" class="ident">ch</label></code></span>
-<span class="codeline" id="line-112"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-113"><code>}</code></span>
-<span class="codeline" id="line-114"><code></code></span>
-<span class="codeline" id="line-115"><code><span class="keyword">func</span> (<label for="r28" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r29" class="ident">getChannel</label>(<label for="r30" class="ident">sid</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<span class="keyword">chan</span>&lt;- <a href="#line-126" class="ident">result</a>, <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
-<span class="codeline" id="line-116"><code>	<label for="r28" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-117"><code>	<span class="keyword">defer</span> <label for="r28" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// For the client mode just pass 0.</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// It returns io.EOF if the connection is closed and</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// there are no more packets to read.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r1" class="ident">recvPacket</label>(<label for="r2" class="ident">orderID</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<a href="../../../../pkg/builtin.html#name-uint8" class="ident">uint8</a>, []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-25"><code>	<span class="keyword">return</span> <a href="packet.go.html#line-270" class="ident">recvPacket</a>(<label for="r0" class="ident">c</label>, <label for="r0" class="ident">c</label>.<a href="#line-16" class="ident">alloc</a>, <label for="r2" class="ident">orderID</label>)</code></span>
+<span class="codeline" id="line-26"><code>}</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">func</span> (<label for="r3" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r4" class="ident">sendPacket</label>(<label for="r5" class="ident">m</label> <a href="../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../encoding/encoding.go.html#line-24" class="ident">BinaryMarshaler</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-29"><code>	<label for="r3" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">defer</span> <label for="r3" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code>	<span class="keyword">return</span> <a href="packet.go.html#line-242" class="ident">sendPacket</a>(<label for="r3" class="ident">c</label>, <label for="r5" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-33"><code>}</code></span>
+<span class="codeline" id="line-34"><code></code></span>
+<span class="codeline" id="line-35"><code><span class="keyword">func</span> (<label for="r6" class="ident">c</label> *<a href="#line-12" class="ident">conn</a>) <label for="r7" class="ident">Close</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-36"><code>	<label for="r6" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">defer</span> <label for="r6" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">return</span> <label for="r6" class="ident">c</label>.<a href="#line-14" class="ident">WriteCloser</a>.<a href="../../../io/io.go.html#line-108" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-39"><code>}</code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="keyword">type</span> clientConn <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-42"><code>	<a href="#line-12" class="ident">conn</a></code></span>
+<span class="codeline" id="line-43"><code>	wg <a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/waitgroup.go.html#line-23" class="ident">WaitGroup</a></code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/mutex.go.html#line-34" class="ident">Mutex</a>                          <span class="comment">// protects inflight</span></code></span>
+<span class="codeline" id="line-46"><code>	inflight   <span class="keyword">map</span>[<a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>]<span class="keyword">chan</span>&lt;- <a href="#line-120" class="ident">result</a> <span class="comment">// outstanding requests</span></code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>	closed <span class="keyword">chan</span> <span class="keyword">struct</span>{}</code></span>
+<span class="codeline" id="line-49"><code>	err    <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// Wait blocks until the conn has shut down, and return the error</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// causing the shutdown. It can be called concurrently from multiple</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// goroutines.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="keyword">func</span> (<label for="r8" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r9" class="ident">Wait</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-56"><code>	&lt;-<label for="r8" class="ident">c</label>.<a href="#line-48" class="ident">closed</a></code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">return</span> <label for="r8" class="ident">c</label>.<a href="#line-49" class="ident">err</a></code></span>
+<span class="codeline" id="line-58"><code>}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">// Close closes the SFTP session.</span></code></span>
+<span class="codeline" id="line-61"><code><span class="keyword">func</span> (<label for="r10" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r11" class="ident">Close</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-62"><code>	<span class="keyword">defer</span> <label for="r10" class="ident">c</label>.<a href="#line-43" class="ident">wg</a>.<a href="../../../sync/waitgroup.go.html#line-91" class="ident">Wait</a>()</code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">return</span> <label for="r10" class="ident">c</label>.<a href="#line-42" class="ident">conn</a>.<a href="#line-35" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-64"><code>}</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// recv continuously reads from the server and forwards responses to the</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// appropriate channel.</span></code></span>
+<span class="codeline" id="line-68"><code><span class="keyword">func</span> (<label for="r12" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r13" class="ident">recv</label>() <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">defer</span> <label for="r12" class="ident">c</label>.<a href="#line-42" class="ident">conn</a>.<a href="#line-35" class="ident">Close</a>()</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-72"><code>		<label for="r14" class="ident">typ</label>, <label for="r15" class="ident">data</label>, <label for="r16" class="ident">err</label> := <label for="r12" class="ident">c</label>.<a href="#line-24" class="ident">recvPacket</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">if</span> <label for="r16" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-74"><code>			<span class="keyword">return</span> <label for="r16" class="ident">err</label></code></span>
+<span class="codeline" id="line-75"><code>		}</code></span>
+<span class="codeline" id="line-76"><code>		<label for="r17" class="ident">sid</label>, <label for="r18" class="ident">_</label>, <label for="r16" class="ident">err</label> := <a href="packet.go.html#line-131" class="ident">unmarshalUint32Safe</a>(<label for="r15" class="ident">data</label>)</code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">if</span> <label for="r16" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-78"><code>			<span class="keyword">return</span> <label for="r16" class="ident">err</label></code></span>
+<span class="codeline" id="line-79"><code>		}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code>		<label for="r19" class="ident">ch</label>, <label for="r20" class="ident">ok</label> := <label for="r12" class="ident">c</label>.<a href="#line-109" class="ident">getChannel</a>(<label for="r17" class="ident">sid</label>)</code></span>
+<span class="codeline" id="line-82"><code>		<span class="keyword">if</span> !<label for="r20" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-83"><code>			<span class="comment">// This is an unexpected occurrence. Send the error</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">			// back to all listeners so that they terminate</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">			// gracefully.</span></code></span>
+<span class="codeline" id="line-86"><code>			<span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"sid not found: %d"</span>, <label for="r17" class="ident">sid</label>)</code></span>
+<span class="codeline" id="line-87"><code>		}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>		<label for="r19" class="ident">ch</label> &lt;- <a href="#line-120" class="ident">result</a>{<a href="#line-121" class="ident">typ</a>: <label for="r14" class="ident">typ</label>, <a href="#line-122" class="ident">data</a>: <label for="r15" class="ident">data</label>}</code></span>
+<span class="codeline" id="line-90"><code>	}</code></span>
+<span class="codeline" id="line-91"><code>}</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> (<label for="r21" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r22" class="ident">putChannel</label>(<label for="r23" class="ident">ch</label> <span class="keyword">chan</span>&lt;- <a href="#line-120" class="ident">result</a>, <label for="r24" class="ident">sid</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-94"><code>	<label for="r21" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-95"><code>	<span class="keyword">defer</span> <label for="r21" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code>	<a href="../../../runtime/chan.go.html#line-713"><span class="keyword">select</span></a> {</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">case</span> <a href="../../../runtime/chan.go.html#line-441">&lt;-</a><label for="r21" class="ident">c</label>.<a href="#line-48" class="ident">closed</a>:</code></span>
+<span class="codeline" id="line-99"><code>		<span class="comment">// already closed with broadcastErr, return error on chan.</span></code></span>
+<span class="codeline" id="line-100"><code>		<label for="r23" class="ident">ch</label> &lt;- <a href="#line-120" class="ident">result</a>{<a href="#line-123" class="ident">err</a>: <a href="request-errors.go.html#line-16" class="ident">ErrSSHFxConnectionLost</a>}</code></span>
+<span class="codeline" id="line-101"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-103"><code>	}</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code>	<label for="r21" class="ident">c</label>.<a href="#line-46" class="ident">inflight</a>[<label for="r24" class="ident">sid</label>] = <label for="r23" class="ident">ch</label></code></span>
+<span class="codeline" id="line-106"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-107"><code>}</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code><span class="keyword">func</span> (<label for="r25" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r26" class="ident">getChannel</label>(<label for="r27" class="ident">sid</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) (<span class="keyword">chan</span>&lt;- <a href="#line-120" class="ident">result</a>, <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-110"><code>	<label for="r25" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-111"><code>	<span class="keyword">defer</span> <label for="r25" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-112"><code></code></span>
+<span class="codeline" id="line-113"><code>	<label for="r28" class="ident">ch</label>, <label for="r29" class="ident">ok</label> := <label for="r25" class="ident">c</label>.<a href="#line-46" class="ident">inflight</a>[<label for="r27" class="ident">sid</label>]</code></span>
+<span class="codeline" id="line-114"><code>	<a href="../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<label for="r25" class="ident">c</label>.<a href="#line-46" class="ident">inflight</a>, <label for="r27" class="ident">sid</label>)</code></span>
+<span class="codeline" id="line-115"><code></code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">return</span> <label for="r28" class="ident">ch</label>, <label for="r29" class="ident">ok</label></code></span>
+<span class="codeline" id="line-117"><code>}</code></span>
 <span class="codeline" id="line-118"><code></code></span>
-<span class="codeline" id="line-119"><code>	<label for="r31" class="ident">ch</label>, <label for="r32" class="ident">ok</label> := <label for="r28" class="ident">c</label>.<a href="#line-44" class="ident">inflight</a>[<label for="r30" class="ident">sid</label>]</code></span>
-<span class="codeline" id="line-120"><code>	<a href="../../../../pkg/builtin.html#name-delete" class="ident">delete</a>(<label for="r28" class="ident">c</label>.<a href="#line-44" class="ident">inflight</a>, <label for="r30" class="ident">sid</label>)</code></span>
-<span class="codeline" id="line-121"><code></code></span>
-<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <label for="r31" class="ident">ch</label>, <label for="r32" class="ident">ok</label></code></span>
-<span class="codeline" id="line-123"><code>}</code></span>
-<span class="codeline" id="line-124"><code></code></span>
-<span class="codeline" id="line-125"><code><span class="comment">// result captures the result of receiving the a packet from the server</span></code></span>
-<span class="codeline" id="line-126"><code><span class="keyword">type</span> result <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-127"><code>	typ  <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-128"><code>	data []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-129"><code>	err  <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-130"><code>}</code></span>
-<span class="codeline" id="line-131"><code></code></span>
-<span class="codeline" id="line-132"><code><span class="keyword">type</span> idmarshaler <span class="keyword">interface</span> {</code></span>
-<span class="codeline" id="line-133"><code>	id() <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
-<span class="codeline" id="line-134"><code>	<a href="../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../encoding/encoding.go.html#line-18" class="ident">BinaryMarshaler</a></code></span>
-<span class="codeline" id="line-135"><code>}</code></span>
-<span class="codeline" id="line-136"><code></code></span>
-<span class="codeline" id="line-137"><code><span class="keyword">func</span> (<label for="r33" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r34" class="ident">sendPacket</label>(<label for="r35" class="ident">ch</label> <span class="keyword">chan</span> <a href="#line-126" class="ident">result</a>, <label for="r36" class="ident">p</label> <a href="#line-132" class="ident">idmarshaler</a>) (<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-138"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r35" class="ident">ch</label>) &lt; <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-139"><code>		<label for="r35" class="ident">ch</label> = <a href="../../../runtime/chan.go.html#line-72">make</a>(<span class="keyword">chan</span> <a href="#line-126" class="ident">result</a>, <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-140"><code>	}</code></span>
-<span class="codeline" id="line-141"><code></code></span>
-<span class="codeline" id="line-142"><code>	<label for="r33" class="ident">c</label>.<a href="#line-149" class="ident">dispatchRequest</a>(<label for="r35" class="ident">ch</label>, <label for="r36" class="ident">p</label>)</code></span>
-<span class="codeline" id="line-143"><code>	<label for="r37" class="ident">s</label> := &lt;-<label for="r35" class="ident">ch</label></code></span>
-<span class="codeline" id="line-144"><code>	<span class="keyword">return</span> <label for="r37" class="ident">s</label>.<a href="#line-127" class="ident">typ</a>, <label for="r37" class="ident">s</label>.<a href="#line-128" class="ident">data</a>, <label for="r37" class="ident">s</label>.<a href="#line-129" class="ident">err</a></code></span>
-<span class="codeline" id="line-145"><code>}</code></span>
-<span class="codeline" id="line-146"><code></code></span>
-<span class="codeline" id="line-147"><code><span class="comment">// dispatchRequest should ideally only be called by race-detection tests outside of this file,</span></code></span>
-<span class="codeline" id="line-148"><code><span class="comment">// where you have to ensure two packets are in flight sequentially after each other.</span></code></span>
-<span class="codeline" id="line-149"><code><span class="keyword">func</span> (<label for="r38" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r39" class="ident">dispatchRequest</label>(<label for="r40" class="ident">ch</label> <span class="keyword">chan</span>&lt;- <a href="#line-126" class="ident">result</a>, <label for="r41" class="ident">p</label> <a href="#line-132" class="ident">idmarshaler</a>) {</code></span>
-<span class="codeline" id="line-150"><code>	<label for="r42" class="ident">sid</label> := <label for="r41" class="ident">p</label>.<a href="#line-133" class="ident">id</a>()</code></span>
-<span class="codeline" id="line-151"><code></code></span>
-<span class="codeline" id="line-152"><code>	<span class="keyword">if</span> !<label for="r38" class="ident">c</label>.<a href="#line-99" class="ident">putChannel</a>(<label for="r40" class="ident">ch</label>, <label for="r42" class="ident">sid</label>) {</code></span>
-<span class="codeline" id="line-153"><code>		<span class="comment">// already closed.</span></code></span>
-<span class="codeline" id="line-154"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// result captures the result of receiving the a packet from the server</span></code></span>
+<span class="codeline" id="line-120"><code><span class="keyword">type</span> result <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-121"><code>	typ  <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-122"><code>	data []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-123"><code>	err  <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-124"><code>}</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code><span class="keyword">type</span> idmarshaler <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-127"><code>	id() <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-128"><code>	<a href="../../../../pkg/encoding.html" class="ident i0">encoding</a>.<a href="../../../encoding/encoding.go.html#line-24" class="ident">BinaryMarshaler</a></code></span>
+<span class="codeline" id="line-129"><code>}</code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code><span class="keyword">func</span> (<label for="r30" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r31" class="ident">sendPacket</label>(<label for="r32" class="ident">ch</label> <span class="keyword">chan</span> <a href="#line-120" class="ident">result</a>, <label for="r33" class="ident">p</label> <a href="#line-126" class="ident">idmarshaler</a>) (<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r32" class="ident">ch</label>) &lt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-133"><code>		<label for="r32" class="ident">ch</label> = <a href="../../../runtime/chan.go.html#line-72">make</a>(<span class="keyword">chan</span> <a href="#line-120" class="ident">result</a>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-134"><code>	}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code>	<label for="r30" class="ident">c</label>.<a href="#line-143" class="ident">dispatchRequest</a>(<label for="r32" class="ident">ch</label>, <label for="r33" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-137"><code>	<label for="r34" class="ident">s</label> := &lt;-<label for="r32" class="ident">ch</label></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">return</span> <label for="r34" class="ident">s</label>.<a href="#line-121" class="ident">typ</a>, <label for="r34" class="ident">s</label>.<a href="#line-122" class="ident">data</a>, <label for="r34" class="ident">s</label>.<a href="#line-123" class="ident">err</a></code></span>
+<span class="codeline" id="line-139"><code>}</code></span>
+<span class="codeline" id="line-140"><code></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// dispatchRequest should ideally only be called by race-detection tests outside of this file,</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">// where you have to ensure two packets are in flight sequentially after each other.</span></code></span>
+<span class="codeline" id="line-143"><code><span class="keyword">func</span> (<label for="r35" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r36" class="ident">dispatchRequest</label>(<label for="r37" class="ident">ch</label> <span class="keyword">chan</span>&lt;- <a href="#line-120" class="ident">result</a>, <label for="r38" class="ident">p</label> <a href="#line-126" class="ident">idmarshaler</a>) {</code></span>
+<span class="codeline" id="line-144"><code>	<label for="r39" class="ident">sid</label> := <label for="r38" class="ident">p</label>.<a href="#line-127" class="ident">id</a>()</code></span>
+<span class="codeline" id="line-145"><code></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">if</span> !<label for="r35" class="ident">c</label>.<a href="#line-93" class="ident">putChannel</a>(<label for="r37" class="ident">ch</label>, <label for="r39" class="ident">sid</label>) {</code></span>
+<span class="codeline" id="line-147"><code>		<span class="comment">// already closed.</span></code></span>
+<span class="codeline" id="line-148"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-149"><code>	}</code></span>
+<span class="codeline" id="line-150"><code></code></span>
+<span class="codeline" id="line-151"><code>	<span class="keyword">if</span> <label for="r40" class="ident">err</label> := <label for="r35" class="ident">c</label>.<a href="#line-42" class="ident">conn</a>.<a href="#line-28" class="ident">sendPacket</a>(<label for="r38" class="ident">p</label>); <label for="r40" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-152"><code>		<span class="keyword">if</span> <label for="r41" class="ident">ch</label>, <label for="r42" class="ident">ok</label> := <label for="r35" class="ident">c</label>.<a href="#line-109" class="ident">getChannel</a>(<label for="r39" class="ident">sid</label>); <label for="r42" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-153"><code>			<label for="r41" class="ident">ch</label> &lt;- <a href="#line-120" class="ident">result</a>{<a href="#line-123" class="ident">err</a>: <label for="r40" class="ident">err</label>}</code></span>
+<span class="codeline" id="line-154"><code>		}</code></span>
 <span class="codeline" id="line-155"><code>	}</code></span>
-<span class="codeline" id="line-156"><code></code></span>
-<span class="codeline" id="line-157"><code>	<span class="keyword">if</span> <label for="r43" class="ident">err</label> := <label for="r38" class="ident">c</label>.<a href="#line-40" class="ident">conn</a>.<a href="#line-26" class="ident">sendPacket</a>(<label for="r41" class="ident">p</label>); <label for="r43" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-158"><code>		<span class="keyword">if</span> <label for="r44" class="ident">ch</label>, <label for="r45" class="ident">ok</label> := <label for="r38" class="ident">c</label>.<a href="#line-115" class="ident">getChannel</a>(<label for="r42" class="ident">sid</label>); <label for="r45" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-159"><code>			<label for="r44" class="ident">ch</label> &lt;- <a href="#line-126" class="ident">result</a>{<a href="#line-129" class="ident">err</a>: <label for="r43" class="ident">err</label>}</code></span>
-<span class="codeline" id="line-160"><code>		}</code></span>
-<span class="codeline" id="line-161"><code>	}</code></span>
-<span class="codeline" id="line-162"><code>}</code></span>
-<span class="codeline" id="line-163"><code></code></span>
-<span class="codeline" id="line-164"><code><span class="comment">// broadcastErr sends an error to all goroutines waiting for a response.</span></code></span>
-<span class="codeline" id="line-165"><code><span class="keyword">func</span> (<label for="r46" class="ident">c</label> *<a href="#line-39" class="ident">clientConn</a>) <label for="r47" class="ident">broadcastErr</label>(<label for="r48" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-166"><code>	<label for="r46" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-167"><code>	<span class="keyword">defer</span> <label for="r46" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-168"><code></code></span>
-<span class="codeline" id="line-169"><code>	<label for="r49" class="ident">bcastRes</label> := <a href="#line-126" class="ident">result</a>{<a href="#line-129" class="ident">err</a>: <a href="request-errors.go.html#line-16" class="ident">ErrSSHFxConnectionLost</a>}</code></span>
-<span class="codeline" id="line-170"><code>	<span class="keyword">for</span> <label for="r50" class="ident">sid</label>, <label for="r51" class="ident">ch</label> := <span class="keyword">range</span> <label for="r46" class="ident">c</label>.<a href="#line-44" class="ident">inflight</a> {</code></span>
-<span class="codeline" id="line-171"><code>		<label for="r51" class="ident">ch</label> &lt;- <label for="r49" class="ident">bcastRes</label></code></span>
+<span class="codeline" id="line-156"><code>}</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// broadcastErr sends an error to all goroutines waiting for a response.</span></code></span>
+<span class="codeline" id="line-159"><code><span class="keyword">func</span> (<label for="r43" class="ident">c</label> *<a href="#line-41" class="ident">clientConn</a>) <label for="r44" class="ident">broadcastErr</label>(<label for="r45" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-160"><code>	<label for="r43" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-161"><code>	<span class="keyword">defer</span> <label for="r43" class="ident">c</label>.<a href="../../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-162"><code></code></span>
+<span class="codeline" id="line-163"><code>	<label for="r46" class="ident">bcastRes</label> := <a href="#line-120" class="ident">result</a>{<a href="#line-123" class="ident">err</a>: <a href="request-errors.go.html#line-16" class="ident">ErrSSHFxConnectionLost</a>}</code></span>
+<span class="codeline" id="line-164"><code>	<span class="keyword">for</span> <label for="r47" class="ident">sid</label>, <label for="r48" class="ident">ch</label> := <span class="keyword">range</span> <label for="r43" class="ident">c</label>.<a href="#line-46" class="ident">inflight</a> {</code></span>
+<span class="codeline" id="line-165"><code>		<label for="r48" class="ident">ch</label> &lt;- <label for="r46" class="ident">bcastRes</label></code></span>
+<span class="codeline" id="line-166"><code></code></span>
+<span class="codeline" id="line-167"><code>		<span class="comment">// Replace the chan in inflight,</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">		// we have hijacked this chan,</span></code></span>
+<span class="codeline" id="line-169"><code><span class="comment">		// and this guarantees always-only-once sending.</span></code></span>
+<span class="codeline" id="line-170"><code>		<label for="r43" class="ident">c</label>.<a href="#line-46" class="ident">inflight</a>[<label for="r47" class="ident">sid</label>] = <a href="../../../runtime/chan.go.html#line-72">make</a>(<span class="keyword">chan</span>&lt;- <a href="#line-120" class="ident">result</a>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-171"><code>	}</code></span>
 <span class="codeline" id="line-172"><code></code></span>
-<span class="codeline" id="line-173"><code>		<span class="comment">// Replace the chan in inflight,</span></code></span>
-<span class="codeline" id="line-174"><code><span class="comment">		// we have hijacked this chan,</span></code></span>
-<span class="codeline" id="line-175"><code><span class="comment">		// and this guarantees always-only-once sending.</span></code></span>
-<span class="codeline" id="line-176"><code>		<label for="r46" class="ident">c</label>.<a href="#line-44" class="ident">inflight</a>[<label for="r50" class="ident">sid</label>] = <a href="../../../runtime/chan.go.html#line-72">make</a>(<span class="keyword">chan</span>&lt;- <a href="#line-126" class="ident">result</a>, <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-177"><code>	}</code></span>
-<span class="codeline" id="line-178"><code></code></span>
-<span class="codeline" id="line-179"><code>	<label for="r46" class="ident">c</label>.<a href="#line-47" class="ident">err</a> = <label for="r48" class="ident">err</label></code></span>
-<span class="codeline" id="line-180"><code>	<a href="../../../../pkg/builtin.html#name-close" class="ident">close</a>(<label for="r46" class="ident">c</label>.<a href="#line-46" class="ident">closed</a>)</code></span>
-<span class="codeline" id="line-181"><code>}</code></span>
-<span class="codeline" id="line-182"><code></code></span>
-<span class="codeline" id="line-183"><code><span class="keyword">type</span> serverConn <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-184"><code>	<a href="#line-12" class="ident">conn</a></code></span>
-<span class="codeline" id="line-185"><code>}</code></span>
-<span class="codeline" id="line-186"><code></code></span>
-<span class="codeline" id="line-187"><code><span class="keyword">func</span> (<label for="r52" class="ident">s</label> *<a href="#line-183" class="ident">serverConn</a>) <label for="r53" class="ident">sendError</label>(<label for="r54" class="ident">id</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r55" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-188"><code>	<span class="keyword">return</span> <label for="r52" class="ident">s</label>.<a href="#line-26" class="ident">sendPacket</a>(<a href="server.go.html#line-573" class="ident">statusFromError</a>(<label for="r54" class="ident">id</label>, <label for="r55" class="ident">err</label>))</code></span>
-<span class="codeline" id="line-189"><code>}</code></span>
+<span class="codeline" id="line-173"><code>	<label for="r43" class="ident">c</label>.<a href="#line-49" class="ident">err</a> = <label for="r45" class="ident">err</label></code></span>
+<span class="codeline" id="line-174"><code>	<a href="../../../../pkg/builtin.html#name-close" class="ident">close</a>(<label for="r43" class="ident">c</label>.<a href="#line-48" class="ident">closed</a>)</code></span>
+<span class="codeline" id="line-175"><code>}</code></span>
+<span class="codeline" id="line-176"><code></code></span>
+<span class="codeline" id="line-177"><code><span class="keyword">type</span> serverConn <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-178"><code>	<a href="#line-12" class="ident">conn</a></code></span>
+<span class="codeline" id="line-179"><code>}</code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code><span class="keyword">func</span> (<label for="r49" class="ident">s</label> *<a href="#line-177" class="ident">serverConn</a>) <label for="r50" class="ident">sendError</label>(<label for="r51" class="ident">id</label> <a href="../../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r52" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-182"><code>	<span class="keyword">return</span> <label for="r49" class="ident">s</label>.<a href="#line-28" class="ident">sendPacket</a>(<a href="server.go.html#line-589" class="ident">statusFromError</a>(<label for="r51" class="ident">id</label>, <label for="r52" class="ident">err</label>))</code></span>
+<span class="codeline" id="line-183"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -20,6 +20,7 @@ type CreateReport struct {
 	DB    *gorm.DB
 }
 
+// Process creates new report queue
 func (c CreateReport) Process() error {
 	// Update cronjob as processing
 	c.Queue.UpdateStatus(models.StatusProcessing)

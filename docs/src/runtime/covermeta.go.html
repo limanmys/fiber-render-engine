@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: covermeta.go in package runtime</title>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	covermeta.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/runtime.html">runtime</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2022 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> runtime</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"internal/coverage/rtcov"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"unsafe"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// covMeta is the top-level container for bits of state related to</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// code coverage meta-data in the runtime.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">var</span> covMeta <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-15"><code>	<span class="comment">// metaList contains the list of currently registered meta-data</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">	// blobs for the running program.</span></code></span>
+<span class="codeline" id="line-17"><code>	metaList []<a href="../../pkg/internal/coverage/rtcov.html" class="ident i0">rtcov</a>.<a href="../internal/coverage/rtcov/rtcov.go.html#line-17" class="ident">CovMetaBlob</a></code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>	<span class="comment">// pkgMap records mappings from hard-coded package IDs to</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">	// slots in the covMetaList above.</span></code></span>
+<span class="codeline" id="line-21"><code>	pkgMap <span class="keyword">map</span>[<a href="../../pkg/builtin.html#name-int" class="ident">int</a>]<a href="../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code>	<span class="comment">// Set to true if we discover a package mapping glitch.</span></code></span>
+<span class="codeline" id="line-24"><code>	hardCodedListNeedsUpdating <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-25"><code>}</code></span>
+<span class="codeline" id="line-26"><code></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// addCovMeta is invoked during package "init" functions by the</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// compiler when compiling for coverage instrumentation; here 'p' is a</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// meta-data blob of length 'dlen' for the package in question, 'hash'</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// is a compiler-computed md5.sum for the blob, 'pkpath' is the</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// package path, 'pkid' is the hard-coded ID that the compiler is</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// using for the package (or -1 if the compiler doesn't think a</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// hard-coded ID is needed), and 'cmode'/'cgran' are the coverage</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// counter mode and granularity requested by the user. Return value is</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// the ID for the package for use by the package code itself.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> addCovMeta(<label for="r1" class="ident">p</label> <a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>, <label for="r2" class="ident">dlen</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r3" class="ident">hash</label> [<span class="lit-number">16</span>]<a href="../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r4" class="ident">pkpath</label> <a href="../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r5" class="ident">pkid</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r6" class="ident">cmode</label> <a href="../../pkg/builtin.html#name-uint8" class="ident">uint8</a>, <label for="r7" class="ident">cgran</label> <a href="../../pkg/builtin.html#name-uint8" class="ident">uint8</a>) <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-37"><code>	<label for="r8" class="ident">slot</label> := <a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<a href="#line-14" class="ident">covMeta</a>.<a href="#line-17" class="ident">metaList</a>)</code></span>
+<span class="codeline" id="line-38"><code>	<a href="#line-14" class="ident">covMeta</a>.<a href="#line-17" class="ident">metaList</a> = <a href="../../pkg/builtin.html#name-append" class="ident">append</a>(<a href="#line-14" class="ident">covMeta</a>.<a href="#line-17" class="ident">metaList</a>,</code></span>
+<span class="codeline" id="line-39"><code>		<a href="../../pkg/internal/coverage/rtcov.html" class="ident i0">rtcov</a>.<a href="../internal/coverage/rtcov/rtcov.go.html#line-17" class="ident">CovMetaBlob</a>{</code></span>
+<span class="codeline" id="line-40"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-18" class="ident">P</a>:                  (*<a href="../../pkg/builtin.html#name-byte" class="ident">byte</a>)(<label for="r1" class="ident">p</label>),</code></span>
+<span class="codeline" id="line-41"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-19" class="ident">Len</a>:                <label for="r2" class="ident">dlen</label>,</code></span>
+<span class="codeline" id="line-42"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-20" class="ident">Hash</a>:               <label for="r3" class="ident">hash</label>,</code></span>
+<span class="codeline" id="line-43"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-21" class="ident">PkgPath</a>:            <label for="r4" class="ident">pkpath</label>,</code></span>
+<span class="codeline" id="line-44"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-22" class="ident">PkgID</a>:              <label for="r5" class="ident">pkid</label>,</code></span>
+<span class="codeline" id="line-45"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-23" class="ident">CounterMode</a>:        <label for="r6" class="ident">cmode</label>,</code></span>
+<span class="codeline" id="line-46"><code>			<a href="../internal/coverage/rtcov/rtcov.go.html#line-24" class="ident">CounterGranularity</a>: <label for="r7" class="ident">cgran</label>,</code></span>
+<span class="codeline" id="line-47"><code>		})</code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">if</span> <label for="r5" class="ident">pkid</label> != -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-49"><code>		<span class="keyword">if</span> <a href="#line-14" class="ident">covMeta</a>.<a href="#line-21" class="ident">pkgMap</a> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-50"><code>			<a href="#line-14" class="ident">covMeta</a>.<a href="#line-21" class="ident">pkgMap</a> = <a href="../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../pkg/builtin.html#name-int" class="ident">int</a>]<a href="../../pkg/builtin.html#name-int" class="ident">int</a>)</code></span>
+<span class="codeline" id="line-51"><code>		}</code></span>
+<span class="codeline" id="line-52"><code>		<span class="keyword">if</span> <label for="r9" class="ident">_</label>, <label for="r10" class="ident">ok</label> := <a href="#line-14" class="ident">covMeta</a>.<a href="#line-21" class="ident">pkgMap</a>[<label for="r5" class="ident">pkid</label>]; <label for="r10" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-53"><code>			<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"runtime.addCovMeta: coverage package map collision"</span>)</code></span>
+<span class="codeline" id="line-54"><code>		}</code></span>
+<span class="codeline" id="line-55"><code>		<span class="comment">// Record the real slot (position on meta-list) for this</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">		// package; we'll use the map to fix things up later on.</span></code></span>
+<span class="codeline" id="line-57"><code>		<a href="#line-14" class="ident">covMeta</a>.<a href="#line-21" class="ident">pkgMap</a>[<label for="r5" class="ident">pkid</label>] = <label for="r8" class="ident">slot</label></code></span>
+<span class="codeline" id="line-58"><code>	}</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// ID zero is reserved as invalid.</span></code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r8" class="ident">slot</label> + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-62"><code>}</code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">//go:linkname runtime_coverage_getCovMetaList runtime/coverage.getCovMetaList</span></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">func</span> runtime_coverage_getCovMetaList() []<a href="../../pkg/internal/coverage/rtcov.html" class="ident i0">rtcov</a>.<a href="../internal/coverage/rtcov/rtcov.go.html#line-17" class="ident">CovMetaBlob</a> {</code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">return</span> <a href="#line-14" class="ident">covMeta</a>.<a href="#line-17" class="ident">metaList</a></code></span>
+<span class="codeline" id="line-67"><code>}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">//go:linkname runtime_coverage_getCovPkgMap runtime/coverage.getCovPkgMap</span></code></span>
+<span class="codeline" id="line-70"><code><span class="keyword">func</span> runtime_coverage_getCovPkgMap() <span class="keyword">map</span>[<a href="../../pkg/builtin.html#name-int" class="ident">int</a>]<a href="../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-71"><code>	<span class="keyword">return</span> <a href="#line-14" class="ident">covMeta</a>.<a href="#line-21" class="ident">pkgMap</a></code></span>
+<span class="codeline" id="line-72"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

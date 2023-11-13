@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: spec.go in package github.com/robfig/cron/v3</title>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	spec.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/robfig/cron/v3.html">github.com/robfig/cron/v3</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> cron</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"time"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// SpecSchedule specifies a duty cycle (to the second granularity), based on a</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// traditional crontab specification. It is computed initially and stored as bit sets.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/robfig/cron/v3.html#name-SpecSchedule" class="ident">SpecSchedule</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-8"><code>	Second, Minute, Hour, Dom, Month, Dow <a href="../../../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code>	<span class="comment">// Override location for this schedule.</span></code></span>
+<span class="codeline" id="line-11"><code>	Location *<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/zoneinfo.go.html#line-19" class="ident">Location</a></code></span>
+<span class="codeline" id="line-12"><code>}</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// bounds provides a range of acceptable values (plus a map of name to value).</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">type</span> bounds <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-16"><code>	min, max <a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-17"><code>	names    <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-18"><code>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// The bounds for each field.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-22"><code>	seconds = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">0</span>, <span class="lit-number">59</span>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>}</code></span>
+<span class="codeline" id="line-23"><code>	minutes = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">0</span>, <span class="lit-number">59</span>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>}</code></span>
+<span class="codeline" id="line-24"><code>	hours   = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">0</span>, <span class="lit-number">23</span>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>}</code></span>
+<span class="codeline" id="line-25"><code>	dom     = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">1</span>, <span class="lit-number">31</span>, <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>}</code></span>
+<span class="codeline" id="line-26"><code>	months  = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">1</span>, <span class="lit-number">12</span>, <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-27"><code>		<span class="lit-string">"jan"</span>: <span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-28"><code>		<span class="lit-string">"feb"</span>: <span class="lit-number">2</span>,</code></span>
+<span class="codeline" id="line-29"><code>		<span class="lit-string">"mar"</span>: <span class="lit-number">3</span>,</code></span>
+<span class="codeline" id="line-30"><code>		<span class="lit-string">"apr"</span>: <span class="lit-number">4</span>,</code></span>
+<span class="codeline" id="line-31"><code>		<span class="lit-string">"may"</span>: <span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-32"><code>		<span class="lit-string">"jun"</span>: <span class="lit-number">6</span>,</code></span>
+<span class="codeline" id="line-33"><code>		<span class="lit-string">"jul"</span>: <span class="lit-number">7</span>,</code></span>
+<span class="codeline" id="line-34"><code>		<span class="lit-string">"aug"</span>: <span class="lit-number">8</span>,</code></span>
+<span class="codeline" id="line-35"><code>		<span class="lit-string">"sep"</span>: <span class="lit-number">9</span>,</code></span>
+<span class="codeline" id="line-36"><code>		<span class="lit-string">"oct"</span>: <span class="lit-number">10</span>,</code></span>
+<span class="codeline" id="line-37"><code>		<span class="lit-string">"nov"</span>: <span class="lit-number">11</span>,</code></span>
+<span class="codeline" id="line-38"><code>		<span class="lit-string">"dec"</span>: <span class="lit-number">12</span>,</code></span>
+<span class="codeline" id="line-39"><code>	}}</code></span>
+<span class="codeline" id="line-40"><code>	dow = <a href="#line-15" class="ident">bounds</a>{<span class="lit-number">0</span>, <span class="lit-number">6</span>, <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-41"><code>		<span class="lit-string">"sun"</span>: <span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-42"><code>		<span class="lit-string">"mon"</span>: <span class="lit-number">1</span>,</code></span>
+<span class="codeline" id="line-43"><code>		<span class="lit-string">"tue"</span>: <span class="lit-number">2</span>,</code></span>
+<span class="codeline" id="line-44"><code>		<span class="lit-string">"wed"</span>: <span class="lit-number">3</span>,</code></span>
+<span class="codeline" id="line-45"><code>		<span class="lit-string">"thu"</span>: <span class="lit-number">4</span>,</code></span>
+<span class="codeline" id="line-46"><code>		<span class="lit-string">"fri"</span>: <span class="lit-number">5</span>,</code></span>
+<span class="codeline" id="line-47"><code>		<span class="lit-string">"sat"</span>: <span class="lit-number">6</span>,</code></span>
+<span class="codeline" id="line-48"><code>	}}</code></span>
+<span class="codeline" id="line-49"><code>)</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-52"><code>	<span class="comment">// Set the top bit if a star was included in the expression.</span></code></span>
+<span class="codeline" id="line-53"><code>	starBit = <span class="lit-number">1</span> &lt;&lt; <span class="lit-number">63</span></code></span>
+<span class="codeline" id="line-54"><code>)</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// Next returns the next time this schedule is activated, greater than the given</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// time.  If no time can be found to satisfy the schedule, return the zero time.</span></code></span>
+<span class="codeline" id="line-58"><code><span class="keyword">func</span> (<label for="r0" class="ident">s</label> *<a href="#line-7" class="ident">SpecSchedule</a>) <label for="r1" class="ident">Next</label>(<label for="r2" class="ident">t</label> <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a>) <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a> {</code></span>
+<span class="codeline" id="line-59"><code>	<span class="comment">// General approach</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">	// For Month, Day, Hour, Minute, Second:</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">	// Check if the time value matches.  If yes, continue to the next field.</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">	// If the field doesn't match the schedule, then increment the field until it matches.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">	// While incrementing the field, a wrap-around brings it back to the beginning</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">	// of the field list (since it is necessary to re-verify previous field</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">	// values)</span></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code>	<span class="comment">// Convert the given time into the schedule's timezone, if one is specified.</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">	// Save the original timezone so we can convert back after we find a time.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">	// Note that schedules without a time zone specified (time.Local) are treated</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">	// as local to the time provided.</span></code></span>
+<span class="codeline" id="line-72"><code>	<label for="r3" class="ident">origLocation</label> := <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1153" class="ident">Location</a>()</code></span>
+<span class="codeline" id="line-73"><code>	<label for="r4" class="ident">loc</label> := <label for="r0" class="ident">s</label>.<a href="#line-11" class="ident">Location</a></code></span>
+<span class="codeline" id="line-74"><code>	<span class="keyword">if</span> <label for="r4" class="ident">loc</label> == <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/zoneinfo.go.html#line-80" class="ident">Local</a> {</code></span>
+<span class="codeline" id="line-75"><code>		<label for="r4" class="ident">loc</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1153" class="ident">Location</a>()</code></span>
+<span class="codeline" id="line-76"><code>	}</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">if</span> <label for="r0" class="ident">s</label>.<a href="#line-11" class="ident">Location</a> != <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/zoneinfo.go.html#line-80" class="ident">Local</a> {</code></span>
+<span class="codeline" id="line-78"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1144" class="ident">In</a>(<label for="r0" class="ident">s</label>.<a href="#line-11" class="ident">Location</a>)</code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code>	<span class="comment">// Start at the earliest possible time (the upcoming second).</span></code></span>
+<span class="codeline" id="line-82"><code>	<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<span class="lit-number">1</span>*<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a> - <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-598" class="ident">Nanosecond</a>())*<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-632" class="ident">Nanosecond</a>)</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>	<span class="comment">// This flag indicates whether a field has been incremented.</span></code></span>
+<span class="codeline" id="line-85"><code>	<label for="r5" class="ident">added</label> := <a href="../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-86"><code></code></span>
+<span class="codeline" id="line-87"><code>	<span class="comment">// If no time is found within five years, return zero.</span></code></span>
+<span class="codeline" id="line-88"><code>	<label for="r6" class="ident">yearLimit</label> := <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-510" class="ident">Year</a>() + <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-89"><code></code></span>
+<span class="codeline" id="line-90"><code><label for="r7" class="ident">WRAP</label>:</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-510" class="ident">Year</a>() &gt; <label for="r6" class="ident">yearLimit</label> {</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a>{}</code></span>
+<span class="codeline" id="line-93"><code>	}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code>	<span class="comment">// Find the first applicable month.</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">	// If it's this month, then do nothing.</span></code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">for</span> <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-516" class="ident">Month</a>())&amp;<label for="r0" class="ident">s</label>.<a href="#line-8" class="ident">Month</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-98"><code>		<span class="comment">// If we have to add a month, reset the other parts to 0.</span></code></span>
+<span class="codeline" id="line-99"><code>		<span class="keyword">if</span> !<label for="r5" class="ident">added</label> {</code></span>
+<span class="codeline" id="line-100"><code>			<label for="r5" class="ident">added</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-101"><code>			<span class="comment">// Otherwise, set the date at the beginning (since the current time is irrelevant).</span></code></span>
+<span class="codeline" id="line-102"><code>			<label for="r2" class="ident">t</label> = <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-1467" class="ident">Date</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-510" class="ident">Year</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-516" class="ident">Month</a>(), <span class="lit-number">1</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <label for="r4" class="ident">loc</label>)</code></span>
+<span class="codeline" id="line-103"><code>		}</code></span>
+<span class="codeline" id="line-104"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-943" class="ident">AddDate</a>(<span class="lit-number">0</span>, <span class="lit-number">1</span>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code>		<span class="comment">// Wrapped around.</span></code></span>
+<span class="codeline" id="line-107"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-516" class="ident">Month</a>() == <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-306" class="ident">January</a> {</code></span>
+<span class="codeline" id="line-108"><code>			<span class="keyword">goto</span> <label for="r7" class="ident">WRAP</label></code></span>
+<span class="codeline" id="line-109"><code>		}</code></span>
+<span class="codeline" id="line-110"><code>	}</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>	<span class="comment">// Now get a day in that month.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">	// NOTE: This causes issues for daylight savings regimes where midnight does</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">	// not exist.  For example: Sao Paulo has DST that transforms midnight on</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">	// 11/3 into 1am. Handle that by noticing when the Hour ends up != 0.</span></code></span>
+<span class="codeline" id="line-117"><code>	<span class="keyword">for</span> !<a href="#line-179" class="ident">dayMatches</a>(<label for="r0" class="ident">s</label>, <label for="r2" class="ident">t</label>) {</code></span>
+<span class="codeline" id="line-118"><code>		<span class="keyword">if</span> !<label for="r5" class="ident">added</label> {</code></span>
+<span class="codeline" id="line-119"><code>			<label for="r5" class="ident">added</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-120"><code>			<label for="r2" class="ident">t</label> = <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-1467" class="ident">Date</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-510" class="ident">Year</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-516" class="ident">Month</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-522" class="ident">Day</a>(), <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <label for="r4" class="ident">loc</label>)</code></span>
+<span class="codeline" id="line-121"><code>		}</code></span>
+<span class="codeline" id="line-122"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-943" class="ident">AddDate</a>(<span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-123"><code>		<span class="comment">// Notice if the hour is no longer midnight due to DST.</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">		// Add an hour if it's 23, subtract an hour if it's 1.</span></code></span>
+<span class="codeline" id="line-125"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>() != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-126"><code>			<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>() &gt; <span class="lit-number">12</span> {</code></span>
+<span class="codeline" id="line-127"><code>				<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>(<span class="lit-number">24</span>-<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>()) * <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-637" class="ident">Hour</a>)</code></span>
+<span class="codeline" id="line-128"><code>			} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-129"><code>				<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>(-<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>()) * <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-637" class="ident">Hour</a>)</code></span>
+<span class="codeline" id="line-130"><code>			}</code></span>
+<span class="codeline" id="line-131"><code>		}</code></span>
+<span class="codeline" id="line-132"><code></code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-522" class="ident">Day</a>() == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-134"><code>			<span class="keyword">goto</span> <label for="r7" class="ident">WRAP</label></code></span>
+<span class="codeline" id="line-135"><code>		}</code></span>
+<span class="codeline" id="line-136"><code>	}</code></span>
+<span class="codeline" id="line-137"><code></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">for</span> <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>())&amp;<label for="r0" class="ident">s</label>.<a href="#line-8" class="ident">Hour</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">if</span> !<label for="r5" class="ident">added</label> {</code></span>
+<span class="codeline" id="line-140"><code>			<label for="r5" class="ident">added</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-141"><code>			<label for="r2" class="ident">t</label> = <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-1467" class="ident">Date</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-510" class="ident">Year</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-516" class="ident">Month</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-522" class="ident">Day</a>(), <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>(), <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <label for="r4" class="ident">loc</label>)</code></span>
+<span class="codeline" id="line-142"><code>		}</code></span>
+<span class="codeline" id="line-143"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<span class="lit-number">1</span> * <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-637" class="ident">Hour</a>)</code></span>
+<span class="codeline" id="line-144"><code></code></span>
+<span class="codeline" id="line-145"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-582" class="ident">Hour</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-146"><code>			<span class="keyword">goto</span> <label for="r7" class="ident">WRAP</label></code></span>
+<span class="codeline" id="line-147"><code>		}</code></span>
+<span class="codeline" id="line-148"><code>	}</code></span>
+<span class="codeline" id="line-149"><code></code></span>
+<span class="codeline" id="line-150"><code>	<span class="keyword">for</span> <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-587" class="ident">Minute</a>())&amp;<label for="r0" class="ident">s</label>.<a href="#line-8" class="ident">Minute</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-151"><code>		<span class="keyword">if</span> !<label for="r5" class="ident">added</label> {</code></span>
+<span class="codeline" id="line-152"><code>			<label for="r5" class="ident">added</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-153"><code>			<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1528" class="ident">Truncate</a>(<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-636" class="ident">Minute</a>)</code></span>
+<span class="codeline" id="line-154"><code>		}</code></span>
+<span class="codeline" id="line-155"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<span class="lit-number">1</span> * <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-636" class="ident">Minute</a>)</code></span>
+<span class="codeline" id="line-156"><code></code></span>
+<span class="codeline" id="line-157"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-587" class="ident">Minute</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-158"><code>			<span class="keyword">goto</span> <label for="r7" class="ident">WRAP</label></code></span>
+<span class="codeline" id="line-159"><code>		}</code></span>
+<span class="codeline" id="line-160"><code>	}</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code>	<span class="keyword">for</span> <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-592" class="ident">Second</a>())&amp;<label for="r0" class="ident">s</label>.<a href="#line-8" class="ident">Second</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-163"><code>		<span class="keyword">if</span> !<label for="r5" class="ident">added</label> {</code></span>
+<span class="codeline" id="line-164"><code>			<label for="r5" class="ident">added</label> = <a href="../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-165"><code>			<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1528" class="ident">Truncate</a>(<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a>)</code></span>
+<span class="codeline" id="line-166"><code>		}</code></span>
+<span class="codeline" id="line-167"><code>		<label for="r2" class="ident">t</label> = <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<span class="lit-number">1</span> * <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a>)</code></span>
+<span class="codeline" id="line-168"><code></code></span>
+<span class="codeline" id="line-169"><code>		<span class="keyword">if</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-592" class="ident">Second</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-170"><code>			<span class="keyword">goto</span> <label for="r7" class="ident">WRAP</label></code></span>
+<span class="codeline" id="line-171"><code>		}</code></span>
+<span class="codeline" id="line-172"><code>	}</code></span>
+<span class="codeline" id="line-173"><code></code></span>
+<span class="codeline" id="line-174"><code>	<span class="keyword">return</span> <label for="r2" class="ident">t</label>.<a href="../../../../time/time.go.html#line-1144" class="ident">In</a>(<label for="r3" class="ident">origLocation</label>)</code></span>
+<span class="codeline" id="line-175"><code>}</code></span>
+<span class="codeline" id="line-176"><code></code></span>
+<span class="codeline" id="line-177"><code><span class="comment">// dayMatches returns true if the schedule's day-of-week and day-of-month</span></code></span>
+<span class="codeline" id="line-178"><code><span class="comment">// restrictions are satisfied by the given time.</span></code></span>
+<span class="codeline" id="line-179"><code><span class="keyword">func</span> dayMatches(<label for="r9" class="ident">s</label> *<a href="#line-7" class="ident">SpecSchedule</a>, <label for="r10" class="ident">t</label> <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a>) <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-180"><code>	<span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-181"><code>		<label for="r11" class="ident">domMatch</label> <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> = <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r10" class="ident">t</label>.<a href="../../../../time/time.go.html#line-522" class="ident">Day</a>())&amp;<label for="r9" class="ident">s</label>.<a href="#line-8" class="ident">Dom</a> &gt; <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-182"><code>		<label for="r12" class="ident">dowMatch</label> <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a> = <span class="lit-number">1</span>&lt;&lt;<a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r10" class="ident">t</label>.<a href="../../../../time/time.go.html#line-528" class="ident">Weekday</a>())&amp;<label for="r9" class="ident">s</label>.<a href="#line-8" class="ident">Dow</a> &gt; <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-183"><code>	)</code></span>
+<span class="codeline" id="line-184"><code>	<span class="keyword">if</span> <label for="r9" class="ident">s</label>.<a href="#line-8" class="ident">Dom</a>&amp;<a href="#line-53" class="ident">starBit</a> &gt; <span class="lit-number">0</span> || <label for="r9" class="ident">s</label>.<a href="#line-8" class="ident">Dow</a>&amp;<a href="#line-53" class="ident">starBit</a> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-185"><code>		<span class="keyword">return</span> <label for="r11" class="ident">domMatch</label> &amp;&amp; <label for="r12" class="ident">dowMatch</label></code></span>
+<span class="codeline" id="line-186"><code>	}</code></span>
+<span class="codeline" id="line-187"><code>	<span class="keyword">return</span> <label for="r11" class="ident">domMatch</label> || <label for="r12" class="ident">dowMatch</label></code></span>
+<span class="codeline" id="line-188"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

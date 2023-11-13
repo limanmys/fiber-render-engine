@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: hmac.go in package github.com/golang-jwt/jwt/v4</title>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	hmac.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html">github.com/golang-jwt/jwt/v4</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> jwt</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"crypto"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"crypto/hmac"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"errors"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// SigningMethodHMAC implements the HMAC-SHA family of signing methods.</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// Expects key type of []byte for both signing and validation</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-SigningMethodHMAC" class="ident">SigningMethodHMAC</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-12"><code>	Name <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-13"><code>	Hash <a href="../../../../../pkg/crypto.html" class="ident i0">crypto</a>.<a href="../../../../crypto/crypto.go.html#line-16" class="ident">Hash</a></code></span>
+<span class="codeline" id="line-14"><code>}</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// Specific instances for HS256 and company</span></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-18"><code>	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-SigningMethodHS256" class="ident">SigningMethodHS256</a>  *<a href="#line-11" class="ident">SigningMethodHMAC</a></code></span>
+<span class="codeline" id="line-19"><code>	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-SigningMethodHS384" class="ident">SigningMethodHS384</a>  *<a href="#line-11" class="ident">SigningMethodHMAC</a></code></span>
+<span class="codeline" id="line-20"><code>	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-SigningMethodHS512" class="ident">SigningMethodHS512</a>  *<a href="#line-11" class="ident">SigningMethodHMAC</a></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-ErrSignatureInvalid" class="ident">ErrSignatureInvalid</a> = <a href="../../../../../pkg/errors.html" class="ident i2">errors</a>.<a href="../../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"signature is invalid"</span>)</code></span>
+<span class="codeline" id="line-22"><code>)</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-25"><code>	<span class="comment">// HS256</span></code></span>
+<span class="codeline" id="line-26"><code>	<a href="#line-18" class="ident">SigningMethodHS256</a> = &amp;<a href="#line-11" class="ident">SigningMethodHMAC</a>{<span class="lit-string">"HS256"</span>, <a href="../../../../../pkg/crypto.html" class="ident i0">crypto</a>.<a href="../../../../crypto/crypto.go.html#line-73" class="ident">SHA256</a>}</code></span>
+<span class="codeline" id="line-27"><code>	<a href="signing_method.go.html#line-19" class="ident">RegisterSigningMethod</a>(<a href="#line-18" class="ident">SigningMethodHS256</a>.<a href="#line-44" class="ident">Alg</a>(), <span class="keyword">func</span>() <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a> {</code></span>
+<span class="codeline" id="line-28"><code>		<span class="keyword">return</span> <a href="#line-18" class="ident">SigningMethodHS256</a></code></span>
+<span class="codeline" id="line-29"><code>	})</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code>	<span class="comment">// HS384</span></code></span>
+<span class="codeline" id="line-32"><code>	<a href="#line-19" class="ident">SigningMethodHS384</a> = &amp;<a href="#line-11" class="ident">SigningMethodHMAC</a>{<span class="lit-string">"HS384"</span>, <a href="../../../../../pkg/crypto.html" class="ident i0">crypto</a>.<a href="../../../../crypto/crypto.go.html#line-74" class="ident">SHA384</a>}</code></span>
+<span class="codeline" id="line-33"><code>	<a href="signing_method.go.html#line-19" class="ident">RegisterSigningMethod</a>(<a href="#line-19" class="ident">SigningMethodHS384</a>.<a href="#line-44" class="ident">Alg</a>(), <span class="keyword">func</span>() <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a> {</code></span>
+<span class="codeline" id="line-34"><code>		<span class="keyword">return</span> <a href="#line-19" class="ident">SigningMethodHS384</a></code></span>
+<span class="codeline" id="line-35"><code>	})</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">// HS512</span></code></span>
+<span class="codeline" id="line-38"><code>	<a href="#line-20" class="ident">SigningMethodHS512</a> = &amp;<a href="#line-11" class="ident">SigningMethodHMAC</a>{<span class="lit-string">"HS512"</span>, <a href="../../../../../pkg/crypto.html" class="ident i0">crypto</a>.<a href="../../../../crypto/crypto.go.html#line-75" class="ident">SHA512</a>}</code></span>
+<span class="codeline" id="line-39"><code>	<a href="signing_method.go.html#line-19" class="ident">RegisterSigningMethod</a>(<a href="#line-20" class="ident">SigningMethodHS512</a>.<a href="#line-44" class="ident">Alg</a>(), <span class="keyword">func</span>() <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a> {</code></span>
+<span class="codeline" id="line-40"><code>		<span class="keyword">return</span> <a href="#line-20" class="ident">SigningMethodHS512</a></code></span>
+<span class="codeline" id="line-41"><code>	})</code></span>
+<span class="codeline" id="line-42"><code>}</code></span>
+<span class="codeline" id="line-43"><code></code></span>
+<span class="codeline" id="line-44"><code><span class="keyword">func</span> (<label for="r1" class="ident">m</label> *<a href="#line-11" class="ident">SigningMethodHMAC</a>) <label for="r2" class="ident">Alg</label>() <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-45"><code>	<span class="keyword">return</span> <label for="r1" class="ident">m</label>.<a href="#line-12" class="ident">Name</a></code></span>
+<span class="codeline" id="line-46"><code>}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// Verify implements token verification for the SigningMethod. Returns nil if the signature is valid.</span></code></span>
+<span class="codeline" id="line-49"><code><span class="keyword">func</span> (<label for="r3" class="ident">m</label> *<a href="#line-11" class="ident">SigningMethodHMAC</a>) <label for="r4" class="ident">Verify</label>(<label for="r5" class="ident">signingString</label>, <label for="r6" class="ident">signature</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r7" class="ident">key</label> <span class="keyword">interface</span>{}) <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-50"><code>	<span class="comment">// Verify the key is the right type</span></code></span>
+<span class="codeline" id="line-51"><code>	<label for="r8" class="ident">keyBytes</label>, <label for="r9" class="ident">ok</label> := <label for="r7" class="ident">key</label>.([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>)</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">if</span> !<label for="r9" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-53"><code>		<span class="keyword">return</span> <a href="errors.go.html#line-10" class="ident">ErrInvalidKeyType</a></code></span>
+<span class="codeline" id="line-54"><code>	}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>	<span class="comment">// Decode signature, for comparison</span></code></span>
+<span class="codeline" id="line-57"><code>	<label for="r10" class="ident">sig</label>, <label for="r11" class="ident">err</label> := <a href="token.go.html#line-129" class="ident">DecodeSegment</a>(<label for="r6" class="ident">signature</label>)</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">if</span> <label for="r11" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">return</span> <label for="r11" class="ident">err</label></code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code>	<span class="comment">// Can we use the specified hashing method?</span></code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">if</span> !<label for="r3" class="ident">m</label>.<a href="#line-13" class="ident">Hash</a>.<a href="../../../../crypto/crypto.go.html#line-138" class="ident">Available</a>() {</code></span>
+<span class="codeline" id="line-64"><code>		<span class="keyword">return</span> <a href="errors.go.html#line-11" class="ident">ErrHashUnavailable</a></code></span>
+<span class="codeline" id="line-65"><code>	}</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code>	<span class="comment">// This signing method is symmetric, so we validate the signature</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">	// by reproducing the signature from the signing string and key, then</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">	// comparing that against the provided signature.</span></code></span>
+<span class="codeline" id="line-70"><code>	<label for="r12" class="ident">hasher</label> := <a href="../../../../../pkg/crypto/hmac.html" class="ident i1">hmac</a>.<a href="../../../../crypto/hmac/hmac.go.html#line-129" class="ident">New</a>(<label for="r3" class="ident">m</label>.<a href="#line-13" class="ident">Hash</a>.<a href="../../../../crypto/crypto.go.html#line-127" class="ident">New</a>, <label for="r8" class="ident">keyBytes</label>)</code></span>
+<span class="codeline" id="line-71"><code>	<label for="r12" class="ident">hasher</label>.<a href="../../../../io/io.go.html#line-100" class="ident">Write</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r5" class="ident">signingString</label>))</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">if</span> !<a href="../../../../../pkg/crypto/hmac.html" class="ident i1">hmac</a>.<a href="../../../../crypto/hmac/hmac.go.html#line-175" class="ident">Equal</a>(<label for="r10" class="ident">sig</label>, <label for="r12" class="ident">hasher</label>.<a href="../../../../hash/hash.go.html#line-33" class="ident">Sum</a>(<a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)) {</code></span>
+<span class="codeline" id="line-73"><code>		<span class="keyword">return</span> <a href="#line-21" class="ident">ErrSignatureInvalid</a></code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code>	<span class="comment">// No validation errors.  Signature is good.</span></code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-78"><code>}</code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// Sign implements token signing for the SigningMethod.</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// Key must be []byte</span></code></span>
+<span class="codeline" id="line-82"><code><span class="keyword">func</span> (<label for="r13" class="ident">m</label> *<a href="#line-11" class="ident">SigningMethodHMAC</a>) <label for="r14" class="ident">Sign</label>(<label for="r15" class="ident">signingString</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r16" class="ident">key</label> <span class="keyword">interface</span>{}) (<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <label for="r17" class="ident">keyBytes</label>, <label for="r18" class="ident">ok</label> := <label for="r16" class="ident">key</label>.([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>); <label for="r18" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-84"><code>		<span class="keyword">if</span> !<label for="r13" class="ident">m</label>.<a href="#line-13" class="ident">Hash</a>.<a href="../../../../crypto/crypto.go.html#line-138" class="ident">Available</a>() {</code></span>
+<span class="codeline" id="line-85"><code>			<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="errors.go.html#line-11" class="ident">ErrHashUnavailable</a></code></span>
+<span class="codeline" id="line-86"><code>		}</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>		<label for="r19" class="ident">hasher</label> := <a href="../../../../../pkg/crypto/hmac.html" class="ident i1">hmac</a>.<a href="../../../../crypto/hmac/hmac.go.html#line-129" class="ident">New</a>(<label for="r13" class="ident">m</label>.<a href="#line-13" class="ident">Hash</a>.<a href="../../../../crypto/crypto.go.html#line-127" class="ident">New</a>, <label for="r17" class="ident">keyBytes</label>)</code></span>
+<span class="codeline" id="line-89"><code>		<label for="r19" class="ident">hasher</label>.<a href="../../../../io/io.go.html#line-100" class="ident">Write</a>([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r15" class="ident">signingString</label>))</code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code>		<span class="keyword">return</span> <a href="token.go.html#line-121" class="ident">EncodeSegment</a>(<label for="r19" class="ident">hasher</label>.<a href="../../../../hash/hash.go.html#line-33" class="ident">Sum</a>(<a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>)), <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-92"><code>	}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">return</span> <span class="lit-string">""</span>, <a href="errors.go.html#line-10" class="ident">ErrInvalidKeyType</a></code></span>
+<span class="codeline" id="line-95"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

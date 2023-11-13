@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: gocron.go in package github.com/go-co-op/gocron</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	gocron.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/go-co-op/gocron.html">github.com/go-co-op/gocron</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package gocron : A Golang Job Scheduling Package.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// An in-process scheduler for periodic jobs that uses the builder pattern</span></code></span>
+<span class="codeline" id="line-4"><code><span class="comment">// for configuration. gocron lets you run Golang functions periodically</span></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// at pre-determined intervals using a simple, human-friendly syntax.</span></code></span></div><span class="codeline" id="line-6"><code><span class="keyword">package</span> gocron</code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-9"><code>	<label for="i0"><span class="lit-string i0">"errors"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i1"><span class="lit-string i1">"fmt"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i2"><span class="lit-string i2">"reflect"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i3"><span class="lit-string i3">"regexp"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i4"><span class="lit-string i4">"runtime"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i5"><span class="lit-string i5">"sync"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i6"><span class="lit-string i6">"time"</span></label></code></span>
+<span class="codeline" id="line-16"><code>)</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// PanicHandlerFunc represents a type that can be set to handle panics occurring</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// during job execution.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/go-co-op/gocron.html#name-PanicHandlerFunc" class="ident">PanicHandlerFunc</a> <span class="keyword">func</span>(jobName <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, recoverData <span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// The global panic handler</span></code></span>
+<span class="codeline" id="line-23"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-24"><code>	panicHandler      <a href="#line-20" class="ident">PanicHandlerFunc</a></code></span>
+<span class="codeline" id="line-25"><code>	panicHandlerMutex = <a href="../../../../pkg/sync.html" class="ident i5">sync</a>.<a href="../../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a>{}</code></span>
+<span class="codeline" id="line-26"><code>)</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// SetPanicHandler sets the global panicHandler to the given function.</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// Leaving it nil or setting it to nil disables automatic panic handling.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// If the panicHandler is not nil, any panic that occurs during executing a job will be recovered</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// and the panicHandlerFunc will be called with the job's funcName and the recover data.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/go-co-op/gocron.html#name-SetPanicHandler" class="ident">SetPanicHandler</a></label>(<label for="r1" class="ident">handler</label> <a href="#line-20" class="ident">PanicHandlerFunc</a>) {</code></span>
+<span class="codeline" id="line-33"><code>	<a href="#line-25" class="ident">panicHandlerMutex</a>.<a href="../../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-34"><code>	<span class="keyword">defer</span> <a href="#line-25" class="ident">panicHandlerMutex</a>.<a href="../../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-35"><code>	<a href="#line-24" class="ident">panicHandler</a> = <label for="r1" class="ident">handler</label></code></span>
+<span class="codeline" id="line-36"><code>}</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// Error declarations for gocron related errors</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-40"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrNotAFunction" class="ident">ErrNotAFunction</a>                  = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: only functions can be scheduled into the job queue"</span>)</code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrNotScheduledWeekday" class="ident">ErrNotScheduledWeekday</a>           = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: job not scheduled weekly on a weekday"</span>)</code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrJobNotFoundWithTag" class="ident">ErrJobNotFoundWithTag</a>            = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: no jobs found with given tag"</span>)</code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrJobNotFound" class="ident">ErrJobNotFound</a>                   = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: no job found"</span>)</code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrUnsupportedTimeFormat" class="ident">ErrUnsupportedTimeFormat</a>         = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: the given time format is not supported"</span>)</code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidInterval" class="ident">ErrInvalidInterval</a>               = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: .Every() interval must be greater than 0"</span>)</code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidIntervalType" class="ident">ErrInvalidIntervalType</a>           = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: .Every() interval must be int, time.Duration, or string"</span>)</code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidIntervalUnitsSelection" class="ident">ErrInvalidIntervalUnitsSelection</a> = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: .Every(time.Duration) and .Cron() cannot be used with units (e.g. .Seconds())"</span>)</code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidFunctionParameters" class="ident">ErrInvalidFunctionParameters</a>     = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: length of function parameters must match job function parameters"</span>)</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrAtTimeNotSupported" class="ident">ErrAtTimeNotSupported</a>               = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: the At() method is not supported for this time unit"</span>)</code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrWeekdayNotSupported" class="ident">ErrWeekdayNotSupported</a>              = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: weekday is not supported for time unit"</span>)</code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidDayOfMonthEntry" class="ident">ErrInvalidDayOfMonthEntry</a>           = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: only days 1 through 28 and -1 through -28 are allowed for monthly schedules"</span>)</code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidMonthLastDayEntry" class="ident">ErrInvalidMonthLastDayEntry</a>         = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: only a single negative integer is permitted for MonthLastDay"</span>)</code></span>
+<span class="codeline" id="line-54"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrTagsUnique" class="ident">ErrTagsUnique</a>                       = <span class="keyword">func</span>(<label for="r2" class="ident">tag</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> { <span class="keyword">return</span> <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"gocron: a non-unique tag was set on the job: %s"</span>, <label for="r2" class="ident">tag</label>) }</code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrWrongParams" class="ident">ErrWrongParams</a>                      = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: wrong list of params"</span>)</code></span>
+<span class="codeline" id="line-56"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrDoWithJobDetails" class="ident">ErrDoWithJobDetails</a>                 = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: DoWithJobDetails expects a function whose last parameter is a gocron.Job"</span>)</code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrUpdateCalledWithoutJob" class="ident">ErrUpdateCalledWithoutJob</a>           = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: a call to Scheduler.Update() requires a call to Scheduler.Job() first"</span>)</code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrCronParseFailure" class="ident">ErrCronParseFailure</a>                 = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: cron expression failed to be parsed"</span>)</code></span>
+<span class="codeline" id="line-59"><code>	<a href="../../../../pkg/github.com/go-co-op/gocron.html#name-ErrInvalidDaysOfMonthDuplicateValue" class="ident">ErrInvalidDaysOfMonthDuplicateValue</a> = <a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gocron: duplicate days of month is not allowed in Month() and Months() methods"</span>)</code></span>
+<span class="codeline" id="line-60"><code>)</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code><span class="keyword">func</span> wrapOrError(<label for="r4" class="ident">toWrap</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r5" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">var</span> <label for="r6" class="ident">returnErr</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">if</span> <label for="r4" class="ident">toWrap</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; !<a href="../../../../pkg/errors.html" class="ident i0">errors</a>.<a href="../../../errors/wrap.go.html#line-44" class="ident">Is</a>(<label for="r5" class="ident">err</label>, <label for="r4" class="ident">toWrap</label>) {</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r6" class="ident">returnErr</label> = <a href="../../../../pkg/fmt.html" class="ident i1">fmt</a>.<a href="../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"%s: %w"</span>, <label for="r5" class="ident">err</label>, <label for="r4" class="ident">toWrap</label>)</code></span>
+<span class="codeline" id="line-66"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-67"><code>		<label for="r6" class="ident">returnErr</label> = <label for="r5" class="ident">err</label></code></span>
+<span class="codeline" id="line-68"><code>	}</code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">return</span> <label for="r6" class="ident">returnErr</label></code></span>
+<span class="codeline" id="line-70"><code>}</code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">// regex patterns for supported time formats</span></code></span>
+<span class="codeline" id="line-73"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-74"><code>	timeWithSeconds    = <a href="../../../../pkg/regexp.html" class="ident i3">regexp</a>.<a href="../../../regexp/regexp.go.html#line-316" class="ident">MustCompile</a>(<span class="lit-string">`(?m)^\d{1,2}:\d\d:\d\d$`</span>)</code></span>
+<span class="codeline" id="line-75"><code>	timeWithoutSeconds = <a href="../../../../pkg/regexp.html" class="ident i3">regexp</a>.<a href="../../../regexp/regexp.go.html#line-316" class="ident">MustCompile</a>(<span class="lit-string">`(?m)^\d{1,2}:\d\d$`</span>)</code></span>
+<span class="codeline" id="line-76"><code>)</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="keyword">type</span> schedulingUnit <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-81"><code>	<span class="comment">// default unit is seconds</span></code></span>
+<span class="codeline" id="line-82"><code>	milliseconds <a href="#line-78" class="ident">schedulingUnit</a> = <a href="../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-83"><code>	seconds</code></span>
+<span class="codeline" id="line-84"><code>	minutes</code></span>
+<span class="codeline" id="line-85"><code>	hours</code></span>
+<span class="codeline" id="line-86"><code>	days</code></span>
+<span class="codeline" id="line-87"><code>	weeks</code></span>
+<span class="codeline" id="line-88"><code>	months</code></span>
+<span class="codeline" id="line-89"><code>	duration</code></span>
+<span class="codeline" id="line-90"><code>	crontab</code></span>
+<span class="codeline" id="line-91"><code>)</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code><span class="keyword">func</span> callJobFunc(<label for="r8" class="ident">jobFunc</label> <span class="keyword">interface</span>{}) {</code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <label for="r8" class="ident">jobFunc</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code>	<label for="r9" class="ident">f</label> := <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r8" class="ident">jobFunc</label>)</code></span>
+<span class="codeline" id="line-98"><code>	<span class="keyword">if</span> !<label for="r9" class="ident">f</label>.<a href="../../../reflect/value.go.html#line-1582" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-99"><code>		<label for="r9" class="ident">f</label>.<a href="../../../reflect/value.go.html#line-377" class="ident">Call</a>([]<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-39" class="ident">Value</a>{})</code></span>
+<span class="codeline" id="line-100"><code>	}</code></span>
+<span class="codeline" id="line-101"><code>}</code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code><span class="keyword">func</span> callJobFuncWithParams(<label for="r11" class="ident">jobFunc</label> <span class="keyword">interface</span>{}, <label for="r12" class="ident">params</label> []<span class="keyword">interface</span>{}) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">if</span> <label for="r11" class="ident">jobFunc</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-105"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-106"><code>	}</code></span>
+<span class="codeline" id="line-107"><code>	<label for="r13" class="ident">f</label> := <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r11" class="ident">jobFunc</label>)</code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">if</span> <label for="r13" class="ident">f</label>.<a href="../../../reflect/value.go.html#line-1582" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-109"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-110"><code>	}</code></span>
+<span class="codeline" id="line-111"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">params</label>) != <label for="r13" class="ident">f</label>.<a href="../../../reflect/value.go.html#line-2625" class="ident">Type</a>().<a href="../../../reflect/type.go.html#line-210" class="ident">NumIn</a>() {</code></span>
+<span class="codeline" id="line-112"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-113"><code>	}</code></span>
+<span class="codeline" id="line-114"><code>	<label for="r14" class="ident">in</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-39" class="ident">Value</a>, <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">params</label>))</code></span>
+<span class="codeline" id="line-115"><code>	<span class="keyword">for</span> <label for="r15" class="ident">k</label>, <label for="r16" class="ident">param</label> := <span class="keyword">range</span> <label for="r12" class="ident">params</label> {</code></span>
+<span class="codeline" id="line-116"><code>		<label for="r14" class="ident">in</label>[<label for="r15" class="ident">k</label>] = <a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r16" class="ident">param</label>)</code></span>
+<span class="codeline" id="line-117"><code>	}</code></span>
+<span class="codeline" id="line-118"><code>	<label for="r17" class="ident">vals</label> := <label for="r13" class="ident">f</label>.<a href="../../../reflect/value.go.html#line-377" class="ident">Call</a>(<label for="r14" class="ident">in</label>)</code></span>
+<span class="codeline" id="line-119"><code>	<span class="keyword">for</span> <label for="r18" class="ident">_</label>, <label for="r19" class="ident">val</label> := <span class="keyword">range</span> <label for="r17" class="ident">vals</label> {</code></span>
+<span class="codeline" id="line-120"><code>		<label for="r20" class="ident">i</label> := <label for="r19" class="ident">val</label>.<a href="../../../reflect/value.go.html#line-1489" class="ident">Interface</a>()</code></span>
+<span class="codeline" id="line-121"><code>		<span class="keyword">if</span> <label for="r21" class="ident">err</label>, <label for="r22" class="ident">ok</label> := <label for="r20" class="ident">i</label>.(<a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>); <label for="r22" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-122"><code>			<span class="keyword">return</span> <label for="r21" class="ident">err</label></code></span>
+<span class="codeline" id="line-123"><code>		}</code></span>
+<span class="codeline" id="line-124"><code>	}</code></span>
+<span class="codeline" id="line-125"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-126"><code>}</code></span>
+<span class="codeline" id="line-127"><code></code></span>
+<span class="codeline" id="line-128"><code><span class="keyword">func</span> getFunctionName(<label for="r24" class="ident">fn</label> <span class="keyword">interface</span>{}) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">return</span> <a href="../../../../pkg/runtime.html" class="ident i4">runtime</a>.<a href="../../../runtime/symtab.go.html#line-652" class="ident">FuncForPC</a>(<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r24" class="ident">fn</label>).<a href="../../../reflect/value.go.html#line-2144" class="ident">Pointer</a>()).<a href="../../../runtime/symtab.go.html#line-679" class="ident">Name</a>()</code></span>
+<span class="codeline" id="line-130"><code>}</code></span>
+<span class="codeline" id="line-131"><code></code></span>
+<span class="codeline" id="line-132"><code><span class="keyword">func</span> getFunctionNameOfPointer(<label for="r26" class="ident">fn</label> <span class="keyword">interface</span>{}) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">return</span> <a href="../../../../pkg/runtime.html" class="ident i4">runtime</a>.<a href="../../../runtime/symtab.go.html#line-652" class="ident">FuncForPC</a>(<a href="../../../../pkg/reflect.html" class="ident i2">reflect</a>.<a href="../../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r26" class="ident">fn</label>).<a href="../../../reflect/value.go.html#line-1224" class="ident">Elem</a>().<a href="../../../reflect/value.go.html#line-2144" class="ident">Pointer</a>()).<a href="../../../runtime/symtab.go.html#line-679" class="ident">Name</a>()</code></span>
+<span class="codeline" id="line-134"><code>}</code></span>
+<span class="codeline" id="line-135"><code></code></span>
+<span class="codeline" id="line-136"><code><span class="keyword">func</span> parseTime(<label for="r28" class="ident">t</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r29" class="ident">hour</label>, <label for="r30" class="ident">min</label>, <label for="r31" class="ident">sec</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r32" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-137"><code>	<span class="keyword">var</span> <label for="r33" class="ident">timeLayout</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">switch</span> {</code></span>
+<span class="codeline" id="line-139"><code>	<span class="keyword">case</span> <a href="#line-74" class="ident">timeWithSeconds</a>.<a href="../../../regexp/regexp.go.html#line-532" class="ident">MatchString</a>(<label for="r28" class="ident">t</label>):</code></span>
+<span class="codeline" id="line-140"><code>		<label for="r33" class="ident">timeLayout</label> = <span class="lit-string">"15:04:05"</span></code></span>
+<span class="codeline" id="line-141"><code>	<span class="keyword">case</span> <a href="#line-75" class="ident">timeWithoutSeconds</a>.<a href="../../../regexp/regexp.go.html#line-532" class="ident">MatchString</a>(<label for="r28" class="ident">t</label>):</code></span>
+<span class="codeline" id="line-142"><code>		<label for="r33" class="ident">timeLayout</label> = <span class="lit-string">"15:04"</span></code></span>
+<span class="codeline" id="line-143"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-144"><code>		<span class="keyword">return</span> <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <a href="#line-44" class="ident">ErrUnsupportedTimeFormat</a></code></span>
+<span class="codeline" id="line-145"><code>	}</code></span>
+<span class="codeline" id="line-146"><code></code></span>
+<span class="codeline" id="line-147"><code>	<label for="r34" class="ident">parsedTime</label>, <label for="r32" class="ident">err</label> := <a href="../../../../pkg/time.html" class="ident i6">time</a>.<a href="../../../time/format.go.html#line-1007" class="ident">Parse</a>(<label for="r33" class="ident">timeLayout</label>, <label for="r28" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-148"><code>	<span class="keyword">if</span> <label for="r32" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-149"><code>		<span class="keyword">return</span> <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <a href="#line-44" class="ident">ErrUnsupportedTimeFormat</a></code></span>
+<span class="codeline" id="line-150"><code>	}</code></span>
+<span class="codeline" id="line-151"><code>	<span class="keyword">return</span> <label for="r34" class="ident">parsedTime</label>.<a href="../../../time/time.go.html#line-582" class="ident">Hour</a>(), <label for="r34" class="ident">parsedTime</label>.<a href="../../../time/time.go.html#line-587" class="ident">Minute</a>(), <label for="r34" class="ident">parsedTime</label>.<a href="../../../time/time.go.html#line-592" class="ident">Second</a>(), <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-152"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

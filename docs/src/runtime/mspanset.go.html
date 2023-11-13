@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: mspanset.go in package runtime</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -82,7 +82,17 @@ input[id=r62]:checked ~pre label[for=r62],
 input[id=r63]:checked ~pre label[for=r63],
 input[id=r64]:checked ~pre label[for=r64],
 input[id=r65]:checked ~pre label[for=r65],
-input[id=r66]:checked ~pre label[for=r66]
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0,
 input[id=i1]:checked ~pre .i1,
@@ -156,6 +166,16 @@ input[id=i3]:checked ~pre .i3
 <input id="r64" type="radio" name="g"/>
 <input id="r65" type="radio" name="g"/>
 <input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 <input id="i1" type="radio" name="i"/>
 <input id="i2" type="radio" name="i"/>
@@ -196,10 +216,10 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-32"><code><span class="comment">	// concurrent lock-free access and we're likely to reuse it</span></code></span>
 <span class="codeline" id="line-33"><code><span class="comment">	// anyway. (In principle, we could do this during STW.)</span></code></span>
 <span class="codeline" id="line-34"><code></code></span>
-<span class="codeline" id="line-35"><code>	spineLock <a href="runtime2.go.html#line-161" class="ident">mutex</a></code></span>
-<span class="codeline" id="line-36"><code>	spine     <a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a> <span class="comment">// *[N]*spanSetBlock, accessed atomically</span></code></span>
-<span class="codeline" id="line-37"><code>	spineLen  <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>        <span class="comment">// Spine array length, accessed atomically</span></code></span>
-<span class="codeline" id="line-38"><code>	spineCap  <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>        <span class="comment">// Spine array cap, accessed under lock</span></code></span>
+<span class="codeline" id="line-35"><code>	spineLock <a href="runtime2.go.html#line-163" class="ident">mutex</a></code></span>
+<span class="codeline" id="line-36"><code>	spine     <a href="#line-274" class="ident">atomicSpanSetSpinePointer</a> <span class="comment">// *[N]atomic.Pointer[spanSetBlock]</span></code></span>
+<span class="codeline" id="line-37"><code>	spineLen  <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-350" class="ident">Uintptr</a>            <span class="comment">// Spine array length</span></code></span>
+<span class="codeline" id="line-38"><code>	spineCap  <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>                   <span class="comment">// Spine array cap, accessed under spineLock</span></code></span>
 <span class="codeline" id="line-39"><code></code></span>
 <span class="codeline" id="line-40"><code>	<span class="comment">// index is the head and tail of the spanSet in a single field.</span></code></span>
 <span class="codeline" id="line-41"><code><span class="comment">	// The head and the tail both represent an index into the logical</span></code></span>
@@ -212,7 +232,7 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-48"><code><span class="comment">	// span in the heap were stored in this set, and each span were</span></code></span>
 <span class="codeline" id="line-49"><code><span class="comment">	// the minimum size (1 runtime page, 8 KiB), then roughly the</span></code></span>
 <span class="codeline" id="line-50"><code><span class="comment">	// smallest heap which would be unrepresentable is 32 TiB in size.</span></code></span>
-<span class="codeline" id="line-51"><code>	index <a href="#line-297" class="ident">headTailIndex</a></code></span>
+<span class="codeline" id="line-51"><code>	index <a href="#line-351" class="ident">atomicHeadTailIndex</a></code></span>
 <span class="codeline" id="line-52"><code>}</code></span>
 <span class="codeline" id="line-53"><code></code></span>
 <span class="codeline" id="line-54"><code><span class="keyword">const</span> (</code></span>
@@ -222,100 +242,100 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-58"><code></code></span>
 <span class="codeline" id="line-59"><code><span class="keyword">type</span> spanSetBlock <span class="keyword">struct</span> {</code></span>
 <span class="codeline" id="line-60"><code>	<span class="comment">// Free spanSetBlocks are managed via a lock-free stack.</span></code></span>
-<span class="codeline" id="line-61"><code>	<a href="runtime2.go.html#line-912" class="ident">lfnode</a></code></span>
+<span class="codeline" id="line-61"><code>	<a href="runtime2.go.html#line-961" class="ident">lfnode</a></code></span>
 <span class="codeline" id="line-62"><code></code></span>
 <span class="codeline" id="line-63"><code>	<span class="comment">// popped is the number of pop operations that have occurred on</span></code></span>
 <span class="codeline" id="line-64"><code><span class="comment">	// this block. This number is used to help determine when a block</span></code></span>
 <span class="codeline" id="line-65"><code><span class="comment">	// may be safely recycled.</span></code></span>
-<span class="codeline" id="line-66"><code>	popped <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-66"><code>	popped <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-185" class="ident">Uint32</a></code></span>
 <span class="codeline" id="line-67"><code></code></span>
 <span class="codeline" id="line-68"><code>	<span class="comment">// spans is the set of spans in this block.</span></code></span>
-<span class="codeline" id="line-69"><code>	spans [<a href="#line-55" class="ident">spanSetBlockEntries</a>]*<a href="mheap.go.html#line-377" class="ident">mspan</a></code></span>
+<span class="codeline" id="line-69"><code>	spans [<a href="#line-55" class="ident">spanSetBlockEntries</a>]<a href="#line-392" class="ident">atomicMSpanPointer</a></code></span>
 <span class="codeline" id="line-70"><code>}</code></span>
 <span class="codeline" id="line-71"><code></code></span>
 <span class="codeline" id="line-72"><code><span class="comment">// push adds span s to buffer b. push is safe to call concurrently</span></code></span>
 <span class="codeline" id="line-73"><code><span class="comment">// with other push and pop operations.</span></code></span>
-<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r0" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r1" class="ident">push</label>(<label for="r2" class="ident">s</label> *<a href="mheap.go.html#line-377" class="ident">mspan</a>) {</code></span>
+<span class="codeline" id="line-74"><code><span class="keyword">func</span> (<label for="r0" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r1" class="ident">push</label>(<label for="r2" class="ident">s</label> *<a href="mheap.go.html#line-410" class="ident">mspan</a>) {</code></span>
 <span class="codeline" id="line-75"><code>	<span class="comment">// Obtain our slot.</span></code></span>
-<span class="codeline" id="line-76"><code>	<label for="r3" class="ident">cursor</label> := <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r0" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-341" class="ident">incTail</a>().<a href="#line-311" class="ident">tail</a>() - <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-76"><code>	<label for="r3" class="ident">cursor</label> := <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r0" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-376" class="ident">incTail</a>().<a href="#line-341" class="ident">tail</a>() - <span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-77"><code>	<label for="r4" class="ident">top</label>, <label for="r5" class="ident">bottom</label> := <label for="r3" class="ident">cursor</label>/<a href="#line-55" class="ident">spanSetBlockEntries</a>, <label for="r3" class="ident">cursor</label>%<a href="#line-55" class="ident">spanSetBlockEntries</a></code></span>
 <span class="codeline" id="line-78"><code></code></span>
 <span class="codeline" id="line-79"><code>	<span class="comment">// Do we need to add a block?</span></code></span>
-<span class="codeline" id="line-80"><code>	<label for="r6" class="ident">spineLen</label> := <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/stubs.go.html#line-36" class="ident">Loaduintptr</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>)</code></span>
+<span class="codeline" id="line-80"><code>	<label for="r6" class="ident">spineLen</label> := <label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>()</code></span>
 <span class="codeline" id="line-81"><code>	<span class="keyword">var</span> <label for="r7" class="ident">block</label> *<a href="#line-59" class="ident">spanSetBlock</a></code></span>
 <span class="codeline" id="line-82"><code><label for="r8" class="ident">retry</label>:</code></span>
 <span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <label for="r4" class="ident">top</label> &lt; <label for="r6" class="ident">spineLen</label> {</code></span>
-<span class="codeline" id="line-84"><code>		<label for="r9" class="ident">spine</label> := <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>))</code></span>
-<span class="codeline" id="line-85"><code>		<label for="r10" class="ident">blockp</label> := <a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r9" class="ident">spine</label>, <a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>*<label for="r4" class="ident">top</label>)</code></span>
-<span class="codeline" id="line-86"><code>		<label for="r7" class="ident">block</label> = (*<a href="#line-59" class="ident">spanSetBlock</a>)(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<label for="r10" class="ident">blockp</label>))</code></span>
-<span class="codeline" id="line-87"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-88"><code>		<span class="comment">// Add a new block to the spine, potentially growing</span></code></span>
-<span class="codeline" id="line-89"><code><span class="comment">		// the spine.</span></code></span>
-<span class="codeline" id="line-90"><code>		<a href="lock_futex.go.html#line-47" class="ident">lock</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-35" class="ident">spineLock</a>)</code></span>
-<span class="codeline" id="line-91"><code>		<span class="comment">// spineLen cannot change until we release the lock,</span></code></span>
-<span class="codeline" id="line-92"><code><span class="comment">		// but may have changed while we were waiting.</span></code></span>
-<span class="codeline" id="line-93"><code>		<label for="r6" class="ident">spineLen</label> = <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/stubs.go.html#line-36" class="ident">Loaduintptr</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>)</code></span>
-<span class="codeline" id="line-94"><code>		<span class="keyword">if</span> <label for="r4" class="ident">top</label> &lt; <label for="r6" class="ident">spineLen</label> {</code></span>
-<span class="codeline" id="line-95"><code>			<a href="lock_futex.go.html#line-111" class="ident">unlock</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-35" class="ident">spineLock</a>)</code></span>
-<span class="codeline" id="line-96"><code>			<span class="keyword">goto</span> <label for="r8" class="ident">retry</label></code></span>
-<span class="codeline" id="line-97"><code>		}</code></span>
-<span class="codeline" id="line-98"><code></code></span>
-<span class="codeline" id="line-99"><code>		<span class="keyword">if</span> <label for="r6" class="ident">spineLen</label> == <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> {</code></span>
-<span class="codeline" id="line-100"><code>			<span class="comment">// Grow the spine.</span></code></span>
-<span class="codeline" id="line-101"><code>			<label for="r11" class="ident">newCap</label> := <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> * <span class="lit-number">2</span></code></span>
-<span class="codeline" id="line-102"><code>			<span class="keyword">if</span> <label for="r11" class="ident">newCap</label> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-103"><code>				<label for="r11" class="ident">newCap</label> = <a href="#line-56" class="ident">spanSetInitSpineCap</a></code></span>
-<span class="codeline" id="line-104"><code>			}</code></span>
-<span class="codeline" id="line-105"><code>			<label for="r12" class="ident">newSpine</label> := <a href="malloc.go.html#line-1327" class="ident">persistentalloc</a>(<label for="r11" class="ident">newCap</label>*<a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>, <a href="../../pkg/internal/cpu.html" class="ident i0">cpu</a>.<a href="../internal/cpu/cpu.go.html#line-20" class="ident">CacheLineSize</a>, &amp;<a href="mstats.go.html#line-57" class="ident">memstats</a>.<a href="mstats.go.html#line-27" class="ident">gcMiscSys</a>)</code></span>
-<span class="codeline" id="line-106"><code>			<span class="keyword">if</span> <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-107"><code>				<span class="comment">// Blocks are allocated off-heap, so</span></code></span>
-<span class="codeline" id="line-108"><code><span class="comment">				// no write barriers.</span></code></span>
-<span class="codeline" id="line-109"><code>				<a href="stubs.go.html#line-112" class="ident">memmove</a>(<label for="r12" class="ident">newSpine</label>, <label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>, <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a>*<a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>)</code></span>
-<span class="codeline" id="line-110"><code>			}</code></span>
-<span class="codeline" id="line-111"><code>			<span class="comment">// Spine is allocated off-heap, so no write barrier.</span></code></span>
-<span class="codeline" id="line-112"><code>			<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>), <label for="r12" class="ident">newSpine</label>)</code></span>
-<span class="codeline" id="line-113"><code>			<label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> = <label for="r11" class="ident">newCap</label></code></span>
-<span class="codeline" id="line-114"><code>			<span class="comment">// We can't immediately free the old spine</span></code></span>
-<span class="codeline" id="line-115"><code><span class="comment">			// since a concurrent push with a lower index</span></code></span>
-<span class="codeline" id="line-116"><code><span class="comment">			// could still be reading from it. We let it</span></code></span>
-<span class="codeline" id="line-117"><code><span class="comment">			// leak because even a 1TB heap would waste</span></code></span>
-<span class="codeline" id="line-118"><code><span class="comment">			// less than 2MB of memory on old spines. If</span></code></span>
-<span class="codeline" id="line-119"><code><span class="comment">			// this is a problem, we could free old spines</span></code></span>
-<span class="codeline" id="line-120"><code><span class="comment">			// during STW.</span></code></span>
-<span class="codeline" id="line-121"><code>		}</code></span>
-<span class="codeline" id="line-122"><code></code></span>
-<span class="codeline" id="line-123"><code>		<span class="comment">// Allocate a new block from the pool.</span></code></span>
-<span class="codeline" id="line-124"><code>		<label for="r7" class="ident">block</label> = <a href="#line-273" class="ident">spanSetBlockPool</a>.<a href="#line-282" class="ident">alloc</a>()</code></span>
-<span class="codeline" id="line-125"><code></code></span>
-<span class="codeline" id="line-126"><code>		<span class="comment">// Add it to the spine.</span></code></span>
-<span class="codeline" id="line-127"><code>		<label for="r13" class="ident">blockp</label> := <a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>, <a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>*<label for="r4" class="ident">top</label>)</code></span>
-<span class="codeline" id="line-128"><code>		<span class="comment">// Blocks are allocated off-heap, so no write barrier.</span></code></span>
-<span class="codeline" id="line-129"><code>		<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<label for="r13" class="ident">blockp</label>, <a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r7" class="ident">block</label>))</code></span>
-<span class="codeline" id="line-130"><code>		<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/stubs.go.html#line-33" class="ident">Storeuintptr</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>, <label for="r6" class="ident">spineLen</label>+<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r7" class="ident">block</label> = <label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>.<a href="#line-281" class="ident">Load</a>().<a href="#line-298" class="ident">lookup</a>(<label for="r4" class="ident">top</label>).<a href="internal/atomic/types.go.html#line-525" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-85"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-86"><code>		<span class="comment">// Add a new block to the spine, potentially growing</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">		// the spine.</span></code></span>
+<span class="codeline" id="line-88"><code>		<a href="lock_futex.go.html#line-47" class="ident">lock</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-35" class="ident">spineLock</a>)</code></span>
+<span class="codeline" id="line-89"><code>		<span class="comment">// spineLen cannot change until we release the lock,</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">		// but may have changed while we were waiting.</span></code></span>
+<span class="codeline" id="line-91"><code>		<label for="r6" class="ident">spineLen</label> = <label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-92"><code>		<span class="keyword">if</span> <label for="r4" class="ident">top</label> &lt; <label for="r6" class="ident">spineLen</label> {</code></span>
+<span class="codeline" id="line-93"><code>			<a href="lock_futex.go.html#line-111" class="ident">unlock</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-35" class="ident">spineLock</a>)</code></span>
+<span class="codeline" id="line-94"><code>			<span class="keyword">goto</span> <label for="r8" class="ident">retry</label></code></span>
+<span class="codeline" id="line-95"><code>		}</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code>		<label for="r9" class="ident">spine</label> := <label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>.<a href="#line-281" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-98"><code>		<span class="keyword">if</span> <label for="r6" class="ident">spineLen</label> == <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> {</code></span>
+<span class="codeline" id="line-99"><code>			<span class="comment">// Grow the spine.</span></code></span>
+<span class="codeline" id="line-100"><code>			<label for="r10" class="ident">newCap</label> := <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> * <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-101"><code>			<span class="keyword">if</span> <label for="r10" class="ident">newCap</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-102"><code>				<label for="r10" class="ident">newCap</label> = <a href="#line-56" class="ident">spanSetInitSpineCap</a></code></span>
+<span class="codeline" id="line-103"><code>			}</code></span>
+<span class="codeline" id="line-104"><code>			<label for="r11" class="ident">newSpine</label> := <a href="malloc.go.html#line-1460" class="ident">persistentalloc</a>(<label for="r10" class="ident">newCap</label>*<a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>, <a href="../../pkg/internal/cpu.html" class="ident i0">cpu</a>.<a href="../internal/cpu/cpu.go.html#line-20" class="ident">CacheLineSize</a>, &amp;<a href="mstats.go.html#line-55" class="ident">memstats</a>.<a href="mstats.go.html#line-27" class="ident">gcMiscSys</a>)</code></span>
+<span class="codeline" id="line-105"><code>			<span class="keyword">if</span> <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-106"><code>				<span class="comment">// Blocks are allocated off-heap, so</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">				// no write barriers.</span></code></span>
+<span class="codeline" id="line-108"><code>				<a href="stubs.go.html#line-109" class="ident">memmove</a>(<label for="r11" class="ident">newSpine</label>, <label for="r9" class="ident">spine</label>.<a href="#line-294" class="ident">p</a>, <label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a>*<a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>)</code></span>
+<span class="codeline" id="line-109"><code>			}</code></span>
+<span class="codeline" id="line-110"><code>			<label for="r9" class="ident">spine</label> = <a href="#line-293" class="ident">spanSetSpinePointer</a>{<label for="r11" class="ident">newSpine</label>}</code></span>
+<span class="codeline" id="line-111"><code></code></span>
+<span class="codeline" id="line-112"><code>			<span class="comment">// Spine is allocated off-heap, so no write barrier.</span></code></span>
+<span class="codeline" id="line-113"><code>			<label for="r0" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>.<a href="#line-288" class="ident">StoreNoWB</a>(<label for="r9" class="ident">spine</label>)</code></span>
+<span class="codeline" id="line-114"><code>			<label for="r0" class="ident">b</label>.<a href="#line-38" class="ident">spineCap</a> = <label for="r10" class="ident">newCap</label></code></span>
+<span class="codeline" id="line-115"><code>			<span class="comment">// We can't immediately free the old spine</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">			// since a concurrent push with a lower index</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">			// could still be reading from it. We let it</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">			// leak because even a 1TB heap would waste</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">			// less than 2MB of memory on old spines. If</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">			// this is a problem, we could free old spines</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">			// during STW.</span></code></span>
+<span class="codeline" id="line-122"><code>		}</code></span>
+<span class="codeline" id="line-123"><code></code></span>
+<span class="codeline" id="line-124"><code>		<span class="comment">// Allocate a new block from the pool.</span></code></span>
+<span class="codeline" id="line-125"><code>		<label for="r7" class="ident">block</label> = <a href="#line-303" class="ident">spanSetBlockPool</a>.<a href="#line-312" class="ident">alloc</a>()</code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code>		<span class="comment">// Add it to the spine.</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">		// Blocks are allocated off-heap, so no write barrier.</span></code></span>
+<span class="codeline" id="line-129"><code>		<label for="r9" class="ident">spine</label>.<a href="#line-298" class="ident">lookup</a>(<label for="r4" class="ident">top</label>).<a href="internal/atomic/types.go.html#line-538" class="ident">StoreNoWB</a>(<label for="r7" class="ident">block</label>)</code></span>
+<span class="codeline" id="line-130"><code>		<label for="r0" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-378" class="ident">Store</a>(<label for="r6" class="ident">spineLen</label> + <span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-131"><code>		<a href="lock_futex.go.html#line-111" class="ident">unlock</a>(&amp;<label for="r0" class="ident">b</label>.<a href="#line-35" class="ident">spineLock</a>)</code></span>
 <span class="codeline" id="line-132"><code>	}</code></span>
 <span class="codeline" id="line-133"><code></code></span>
 <span class="codeline" id="line-134"><code>	<span class="comment">// We have a block. Insert the span atomically, since there may be</span></code></span>
 <span class="codeline" id="line-135"><code><span class="comment">	// concurrent readers via the block API.</span></code></span>
-<span class="codeline" id="line-136"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r7" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r5" class="ident">bottom</label>]), <a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r2" class="ident">s</label>))</code></span>
+<span class="codeline" id="line-136"><code>	<label for="r7" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r5" class="ident">bottom</label>].<a href="#line-402" class="ident">StoreNoWB</a>(<label for="r2" class="ident">s</label>)</code></span>
 <span class="codeline" id="line-137"><code>}</code></span>
 <span class="codeline" id="line-138"><code></code></span>
 <span class="codeline" id="line-139"><code><span class="comment">// pop removes and returns a span from buffer b, or nil if b is empty.</span></code></span>
 <span class="codeline" id="line-140"><code><span class="comment">// pop is safe to call concurrently with other pop and push operations.</span></code></span>
-<span class="codeline" id="line-141"><code><span class="keyword">func</span> (<label for="r14" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r15" class="ident">pop</label>() *<a href="mheap.go.html#line-377" class="ident">mspan</a> {</code></span>
-<span class="codeline" id="line-142"><code>	<span class="keyword">var</span> <label for="r16" class="ident">head</label>, <label for="r17" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
-<span class="codeline" id="line-143"><code><label for="r18" class="ident">claimLoop</label>:</code></span>
+<span class="codeline" id="line-141"><code><span class="keyword">func</span> (<label for="r12" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r13" class="ident">pop</label>() *<a href="mheap.go.html#line-410" class="ident">mspan</a> {</code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">var</span> <label for="r14" class="ident">head</label>, <label for="r15" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-143"><code><label for="r16" class="ident">claimLoop</label>:</code></span>
 <span class="codeline" id="line-144"><code>	<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-145"><code>		<label for="r19" class="ident">headtail</label> := <label for="r14" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-321" class="ident">load</a>()</code></span>
-<span class="codeline" id="line-146"><code>		<label for="r16" class="ident">head</label>, <label for="r17" class="ident">tail</label> = <label for="r19" class="ident">headtail</label>.<a href="#line-316" class="ident">split</a>()</code></span>
-<span class="codeline" id="line-147"><code>		<span class="keyword">if</span> <label for="r16" class="ident">head</label> &gt;= <label for="r17" class="ident">tail</label> {</code></span>
+<span class="codeline" id="line-145"><code>		<label for="r17" class="ident">headtail</label> := <label for="r12" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-356" class="ident">load</a>()</code></span>
+<span class="codeline" id="line-146"><code>		<label for="r14" class="ident">head</label>, <label for="r15" class="ident">tail</label> = <label for="r17" class="ident">headtail</label>.<a href="#line-346" class="ident">split</a>()</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">if</span> <label for="r14" class="ident">head</label> &gt;= <label for="r15" class="ident">tail</label> {</code></span>
 <span class="codeline" id="line-148"><code>			<span class="comment">// The buf is empty, as far as we can tell.</span></code></span>
 <span class="codeline" id="line-149"><code>			<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
 <span class="codeline" id="line-150"><code>		}</code></span>
 <span class="codeline" id="line-151"><code>		<span class="comment">// Check if the head position we want to claim is actually</span></code></span>
 <span class="codeline" id="line-152"><code><span class="comment">		// backed by a block.</span></code></span>
-<span class="codeline" id="line-153"><code>		<label for="r20" class="ident">spineLen</label> := <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/stubs.go.html#line-36" class="ident">Loaduintptr</a>(&amp;<label for="r14" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>)</code></span>
-<span class="codeline" id="line-154"><code>		<span class="keyword">if</span> <label for="r20" class="ident">spineLen</label> &lt;= <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r16" class="ident">head</label>)/<a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
+<span class="codeline" id="line-153"><code>		<label for="r18" class="ident">spineLen</label> := <label for="r12" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-154"><code>		<span class="keyword">if</span> <label for="r18" class="ident">spineLen</label> &lt;= <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r14" class="ident">head</label>)/<a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
 <span class="codeline" id="line-155"><code>			<span class="comment">// We're racing with a spine growth and the allocation of</span></code></span>
 <span class="codeline" id="line-156"><code><span class="comment">			// a new block (and maybe a new spine!), and trying to grab</span></code></span>
 <span class="codeline" id="line-157"><code><span class="comment">			// the span at the index which is currently being pushed.</span></code></span>
@@ -327,198 +347,248 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-163"><code>		<span class="comment">// Try to claim the current head by CASing in an updated head.</span></code></span>
 <span class="codeline" id="line-164"><code><span class="comment">		// This may fail transiently due to a push which modifies the</span></code></span>
 <span class="codeline" id="line-165"><code><span class="comment">		// tail, so keep trying while the head isn't changing.</span></code></span>
-<span class="codeline" id="line-166"><code>		<label for="r21" class="ident">want</label> := <label for="r16" class="ident">head</label></code></span>
-<span class="codeline" id="line-167"><code>		<span class="keyword">for</span> <label for="r21" class="ident">want</label> == <label for="r16" class="ident">head</label> {</code></span>
-<span class="codeline" id="line-168"><code>			<span class="keyword">if</span> <label for="r14" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-326" class="ident">cas</a>(<label for="r19" class="ident">headtail</label>, <a href="#line-301" class="ident">makeHeadTailIndex</a>(<label for="r21" class="ident">want</label>+<span class="lit-number">1</span>, <label for="r17" class="ident">tail</label>)) {</code></span>
-<span class="codeline" id="line-169"><code>				<span class="keyword">break</span> <label for="r18" class="ident">claimLoop</label></code></span>
+<span class="codeline" id="line-166"><code>		<label for="r19" class="ident">want</label> := <label for="r14" class="ident">head</label></code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">for</span> <label for="r19" class="ident">want</label> == <label for="r14" class="ident">head</label> {</code></span>
+<span class="codeline" id="line-168"><code>			<span class="keyword">if</span> <label for="r12" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-361" class="ident">cas</a>(<label for="r17" class="ident">headtail</label>, <a href="#line-331" class="ident">makeHeadTailIndex</a>(<label for="r19" class="ident">want</label>+<span class="lit-number">1</span>, <label for="r15" class="ident">tail</label>)) {</code></span>
+<span class="codeline" id="line-169"><code>				<span class="keyword">break</span> <label for="r16" class="ident">claimLoop</label></code></span>
 <span class="codeline" id="line-170"><code>			}</code></span>
-<span class="codeline" id="line-171"><code>			<label for="r19" class="ident">headtail</label> = <label for="r14" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-321" class="ident">load</a>()</code></span>
-<span class="codeline" id="line-172"><code>			<label for="r16" class="ident">head</label>, <label for="r17" class="ident">tail</label> = <label for="r19" class="ident">headtail</label>.<a href="#line-316" class="ident">split</a>()</code></span>
+<span class="codeline" id="line-171"><code>			<label for="r17" class="ident">headtail</label> = <label for="r12" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-356" class="ident">load</a>()</code></span>
+<span class="codeline" id="line-172"><code>			<label for="r14" class="ident">head</label>, <label for="r15" class="ident">tail</label> = <label for="r17" class="ident">headtail</label>.<a href="#line-346" class="ident">split</a>()</code></span>
 <span class="codeline" id="line-173"><code>		}</code></span>
 <span class="codeline" id="line-174"><code>		<span class="comment">// We failed to claim the spot we were after and the head changed,</span></code></span>
 <span class="codeline" id="line-175"><code><span class="comment">		// meaning a popper got ahead of us. Try again from the top because</span></code></span>
 <span class="codeline" id="line-176"><code><span class="comment">		// the buf may not be empty.</span></code></span>
 <span class="codeline" id="line-177"><code>	}</code></span>
-<span class="codeline" id="line-178"><code>	<label for="r22" class="ident">top</label>, <label for="r23" class="ident">bottom</label> := <label for="r16" class="ident">head</label>/<a href="#line-55" class="ident">spanSetBlockEntries</a>, <label for="r16" class="ident">head</label>%<a href="#line-55" class="ident">spanSetBlockEntries</a></code></span>
+<span class="codeline" id="line-178"><code>	<label for="r20" class="ident">top</label>, <label for="r21" class="ident">bottom</label> := <label for="r14" class="ident">head</label>/<a href="#line-55" class="ident">spanSetBlockEntries</a>, <label for="r14" class="ident">head</label>%<a href="#line-55" class="ident">spanSetBlockEntries</a></code></span>
 <span class="codeline" id="line-179"><code></code></span>
 <span class="codeline" id="line-180"><code>	<span class="comment">// We may be reading a stale spine pointer, but because the length</span></code></span>
 <span class="codeline" id="line-181"><code><span class="comment">	// grows monotonically and we've already verified it, we'll definitely</span></code></span>
 <span class="codeline" id="line-182"><code><span class="comment">	// be reading from a valid block.</span></code></span>
-<span class="codeline" id="line-183"><code>	<label for="r24" class="ident">spine</label> := <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r14" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>))</code></span>
-<span class="codeline" id="line-184"><code>	<label for="r25" class="ident">blockp</label> := <a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r24" class="ident">spine</label>, <a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>*<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r22" class="ident">top</label>))</code></span>
-<span class="codeline" id="line-185"><code></code></span>
-<span class="codeline" id="line-186"><code>	<span class="comment">// Given that the spine length is correct, we know we will never</span></code></span>
-<span class="codeline" id="line-187"><code><span class="comment">	// see a nil block here, since the length is always updated after</span></code></span>
-<span class="codeline" id="line-188"><code><span class="comment">	// the block is set.</span></code></span>
-<span class="codeline" id="line-189"><code>	<label for="r26" class="ident">block</label> := (*<a href="#line-59" class="ident">spanSetBlock</a>)(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<label for="r25" class="ident">blockp</label>))</code></span>
-<span class="codeline" id="line-190"><code>	<label for="r27" class="ident">s</label> := (*<a href="mheap.go.html#line-377" class="ident">mspan</a>)(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r26" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r23" class="ident">bottom</label>])))</code></span>
-<span class="codeline" id="line-191"><code>	<span class="keyword">for</span> <label for="r27" class="ident">s</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-192"><code>		<span class="comment">// We raced with the span actually being set, but given that we</span></code></span>
-<span class="codeline" id="line-193"><code><span class="comment">		// know a block for this span exists, the race window here is</span></code></span>
-<span class="codeline" id="line-194"><code><span class="comment">		// extremely small. Try again.</span></code></span>
-<span class="codeline" id="line-195"><code>		<label for="r27" class="ident">s</label> = (*<a href="mheap.go.html#line-377" class="ident">mspan</a>)(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-23" class="ident">Loadp</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r26" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r23" class="ident">bottom</label>])))</code></span>
-<span class="codeline" id="line-196"><code>	}</code></span>
-<span class="codeline" id="line-197"><code>	<span class="comment">// Clear the pointer. This isn't strictly necessary, but defensively</span></code></span>
-<span class="codeline" id="line-198"><code><span class="comment">	// avoids accidentally re-using blocks which could lead to memory</span></code></span>
-<span class="codeline" id="line-199"><code><span class="comment">	// corruption. This way, we'll get a nil pointer access instead.</span></code></span>
-<span class="codeline" id="line-200"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r26" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r23" class="ident">bottom</label>]), <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
-<span class="codeline" id="line-201"><code></code></span>
-<span class="codeline" id="line-202"><code>	<span class="comment">// Increase the popped count. If we are the last possible popper</span></code></span>
-<span class="codeline" id="line-203"><code><span class="comment">	// in the block (note that bottom need not equal spanSetBlockEntries-1</span></code></span>
-<span class="codeline" id="line-204"><code><span class="comment">	// due to races) then it's our responsibility to free the block.</span></code></span>
-<span class="codeline" id="line-205"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-206"><code><span class="comment">	// If we increment popped to spanSetBlockEntries, we can be sure that</span></code></span>
-<span class="codeline" id="line-207"><code><span class="comment">	// we're the last popper for this block, and it's thus safe to free it.</span></code></span>
-<span class="codeline" id="line-208"><code><span class="comment">	// Every other popper must have crossed this barrier (and thus finished</span></code></span>
-<span class="codeline" id="line-209"><code><span class="comment">	// popping its corresponding mspan) by the time we get here. Because</span></code></span>
-<span class="codeline" id="line-210"><code><span class="comment">	// we're the last popper, we also don't have to worry about concurrent</span></code></span>
-<span class="codeline" id="line-211"><code><span class="comment">	// pushers (there can't be any). Note that we may not be the popper</span></code></span>
-<span class="codeline" id="line-212"><code><span class="comment">	// which claimed the last slot in the block, we're just the last one</span></code></span>
-<span class="codeline" id="line-213"><code><span class="comment">	// to finish popping.</span></code></span>
-<span class="codeline" id="line-214"><code>	<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-52" class="ident">Xadd</a>(&amp;<label for="r26" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>, <span class="lit-number">1</span>) == <a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
-<span class="codeline" id="line-215"><code>		<span class="comment">// Clear the block's pointer.</span></code></span>
-<span class="codeline" id="line-216"><code>		<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<label for="r25" class="ident">blockp</label>, <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
-<span class="codeline" id="line-217"><code></code></span>
-<span class="codeline" id="line-218"><code>		<span class="comment">// Return the block to the block pool.</span></code></span>
-<span class="codeline" id="line-219"><code>		<a href="#line-273" class="ident">spanSetBlockPool</a>.<a href="#line-290" class="ident">free</a>(<label for="r26" class="ident">block</label>)</code></span>
-<span class="codeline" id="line-220"><code>	}</code></span>
-<span class="codeline" id="line-221"><code>	<span class="keyword">return</span> <label for="r27" class="ident">s</label></code></span>
-<span class="codeline" id="line-222"><code>}</code></span>
-<span class="codeline" id="line-223"><code></code></span>
-<span class="codeline" id="line-224"><code><span class="comment">// reset resets a spanSet which is empty. It will also clean up</span></code></span>
-<span class="codeline" id="line-225"><code><span class="comment">// any left over blocks.</span></code></span>
-<span class="codeline" id="line-226"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-227"><code><span class="comment">// Throws if the buf is not empty.</span></code></span>
-<span class="codeline" id="line-228"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-229"><code><span class="comment">// reset may not be called concurrently with any other operations</span></code></span>
-<span class="codeline" id="line-230"><code><span class="comment">// on the span set.</span></code></span>
-<span class="codeline" id="line-231"><code><span class="keyword">func</span> (<label for="r28" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r29" class="ident">reset</label>() {</code></span>
-<span class="codeline" id="line-232"><code>	<label for="r30" class="ident">head</label>, <label for="r31" class="ident">tail</label> := <label for="r28" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-321" class="ident">load</a>().<a href="#line-316" class="ident">split</a>()</code></span>
-<span class="codeline" id="line-233"><code>	<span class="keyword">if</span> <label for="r30" class="ident">head</label> &lt; <label for="r31" class="ident">tail</label> {</code></span>
-<span class="codeline" id="line-234"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"head = "</span>, <label for="r30" class="ident">head</label>, <span class="lit-string">", tail = "</span>, <label for="r31" class="ident">tail</label>, <span class="lit-string">"\n"</span>)</code></span>
-<span class="codeline" id="line-235"><code>		<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"attempt to clear non-empty span set"</span>)</code></span>
-<span class="codeline" id="line-236"><code>	}</code></span>
-<span class="codeline" id="line-237"><code>	<label for="r32" class="ident">top</label> := <label for="r30" class="ident">head</label> / <a href="#line-55" class="ident">spanSetBlockEntries</a></code></span>
-<span class="codeline" id="line-238"><code>	<span class="keyword">if</span> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r32" class="ident">top</label>) &lt; <label for="r28" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a> {</code></span>
-<span class="codeline" id="line-239"><code>		<span class="comment">// If the head catches up to the tail and the set is empty,</span></code></span>
-<span class="codeline" id="line-240"><code><span class="comment">		// we may not clean up the block containing the head and tail</span></code></span>
-<span class="codeline" id="line-241"><code><span class="comment">		// since it may be pushed into again. In order to avoid leaking</span></code></span>
-<span class="codeline" id="line-242"><code><span class="comment">		// memory since we're going to reset the head and tail, clean</span></code></span>
-<span class="codeline" id="line-243"><code><span class="comment">		// up such a block now, if it exists.</span></code></span>
-<span class="codeline" id="line-244"><code>		<label for="r33" class="ident">blockp</label> := (**<a href="#line-59" class="ident">spanSetBlock</a>)(<a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r28" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>, <a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>*<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r32" class="ident">top</label>)))</code></span>
-<span class="codeline" id="line-245"><code>		<label for="r34" class="ident">block</label> := *<label for="r33" class="ident">blockp</label></code></span>
-<span class="codeline" id="line-246"><code>		<span class="keyword">if</span> <label for="r34" class="ident">block</label> != <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-247"><code>			<span class="comment">// Sanity check the popped value.</span></code></span>
-<span class="codeline" id="line-248"><code>			<span class="keyword">if</span> <label for="r34" class="ident">block</label>.<a href="#line-66" class="ident">popped</a> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-249"><code>				<span class="comment">// popped should never be zero because that means we have</span></code></span>
-<span class="codeline" id="line-250"><code><span class="comment">				// pushed at least one value but not yet popped if this</span></code></span>
-<span class="codeline" id="line-251"><code><span class="comment">				// block pointer is not nil.</span></code></span>
-<span class="codeline" id="line-252"><code>				<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"span set block with unpopped elements found in reset"</span>)</code></span>
-<span class="codeline" id="line-253"><code>			}</code></span>
-<span class="codeline" id="line-254"><code>			<span class="keyword">if</span> <label for="r34" class="ident">block</label>.<a href="#line-66" class="ident">popped</a> == <a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
-<span class="codeline" id="line-255"><code>				<span class="comment">// popped should also never be equal to spanSetBlockEntries</span></code></span>
-<span class="codeline" id="line-256"><code><span class="comment">				// because the last popper should have made the block pointer</span></code></span>
-<span class="codeline" id="line-257"><code><span class="comment">				// in this slot nil.</span></code></span>
-<span class="codeline" id="line-258"><code>				<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"fully empty unfreed span set block found in reset"</span>)</code></span>
-<span class="codeline" id="line-259"><code>			}</code></span>
-<span class="codeline" id="line-260"><code></code></span>
-<span class="codeline" id="line-261"><code>			<span class="comment">// Clear the pointer to the block.</span></code></span>
-<span class="codeline" id="line-262"><code>			<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-117" class="ident">StorepNoWB</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r33" class="ident">blockp</label>), <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
-<span class="codeline" id="line-263"><code></code></span>
-<span class="codeline" id="line-264"><code>			<span class="comment">// Return the block to the block pool.</span></code></span>
-<span class="codeline" id="line-265"><code>			<a href="#line-273" class="ident">spanSetBlockPool</a>.<a href="#line-290" class="ident">free</a>(<label for="r34" class="ident">block</label>)</code></span>
-<span class="codeline" id="line-266"><code>		}</code></span>
-<span class="codeline" id="line-267"><code>	}</code></span>
-<span class="codeline" id="line-268"><code>	<label for="r28" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-352" class="ident">reset</a>()</code></span>
-<span class="codeline" id="line-269"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/stubs.go.html#line-33" class="ident">Storeuintptr</a>(&amp;<label for="r28" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>, <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-270"><code>}</code></span>
-<span class="codeline" id="line-271"><code></code></span>
-<span class="codeline" id="line-272"><code><span class="comment">// spanSetBlockPool is a global pool of spanSetBlocks.</span></code></span>
-<span class="codeline" id="line-273"><code><span class="keyword">var</span> spanSetBlockPool <a href="#line-276" class="ident">spanSetBlockAlloc</a></code></span>
-<span class="codeline" id="line-274"><code></code></span>
-<span class="codeline" id="line-275"><code><span class="comment">// spanSetBlockAlloc represents a concurrent pool of spanSetBlocks.</span></code></span>
-<span class="codeline" id="line-276"><code><span class="keyword">type</span> spanSetBlockAlloc <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-277"><code>	stack <a href="lfstack.go.html#line-23" class="ident">lfstack</a></code></span>
-<span class="codeline" id="line-278"><code>}</code></span>
-<span class="codeline" id="line-279"><code></code></span>
-<span class="codeline" id="line-280"><code><span class="comment">// alloc tries to grab a spanSetBlock out of the pool, and if it fails</span></code></span>
-<span class="codeline" id="line-281"><code><span class="comment">// persistentallocs a new one and returns it.</span></code></span>
-<span class="codeline" id="line-282"><code><span class="keyword">func</span> (<label for="r35" class="ident">p</label> *<a href="#line-276" class="ident">spanSetBlockAlloc</a>) <label for="r36" class="ident">alloc</label>() *<a href="#line-59" class="ident">spanSetBlock</a> {</code></span>
-<span class="codeline" id="line-283"><code>	<span class="keyword">if</span> <label for="r37" class="ident">s</label> := (*<a href="#line-59" class="ident">spanSetBlock</a>)(<label for="r35" class="ident">p</label>.<a href="#line-277" class="ident">stack</a>.<a href="lfstack.go.html#line-41" class="ident">pop</a>()); <label for="r37" class="ident">s</label> != <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-284"><code>		<span class="keyword">return</span> <label for="r37" class="ident">s</label></code></span>
-<span class="codeline" id="line-285"><code>	}</code></span>
-<span class="codeline" id="line-286"><code>	<span class="keyword">return</span> (*<a href="#line-59" class="ident">spanSetBlock</a>)(<a href="malloc.go.html#line-1327" class="ident">persistentalloc</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Sizeof" class="ident">Sizeof</a>(<a href="#line-59" class="ident">spanSetBlock</a>{}), <a href="../../pkg/internal/cpu.html" class="ident i0">cpu</a>.<a href="../internal/cpu/cpu.go.html#line-20" class="ident">CacheLineSize</a>, &amp;<a href="mstats.go.html#line-57" class="ident">memstats</a>.<a href="mstats.go.html#line-27" class="ident">gcMiscSys</a>))</code></span>
-<span class="codeline" id="line-287"><code>}</code></span>
-<span class="codeline" id="line-288"><code></code></span>
-<span class="codeline" id="line-289"><code><span class="comment">// free returns a spanSetBlock back to the pool.</span></code></span>
-<span class="codeline" id="line-290"><code><span class="keyword">func</span> (<label for="r38" class="ident">p</label> *<a href="#line-276" class="ident">spanSetBlockAlloc</a>) <label for="r39" class="ident">free</label>(<label for="r40" class="ident">block</label> *<a href="#line-59" class="ident">spanSetBlock</a>) {</code></span>
-<span class="codeline" id="line-291"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-96" class="ident">Store</a>(&amp;<label for="r40" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>, <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-292"><code>	<label for="r38" class="ident">p</label>.<a href="#line-277" class="ident">stack</a>.<a href="lfstack.go.html#line-25" class="ident">push</a>(&amp;<label for="r40" class="ident">block</label>.<a href="#line-61" class="ident">lfnode</a>)</code></span>
-<span class="codeline" id="line-293"><code>}</code></span>
-<span class="codeline" id="line-294"><code></code></span>
-<span class="codeline" id="line-295"><code><span class="comment">// haidTailIndex represents a combined 32-bit head and 32-bit tail</span></code></span>
-<span class="codeline" id="line-296"><code><span class="comment">// of a queue into a single 64-bit value.</span></code></span>
-<span class="codeline" id="line-297"><code><span class="keyword">type</span> headTailIndex <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
-<span class="codeline" id="line-298"><code></code></span>
-<span class="codeline" id="line-299"><code><span class="comment">// makeHeadTailIndex creates a headTailIndex value from a separate</span></code></span>
-<span class="codeline" id="line-300"><code><span class="comment">// head and tail.</span></code></span>
-<span class="codeline" id="line-301"><code><span class="keyword">func</span> makeHeadTailIndex(<label for="r42" class="ident">head</label>, <label for="r43" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="#line-297" class="ident">headTailIndex</a> {</code></span>
-<span class="codeline" id="line-302"><code>	<span class="keyword">return</span> <a href="#line-297" class="ident">headTailIndex</a>(<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r42" class="ident">head</label>)&lt;&lt;<span class="lit-number">32</span> | <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r43" class="ident">tail</label>))</code></span>
-<span class="codeline" id="line-303"><code>}</code></span>
+<span class="codeline" id="line-183"><code>	<label for="r22" class="ident">blockp</label> := <label for="r12" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>.<a href="#line-281" class="ident">Load</a>().<a href="#line-298" class="ident">lookup</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r20" class="ident">top</label>))</code></span>
+<span class="codeline" id="line-184"><code></code></span>
+<span class="codeline" id="line-185"><code>	<span class="comment">// Given that the spine length is correct, we know we will never</span></code></span>
+<span class="codeline" id="line-186"><code><span class="comment">	// see a nil block here, since the length is always updated after</span></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">	// the block is set.</span></code></span>
+<span class="codeline" id="line-188"><code>	<label for="r23" class="ident">block</label> := <label for="r22" class="ident">blockp</label>.<a href="internal/atomic/types.go.html#line-525" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-189"><code>	<label for="r24" class="ident">s</label> := <label for="r23" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r21" class="ident">bottom</label>].<a href="#line-397" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-190"><code>	<span class="keyword">for</span> <label for="r24" class="ident">s</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-191"><code>		<span class="comment">// We raced with the span actually being set, but given that we</span></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">		// know a block for this span exists, the race window here is</span></code></span>
+<span class="codeline" id="line-193"><code><span class="comment">		// extremely small. Try again.</span></code></span>
+<span class="codeline" id="line-194"><code>		<label for="r24" class="ident">s</label> = <label for="r23" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r21" class="ident">bottom</label>].<a href="#line-397" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-195"><code>	}</code></span>
+<span class="codeline" id="line-196"><code>	<span class="comment">// Clear the pointer. This isn't strictly necessary, but defensively</span></code></span>
+<span class="codeline" id="line-197"><code><span class="comment">	// avoids accidentally re-using blocks which could lead to memory</span></code></span>
+<span class="codeline" id="line-198"><code><span class="comment">	// corruption. This way, we'll get a nil pointer access instead.</span></code></span>
+<span class="codeline" id="line-199"><code>	<label for="r23" class="ident">block</label>.<a href="#line-69" class="ident">spans</a>[<label for="r21" class="ident">bottom</label>].<a href="#line-402" class="ident">StoreNoWB</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code>	<span class="comment">// Increase the popped count. If we are the last possible popper</span></code></span>
+<span class="codeline" id="line-202"><code><span class="comment">	// in the block (note that bottom need not equal spanSetBlockEntries-1</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">	// due to races) then it's our responsibility to free the block.</span></code></span>
+<span class="codeline" id="line-204"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-205"><code><span class="comment">	// If we increment popped to spanSetBlockEntries, we can be sure that</span></code></span>
+<span class="codeline" id="line-206"><code><span class="comment">	// we're the last popper for this block, and it's thus safe to free it.</span></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">	// Every other popper must have crossed this barrier (and thus finished</span></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">	// popping its corresponding mspan) by the time we get here. Because</span></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">	// we're the last popper, we also don't have to worry about concurrent</span></code></span>
+<span class="codeline" id="line-210"><code><span class="comment">	// pushers (there can't be any). Note that we may not be the popper</span></code></span>
+<span class="codeline" id="line-211"><code><span class="comment">	// which claimed the last slot in the block, we're just the last one</span></code></span>
+<span class="codeline" id="line-212"><code><span class="comment">	// to finish popping.</span></code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">if</span> <label for="r23" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>.<a href="internal/atomic/types.go.html#line-290" class="ident">Add</a>(<span class="lit-number">1</span>) == <a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
+<span class="codeline" id="line-214"><code>		<span class="comment">// Clear the block's pointer.</span></code></span>
+<span class="codeline" id="line-215"><code>		<label for="r22" class="ident">blockp</label>.<a href="internal/atomic/types.go.html#line-538" class="ident">StoreNoWB</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-216"><code></code></span>
+<span class="codeline" id="line-217"><code>		<span class="comment">// Return the block to the block pool.</span></code></span>
+<span class="codeline" id="line-218"><code>		<a href="#line-303" class="ident">spanSetBlockPool</a>.<a href="#line-320" class="ident">free</a>(<label for="r23" class="ident">block</label>)</code></span>
+<span class="codeline" id="line-219"><code>	}</code></span>
+<span class="codeline" id="line-220"><code>	<span class="keyword">return</span> <label for="r24" class="ident">s</label></code></span>
+<span class="codeline" id="line-221"><code>}</code></span>
+<span class="codeline" id="line-222"><code></code></span>
+<span class="codeline" id="line-223"><code><span class="comment">// reset resets a spanSet which is empty. It will also clean up</span></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">// any left over blocks.</span></code></span>
+<span class="codeline" id="line-225"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-226"><code><span class="comment">// Throws if the buf is not empty.</span></code></span>
+<span class="codeline" id="line-227"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-228"><code><span class="comment">// reset may not be called concurrently with any other operations</span></code></span>
+<span class="codeline" id="line-229"><code><span class="comment">// on the span set.</span></code></span>
+<span class="codeline" id="line-230"><code><span class="keyword">func</span> (<label for="r25" class="ident">b</label> *<a href="#line-17" class="ident">spanSet</a>) <label for="r26" class="ident">reset</label>() {</code></span>
+<span class="codeline" id="line-231"><code>	<label for="r27" class="ident">head</label>, <label for="r28" class="ident">tail</label> := <label for="r25" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-356" class="ident">load</a>().<a href="#line-346" class="ident">split</a>()</code></span>
+<span class="codeline" id="line-232"><code>	<span class="keyword">if</span> <label for="r27" class="ident">head</label> &lt; <label for="r28" class="ident">tail</label> {</code></span>
+<span class="codeline" id="line-233"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"head = "</span>, <label for="r27" class="ident">head</label>, <span class="lit-string">", tail = "</span>, <label for="r28" class="ident">tail</label>, <span class="lit-string">"\n"</span>)</code></span>
+<span class="codeline" id="line-234"><code>		<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"attempt to clear non-empty span set"</span>)</code></span>
+<span class="codeline" id="line-235"><code>	}</code></span>
+<span class="codeline" id="line-236"><code>	<label for="r29" class="ident">top</label> := <label for="r27" class="ident">head</label> / <a href="#line-55" class="ident">spanSetBlockEntries</a></code></span>
+<span class="codeline" id="line-237"><code>	<span class="keyword">if</span> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r29" class="ident">top</label>) &lt; <label for="r25" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>() {</code></span>
+<span class="codeline" id="line-238"><code>		<span class="comment">// If the head catches up to the tail and the set is empty,</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">		// we may not clean up the block containing the head and tail</span></code></span>
+<span class="codeline" id="line-240"><code><span class="comment">		// since it may be pushed into again. In order to avoid leaking</span></code></span>
+<span class="codeline" id="line-241"><code><span class="comment">		// memory since we're going to reset the head and tail, clean</span></code></span>
+<span class="codeline" id="line-242"><code><span class="comment">		// up such a block now, if it exists.</span></code></span>
+<span class="codeline" id="line-243"><code>		<label for="r30" class="ident">blockp</label> := <label for="r25" class="ident">b</label>.<a href="#line-36" class="ident">spine</a>.<a href="#line-281" class="ident">Load</a>().<a href="#line-298" class="ident">lookup</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r29" class="ident">top</label>))</code></span>
+<span class="codeline" id="line-244"><code>		<label for="r31" class="ident">block</label> := <label for="r30" class="ident">blockp</label>.<a href="internal/atomic/types.go.html#line-525" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-245"><code>		<span class="keyword">if</span> <label for="r31" class="ident">block</label> != <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-246"><code>			<span class="comment">// Check the popped value.</span></code></span>
+<span class="codeline" id="line-247"><code>			<span class="keyword">if</span> <label for="r31" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-248"><code>				<span class="comment">// popped should never be zero because that means we have</span></code></span>
+<span class="codeline" id="line-249"><code><span class="comment">				// pushed at least one value but not yet popped if this</span></code></span>
+<span class="codeline" id="line-250"><code><span class="comment">				// block pointer is not nil.</span></code></span>
+<span class="codeline" id="line-251"><code>				<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"span set block with unpopped elements found in reset"</span>)</code></span>
+<span class="codeline" id="line-252"><code>			}</code></span>
+<span class="codeline" id="line-253"><code>			<span class="keyword">if</span> <label for="r31" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() == <a href="#line-55" class="ident">spanSetBlockEntries</a> {</code></span>
+<span class="codeline" id="line-254"><code>				<span class="comment">// popped should also never be equal to spanSetBlockEntries</span></code></span>
+<span class="codeline" id="line-255"><code><span class="comment">				// because the last popper should have made the block pointer</span></code></span>
+<span class="codeline" id="line-256"><code><span class="comment">				// in this slot nil.</span></code></span>
+<span class="codeline" id="line-257"><code>				<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"fully empty unfreed span set block found in reset"</span>)</code></span>
+<span class="codeline" id="line-258"><code>			}</code></span>
+<span class="codeline" id="line-259"><code></code></span>
+<span class="codeline" id="line-260"><code>			<span class="comment">// Clear the pointer to the block.</span></code></span>
+<span class="codeline" id="line-261"><code>			<label for="r30" class="ident">blockp</label>.<a href="internal/atomic/types.go.html#line-538" class="ident">StoreNoWB</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
+<span class="codeline" id="line-262"><code></code></span>
+<span class="codeline" id="line-263"><code>			<span class="comment">// Return the block to the block pool.</span></code></span>
+<span class="codeline" id="line-264"><code>			<a href="#line-303" class="ident">spanSetBlockPool</a>.<a href="#line-320" class="ident">free</a>(<label for="r31" class="ident">block</label>)</code></span>
+<span class="codeline" id="line-265"><code>		}</code></span>
+<span class="codeline" id="line-266"><code>	}</code></span>
+<span class="codeline" id="line-267"><code>	<label for="r25" class="ident">b</label>.<a href="#line-51" class="ident">index</a>.<a href="#line-387" class="ident">reset</a>()</code></span>
+<span class="codeline" id="line-268"><code>	<label for="r25" class="ident">b</label>.<a href="#line-37" class="ident">spineLen</a>.<a href="internal/atomic/types.go.html#line-378" class="ident">Store</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-269"><code>}</code></span>
+<span class="codeline" id="line-270"><code></code></span>
+<span class="codeline" id="line-271"><code><span class="comment">// atomicSpanSetSpinePointer is an atomically-accessed spanSetSpinePointer.</span></code></span>
+<span class="codeline" id="line-272"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-273"><code><span class="comment">// It has the same semantics as atomic.UnsafePointer.</span></code></span>
+<span class="codeline" id="line-274"><code><span class="keyword">type</span> atomicSpanSetSpinePointer <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-275"><code>	a <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-457" class="ident">UnsafePointer</a></code></span>
+<span class="codeline" id="line-276"><code>}</code></span>
+<span class="codeline" id="line-277"><code></code></span>
+<span class="codeline" id="line-278"><code><span class="comment">// Loads the spanSetSpinePointer and returns it.</span></code></span>
+<span class="codeline" id="line-279"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-280"><code><span class="comment">// It has the same semantics as atomic.UnsafePointer.</span></code></span>
+<span class="codeline" id="line-281"><code><span class="keyword">func</span> (<label for="r32" class="ident">s</label> *<a href="#line-274" class="ident">atomicSpanSetSpinePointer</a>) <label for="r33" class="ident">Load</label>() <a href="#line-293" class="ident">spanSetSpinePointer</a> {</code></span>
+<span class="codeline" id="line-282"><code>	<span class="keyword">return</span> <a href="#line-293" class="ident">spanSetSpinePointer</a>{<label for="r32" class="ident">s</label>.<a href="#line-275" class="ident">a</a>.<a href="internal/atomic/types.go.html#line-465" class="ident">Load</a>()}</code></span>
+<span class="codeline" id="line-283"><code>}</code></span>
+<span class="codeline" id="line-284"><code></code></span>
+<span class="codeline" id="line-285"><code><span class="comment">// Stores the spanSetSpinePointer.</span></code></span>
+<span class="codeline" id="line-286"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-287"><code><span class="comment">// It has the same semantics as atomic.UnsafePointer.</span></code></span>
+<span class="codeline" id="line-288"><code><span class="keyword">func</span> (<label for="r34" class="ident">s</label> *<a href="#line-274" class="ident">atomicSpanSetSpinePointer</a>) <label for="r35" class="ident">StoreNoWB</label>(<label for="r36" class="ident">p</label> <a href="#line-293" class="ident">spanSetSpinePointer</a>) {</code></span>
+<span class="codeline" id="line-289"><code>	<label for="r34" class="ident">s</label>.<a href="#line-275" class="ident">a</a>.<a href="internal/atomic/types.go.html#line-478" class="ident">StoreNoWB</a>(<label for="r36" class="ident">p</label>.<a href="#line-294" class="ident">p</a>)</code></span>
+<span class="codeline" id="line-290"><code>}</code></span>
+<span class="codeline" id="line-291"><code></code></span>
+<span class="codeline" id="line-292"><code><span class="comment">// spanSetSpinePointer represents a pointer to a contiguous block of atomic.Pointer[spanSetBlock].</span></code></span>
+<span class="codeline" id="line-293"><code><span class="keyword">type</span> spanSetSpinePointer <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-294"><code>	p <a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a></code></span>
+<span class="codeline" id="line-295"><code>}</code></span>
+<span class="codeline" id="line-296"><code></code></span>
+<span class="codeline" id="line-297"><code><span class="comment">// lookup returns &amp;s[idx].</span></code></span>
+<span class="codeline" id="line-298"><code><span class="keyword">func</span> (<label for="r37" class="ident">s</label> <a href="#line-293" class="ident">spanSetSpinePointer</a>) <label for="r38" class="ident">lookup</label>(<label for="r39" class="ident">idx</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) *<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-518" class="ident">Pointer</a>[<a href="#line-59" class="ident">spanSetBlock</a>] {</code></span>
+<span class="codeline" id="line-299"><code>	<span class="keyword">return</span> (*<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-518" class="ident">Pointer</a>[<a href="#line-59" class="ident">spanSetBlock</a>])(<a href="stubs.go.html#line-17" class="ident">add</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r37" class="ident">s</label>.<a href="#line-294" class="ident">p</a>), <a href="../../pkg/internal/goarch.html" class="ident i1">goarch</a>.<a href="../internal/goarch/goarch.go.html#line-33" class="ident">PtrSize</a>*<label for="r39" class="ident">idx</label>))</code></span>
+<span class="codeline" id="line-300"><code>}</code></span>
+<span class="codeline" id="line-301"><code></code></span>
+<span class="codeline" id="line-302"><code><span class="comment">// spanSetBlockPool is a global pool of spanSetBlocks.</span></code></span>
+<span class="codeline" id="line-303"><code><span class="keyword">var</span> spanSetBlockPool <a href="#line-306" class="ident">spanSetBlockAlloc</a></code></span>
 <span class="codeline" id="line-304"><code></code></span>
-<span class="codeline" id="line-305"><code><span class="comment">// head returns the head of a headTailIndex value.</span></code></span>
-<span class="codeline" id="line-306"><code><span class="keyword">func</span> (<label for="r44" class="ident">h</label> <a href="#line-297" class="ident">headTailIndex</a>) <label for="r45" class="ident">head</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
-<span class="codeline" id="line-307"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r44" class="ident">h</label> &gt;&gt; <span class="lit-number">32</span>)</code></span>
+<span class="codeline" id="line-305"><code><span class="comment">// spanSetBlockAlloc represents a concurrent pool of spanSetBlocks.</span></code></span>
+<span class="codeline" id="line-306"><code><span class="keyword">type</span> spanSetBlockAlloc <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-307"><code>	stack <a href="lfstack.go.html#line-22" class="ident">lfstack</a></code></span>
 <span class="codeline" id="line-308"><code>}</code></span>
 <span class="codeline" id="line-309"><code></code></span>
-<span class="codeline" id="line-310"><code><span class="comment">// tail returns the tail of a headTailIndex value.</span></code></span>
-<span class="codeline" id="line-311"><code><span class="keyword">func</span> (<label for="r46" class="ident">h</label> <a href="#line-297" class="ident">headTailIndex</a>) <label for="r47" class="ident">tail</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
-<span class="codeline" id="line-312"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r46" class="ident">h</label>)</code></span>
-<span class="codeline" id="line-313"><code>}</code></span>
-<span class="codeline" id="line-314"><code></code></span>
-<span class="codeline" id="line-315"><code><span class="comment">// split splits the headTailIndex value into its parts.</span></code></span>
-<span class="codeline" id="line-316"><code><span class="keyword">func</span> (<label for="r48" class="ident">h</label> <a href="#line-297" class="ident">headTailIndex</a>) <label for="r49" class="ident">split</label>() (<label for="r50" class="ident">head</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r51" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
-<span class="codeline" id="line-317"><code>	<span class="keyword">return</span> <label for="r48" class="ident">h</label>.<a href="#line-306" class="ident">head</a>(), <label for="r48" class="ident">h</label>.<a href="#line-311" class="ident">tail</a>()</code></span>
-<span class="codeline" id="line-318"><code>}</code></span>
-<span class="codeline" id="line-319"><code></code></span>
-<span class="codeline" id="line-320"><code><span class="comment">// load atomically reads a headTailIndex value.</span></code></span>
-<span class="codeline" id="line-321"><code><span class="keyword">func</span> (<label for="r52" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r53" class="ident">load</label>() <a href="#line-297" class="ident">headTailIndex</a> {</code></span>
-<span class="codeline" id="line-322"><code>	<span class="keyword">return</span> <a href="#line-297" class="ident">headTailIndex</a>(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-29" class="ident">Load64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r52" class="ident">h</label>)))</code></span>
+<span class="codeline" id="line-310"><code><span class="comment">// alloc tries to grab a spanSetBlock out of the pool, and if it fails</span></code></span>
+<span class="codeline" id="line-311"><code><span class="comment">// persistentallocs a new one and returns it.</span></code></span>
+<span class="codeline" id="line-312"><code><span class="keyword">func</span> (<label for="r40" class="ident">p</label> *<a href="#line-306" class="ident">spanSetBlockAlloc</a>) <label for="r41" class="ident">alloc</label>() *<a href="#line-59" class="ident">spanSetBlock</a> {</code></span>
+<span class="codeline" id="line-313"><code>	<span class="keyword">if</span> <label for="r42" class="ident">s</label> := (*<a href="#line-59" class="ident">spanSetBlock</a>)(<label for="r40" class="ident">p</label>.<a href="#line-307" class="ident">stack</a>.<a href="lfstack.go.html#line-40" class="ident">pop</a>()); <label for="r42" class="ident">s</label> != <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-314"><code>		<span class="keyword">return</span> <label for="r42" class="ident">s</label></code></span>
+<span class="codeline" id="line-315"><code>	}</code></span>
+<span class="codeline" id="line-316"><code>	<span class="keyword">return</span> (*<a href="#line-59" class="ident">spanSetBlock</a>)(<a href="malloc.go.html#line-1460" class="ident">persistentalloc</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Sizeof" class="ident">Sizeof</a>(<a href="#line-59" class="ident">spanSetBlock</a>{}), <a href="../../pkg/internal/cpu.html" class="ident i0">cpu</a>.<a href="../internal/cpu/cpu.go.html#line-20" class="ident">CacheLineSize</a>, &amp;<a href="mstats.go.html#line-55" class="ident">memstats</a>.<a href="mstats.go.html#line-27" class="ident">gcMiscSys</a>))</code></span>
+<span class="codeline" id="line-317"><code>}</code></span>
+<span class="codeline" id="line-318"><code></code></span>
+<span class="codeline" id="line-319"><code><span class="comment">// free returns a spanSetBlock back to the pool.</span></code></span>
+<span class="codeline" id="line-320"><code><span class="keyword">func</span> (<label for="r43" class="ident">p</label> *<a href="#line-306" class="ident">spanSetBlockAlloc</a>) <label for="r44" class="ident">free</label>(<label for="r45" class="ident">block</label> *<a href="#line-59" class="ident">spanSetBlock</a>) {</code></span>
+<span class="codeline" id="line-321"><code>	<label for="r45" class="ident">block</label>.<a href="#line-66" class="ident">popped</a>.<a href="internal/atomic/types.go.html#line-213" class="ident">Store</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-322"><code>	<label for="r43" class="ident">p</label>.<a href="#line-307" class="ident">stack</a>.<a href="lfstack.go.html#line-24" class="ident">push</a>(&amp;<label for="r45" class="ident">block</label>.<a href="#line-61" class="ident">lfnode</a>)</code></span>
 <span class="codeline" id="line-323"><code>}</code></span>
 <span class="codeline" id="line-324"><code></code></span>
-<span class="codeline" id="line-325"><code><span class="comment">// cas atomically compares-and-swaps a headTailIndex value.</span></code></span>
-<span class="codeline" id="line-326"><code><span class="keyword">func</span> (<label for="r54" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r55" class="ident">cas</label>(<label for="r56" class="ident">old</label>, <label for="r57" class="ident">new</label> <a href="#line-297" class="ident">headTailIndex</a>) <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-327"><code>	<span class="keyword">return</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-90" class="ident">Cas64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r54" class="ident">h</label>), <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r56" class="ident">old</label>), <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r57" class="ident">new</label>))</code></span>
-<span class="codeline" id="line-328"><code>}</code></span>
-<span class="codeline" id="line-329"><code></code></span>
-<span class="codeline" id="line-330"><code><span class="comment">// incHead atomically increments the head of a headTailIndex.</span></code></span>
-<span class="codeline" id="line-331"><code><span class="keyword">func</span> (<label for="r58" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r59" class="ident">incHead</label>() <a href="#line-297" class="ident">headTailIndex</a> {</code></span>
-<span class="codeline" id="line-332"><code>	<span class="keyword">return</span> <a href="#line-297" class="ident">headTailIndex</a>(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-55" class="ident">Xadd64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r58" class="ident">h</label>), (<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">32</span>)))</code></span>
+<span class="codeline" id="line-325"><code><span class="comment">// headTailIndex represents a combined 32-bit head and 32-bit tail</span></code></span>
+<span class="codeline" id="line-326"><code><span class="comment">// of a queue into a single 64-bit value.</span></code></span>
+<span class="codeline" id="line-327"><code><span class="keyword">type</span> headTailIndex <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-328"><code></code></span>
+<span class="codeline" id="line-329"><code><span class="comment">// makeHeadTailIndex creates a headTailIndex value from a separate</span></code></span>
+<span class="codeline" id="line-330"><code><span class="comment">// head and tail.</span></code></span>
+<span class="codeline" id="line-331"><code><span class="keyword">func</span> makeHeadTailIndex(<label for="r47" class="ident">head</label>, <label for="r48" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="#line-327" class="ident">headTailIndex</a> {</code></span>
+<span class="codeline" id="line-332"><code>	<span class="keyword">return</span> <a href="#line-327" class="ident">headTailIndex</a>(<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r47" class="ident">head</label>)&lt;&lt;<span class="lit-number">32</span> | <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r48" class="ident">tail</label>))</code></span>
 <span class="codeline" id="line-333"><code>}</code></span>
 <span class="codeline" id="line-334"><code></code></span>
-<span class="codeline" id="line-335"><code><span class="comment">// decHead atomically decrements the head of a headTailIndex.</span></code></span>
-<span class="codeline" id="line-336"><code><span class="keyword">func</span> (<label for="r60" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r61" class="ident">decHead</label>() <a href="#line-297" class="ident">headTailIndex</a> {</code></span>
-<span class="codeline" id="line-337"><code>	<span class="keyword">return</span> <a href="#line-297" class="ident">headTailIndex</a>(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-55" class="ident">Xadd64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r60" class="ident">h</label>), -(<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">32</span>)))</code></span>
+<span class="codeline" id="line-335"><code><span class="comment">// head returns the head of a headTailIndex value.</span></code></span>
+<span class="codeline" id="line-336"><code><span class="keyword">func</span> (<label for="r49" class="ident">h</label> <a href="#line-327" class="ident">headTailIndex</a>) <label for="r50" class="ident">head</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-337"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r49" class="ident">h</label> &gt;&gt; <span class="lit-number">32</span>)</code></span>
 <span class="codeline" id="line-338"><code>}</code></span>
 <span class="codeline" id="line-339"><code></code></span>
-<span class="codeline" id="line-340"><code><span class="comment">// incTail atomically increments the tail of a headTailIndex.</span></code></span>
-<span class="codeline" id="line-341"><code><span class="keyword">func</span> (<label for="r62" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r63" class="ident">incTail</label>() <a href="#line-297" class="ident">headTailIndex</a> {</code></span>
-<span class="codeline" id="line-342"><code>	<label for="r64" class="ident">ht</label> := <a href="#line-297" class="ident">headTailIndex</a>(<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-55" class="ident">Xadd64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r62" class="ident">h</label>), +<span class="lit-number">1</span>))</code></span>
-<span class="codeline" id="line-343"><code>	<span class="comment">// Check for overflow.</span></code></span>
-<span class="codeline" id="line-344"><code>	<span class="keyword">if</span> <label for="r64" class="ident">ht</label>.<a href="#line-311" class="ident">tail</a>() == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-345"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: head = "</span>, <label for="r64" class="ident">ht</label>.<a href="#line-306" class="ident">head</a>(), <span class="lit-string">", tail = "</span>, <label for="r64" class="ident">ht</label>.<a href="#line-311" class="ident">tail</a>(), <span class="lit-string">"\n"</span>)</code></span>
-<span class="codeline" id="line-346"><code>		<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"headTailIndex overflow"</span>)</code></span>
-<span class="codeline" id="line-347"><code>	}</code></span>
-<span class="codeline" id="line-348"><code>	<span class="keyword">return</span> <label for="r64" class="ident">ht</label></code></span>
-<span class="codeline" id="line-349"><code>}</code></span>
-<span class="codeline" id="line-350"><code></code></span>
-<span class="codeline" id="line-351"><code><span class="comment">// reset clears the headTailIndex to (0, 0).</span></code></span>
-<span class="codeline" id="line-352"><code><span class="keyword">func</span> (<label for="r65" class="ident">h</label> *<a href="#line-297" class="ident">headTailIndex</a>) <label for="r66" class="ident">reset</label>() {</code></span>
-<span class="codeline" id="line-353"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-102" class="ident">Store64</a>((*<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>)(<label for="r65" class="ident">h</label>), <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-354"><code>}</code></span>
+<span class="codeline" id="line-340"><code><span class="comment">// tail returns the tail of a headTailIndex value.</span></code></span>
+<span class="codeline" id="line-341"><code><span class="keyword">func</span> (<label for="r51" class="ident">h</label> <a href="#line-327" class="ident">headTailIndex</a>) <label for="r52" class="ident">tail</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-342"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r51" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-343"><code>}</code></span>
+<span class="codeline" id="line-344"><code></code></span>
+<span class="codeline" id="line-345"><code><span class="comment">// split splits the headTailIndex value into its parts.</span></code></span>
+<span class="codeline" id="line-346"><code><span class="keyword">func</span> (<label for="r53" class="ident">h</label> <a href="#line-327" class="ident">headTailIndex</a>) <label for="r54" class="ident">split</label>() (<label for="r55" class="ident">head</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>, <label for="r56" class="ident">tail</label> <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) {</code></span>
+<span class="codeline" id="line-347"><code>	<span class="keyword">return</span> <label for="r53" class="ident">h</label>.<a href="#line-336" class="ident">head</a>(), <label for="r53" class="ident">h</label>.<a href="#line-341" class="ident">tail</a>()</code></span>
+<span class="codeline" id="line-348"><code>}</code></span>
+<span class="codeline" id="line-349"><code></code></span>
+<span class="codeline" id="line-350"><code><span class="comment">// atomicHeadTailIndex is an atomically-accessed headTailIndex.</span></code></span>
+<span class="codeline" id="line-351"><code><span class="keyword">type</span> atomicHeadTailIndex <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-352"><code>	u <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-299" class="ident">Uint64</a></code></span>
+<span class="codeline" id="line-353"><code>}</code></span>
+<span class="codeline" id="line-354"><code></code></span>
+<span class="codeline" id="line-355"><code><span class="comment">// load atomically reads a headTailIndex value.</span></code></span>
+<span class="codeline" id="line-356"><code><span class="keyword">func</span> (<label for="r57" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r58" class="ident">load</label>() <a href="#line-327" class="ident">headTailIndex</a> {</code></span>
+<span class="codeline" id="line-357"><code>	<span class="keyword">return</span> <a href="#line-327" class="ident">headTailIndex</a>(<label for="r57" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-308" class="ident">Load</a>())</code></span>
+<span class="codeline" id="line-358"><code>}</code></span>
+<span class="codeline" id="line-359"><code></code></span>
+<span class="codeline" id="line-360"><code><span class="comment">// cas atomically compares-and-swaps a headTailIndex value.</span></code></span>
+<span class="codeline" id="line-361"><code><span class="keyword">func</span> (<label for="r59" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r60" class="ident">cas</label>(<label for="r61" class="ident">old</label>, <label for="r62" class="ident">new</label> <a href="#line-327" class="ident">headTailIndex</a>) <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-362"><code>	<span class="keyword">return</span> <label for="r59" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-324" class="ident">CompareAndSwap</a>(<a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r61" class="ident">old</label>), <a href="../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r62" class="ident">new</label>))</code></span>
+<span class="codeline" id="line-363"><code>}</code></span>
+<span class="codeline" id="line-364"><code></code></span>
+<span class="codeline" id="line-365"><code><span class="comment">// incHead atomically increments the head of a headTailIndex.</span></code></span>
+<span class="codeline" id="line-366"><code><span class="keyword">func</span> (<label for="r63" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r64" class="ident">incHead</label>() <a href="#line-327" class="ident">headTailIndex</a> {</code></span>
+<span class="codeline" id="line-367"><code>	<span class="keyword">return</span> <a href="#line-327" class="ident">headTailIndex</a>(<label for="r63" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-343" class="ident">Add</a>(<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">32</span>))</code></span>
+<span class="codeline" id="line-368"><code>}</code></span>
+<span class="codeline" id="line-369"><code></code></span>
+<span class="codeline" id="line-370"><code><span class="comment">// decHead atomically decrements the head of a headTailIndex.</span></code></span>
+<span class="codeline" id="line-371"><code><span class="keyword">func</span> (<label for="r65" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r66" class="ident">decHead</label>() <a href="#line-327" class="ident">headTailIndex</a> {</code></span>
+<span class="codeline" id="line-372"><code>	<span class="keyword">return</span> <a href="#line-327" class="ident">headTailIndex</a>(<label for="r65" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-343" class="ident">Add</a>(-(<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">32</span>)))</code></span>
+<span class="codeline" id="line-373"><code>}</code></span>
+<span class="codeline" id="line-374"><code></code></span>
+<span class="codeline" id="line-375"><code><span class="comment">// incTail atomically increments the tail of a headTailIndex.</span></code></span>
+<span class="codeline" id="line-376"><code><span class="keyword">func</span> (<label for="r67" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r68" class="ident">incTail</label>() <a href="#line-327" class="ident">headTailIndex</a> {</code></span>
+<span class="codeline" id="line-377"><code>	<label for="r69" class="ident">ht</label> := <a href="#line-327" class="ident">headTailIndex</a>(<label for="r67" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-343" class="ident">Add</a>(<span class="lit-number">1</span>))</code></span>
+<span class="codeline" id="line-378"><code>	<span class="comment">// Check for overflow.</span></code></span>
+<span class="codeline" id="line-379"><code>	<span class="keyword">if</span> <label for="r69" class="ident">ht</label>.<a href="#line-341" class="ident">tail</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-380"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: head = "</span>, <label for="r69" class="ident">ht</label>.<a href="#line-336" class="ident">head</a>(), <span class="lit-string">", tail = "</span>, <label for="r69" class="ident">ht</label>.<a href="#line-341" class="ident">tail</a>(), <span class="lit-string">"\n"</span>)</code></span>
+<span class="codeline" id="line-381"><code>		<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"headTailIndex overflow"</span>)</code></span>
+<span class="codeline" id="line-382"><code>	}</code></span>
+<span class="codeline" id="line-383"><code>	<span class="keyword">return</span> <label for="r69" class="ident">ht</label></code></span>
+<span class="codeline" id="line-384"><code>}</code></span>
+<span class="codeline" id="line-385"><code></code></span>
+<span class="codeline" id="line-386"><code><span class="comment">// reset clears the headTailIndex to (0, 0).</span></code></span>
+<span class="codeline" id="line-387"><code><span class="keyword">func</span> (<label for="r70" class="ident">h</label> *<a href="#line-351" class="ident">atomicHeadTailIndex</a>) <label for="r71" class="ident">reset</label>() {</code></span>
+<span class="codeline" id="line-388"><code>	<label for="r70" class="ident">h</label>.<a href="#line-352" class="ident">u</a>.<a href="internal/atomic/types.go.html#line-315" class="ident">Store</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-389"><code>}</code></span>
+<span class="codeline" id="line-390"><code></code></span>
+<span class="codeline" id="line-391"><code><span class="comment">// atomicMSpanPointer is an atomic.Pointer[mspan]. Can't use generics because it's NotInHeap.</span></code></span>
+<span class="codeline" id="line-392"><code><span class="keyword">type</span> atomicMSpanPointer <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-393"><code>	p <a href="../../pkg/runtime/internal/atomic.html" class="ident i2">atomic</a>.<a href="internal/atomic/types.go.html#line-457" class="ident">UnsafePointer</a></code></span>
+<span class="codeline" id="line-394"><code>}</code></span>
+<span class="codeline" id="line-395"><code></code></span>
+<span class="codeline" id="line-396"><code><span class="comment">// Load returns the *mspan.</span></code></span>
+<span class="codeline" id="line-397"><code><span class="keyword">func</span> (<label for="r72" class="ident">p</label> *<a href="#line-392" class="ident">atomicMSpanPointer</a>) <label for="r73" class="ident">Load</label>() *<a href="mheap.go.html#line-410" class="ident">mspan</a> {</code></span>
+<span class="codeline" id="line-398"><code>	<span class="keyword">return</span> (*<a href="mheap.go.html#line-410" class="ident">mspan</a>)(<label for="r72" class="ident">p</label>.<a href="#line-393" class="ident">p</a>.<a href="internal/atomic/types.go.html#line-465" class="ident">Load</a>())</code></span>
+<span class="codeline" id="line-399"><code>}</code></span>
+<span class="codeline" id="line-400"><code></code></span>
+<span class="codeline" id="line-401"><code><span class="comment">// Store stores an *mspan.</span></code></span>
+<span class="codeline" id="line-402"><code><span class="keyword">func</span> (<label for="r74" class="ident">p</label> *<a href="#line-392" class="ident">atomicMSpanPointer</a>) <label for="r75" class="ident">StoreNoWB</label>(<label for="r76" class="ident">s</label> *<a href="mheap.go.html#line-410" class="ident">mspan</a>) {</code></span>
+<span class="codeline" id="line-403"><code>	<label for="r74" class="ident">p</label>.<a href="#line-393" class="ident">p</a>.<a href="internal/atomic/types.go.html#line-478" class="ident">StoreNoWB</a>(<a href="../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r76" class="ident">s</label>))</code></span>
+<span class="codeline" id="line-404"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

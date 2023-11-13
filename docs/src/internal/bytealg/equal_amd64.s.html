@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: equal_amd64.s in package internal/bytealg</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -22,163 +22,166 @@
 <span class="codeline" id="line-3"><code>// license that can be found in the LICENSE file.</code></span>
 <span class="codeline" id="line-4"><code></code></span>
 <span class="codeline" id="line-5"><code>#include "go_asm.h"</code></span>
-<span class="codeline" id="line-6"><code>#include "textflag.h"</code></span>
-<span class="codeline" id="line-7"><code></code></span>
-<span class="codeline" id="line-8"><code>// memequal(a, b unsafe.Pointer, size uintptr) bool</code></span>
-<span class="codeline" id="line-9"><code>TEXT runtime·memequal&lt;ABIInternal&gt;(SB),NOSPLIT,$0-25</code></span>
-<span class="codeline" id="line-10"><code>	// AX = a    (want in SI)</code></span>
-<span class="codeline" id="line-11"><code>	// BX = b    (want in DI)</code></span>
-<span class="codeline" id="line-12"><code>	// CX = size (want in BX)</code></span>
-<span class="codeline" id="line-13"><code>	CMPQ	AX, BX</code></span>
-<span class="codeline" id="line-14"><code>	JNE	neq</code></span>
-<span class="codeline" id="line-15"><code>	MOVQ	$1, AX	// return 1</code></span>
-<span class="codeline" id="line-16"><code>	RET</code></span>
-<span class="codeline" id="line-17"><code>neq:</code></span>
-<span class="codeline" id="line-18"><code>	MOVQ	AX, SI</code></span>
-<span class="codeline" id="line-19"><code>	MOVQ	BX, DI</code></span>
-<span class="codeline" id="line-20"><code>	MOVQ	CX, BX</code></span>
-<span class="codeline" id="line-21"><code>	JMP	memeqbody&lt;&gt;(SB)</code></span>
-<span class="codeline" id="line-22"><code></code></span>
-<span class="codeline" id="line-23"><code>// memequal_varlen(a, b unsafe.Pointer) bool</code></span>
-<span class="codeline" id="line-24"><code>TEXT runtime·memequal_varlen&lt;ABIInternal&gt;(SB),NOSPLIT,$0-17</code></span>
-<span class="codeline" id="line-25"><code>	// AX = a       (want in SI)</code></span>
-<span class="codeline" id="line-26"><code>	// BX = b       (want in DI)</code></span>
-<span class="codeline" id="line-27"><code>	// 8(DX) = size (want in BX)</code></span>
-<span class="codeline" id="line-28"><code>	CMPQ	AX, BX</code></span>
-<span class="codeline" id="line-29"><code>	JNE	neq</code></span>
-<span class="codeline" id="line-30"><code>	MOVQ	$1, AX	// return 1</code></span>
-<span class="codeline" id="line-31"><code>	RET</code></span>
-<span class="codeline" id="line-32"><code>neq:</code></span>
-<span class="codeline" id="line-33"><code>	MOVQ	AX, SI</code></span>
-<span class="codeline" id="line-34"><code>	MOVQ	BX, DI</code></span>
-<span class="codeline" id="line-35"><code>	MOVQ	8(DX), BX    // compiler stores size at offset 8 in the closure</code></span>
-<span class="codeline" id="line-36"><code>	JMP	memeqbody&lt;&gt;(SB)</code></span>
-<span class="codeline" id="line-37"><code></code></span>
-<span class="codeline" id="line-38"><code>// Input:</code></span>
-<span class="codeline" id="line-39"><code>//   a in SI</code></span>
-<span class="codeline" id="line-40"><code>//   b in DI</code></span>
-<span class="codeline" id="line-41"><code>//   count in BX</code></span>
-<span class="codeline" id="line-42"><code>// Output:</code></span>
-<span class="codeline" id="line-43"><code>//   result in AX</code></span>
-<span class="codeline" id="line-44"><code>TEXT memeqbody&lt;&gt;(SB),NOSPLIT,$0-0</code></span>
-<span class="codeline" id="line-45"><code>	CMPQ	BX, $8</code></span>
-<span class="codeline" id="line-46"><code>	JB	small</code></span>
-<span class="codeline" id="line-47"><code>	CMPQ	BX, $64</code></span>
-<span class="codeline" id="line-48"><code>	JB	bigloop</code></span>
-<span class="codeline" id="line-49"><code>	CMPB	internal∕cpu·X86+const_offsetX86HasAVX2(SB), $1</code></span>
-<span class="codeline" id="line-50"><code>	JE	hugeloop_avx2</code></span>
-<span class="codeline" id="line-51"><code></code></span>
-<span class="codeline" id="line-52"><code>	// 64 bytes at a time using xmm registers</code></span>
-<span class="codeline" id="line-53"><code>hugeloop:</code></span>
-<span class="codeline" id="line-54"><code>	CMPQ	BX, $64</code></span>
-<span class="codeline" id="line-55"><code>	JB	bigloop</code></span>
-<span class="codeline" id="line-56"><code>	MOVOU	(SI), X0</code></span>
-<span class="codeline" id="line-57"><code>	MOVOU	(DI), X1</code></span>
-<span class="codeline" id="line-58"><code>	MOVOU	16(SI), X2</code></span>
-<span class="codeline" id="line-59"><code>	MOVOU	16(DI), X3</code></span>
-<span class="codeline" id="line-60"><code>	MOVOU	32(SI), X4</code></span>
-<span class="codeline" id="line-61"><code>	MOVOU	32(DI), X5</code></span>
-<span class="codeline" id="line-62"><code>	MOVOU	48(SI), X6</code></span>
-<span class="codeline" id="line-63"><code>	MOVOU	48(DI), X7</code></span>
-<span class="codeline" id="line-64"><code>	PCMPEQB	X1, X0</code></span>
-<span class="codeline" id="line-65"><code>	PCMPEQB	X3, X2</code></span>
-<span class="codeline" id="line-66"><code>	PCMPEQB	X5, X4</code></span>
-<span class="codeline" id="line-67"><code>	PCMPEQB	X7, X6</code></span>
-<span class="codeline" id="line-68"><code>	PAND	X2, X0</code></span>
-<span class="codeline" id="line-69"><code>	PAND	X6, X4</code></span>
-<span class="codeline" id="line-70"><code>	PAND	X4, X0</code></span>
-<span class="codeline" id="line-71"><code>	PMOVMSKB X0, DX</code></span>
-<span class="codeline" id="line-72"><code>	ADDQ	$64, SI</code></span>
-<span class="codeline" id="line-73"><code>	ADDQ	$64, DI</code></span>
-<span class="codeline" id="line-74"><code>	SUBQ	$64, BX</code></span>
-<span class="codeline" id="line-75"><code>	CMPL	DX, $0xffff</code></span>
-<span class="codeline" id="line-76"><code>	JEQ	hugeloop</code></span>
-<span class="codeline" id="line-77"><code>	XORQ	AX, AX	// return 0</code></span>
-<span class="codeline" id="line-78"><code>	RET</code></span>
-<span class="codeline" id="line-79"><code></code></span>
-<span class="codeline" id="line-80"><code>	// 64 bytes at a time using ymm registers</code></span>
-<span class="codeline" id="line-81"><code>hugeloop_avx2:</code></span>
-<span class="codeline" id="line-82"><code>	CMPQ	BX, $64</code></span>
-<span class="codeline" id="line-83"><code>	JB	bigloop_avx2</code></span>
-<span class="codeline" id="line-84"><code>	VMOVDQU	(SI), Y0</code></span>
-<span class="codeline" id="line-85"><code>	VMOVDQU	(DI), Y1</code></span>
-<span class="codeline" id="line-86"><code>	VMOVDQU	32(SI), Y2</code></span>
-<span class="codeline" id="line-87"><code>	VMOVDQU	32(DI), Y3</code></span>
-<span class="codeline" id="line-88"><code>	VPCMPEQB	Y1, Y0, Y4</code></span>
-<span class="codeline" id="line-89"><code>	VPCMPEQB	Y2, Y3, Y5</code></span>
-<span class="codeline" id="line-90"><code>	VPAND	Y4, Y5, Y6</code></span>
-<span class="codeline" id="line-91"><code>	VPMOVMSKB Y6, DX</code></span>
-<span class="codeline" id="line-92"><code>	ADDQ	$64, SI</code></span>
-<span class="codeline" id="line-93"><code>	ADDQ	$64, DI</code></span>
-<span class="codeline" id="line-94"><code>	SUBQ	$64, BX</code></span>
-<span class="codeline" id="line-95"><code>	CMPL	DX, $0xffffffff</code></span>
-<span class="codeline" id="line-96"><code>	JEQ	hugeloop_avx2</code></span>
-<span class="codeline" id="line-97"><code>	VZEROUPPER</code></span>
-<span class="codeline" id="line-98"><code>	XORQ	AX, AX	// return 0</code></span>
-<span class="codeline" id="line-99"><code>	RET</code></span>
-<span class="codeline" id="line-100"><code></code></span>
-<span class="codeline" id="line-101"><code>bigloop_avx2:</code></span>
-<span class="codeline" id="line-102"><code>	VZEROUPPER</code></span>
+<span class="codeline" id="line-6"><code>#include "asm_amd64.h"</code></span>
+<span class="codeline" id="line-7"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code>// memequal(a, b unsafe.Pointer, size uintptr) bool</code></span>
+<span class="codeline" id="line-10"><code>TEXT runtime·memequal&lt;ABIInternal&gt;(SB),NOSPLIT,$0-25</code></span>
+<span class="codeline" id="line-11"><code>	// AX = a    (want in SI)</code></span>
+<span class="codeline" id="line-12"><code>	// BX = b    (want in DI)</code></span>
+<span class="codeline" id="line-13"><code>	// CX = size (want in BX)</code></span>
+<span class="codeline" id="line-14"><code>	CMPQ	AX, BX</code></span>
+<span class="codeline" id="line-15"><code>	JNE	neq</code></span>
+<span class="codeline" id="line-16"><code>	MOVQ	$1, AX	// return 1</code></span>
+<span class="codeline" id="line-17"><code>	RET</code></span>
+<span class="codeline" id="line-18"><code>neq:</code></span>
+<span class="codeline" id="line-19"><code>	MOVQ	AX, SI</code></span>
+<span class="codeline" id="line-20"><code>	MOVQ	BX, DI</code></span>
+<span class="codeline" id="line-21"><code>	MOVQ	CX, BX</code></span>
+<span class="codeline" id="line-22"><code>	JMP	memeqbody&lt;&gt;(SB)</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code>// memequal_varlen(a, b unsafe.Pointer) bool</code></span>
+<span class="codeline" id="line-25"><code>TEXT runtime·memequal_varlen&lt;ABIInternal&gt;(SB),NOSPLIT,$0-17</code></span>
+<span class="codeline" id="line-26"><code>	// AX = a       (want in SI)</code></span>
+<span class="codeline" id="line-27"><code>	// BX = b       (want in DI)</code></span>
+<span class="codeline" id="line-28"><code>	// 8(DX) = size (want in BX)</code></span>
+<span class="codeline" id="line-29"><code>	CMPQ	AX, BX</code></span>
+<span class="codeline" id="line-30"><code>	JNE	neq</code></span>
+<span class="codeline" id="line-31"><code>	MOVQ	$1, AX	// return 1</code></span>
+<span class="codeline" id="line-32"><code>	RET</code></span>
+<span class="codeline" id="line-33"><code>neq:</code></span>
+<span class="codeline" id="line-34"><code>	MOVQ	AX, SI</code></span>
+<span class="codeline" id="line-35"><code>	MOVQ	BX, DI</code></span>
+<span class="codeline" id="line-36"><code>	MOVQ	8(DX), BX    // compiler stores size at offset 8 in the closure</code></span>
+<span class="codeline" id="line-37"><code>	JMP	memeqbody&lt;&gt;(SB)</code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code>// Input:</code></span>
+<span class="codeline" id="line-40"><code>//   a in SI</code></span>
+<span class="codeline" id="line-41"><code>//   b in DI</code></span>
+<span class="codeline" id="line-42"><code>//   count in BX</code></span>
+<span class="codeline" id="line-43"><code>// Output:</code></span>
+<span class="codeline" id="line-44"><code>//   result in AX</code></span>
+<span class="codeline" id="line-45"><code>TEXT memeqbody&lt;&gt;(SB),NOSPLIT,$0-0</code></span>
+<span class="codeline" id="line-46"><code>	CMPQ	BX, $8</code></span>
+<span class="codeline" id="line-47"><code>	JB	small</code></span>
+<span class="codeline" id="line-48"><code>	CMPQ	BX, $64</code></span>
+<span class="codeline" id="line-49"><code>	JB	bigloop</code></span>
+<span class="codeline" id="line-50"><code>#ifndef hasAVX2</code></span>
+<span class="codeline" id="line-51"><code>	CMPB	internal∕cpu·X86+const_offsetX86HasAVX2(SB), $1</code></span>
+<span class="codeline" id="line-52"><code>	JE	hugeloop_avx2</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code>	// 64 bytes at a time using xmm registers</code></span>
+<span class="codeline" id="line-55"><code>hugeloop:</code></span>
+<span class="codeline" id="line-56"><code>	CMPQ	BX, $64</code></span>
+<span class="codeline" id="line-57"><code>	JB	bigloop</code></span>
+<span class="codeline" id="line-58"><code>	MOVOU	(SI), X0</code></span>
+<span class="codeline" id="line-59"><code>	MOVOU	(DI), X1</code></span>
+<span class="codeline" id="line-60"><code>	MOVOU	16(SI), X2</code></span>
+<span class="codeline" id="line-61"><code>	MOVOU	16(DI), X3</code></span>
+<span class="codeline" id="line-62"><code>	MOVOU	32(SI), X4</code></span>
+<span class="codeline" id="line-63"><code>	MOVOU	32(DI), X5</code></span>
+<span class="codeline" id="line-64"><code>	MOVOU	48(SI), X6</code></span>
+<span class="codeline" id="line-65"><code>	MOVOU	48(DI), X7</code></span>
+<span class="codeline" id="line-66"><code>	PCMPEQB	X1, X0</code></span>
+<span class="codeline" id="line-67"><code>	PCMPEQB	X3, X2</code></span>
+<span class="codeline" id="line-68"><code>	PCMPEQB	X5, X4</code></span>
+<span class="codeline" id="line-69"><code>	PCMPEQB	X7, X6</code></span>
+<span class="codeline" id="line-70"><code>	PAND	X2, X0</code></span>
+<span class="codeline" id="line-71"><code>	PAND	X6, X4</code></span>
+<span class="codeline" id="line-72"><code>	PAND	X4, X0</code></span>
+<span class="codeline" id="line-73"><code>	PMOVMSKB X0, DX</code></span>
+<span class="codeline" id="line-74"><code>	ADDQ	$64, SI</code></span>
+<span class="codeline" id="line-75"><code>	ADDQ	$64, DI</code></span>
+<span class="codeline" id="line-76"><code>	SUBQ	$64, BX</code></span>
+<span class="codeline" id="line-77"><code>	CMPL	DX, $0xffff</code></span>
+<span class="codeline" id="line-78"><code>	JEQ	hugeloop</code></span>
+<span class="codeline" id="line-79"><code>	XORQ	AX, AX	// return 0</code></span>
+<span class="codeline" id="line-80"><code>	RET</code></span>
+<span class="codeline" id="line-81"><code>#endif</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code>	// 64 bytes at a time using ymm registers</code></span>
+<span class="codeline" id="line-84"><code>hugeloop_avx2:</code></span>
+<span class="codeline" id="line-85"><code>	CMPQ	BX, $64</code></span>
+<span class="codeline" id="line-86"><code>	JB	bigloop_avx2</code></span>
+<span class="codeline" id="line-87"><code>	VMOVDQU	(SI), Y0</code></span>
+<span class="codeline" id="line-88"><code>	VMOVDQU	(DI), Y1</code></span>
+<span class="codeline" id="line-89"><code>	VMOVDQU	32(SI), Y2</code></span>
+<span class="codeline" id="line-90"><code>	VMOVDQU	32(DI), Y3</code></span>
+<span class="codeline" id="line-91"><code>	VPCMPEQB	Y1, Y0, Y4</code></span>
+<span class="codeline" id="line-92"><code>	VPCMPEQB	Y2, Y3, Y5</code></span>
+<span class="codeline" id="line-93"><code>	VPAND	Y4, Y5, Y6</code></span>
+<span class="codeline" id="line-94"><code>	VPMOVMSKB Y6, DX</code></span>
+<span class="codeline" id="line-95"><code>	ADDQ	$64, SI</code></span>
+<span class="codeline" id="line-96"><code>	ADDQ	$64, DI</code></span>
+<span class="codeline" id="line-97"><code>	SUBQ	$64, BX</code></span>
+<span class="codeline" id="line-98"><code>	CMPL	DX, $0xffffffff</code></span>
+<span class="codeline" id="line-99"><code>	JEQ	hugeloop_avx2</code></span>
+<span class="codeline" id="line-100"><code>	VZEROUPPER</code></span>
+<span class="codeline" id="line-101"><code>	XORQ	AX, AX	// return 0</code></span>
+<span class="codeline" id="line-102"><code>	RET</code></span>
 <span class="codeline" id="line-103"><code></code></span>
-<span class="codeline" id="line-104"><code>	// 8 bytes at a time using 64-bit register</code></span>
-<span class="codeline" id="line-105"><code>bigloop:</code></span>
-<span class="codeline" id="line-106"><code>	CMPQ	BX, $8</code></span>
-<span class="codeline" id="line-107"><code>	JBE	leftover</code></span>
-<span class="codeline" id="line-108"><code>	MOVQ	(SI), CX</code></span>
-<span class="codeline" id="line-109"><code>	MOVQ	(DI), DX</code></span>
-<span class="codeline" id="line-110"><code>	ADDQ	$8, SI</code></span>
-<span class="codeline" id="line-111"><code>	ADDQ	$8, DI</code></span>
-<span class="codeline" id="line-112"><code>	SUBQ	$8, BX</code></span>
-<span class="codeline" id="line-113"><code>	CMPQ	CX, DX</code></span>
-<span class="codeline" id="line-114"><code>	JEQ	bigloop</code></span>
-<span class="codeline" id="line-115"><code>	XORQ	AX, AX	// return 0</code></span>
-<span class="codeline" id="line-116"><code>	RET</code></span>
-<span class="codeline" id="line-117"><code></code></span>
-<span class="codeline" id="line-118"><code>	// remaining 0-8 bytes</code></span>
-<span class="codeline" id="line-119"><code>leftover:</code></span>
-<span class="codeline" id="line-120"><code>	MOVQ	-8(SI)(BX*1), CX</code></span>
-<span class="codeline" id="line-121"><code>	MOVQ	-8(DI)(BX*1), DX</code></span>
-<span class="codeline" id="line-122"><code>	CMPQ	CX, DX</code></span>
-<span class="codeline" id="line-123"><code>	SETEQ	AX</code></span>
-<span class="codeline" id="line-124"><code>	RET</code></span>
-<span class="codeline" id="line-125"><code></code></span>
-<span class="codeline" id="line-126"><code>small:</code></span>
-<span class="codeline" id="line-127"><code>	CMPQ	BX, $0</code></span>
-<span class="codeline" id="line-128"><code>	JEQ	equal</code></span>
-<span class="codeline" id="line-129"><code></code></span>
-<span class="codeline" id="line-130"><code>	LEAQ	0(BX*8), CX</code></span>
-<span class="codeline" id="line-131"><code>	NEGQ	CX</code></span>
+<span class="codeline" id="line-104"><code>bigloop_avx2:</code></span>
+<span class="codeline" id="line-105"><code>	VZEROUPPER</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code>	// 8 bytes at a time using 64-bit register</code></span>
+<span class="codeline" id="line-108"><code>bigloop:</code></span>
+<span class="codeline" id="line-109"><code>	CMPQ	BX, $8</code></span>
+<span class="codeline" id="line-110"><code>	JBE	leftover</code></span>
+<span class="codeline" id="line-111"><code>	MOVQ	(SI), CX</code></span>
+<span class="codeline" id="line-112"><code>	MOVQ	(DI), DX</code></span>
+<span class="codeline" id="line-113"><code>	ADDQ	$8, SI</code></span>
+<span class="codeline" id="line-114"><code>	ADDQ	$8, DI</code></span>
+<span class="codeline" id="line-115"><code>	SUBQ	$8, BX</code></span>
+<span class="codeline" id="line-116"><code>	CMPQ	CX, DX</code></span>
+<span class="codeline" id="line-117"><code>	JEQ	bigloop</code></span>
+<span class="codeline" id="line-118"><code>	XORQ	AX, AX	// return 0</code></span>
+<span class="codeline" id="line-119"><code>	RET</code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code>	// remaining 0-8 bytes</code></span>
+<span class="codeline" id="line-122"><code>leftover:</code></span>
+<span class="codeline" id="line-123"><code>	MOVQ	-8(SI)(BX*1), CX</code></span>
+<span class="codeline" id="line-124"><code>	MOVQ	-8(DI)(BX*1), DX</code></span>
+<span class="codeline" id="line-125"><code>	CMPQ	CX, DX</code></span>
+<span class="codeline" id="line-126"><code>	SETEQ	AX</code></span>
+<span class="codeline" id="line-127"><code>	RET</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code>small:</code></span>
+<span class="codeline" id="line-130"><code>	CMPQ	BX, $0</code></span>
+<span class="codeline" id="line-131"><code>	JEQ	equal</code></span>
 <span class="codeline" id="line-132"><code></code></span>
-<span class="codeline" id="line-133"><code>	CMPB	SI, $0xf8</code></span>
-<span class="codeline" id="line-134"><code>	JA	si_high</code></span>
+<span class="codeline" id="line-133"><code>	LEAQ	0(BX*8), CX</code></span>
+<span class="codeline" id="line-134"><code>	NEGQ	CX</code></span>
 <span class="codeline" id="line-135"><code></code></span>
-<span class="codeline" id="line-136"><code>	// load at SI won't cross a page boundary.</code></span>
-<span class="codeline" id="line-137"><code>	MOVQ	(SI), SI</code></span>
-<span class="codeline" id="line-138"><code>	JMP	si_finish</code></span>
-<span class="codeline" id="line-139"><code>si_high:</code></span>
-<span class="codeline" id="line-140"><code>	// address ends in 11111xxx. Load up to bytes we want, move to correct position.</code></span>
-<span class="codeline" id="line-141"><code>	MOVQ	-8(SI)(BX*1), SI</code></span>
-<span class="codeline" id="line-142"><code>	SHRQ	CX, SI</code></span>
-<span class="codeline" id="line-143"><code>si_finish:</code></span>
-<span class="codeline" id="line-144"><code></code></span>
-<span class="codeline" id="line-145"><code>	// same for DI.</code></span>
-<span class="codeline" id="line-146"><code>	CMPB	DI, $0xf8</code></span>
-<span class="codeline" id="line-147"><code>	JA	di_high</code></span>
-<span class="codeline" id="line-148"><code>	MOVQ	(DI), DI</code></span>
-<span class="codeline" id="line-149"><code>	JMP	di_finish</code></span>
-<span class="codeline" id="line-150"><code>di_high:</code></span>
-<span class="codeline" id="line-151"><code>	MOVQ	-8(DI)(BX*1), DI</code></span>
-<span class="codeline" id="line-152"><code>	SHRQ	CX, DI</code></span>
-<span class="codeline" id="line-153"><code>di_finish:</code></span>
-<span class="codeline" id="line-154"><code></code></span>
-<span class="codeline" id="line-155"><code>	SUBQ	SI, DI</code></span>
-<span class="codeline" id="line-156"><code>	SHLQ	CX, DI</code></span>
-<span class="codeline" id="line-157"><code>equal:</code></span>
-<span class="codeline" id="line-158"><code>	SETEQ	AX</code></span>
-<span class="codeline" id="line-159"><code>	RET</code></span>
+<span class="codeline" id="line-136"><code>	CMPB	SI, $0xf8</code></span>
+<span class="codeline" id="line-137"><code>	JA	si_high</code></span>
+<span class="codeline" id="line-138"><code></code></span>
+<span class="codeline" id="line-139"><code>	// load at SI won't cross a page boundary.</code></span>
+<span class="codeline" id="line-140"><code>	MOVQ	(SI), SI</code></span>
+<span class="codeline" id="line-141"><code>	JMP	si_finish</code></span>
+<span class="codeline" id="line-142"><code>si_high:</code></span>
+<span class="codeline" id="line-143"><code>	// address ends in 11111xxx. Load up to bytes we want, move to correct position.</code></span>
+<span class="codeline" id="line-144"><code>	MOVQ	-8(SI)(BX*1), SI</code></span>
+<span class="codeline" id="line-145"><code>	SHRQ	CX, SI</code></span>
+<span class="codeline" id="line-146"><code>si_finish:</code></span>
+<span class="codeline" id="line-147"><code></code></span>
+<span class="codeline" id="line-148"><code>	// same for DI.</code></span>
+<span class="codeline" id="line-149"><code>	CMPB	DI, $0xf8</code></span>
+<span class="codeline" id="line-150"><code>	JA	di_high</code></span>
+<span class="codeline" id="line-151"><code>	MOVQ	(DI), DI</code></span>
+<span class="codeline" id="line-152"><code>	JMP	di_finish</code></span>
+<span class="codeline" id="line-153"><code>di_high:</code></span>
+<span class="codeline" id="line-154"><code>	MOVQ	-8(DI)(BX*1), DI</code></span>
+<span class="codeline" id="line-155"><code>	SHRQ	CX, DI</code></span>
+<span class="codeline" id="line-156"><code>di_finish:</code></span>
+<span class="codeline" id="line-157"><code></code></span>
+<span class="codeline" id="line-158"><code>	SUBQ	SI, DI</code></span>
+<span class="codeline" id="line-159"><code>	SHLQ	CX, DI</code></span>
+<span class="codeline" id="line-160"><code>equal:</code></span>
+<span class="codeline" id="line-161"><code>	SETEQ	AX</code></span>
+<span class="codeline" id="line-162"><code>	RET</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/golang-jwt/jwt/v4</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>jwt</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../../index.html#pkg-github.com/golang-jwt/jwt/v4">github.com/golang-jwt/jwt/v4</a><i> (on <a href="https://pkg.go.dev/github.com/golang-jwt/jwt/v4" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../../dep/github.com/golang-jwt/jwt/v4.html">21 packages</a>, and imported by <a href="../../../../dep/github.com/golang-jwt/jwt/v4.html#imported-by">2 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html">claims.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-1-fold-content"><label for="file-1-fold-content">  <a href="../../../../src/github.com/golang-jwt/jwt/v4/doc.go.html#doc">d</a> <a href="../../../../src/github.com/golang-jwt/jwt/v4/doc.go.html">doc.go</a></label><span id='file-1-fold-content-items' class="fold-items">
+<span class="md-text">		Package jwt is a Go implementation of JSON Web Tokens: http://self-issued.info/docs/draft-jones-json-web-token.html
+		
+		See README.md for more info.</span>
+</span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html">ecdsa.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa_utils.go.html">ecdsa_utils.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html">ed25519.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519_utils.go.html">ed25519_utils.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html">errors.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html">hmac.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html">map_claims.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html">none.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html">parser.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser_option.go.html">parser_option.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html">rsa.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html">rsa_pss.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html">rsa_utils.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html">signing_method.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html">token.go</a></span>
+	<span class="nodocs">    <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html">types.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">NewWithClaims_customClaimsType</label><span id='example-0-fold-content-items' class="fold-items">
+	  {
+	  	mySigningKey := []byte("AllYourBase")
+	  
+	  	type MyCustomClaims struct {
+	  		Foo string `json:"foo"`
+	  		jwt.RegisteredClaims
+	  	}
+	  
+	  	claims := MyCustomClaims{
+	  		"bar",
+	  		jwt.RegisteredClaims{
+	  
+	  			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+	  			IssuedAt:  jwt.NewNumericDate(time.Now()),
+	  			NotBefore: jwt.NewNumericDate(time.Now()),
+	  			Issuer:    "test",
+	  			Subject:   "somebody",
+	  			ID:        "1",
+	  			Audience:  []string{"somebody_else"},
+	  		},
+	  	}
+	  
+	  	claims = MyCustomClaims{
+	  		"bar",
+	  		jwt.RegisteredClaims{
+	  
+	  			ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+	  			Issuer:    "test",
+	  		},
+	  	}
+	  
+	  	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	  	ss, err := token.SignedString(mySigningKey)
+	  	fmt.Printf("%v %v", ss, err)
+	  
+	  }</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">NewWithClaims_registeredClaims</label><span id='example-1-fold-content-items' class="fold-items">
+	  {
+	  	mySigningKey := []byte("AllYourBase")
+	  
+	  	claims := &amp;jwt.RegisteredClaims{
+	  		ExpiresAt: jwt.NewNumericDate(time.Unix(1516239022, 0)),
+	  		Issuer:    "test",
+	  	}
+	  
+	  	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	  	ss, err := token.SignedString(mySigningKey)
+	  	fmt.Printf("%v %v", ss, err)
+	  
+	  }</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">ParseWithClaims_customClaimsType</label><span id='example-2-fold-content-items' class="fold-items">
+	  {
+	  	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJpc3MiOiJ0ZXN0IiwiYXVkIjoic2luZ2xlIn0.QAWg1vGvnqRuCFTMcPkjZljXHh8U3L_qUjszOtQbeaA"
+	  
+	  	type MyCustomClaims struct {
+	  		Foo string `json:"foo"`
+	  		jwt.RegisteredClaims
+	  	}
+	  
+	  	token, err := jwt.ParseWithClaims(tokenString, &amp;MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+	  		return []byte("AllYourBase"), nil
+	  	})
+	  
+	  	if claims, ok := token.Claims.(*MyCustomClaims); ok &amp;&amp; token.Valid {
+	  		fmt.Printf("%v %v", claims.Foo, claims.RegisteredClaims.Issuer)
+	  	} else {
+	  		fmt.Println(err)
+	  	}
+	  
+	  }</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">Parse_errorChecking</label><span id='example-3-fold-content-items' class="fold-items">
+	  {
+	  	// Token from another example.  This token is expired
+	  	var tokenString = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJleHAiOjE1MDAwLCJpc3MiOiJ0ZXN0In0.HE7fK0xOQwFEr4WDgRWj4teRPZ6i3GLwD5YCm6Pwu_c"
+	  
+	  	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	  		return []byte("AllYourBase"), nil
+	  	})
+	  
+	  	if token.Valid {
+	  		fmt.Println("You look nice today")
+	  	} else if errors.Is(err, jwt.ErrTokenMalformed) {
+	  		fmt.Println("That's not even a token")
+	  	} else if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenNotValidYet) {
+	  
+	  		fmt.Println("Timing is everything")
+	  	} else {
+	  		fmt.Println("Couldn't handle this token:", err)
+	  	}
+	  
+	  }</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 17)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Claims" data-popularity="1230">	<input type='checkbox' class="fold" id="Claims-fold-content"><label for="Claims-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-11">Claims</a> <b><i>(interface)</i></b></label><span id='Claims-fold-content-docs' class="fold-docs">
+<span class="md-text">		Claims must just have a Valid method that determines
+		if the token is invalid for any supported reason</span>
+
+		<input type='checkbox' class="fold" id="Claims-fold-methods"><label for="Claims-fold-methods">Methods (<i>only one</i>)</label><span id='Claims-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( Claims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-12">Valid</a>() <a href="../../../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="Claims-fold-impledby"><label for="Claims-fold-impledby">Implemented By (<i>at least 6</i>)</label><span id='Claims-fold-impledby-items' class="fold-items"><span>
+			 <a href="#name-MapClaims">MapClaims</a></span><span>
+			 <a href="#name-RegisteredClaims">RegisteredClaims</a></span><span>
+			 <a href="#name-StandardClaims">StandardClaims</a></span><span>
+			 github.com/Nerzal/gocloak/v13.<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-PermissionTicketRepresentation">PermissionTicketRepresentation</a></span><span>
+			 github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-Claims">Claims</a></span><span>
+			*net/http.<a href="../../../net/http.html#name-Cookie">Cookie</a></span></span>
+		<input type='checkbox' class="fold" id="Claims-fold-params"><label for="Claims-fold-params">As Inputs Of (<i>at least 8</i>)</label><span id='Claims-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewWithClaims">NewWithClaims</a>(method <a href="#name-SigningMethod">SigningMethod</a>, claims <b>Claims</b>) *<a href="#name-Token">Token</a></span><span>
+			func <a href="#name-ParseWithClaims">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <b>Claims</b>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-125">ParseUnverified</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <b>Claims</b>) (token *<a href="#name-Token">Token</a>, parts []<a href="../../../builtin.html#name-string">string</a>, err <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-52">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <b>Claims</b>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-457">DecodeAccessTokenCustomClaims</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, accessToken, realm <a href="../../../builtin.html#name-string">string</a>, claims <b>Claims</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-DecodeAccessTokenECDSACustomClaims">DecodeAccessTokenECDSACustomClaims</a>(accessToken <a href="../../../builtin.html#name-string">string</a>, x, y, crv *<a href="../../../builtin.html#name-string">string</a>, customClaims <b>Claims</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-DecodeAccessTokenRSACustomClaims">DecodeAccessTokenRSACustomClaims</a>(accessToken <a href="../../../builtin.html#name-string">string</a>, e, n *<a href="../../../builtin.html#name-string">string</a>, customClaims <b>Claims</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-SignClaims">SignClaims</a>(claims <b>Claims</b>, key interface{}, method <a href="#name-SigningMethod">SigningMethod</a>) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-ClaimStrings" data-popularity="200">	<input type='checkbox' class="fold" id="ClaimStrings-fold-content"><label for="ClaimStrings-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-100">ClaimStrings</a> <i>([])</i></label><span id='ClaimStrings-fold-content-docs' class="fold-docs">
+<span class="md-text">		ClaimStrings is basically just a slice of strings, but it can be either serialized from a string array or just a string.
+		This type is necessary, since the "aud" claim can either be a single string or an array.</span>
+
+		<input type='checkbox' class="fold" id="ClaimStrings-fold-methods"><label for="ClaimStrings-fold-methods">Methods (<i>total 2</i>)</label><span id='ClaimStrings-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( ClaimStrings) <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-135">MarshalJSON</a>() (b []<a href="../../../builtin.html#name-byte">byte</a>, err <a href="../../../builtin.html#name-error">error</a>)</span></span><span>
+			<span class="nodocs">(*ClaimStrings) <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-102">UnmarshalJSON</a>(data []<a href="../../../builtin.html#name-byte">byte</a>) (err <a href="../../../builtin.html#name-error">error</a>)</span></span></span>
+		<input type='checkbox' class="fold" id="ClaimStrings-fold-impls"><label for="ClaimStrings-fold-impls">Implements (<i>at least 2</i>)</label><span id='ClaimStrings-fold-impls-items' class="fold-items"><span>
+			 ClaimStrings : encoding/json.<a href="../../../encoding/json.html#name-Marshaler">Marshaler</a></span><span>
+			*ClaimStrings : encoding/json.<a href="../../../encoding/json.html#name-Unmarshaler">Unmarshaler</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Keyfunc" data-popularity="140">	<input type='checkbox' class="fold" id="Keyfunc-fold-content"><label for="Keyfunc-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-32">Keyfunc</a> <i>(func)</i></label><span id='Keyfunc-fold-content-docs' class="fold-docs">
+<span class="md-text">		Keyfunc will be used by the Parse methods as a callback function to supply
+		the key for verification.  The function receives the parsed,
+		but unverified Token.  This allows you to use properties in the
+		Header of the token (such as `kid`) to identify which key to use.</span>
+
+		<input type='checkbox' class="fold" id="Keyfunc-fold-params"><label for="Keyfunc-fold-params">As Inputs Of (<i>at least 4</i>)</label><span id='Keyfunc-fold-params-items' class="fold-items"><span>
+			func <a href="#name-Parse">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <b>Keyfunc</b>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-ParseWithClaims">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <b>Keyfunc</b>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-41">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <b>Keyfunc</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-52">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <b>Keyfunc</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-MapClaims" data-popularity="425">	<input type='checkbox' class="fold" id="MapClaims-fold-content"><label for="MapClaims-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-12">MapClaims</a> <i>(map)</i></label><span id='MapClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		MapClaims is a claims type that uses the map[string]interface{} for JSON decoding.
+		This is the default claims type if you don't supply one</span>
+
+		<input type='checkbox' class="fold" id="MapClaims-fold-methods"><label for="MapClaims-fold-methods">Methods (<i>total 6</i>)</label><span id='MapClaims-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-Valid"><label for="MapClaims-fold-method-Valid">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-124">Valid</a>() <a href="../../../builtin.html#name-error">error</a></label><span id='MapClaims-fold-method-Valid-docs' class="fold-docs">
+<span class="md-text">				Valid validates time based claims "exp, iat, nbf".
+				There is no accounting for clock skew.
+				As well, if any of the above claims are not in the token, it will still
+				be considered a valid claim.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-VerifyAudience"><label for="MapClaims-fold-method-VerifyAudience">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-16">VerifyAudience</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='MapClaims-fold-method-VerifyAudience-docs' class="fold-docs">
+<span class="md-text">				VerifyAudience Compares the aud claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-VerifyExpiresAt"><label for="MapClaims-fold-method-VerifyExpiresAt">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-37">VerifyExpiresAt</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='MapClaims-fold-method-VerifyExpiresAt-docs' class="fold-docs">
+<span class="md-text">				VerifyExpiresAt compares the exp claim against cmp (cmp &lt;= exp).
+				If req is false, it will return true, if exp is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-VerifyIssuedAt"><label for="MapClaims-fold-method-VerifyIssuedAt">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-63">VerifyIssuedAt</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='MapClaims-fold-method-VerifyIssuedAt-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuedAt compares the exp claim against cmp (cmp &gt;= iat).
+				If req is false, it will return true, if iat is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-VerifyIssuer"><label for="MapClaims-fold-method-VerifyIssuer">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-115">VerifyIssuer</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='MapClaims-fold-method-VerifyIssuer-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuer compares the iss claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="MapClaims-fold-method-VerifyNotBefore"><label for="MapClaims-fold-method-VerifyNotBefore">( MapClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/map_claims.go.html#line-89">VerifyNotBefore</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='MapClaims-fold-method-VerifyNotBefore-docs' class="fold-docs">
+<span class="md-text">				VerifyNotBefore compares the nbf claim against cmp (cmp &gt;= nbf).
+				If req is false, it will return true, if nbf is unset.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="MapClaims-fold-impls"><label for="MapClaims-fold-impls">Implements (<i>at least one exported</i>)</label><span id='MapClaims-fold-impls-items' class="fold-items"><span>
+			 MapClaims : <a href="#name-Claims">Claims</a></span></span>
+		<input type='checkbox' class="fold" id="MapClaims-fold-results"><label for="MapClaims-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='MapClaims-fold-results-items' class="fold-items"><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-447">DecodeAccessToken</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, accessToken, realm <a href="../../../builtin.html#name-string">string</a>) (*<a href="#name-Token">Token</a>, *<b>MapClaims</b>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-NumericDate" data-popularity="2910">	<input type='checkbox' class="fold" id="NumericDate-fold-content"><label for="NumericDate-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-32">NumericDate</a> <i>(struct)</i></label><span id='NumericDate-fold-content-docs' class="fold-docs">
+<span class="md-text">		NumericDate represents a JSON numeric date value, as referenced at
+		https://datatracker.ietf.org/doc/html/rfc7519#section-2.</span>
+
+		<input type='checkbox' class="fold" id="NumericDate-fold-fields"><label for="NumericDate-fold-fields">Fields (<i>only one</i>)</label><span id='NumericDate-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-33">Time</a> <i><a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="NumericDate-fold-methods"><label for="NumericDate-fold-methods">Methods (<i>total 45</i>)</label><span id='NumericDate-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Add"><label for="NumericDate-fold-method-Add">( NumericDate) <a href="../../../../src/time/time.go.html#line-856">Add</a>(d <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Duration">Duration</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-Add-docs' class="fold-docs">
+<span class="md-text">				Add returns the time t+d.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-AddDate"><label for="NumericDate-fold-method-AddDate">( NumericDate) <a href="../../../../src/time/time.go.html#line-943">AddDate</a>(years <a href="../../../builtin.html#name-int">int</a>, months <a href="../../../builtin.html#name-int">int</a>, days <a href="../../../builtin.html#name-int">int</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-AddDate-docs' class="fold-docs">
+<span class="md-text">				AddDate returns the time corresponding to adding the
+				given number of years, months, and days to t.
+				For example, AddDate(-1, 2, 3) applied to January 1, 2011
+				returns March 4, 2010.
+				
+				AddDate normalizes its result in the same way that Date does,
+				so, for example, adding one month to October 31 yields
+				December 1, the normalized form for November 31.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-After"><label for="NumericDate-fold-method-After">( NumericDate) <a href="../../../../src/time/time.go.html#line-250">After</a>(u <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='NumericDate-fold-method-After-docs' class="fold-docs">
+<span class="md-text">				After reports whether the time instant t is after u.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-AppendFormat"><label for="NumericDate-fold-method-AppendFormat">( NumericDate) <a href="../../../../src/time/format.go.html#line-636">AppendFormat</a>(b []<a href="../../../builtin.html#name-byte">byte</a>, layout <a href="../../../builtin.html#name-string">string</a>) []<a href="../../../builtin.html#name-byte">byte</a></label><span id='NumericDate-fold-method-AppendFormat-docs' class="fold-docs">
+<span class="md-text">				AppendFormat is like Format but appends the textual
+				representation to b and returns the extended buffer.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Before"><label for="NumericDate-fold-method-Before">( NumericDate) <a href="../../../../src/time/time.go.html#line-260">Before</a>(u <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='NumericDate-fold-method-Before-docs' class="fold-docs">
+<span class="md-text">				Before reports whether the time instant t is before u.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Clock"><label for="NumericDate-fold-method-Clock">( NumericDate) <a href="../../../../src/time/time.go.html#line-567">Clock</a>() (hour, min, sec <a href="../../../builtin.html#name-int">int</a>)</label><span id='NumericDate-fold-method-Clock-docs' class="fold-docs">
+<span class="md-text">				Clock returns the hour, minute, and second within the day specified by t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Compare"><label for="NumericDate-fold-method-Compare">( NumericDate) <a href="../../../../src/time/time.go.html#line-271">Compare</a>(u <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Compare-docs' class="fold-docs">
+<span class="md-text">				Compare compares the time instant t with u. If t is before u, it returns -1;
+				if t is after u, it returns +1; if they're the same, it returns 0.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Date"><label for="NumericDate-fold-method-Date">( NumericDate) <a href="../../../../src/time/time.go.html#line-504">Date</a>() (year <a href="../../../builtin.html#name-int">int</a>, month <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Month">Month</a>, day <a href="../../../builtin.html#name-int">int</a>)</label><span id='NumericDate-fold-method-Date-docs' class="fold-docs">
+<span class="md-text">				Date returns the year, month, and day in which t occurs.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Day"><label for="NumericDate-fold-method-Day">( NumericDate) <a href="../../../../src/time/time.go.html#line-522">Day</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Day-docs' class="fold-docs">
+<span class="md-text">				Day returns the day of the month specified by t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Equal"><label for="NumericDate-fold-method-Equal">( NumericDate) <a href="../../../../src/time/time.go.html#line-295">Equal</a>(u <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='NumericDate-fold-method-Equal-docs' class="fold-docs">
+<span class="md-text">				Equal reports whether t and u represent the same time instant.
+				Two times can be equal even if they are in different locations.
+				For example, 6:00 +0200 and 4:00 UTC are Equal.
+				See the documentation on the Time type for the pitfalls of using == with
+				Time values; most code should use Equal instead.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Format"><label for="NumericDate-fold-method-Format">( NumericDate) <a href="../../../../src/time/format.go.html#line-620">Format</a>(layout <a href="../../../builtin.html#name-string">string</a>) <a href="../../../builtin.html#name-string">string</a></label><span id='NumericDate-fold-method-Format-docs' class="fold-docs">
+<span class="md-text">				Format returns a textual representation of the time value formatted according
+				to the layout defined by the argument. See the documentation for the
+				constant called Layout to see how to represent the layout format.
+				
+				The executable example for Time.Format demonstrates the working
+				of the layout string in detail and is a good reference.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-GoString"><label for="NumericDate-fold-method-GoString">( NumericDate) <a href="../../../../src/time/format.go.html#line-558">GoString</a>() <a href="../../../builtin.html#name-string">string</a></label><span id='NumericDate-fold-method-GoString-docs' class="fold-docs">
+<span class="md-text">				GoString implements fmt.GoStringer and formats t to be printed in Go source
+				code.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-GobDecode"><label for="NumericDate-fold-method-GobDecode">(*NumericDate) <a href="../../../../src/time/time.go.html#line-1335">GobDecode</a>(data []<a href="../../../builtin.html#name-byte">byte</a>) <a href="../../../builtin.html#name-error">error</a></label><span id='NumericDate-fold-method-GobDecode-docs' class="fold-docs">
+<span class="md-text">				GobDecode implements the gob.GobDecoder interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-GobEncode"><label for="NumericDate-fold-method-GobEncode">( NumericDate) <a href="../../../../src/time/time.go.html#line-1330">GobEncode</a>() ([]<a href="../../../builtin.html#name-byte">byte</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='NumericDate-fold-method-GobEncode-docs' class="fold-docs">
+<span class="md-text">				GobEncode implements the gob.GobEncoder interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Hour"><label for="NumericDate-fold-method-Hour">( NumericDate) <a href="../../../../src/time/time.go.html#line-582">Hour</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Hour-docs' class="fold-docs">
+<span class="md-text">				Hour returns the hour within the day specified by t, in the range [0, 23].</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-ISOWeek"><label for="NumericDate-fold-method-ISOWeek">( NumericDate) <a href="../../../../src/time/time.go.html#line-543">ISOWeek</a>() (year, week <a href="../../../builtin.html#name-int">int</a>)</label><span id='NumericDate-fold-method-ISOWeek-docs' class="fold-docs">
+<span class="md-text">				ISOWeek returns the ISO 8601 year and week number in which t occurs.
+				Week ranges from 1 to 53. Jan 01 to Jan 03 of year n might belong to
+				week 52 or 53 of year n-1, and Dec 29 to Dec 31 might belong to week 1
+				of year n+1.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-In"><label for="NumericDate-fold-method-In">( NumericDate) <a href="../../../../src/time/time.go.html#line-1144">In</a>(loc *<a href="../../../time.html">time</a>.<a href="../../../time.html#name-Location">Location</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-In-docs' class="fold-docs">
+<span class="md-text">				In returns a copy of t representing the same time instant, but
+				with the copy's location information set to loc for display
+				purposes.
+				
+				In panics if loc is nil.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-IsDST"><label for="NumericDate-fold-method-IsDST">( NumericDate) <a href="../../../../src/time/time.go.html#line-1422">IsDST</a>() <a href="../../../builtin.html#name-bool">bool</a></label><span id='NumericDate-fold-method-IsDST-docs' class="fold-docs">
+<span class="md-text">				IsDST reports whether the time in the configured location is in Daylight Savings Time.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-IsZero"><label for="NumericDate-fold-method-IsZero">( NumericDate) <a href="../../../../src/time/time.go.html#line-455">IsZero</a>() <a href="../../../builtin.html#name-bool">bool</a></label><span id='NumericDate-fold-method-IsZero-docs' class="fold-docs">
+<span class="md-text">				IsZero reports whether t represents the zero time instant,
+				January 1, year 1, 00:00:00 UTC.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Local"><label for="NumericDate-fold-method-Local">( NumericDate) <a href="../../../../src/time/time.go.html#line-1134">Local</a>() <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-Local-docs' class="fold-docs">
+<span class="md-text">				Local returns t with the location set to local time.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Location"><label for="NumericDate-fold-method-Location">( NumericDate) <a href="../../../../src/time/time.go.html#line-1153">Location</a>() *<a href="../../../time.html">time</a>.<a href="../../../time.html#name-Location">Location</a></label><span id='NumericDate-fold-method-Location-docs' class="fold-docs">
+<span class="md-text">				Location returns the time zone information associated with t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-MarshalBinary"><label for="NumericDate-fold-method-MarshalBinary">( NumericDate) <a href="../../../../src/time/time.go.html#line-1230">MarshalBinary</a>() ([]<a href="../../../builtin.html#name-byte">byte</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='NumericDate-fold-method-MarshalBinary-docs' class="fold-docs">
+<span class="md-text">				MarshalBinary implements the encoding.BinaryMarshaler interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-MarshalJSON"><label for="NumericDate-fold-method-MarshalJSON">( NumericDate) <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-51">MarshalJSON</a>() (b []<a href="../../../builtin.html#name-byte">byte</a>, err <a href="../../../builtin.html#name-error">error</a>)</label><span id='NumericDate-fold-method-MarshalJSON-docs' class="fold-docs">
+<span class="md-text">				MarshalJSON is an implementation of the json.RawMessage interface and serializes the UNIX epoch
+				represented in NumericDate to a byte array, using the precision specified in TimePrecision.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-MarshalText"><label for="NumericDate-fold-method-MarshalText">( NumericDate) <a href="../../../../src/time/time.go.html#line-1374">MarshalText</a>() ([]<a href="../../../builtin.html#name-byte">byte</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='NumericDate-fold-method-MarshalText-docs' class="fold-docs">
+<span class="md-text">				MarshalText implements the encoding.TextMarshaler interface.
+				The time is formatted in RFC 3339 format with sub-second precision.
+				If the timestamp cannot be represented as valid RFC 3339
+				(e.g., the year is out of range), then an error is reported.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Minute"><label for="NumericDate-fold-method-Minute">( NumericDate) <a href="../../../../src/time/time.go.html#line-587">Minute</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Minute-docs' class="fold-docs">
+<span class="md-text">				Minute returns the minute offset within the hour specified by t, in the range [0, 59].</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Month"><label for="NumericDate-fold-method-Month">( NumericDate) <a href="../../../../src/time/time.go.html#line-516">Month</a>() <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Month">Month</a></label><span id='NumericDate-fold-method-Month-docs' class="fold-docs">
+<span class="md-text">				Month returns the month of the year specified by t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Nanosecond"><label for="NumericDate-fold-method-Nanosecond">( NumericDate) <a href="../../../../src/time/time.go.html#line-598">Nanosecond</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Nanosecond-docs' class="fold-docs">
+<span class="md-text">				Nanosecond returns the nanosecond offset within the second specified by t,
+				in the range [0, 999999999].</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Round"><label for="NumericDate-fold-method-Round">( NumericDate) <a href="../../../../src/time/time.go.html#line-1545">Round</a>(d <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Duration">Duration</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-Round-docs' class="fold-docs">
+<span class="md-text">				Round returns the result of rounding t to the nearest multiple of d (since the zero time).
+				The rounding behavior for halfway values is to round up.
+				If d &lt;= 0, Round returns t stripped of any monotonic clock reading but otherwise unchanged.
+				
+				Round operates on the time as an absolute duration since the
+				zero time; it does not operate on the presentation form of the
+				time. Thus, Round(Hour) may return a time with a non-zero
+				minute, depending on the time's Location.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Second"><label for="NumericDate-fold-method-Second">( NumericDate) <a href="../../../../src/time/time.go.html#line-592">Second</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Second-docs' class="fold-docs">
+<span class="md-text">				Second returns the second offset within the minute specified by t, in the range [0, 59].</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-String"><label for="NumericDate-fold-method-String">( NumericDate) <a href="../../../../src/time/format.go.html#line-527">String</a>() <a href="../../../builtin.html#name-string">string</a></label><span id='NumericDate-fold-method-String-docs' class="fold-docs">
+<span class="md-text">				String returns the time formatted using the format string
+				
+					"2006-01-02 15:04:05.999999999 -0700 MST"
+				
+				If the time has a monotonic clock reading, the returned string
+				includes a final field "m=±&lt;value&gt;", where value is the monotonic
+				clock reading formatted as a decimal number of seconds.
+				
+				The returned string is meant for debugging; for a stable serialized
+				representation, use t.MarshalText, t.MarshalBinary, or t.Format
+				with an explicit format string.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Sub"><label for="NumericDate-fold-method-Sub">( NumericDate) <a href="../../../../src/time/time.go.html#line-884">Sub</a>(u <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Duration">Duration</a></label><span id='NumericDate-fold-method-Sub-docs' class="fold-docs">
+<span class="md-text">				Sub returns the duration t-u. If the result exceeds the maximum (or minimum)
+				value that can be stored in a Duration, the maximum (or minimum) duration
+				will be returned.
+				To compute t-d for a duration d, use t.Add(-d).</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Truncate"><label for="NumericDate-fold-method-Truncate">( NumericDate) <a href="../../../../src/time/time.go.html#line-1528">Truncate</a>(d <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Duration">Duration</a>) <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-Truncate-docs' class="fold-docs">
+<span class="md-text">				Truncate returns the result of rounding t down to a multiple of d (since the zero time).
+				If d &lt;= 0, Truncate returns t stripped of any monotonic clock reading but otherwise unchanged.
+				
+				Truncate operates on the time as an absolute duration since the
+				zero time; it does not operate on the presentation form of the
+				time. Thus, Truncate(Hour) may return a time with a non-zero
+				minute, depending on the time's Location.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UTC"><label for="NumericDate-fold-method-UTC">( NumericDate) <a href="../../../../src/time/time.go.html#line-1128">UTC</a>() <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='NumericDate-fold-method-UTC-docs' class="fold-docs">
+<span class="md-text">				UTC returns t with the location set to UTC.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Unix"><label for="NumericDate-fold-method-Unix">( NumericDate) <a href="../../../../src/time/time.go.html#line-1192">Unix</a>() <a href="../../../builtin.html#name-int64">int64</a></label><span id='NumericDate-fold-method-Unix-docs' class="fold-docs">
+<span class="md-text">				Unix returns t as a Unix time, the number of seconds elapsed
+				since January 1, 1970 UTC. The result does not depend on the
+				location associated with t.
+				Unix-like operating systems often record time as a 32-bit
+				count of seconds, but since the method here returns a 64-bit
+				value it is valid for billions of years into the past or future.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnixMicro"><label for="NumericDate-fold-method-UnixMicro">( NumericDate) <a href="../../../../src/time/time.go.html#line-1210">UnixMicro</a>() <a href="../../../builtin.html#name-int64">int64</a></label><span id='NumericDate-fold-method-UnixMicro-docs' class="fold-docs">
+<span class="md-text">				UnixMicro returns t as a Unix time, the number of microseconds elapsed since
+				January 1, 1970 UTC. The result is undefined if the Unix time in
+				microseconds cannot be represented by an int64 (a date before year -290307 or
+				after year 294246). The result does not depend on the location associated
+				with t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnixMilli"><label for="NumericDate-fold-method-UnixMilli">( NumericDate) <a href="../../../../src/time/time.go.html#line-1201">UnixMilli</a>() <a href="../../../builtin.html#name-int64">int64</a></label><span id='NumericDate-fold-method-UnixMilli-docs' class="fold-docs">
+<span class="md-text">				UnixMilli returns t as a Unix time, the number of milliseconds elapsed since
+				January 1, 1970 UTC. The result is undefined if the Unix time in
+				milliseconds cannot be represented by an int64 (a date more than 292 million
+				years before or after 1970). The result does not depend on the
+				location associated with t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnixNano"><label for="NumericDate-fold-method-UnixNano">( NumericDate) <a href="../../../../src/time/time.go.html#line-1220">UnixNano</a>() <a href="../../../builtin.html#name-int64">int64</a></label><span id='NumericDate-fold-method-UnixNano-docs' class="fold-docs">
+<span class="md-text">				UnixNano returns t as a Unix time, the number of nanoseconds elapsed
+				since January 1, 1970 UTC. The result is undefined if the Unix time
+				in nanoseconds cannot be represented by an int64 (a date before the year
+				1678 or after 2262). Note that this means the result of calling UnixNano
+				on the zero Time is undefined. The result does not depend on the
+				location associated with t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnmarshalBinary"><label for="NumericDate-fold-method-UnmarshalBinary">(*NumericDate) <a href="../../../../src/time/time.go.html#line-1278">UnmarshalBinary</a>(data []<a href="../../../builtin.html#name-byte">byte</a>) <a href="../../../builtin.html#name-error">error</a></label><span id='NumericDate-fold-method-UnmarshalBinary-docs' class="fold-docs">
+<span class="md-text">				UnmarshalBinary implements the encoding.BinaryUnmarshaler interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnmarshalJSON"><label for="NumericDate-fold-method-UnmarshalJSON">(*NumericDate) <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-78">UnmarshalJSON</a>(b []<a href="../../../builtin.html#name-byte">byte</a>) (err <a href="../../../builtin.html#name-error">error</a>)</label><span id='NumericDate-fold-method-UnmarshalJSON-docs' class="fold-docs">
+<span class="md-text">				UnmarshalJSON is an implementation of the json.RawMessage interface and deserializses a
+				NumericDate from a JSON representation, i.e. a json.Number. This number represents an UNIX epoch
+				with either integer or non-integer seconds.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-UnmarshalText"><label for="NumericDate-fold-method-UnmarshalText">(*NumericDate) <a href="../../../../src/time/time.go.html#line-1385">UnmarshalText</a>(data []<a href="../../../builtin.html#name-byte">byte</a>) <a href="../../../builtin.html#name-error">error</a></label><span id='NumericDate-fold-method-UnmarshalText-docs' class="fold-docs">
+<span class="md-text">				UnmarshalText implements the encoding.TextUnmarshaler interface.
+				The time must be in the RFC 3339 format.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Weekday"><label for="NumericDate-fold-method-Weekday">( NumericDate) <a href="../../../../src/time/time.go.html#line-528">Weekday</a>() <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Weekday">Weekday</a></label><span id='NumericDate-fold-method-Weekday-docs' class="fold-docs">
+<span class="md-text">				Weekday returns the day of the week specified by t.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Year"><label for="NumericDate-fold-method-Year">( NumericDate) <a href="../../../../src/time/time.go.html#line-510">Year</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-Year-docs' class="fold-docs">
+<span class="md-text">				Year returns the year in which t occurs.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-YearDay"><label for="NumericDate-fold-method-YearDay">( NumericDate) <a href="../../../../src/time/time.go.html#line-604">YearDay</a>() <a href="../../../builtin.html#name-int">int</a></label><span id='NumericDate-fold-method-YearDay-docs' class="fold-docs">
+<span class="md-text">				YearDay returns the day of the year specified by t, in the range [1,365] for non-leap years,
+				and [1,366] in leap years.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-Zone"><label for="NumericDate-fold-method-Zone">( NumericDate) <a href="../../../../src/time/time.go.html#line-1163">Zone</a>() (name <a href="../../../builtin.html#name-string">string</a>, offset <a href="../../../builtin.html#name-int">int</a>)</label><span id='NumericDate-fold-method-Zone-docs' class="fold-docs">
+<span class="md-text">				Zone computes the time zone in effect at time t, returning the abbreviated
+				name of the zone (such as "CET") and its offset in seconds east of UTC.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="NumericDate-fold-method-ZoneBounds"><label for="NumericDate-fold-method-ZoneBounds">( NumericDate) <a href="../../../../src/time/time.go.html#line-1173">ZoneBounds</a>() (start, end <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>)</label><span id='NumericDate-fold-method-ZoneBounds-docs' class="fold-docs">
+<span class="md-text">				ZoneBounds returns the bounds of the time zone in effect at time t.
+				The zone begins at start and the next zone begins at end.
+				If the zone begins at the beginning of time, start will be returned as a zero Time.
+				If the zone goes on forever, end will be returned as a zero Time.
+				The Location of the returned times will be the same as t.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="NumericDate-fold-impls"><label for="NumericDate-fold-impls">Implements (<i>at least 11</i>)</label><span id='NumericDate-fold-impls-items' class="fold-items"><span>
+			 NumericDate : github.com/ChrisTrenkamp/goxpath/tree.<a href="../../ChrisTrenkamp^c5a4f/goxpath/tree.html#name-Result">Result</a></span><span>
+			 NumericDate : encoding.<a href="../../../encoding.html#name-BinaryMarshaler">BinaryMarshaler</a></span><span>
+			*NumericDate : encoding.<a href="../../../encoding.html#name-BinaryUnmarshaler">BinaryUnmarshaler</a></span><span>
+			 NumericDate : encoding.<a href="../../../encoding.html#name-TextMarshaler">TextMarshaler</a></span><span>
+			*NumericDate : encoding.<a href="../../../encoding.html#name-TextUnmarshaler">TextUnmarshaler</a></span><span>
+			*NumericDate : encoding/gob.<a href="../../../encoding/gob.html#name-GobDecoder">GobDecoder</a></span><span>
+			 NumericDate : encoding/gob.<a href="../../../encoding/gob.html#name-GobEncoder">GobEncoder</a></span><span>
+			 NumericDate : encoding/json.<a href="../../../encoding/json.html#name-Marshaler">Marshaler</a></span><span>
+			*NumericDate : encoding/json.<a href="../../../encoding/json.html#name-Unmarshaler">Unmarshaler</a></span><span>
+			 NumericDate : fmt.<a href="../../../fmt.html#name-GoStringer">GoStringer</a></span><span>
+			 NumericDate : fmt.<a href="../../../fmt.html#name-Stringer">Stringer</a></span></span>
+		<input type='checkbox' class="fold" id="NumericDate-fold-results"><label for="NumericDate-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='NumericDate-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewNumericDate">NewNumericDate</a>(t <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) *<b>NumericDate</b></span></span>
+		<input type='checkbox' class="fold" id="NumericDate-fold-params"><label for="NumericDate-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='NumericDate-fold-params-items' class="fold-items"><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-585">LoginClientSignedJWT</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, clientID, realm <a href="../../../builtin.html#name-string">string</a>, key interface{}, signedMethod <a href="#name-SigningMethod">SigningMethod</a>, expiresAt *<b>NumericDate</b>) (*<a href="../../Nerzal^2bdbe/gocloak/v13.html">gocloak</a>.<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-JWT">JWT</a>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Parser" data-popularity="225">	<input type='checkbox' class="fold" id="Parser-fold-content"><label for="Parser-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-10">Parser</a> <i>(struct)</i></label><span id='Parser-fold-content-docs' class="fold-docs">
+
+		<input type='checkbox' class="fold" id="Parser-fold-fields"><label for="Parser-fold-fields">Fields (<i>total 3</i>)</label><span id='Parser-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Parser-fold-field-SkipClaimsValidation"><label for="Parser-fold-field-SkipClaimsValidation"><a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-24">SkipClaimsValidation</a> <i><a href="../../../builtin.html#name-bool">bool</a></i></label><span id='Parser-fold-field-SkipClaimsValidation-docs' class="fold-docs">
+<span class="md-text">				Skip claims validation during token parsing.
+				
+				Deprecated: In future releases, this field will not be exported anymore and should be set with an option to NewParser instead.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Parser-fold-field-UseJSONNumber"><label for="Parser-fold-field-UseJSONNumber"><a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-19">UseJSONNumber</a> <i><a href="../../../builtin.html#name-bool">bool</a></i></label><span id='Parser-fold-field-UseJSONNumber-docs' class="fold-docs">
+<span class="md-text">				Use JSON Number format in JSON decoder.
+				
+				Deprecated: In future releases, this field will not be exported anymore and should be set with an option to NewParser instead.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Parser-fold-field-ValidMethods"><label for="Parser-fold-field-ValidMethods"><a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-14">ValidMethods</a> <i>[]<a href="../../../builtin.html#name-string">string</a></i></label><span id='Parser-fold-field-ValidMethods-docs' class="fold-docs">
+<span class="md-text">				If populated, only these methods will be considered valid.
+				
+				Deprecated: In future releases, this field will not be exported anymore and should be set with an option to NewParser instead.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Parser-fold-methods"><label for="Parser-fold-methods">Methods (<i>total 3</i>)</label><span id='Parser-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Parser-fold-method-Parse"><label for="Parser-fold-method-Parse">(*Parser) <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-41">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='Parser-fold-method-Parse-docs' class="fold-docs">
+<span class="md-text">				Parse parses, validates, verifies the signature and returns the parsed token.
+				keyFunc will receive the parsed token and should return the key for validating.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Parser-fold-method-ParseUnverified"><label for="Parser-fold-method-ParseUnverified">(*Parser) <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-125">ParseUnverified</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>) (token *<a href="#name-Token">Token</a>, parts []<a href="../../../builtin.html#name-string">string</a>, err <a href="../../../builtin.html#name-error">error</a>)</label><span id='Parser-fold-method-ParseUnverified-docs' class="fold-docs">
+<span class="md-text">				ParseUnverified parses the token but doesn't validate the signature.
+				
+				WARNING: Don't use this method unless you know what you're doing.
+				
+				It's only ever useful in cases where you know the signature is valid (because it has
+				been checked previously in the stack) and you want to extract values from it.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Parser-fold-method-ParseWithClaims"><label for="Parser-fold-method-ParseWithClaims">(*Parser) <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-52">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='Parser-fold-method-ParseWithClaims-docs' class="fold-docs">
+<span class="md-text">				ParseWithClaims parses, validates, and verifies like Parse, but supplies a default object implementing the Claims
+				interface. This provides default values which can be overridden and allows a caller to use their own type, rather
+				than the default MapClaims implementation of Claims.
+				
+				Note: If you provide a custom claim implementation that embeds one of the standard claims (such as RegisteredClaims),
+				make sure that a) you either embed a non-pointer version of the claims or b) if you are using a pointer, allocate the
+				proper memory for it before passing in the overall claims, otherwise you might run into a panic.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Parser-fold-results"><label for="Parser-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Parser-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewParser">NewParser</a>(options ...<a href="#name-ParserOption">ParserOption</a>) *<b>Parser</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-ParserOption" data-popularity="330">	<input type='checkbox' class="fold" id="ParserOption-fold-content"><label for="ParserOption-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser_option.go.html#line-6">ParserOption</a> <i>(func)</i></label><span id='ParserOption-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParserOption is used to implement functional-style options that modify the behavior of the parser. To add
+		new options, just create a function (ideally beginning with With or Without) that returns an anonymous function that
+		takes a *Parser type as input and manipulates its configuration accordingly.</span>
+
+		<input type='checkbox' class="fold" id="ParserOption-fold-results"><label for="ParserOption-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='ParserOption-fold-results-items' class="fold-items"><span>
+			func <a href="#name-WithJSONNumber">WithJSONNumber</a>() <b>ParserOption</b></span><span>
+			func <a href="#name-WithoutClaimsValidation">WithoutClaimsValidation</a>() <b>ParserOption</b></span><span>
+			func <a href="#name-WithValidMethods">WithValidMethods</a>(methods []<a href="../../../builtin.html#name-string">string</a>) <b>ParserOption</b></span></span>
+		<input type='checkbox' class="fold" id="ParserOption-fold-params"><label for="ParserOption-fold-params">As Inputs Of (<i>at least 3</i>)</label><span id='ParserOption-fold-params-items' class="fold-items"><span>
+			func <a href="#name-NewParser">NewParser</a>(options ...<b>ParserOption</b>) *<a href="#name-Parser">Parser</a></span><span>
+			func <a href="#name-Parse">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<b>ParserOption</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-ParseWithClaims">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<b>ParserOption</b>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-RegisteredClaims" data-popularity="350">	<input type='checkbox' class="fold" id="RegisteredClaims-fold-content"><label for="RegisteredClaims-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-24">RegisteredClaims</a> <i>(struct)</i></label><span id='RegisteredClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		RegisteredClaims are a structured version of the JWT Claims Set,
+		restricted to Registered Claim Names, as referenced at
+		https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+		
+		This type can be used on its own, but then additional private and
+		public claims embedded in the JWT will not be parsed. The typical usecase
+		therefore is to embedded this in a user-defined claim type.
+		
+		See examples for how to use this with your own claim types.</span>
+
+		<input type='checkbox' class="fold" id="RegisteredClaims-fold-fields"><label for="RegisteredClaims-fold-fields">Fields (<i>total 7</i>)</label><span id='RegisteredClaims-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-Audience"><label for="RegisteredClaims-fold-field-Audience"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-32">Audience</a> <i><a href="#name-ClaimStrings">ClaimStrings</a></i></label><span id='RegisteredClaims-fold-field-Audience-docs' class="fold-docs">
+<span class="md-text">				the `aud` (Audience) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-ExpiresAt"><label for="RegisteredClaims-fold-field-ExpiresAt"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-35">ExpiresAt</a> <i>*<a href="#name-NumericDate">NumericDate</a></i></label><span id='RegisteredClaims-fold-field-ExpiresAt-docs' class="fold-docs">
+<span class="md-text">				the `exp` (Expiration Time) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-ID"><label for="RegisteredClaims-fold-field-ID"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-44">ID</a> <i><a href="../../../builtin.html#name-string">string</a></i></label><span id='RegisteredClaims-fold-field-ID-docs' class="fold-docs">
+<span class="md-text">				the `jti` (JWT ID) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-IssuedAt"><label for="RegisteredClaims-fold-field-IssuedAt"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-41">IssuedAt</a> <i>*<a href="#name-NumericDate">NumericDate</a></i></label><span id='RegisteredClaims-fold-field-IssuedAt-docs' class="fold-docs">
+<span class="md-text">				the `iat` (Issued At) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.6</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-Issuer"><label for="RegisteredClaims-fold-field-Issuer"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-26">Issuer</a> <i><a href="../../../builtin.html#name-string">string</a></i></label><span id='RegisteredClaims-fold-field-Issuer-docs' class="fold-docs">
+<span class="md-text">				the `iss` (Issuer) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-NotBefore"><label for="RegisteredClaims-fold-field-NotBefore"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-38">NotBefore</a> <i>*<a href="#name-NumericDate">NumericDate</a></i></label><span id='RegisteredClaims-fold-field-NotBefore-docs' class="fold-docs">
+<span class="md-text">				the `nbf` (Not Before) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-field-Subject"><label for="RegisteredClaims-fold-field-Subject"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-29">Subject</a> <i><a href="../../../builtin.html#name-string">string</a></i></label><span id='RegisteredClaims-fold-field-Subject-docs' class="fold-docs">
+<span class="md-text">				the `sub` (Subject) claim. See https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="RegisteredClaims-fold-methods"><label for="RegisteredClaims-fold-methods">Methods (<i>total 6</i>)</label><span id='RegisteredClaims-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-Valid"><label for="RegisteredClaims-fold-method-Valid">( RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-51">Valid</a>() <a href="../../../builtin.html#name-error">error</a></label><span id='RegisteredClaims-fold-method-Valid-docs' class="fold-docs">
+<span class="md-text">				Valid validates time based claims "exp, iat, nbf".
+				There is no accounting for clock skew.
+				As well, if any of the above claims are not in the token, it will still
+				be considered a valid claim.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-VerifyAudience"><label for="RegisteredClaims-fold-method-VerifyAudience">(*RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-82">VerifyAudience</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='RegisteredClaims-fold-method-VerifyAudience-docs' class="fold-docs">
+<span class="md-text">				VerifyAudience compares the aud claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-VerifyExpiresAt"><label for="RegisteredClaims-fold-method-VerifyExpiresAt">(*RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-88">VerifyExpiresAt</a>(cmp <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='RegisteredClaims-fold-method-VerifyExpiresAt-docs' class="fold-docs">
+<span class="md-text">				VerifyExpiresAt compares the exp claim against cmp (cmp &lt; exp).
+				If req is false, it will return true, if exp is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-VerifyIssuedAt"><label for="RegisteredClaims-fold-method-VerifyIssuedAt">(*RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-98">VerifyIssuedAt</a>(cmp <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='RegisteredClaims-fold-method-VerifyIssuedAt-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuedAt compares the iat claim against cmp (cmp &gt;= iat).
+				If req is false, it will return true, if iat is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-VerifyIssuer"><label for="RegisteredClaims-fold-method-VerifyIssuer">(*RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-118">VerifyIssuer</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='RegisteredClaims-fold-method-VerifyIssuer-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuer compares the iss claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="RegisteredClaims-fold-method-VerifyNotBefore"><label for="RegisteredClaims-fold-method-VerifyNotBefore">(*RegisteredClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-108">VerifyNotBefore</a>(cmp <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='RegisteredClaims-fold-method-VerifyNotBefore-docs' class="fold-docs">
+<span class="md-text">				VerifyNotBefore compares the nbf claim against cmp (cmp &gt;= nbf).
+				If req is false, it will return true, if nbf is unset.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="RegisteredClaims-fold-impls"><label for="RegisteredClaims-fold-impls">Implements (<i>at least one exported</i>)</label><span id='RegisteredClaims-fold-impls-items' class="fold-items"><span>
+			 RegisteredClaims : <a href="#name-Claims">Claims</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethod" data-popularity="1115">	<input type='checkbox' class="fold" id="SigningMethod-fold-content"><label for="SigningMethod-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-11">SigningMethod</a> <b><i>(interface)</i></b></label><span id='SigningMethod-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethod can be used add new methods for signing or verifying tokens.</span>
+
+		<input type='checkbox' class="fold" id="SigningMethod-fold-methods"><label for="SigningMethod-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethod-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="SigningMethod-fold-method-Alg"><label for="SigningMethod-fold-method-Alg">( SigningMethod) <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-14">Alg</a>() <a href="../../../builtin.html#name-string">string</a></label><span id='SigningMethod-fold-method-Alg-docs' class="fold-docs">
+<span class="md-text">				// returns the alg identifier for this method (example: 'HS256')</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethod-fold-method-Sign"><label for="SigningMethod-fold-method-Sign">( SigningMethod) <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-13">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethod-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				// Returns encoded signature or error</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethod-fold-method-Verify"><label for="SigningMethod-fold-method-Verify">( SigningMethod) <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-12">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethod-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				// Returns nil if signature is valid</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethod-fold-impledby"><label for="SigningMethod-fold-impledby">Implemented By (<i>at least 5</i>)</label><span id='SigningMethod-fold-impledby-items' class="fold-items"><span>
+			*<a href="#name-SigningMethodECDSA">SigningMethodECDSA</a></span><span>
+			*<a href="#name-SigningMethodEd25519">SigningMethodEd25519</a></span><span>
+			*<a href="#name-SigningMethodHMAC">SigningMethodHMAC</a></span><span>
+			*<a href="#name-SigningMethodRSA">SigningMethodRSA</a></span><span>
+			*<a href="#name-SigningMethodRSAPSS">SigningMethodRSAPSS</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethod-fold-results"><label for="SigningMethod-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='SigningMethod-fold-results-items' class="fold-items"><span>
+			func <a href="#name-GetSigningMethod">GetSigningMethod</a>(alg <a href="../../../builtin.html#name-string">string</a>) (method <b>SigningMethod</b>)</span></span>
+		<input type='checkbox' class="fold" id="SigningMethod-fold-params"><label for="SigningMethod-fold-params">As Inputs Of (<i>at least 4</i>)</label><span id='SigningMethod-fold-params-items' class="fold-items"><span>
+			func <a href="#name-New">New</a>(method <b>SigningMethod</b>) *<a href="#name-Token">Token</a></span><span>
+			func <a href="#name-NewWithClaims">NewWithClaims</a>(method <b>SigningMethod</b>, claims <a href="#name-Claims">Claims</a>) *<a href="#name-Token">Token</a></span><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-585">LoginClientSignedJWT</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, clientID, realm <a href="../../../builtin.html#name-string">string</a>, key interface{}, signedMethod <b>SigningMethod</b>, expiresAt *<a href="#name-NumericDate">NumericDate</a>) (*<a href="../../Nerzal^2bdbe/gocloak/v13.html">gocloak</a>.<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-JWT">JWT</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-SignClaims">SignClaims</a>(claims <a href="#name-Claims">Claims</a>, key interface{}, method <b>SigningMethod</b>) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethodECDSA" data-popularity="215">	<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-content"><label for="SigningMethodECDSA-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-18">SigningMethodECDSA</a> <i>(struct)</i></label><span id='SigningMethodECDSA-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodECDSA implements the ECDSA family of signing methods.
+		Expects *ecdsa.PrivateKey for signing and *ecdsa.PublicKey for verification</span>
+
+		<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-fields"><label for="SigningMethodECDSA-fold-fields">Fields (<i>total 4</i>)</label><span id='SigningMethodECDSA-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-22">CurveBits</a> <i><a href="../../../builtin.html#name-int">int</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-20">Hash</a> <i><a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-Hash">Hash</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-21">KeySize</a> <i><a href="../../../builtin.html#name-int">int</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-19">Name</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-methods"><label for="SigningMethodECDSA-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethodECDSA-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*SigningMethodECDSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-52">Alg</a>() <a href="../../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-method-Sign"><label for="SigningMethodECDSA-fold-method-Sign">(*SigningMethodECDSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-100">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethodECDSA-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				Sign implements token signing for the SigningMethod.
+				For this signing method, key must be an ecdsa.PrivateKey struct</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-method-Verify"><label for="SigningMethodECDSA-fold-method-Verify">(*SigningMethodECDSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-58">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethodECDSA-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				Verify implements token verification for the SigningMethod.
+				For this verify method, key must be an ecdsa.PublicKey struct</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-impls"><label for="SigningMethodECDSA-fold-impls">Implements (<i>at least one exported</i>)</label><span id='SigningMethodECDSA-fold-impls-items' class="fold-items"><span>
+			*SigningMethodECDSA : <a href="#name-SigningMethod">SigningMethod</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodECDSA-fold-values"><label for="SigningMethodECDSA-fold-values">As Types Of (<i>total 3</i>)</label><span id='SigningMethodECDSA-fold-values-items' class="fold-items"><span>
+			  var <a href="#name-SigningMethodES256">SigningMethodES256</a> *<b>SigningMethodECDSA</b></span><span>
+			  var <a href="#name-SigningMethodES384">SigningMethodES384</a> *<b>SigningMethodECDSA</b></span><span>
+			  var <a href="#name-SigningMethodES512">SigningMethodES512</a> *<b>SigningMethodECDSA</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethodEd25519" data-popularity="205">	<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-content"><label for="SigningMethodEd25519-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-17">SigningMethodEd25519</a> <i>(struct)</i></label><span id='SigningMethodEd25519-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodEd25519 implements the EdDSA family.
+		Expects ed25519.PrivateKey for signing and ed25519.PublicKey for verification</span>
+
+		<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-methods"><label for="SigningMethodEd25519-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethodEd25519-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*SigningMethodEd25519) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-31">Alg</a>() <a href="../../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-method-Sign"><label for="SigningMethodEd25519-fold-method-Sign">(*SigningMethodEd25519) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-66">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethodEd25519-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				Sign implements token signing for the SigningMethod.
+				For this signing method, key must be an ed25519.PrivateKey</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-method-Verify"><label for="SigningMethodEd25519-fold-method-Verify">(*SigningMethodEd25519) <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-37">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethodEd25519-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				Verify implements token verification for the SigningMethod.
+				For this verify method, key must be an ed25519.PublicKey</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-impls"><label for="SigningMethodEd25519-fold-impls">Implements (<i>at least one exported</i>)</label><span id='SigningMethodEd25519-fold-impls-items' class="fold-items"><span>
+			*SigningMethodEd25519 : <a href="#name-SigningMethod">SigningMethod</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodEd25519-fold-values"><label for="SigningMethodEd25519-fold-values">As Types Of (<i>only one</i>)</label><span id='SigningMethodEd25519-fold-values-items' class="fold-items"><span>
+			  var <a href="#name-SigningMethodEdDSA">SigningMethodEdDSA</a> *<b>SigningMethodEd25519</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethodHMAC" data-popularity="215">	<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-content"><label for="SigningMethodHMAC-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-11">SigningMethodHMAC</a> <i>(struct)</i></label><span id='SigningMethodHMAC-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodHMAC implements the HMAC-SHA family of signing methods.
+		Expects key type of []byte for both signing and validation</span>
+
+		<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-fields"><label for="SigningMethodHMAC-fold-fields">Fields (<i>total 2</i>)</label><span id='SigningMethodHMAC-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-13">Hash</a> <i><a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-Hash">Hash</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-12">Name</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-methods"><label for="SigningMethodHMAC-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethodHMAC-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*SigningMethodHMAC) <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-44">Alg</a>() <a href="../../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-method-Sign"><label for="SigningMethodHMAC-fold-method-Sign">(*SigningMethodHMAC) <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-82">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethodHMAC-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				Sign implements token signing for the SigningMethod.
+				Key must be []byte</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-method-Verify"><label for="SigningMethodHMAC-fold-method-Verify">(*SigningMethodHMAC) <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-49">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethodHMAC-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				Verify implements token verification for the SigningMethod. Returns nil if the signature is valid.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-impls"><label for="SigningMethodHMAC-fold-impls">Implements (<i>at least one exported</i>)</label><span id='SigningMethodHMAC-fold-impls-items' class="fold-items"><span>
+			*SigningMethodHMAC : <a href="#name-SigningMethod">SigningMethod</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodHMAC-fold-values"><label for="SigningMethodHMAC-fold-values">As Types Of (<i>total 3</i>)</label><span id='SigningMethodHMAC-fold-values-items' class="fold-items"><span>
+			  var <a href="#name-SigningMethodHS256">SigningMethodHS256</a> *<b>SigningMethodHMAC</b></span><span>
+			  var <a href="#name-SigningMethodHS384">SigningMethodHS384</a> *<b>SigningMethodHMAC</b></span><span>
+			  var <a href="#name-SigningMethodHS512">SigningMethodHS512</a> *<b>SigningMethodHMAC</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethodRSA" data-popularity="215">	<input type='checkbox' class="fold" id="SigningMethodRSA-fold-content"><label for="SigningMethodRSA-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-11">SigningMethodRSA</a> <i>(struct)</i></label><span id='SigningMethodRSA-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodRSA implements the RSA family of signing methods.
+		Expects *rsa.PrivateKey for signing and *rsa.PublicKey for validation</span>
+
+		<input type='checkbox' class="fold" id="SigningMethodRSA-fold-fields"><label for="SigningMethodRSA-fold-fields">Fields (<i>total 2</i>)</label><span id='SigningMethodRSA-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-13">Hash</a> <i><a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-Hash">Hash</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-12">Name</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSA-fold-methods"><label for="SigningMethodRSA-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethodRSA-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">(*SigningMethodRSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-43">Alg</a>() <a href="../../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodRSA-fold-method-Sign"><label for="SigningMethodRSA-fold-method-Sign">(*SigningMethodRSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-78">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethodRSA-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				Sign implements token signing for the SigningMethod
+				For this signing method, must be an *rsa.PrivateKey structure.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodRSA-fold-method-Verify"><label for="SigningMethodRSA-fold-method-Verify">(*SigningMethodRSA) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-49">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethodRSA-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				Verify implements token verification for the SigningMethod
+				For this signing method, must be an *rsa.PublicKey structure.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSA-fold-impls"><label for="SigningMethodRSA-fold-impls">Implements (<i>at least one exported</i>)</label><span id='SigningMethodRSA-fold-impls-items' class="fold-items"><span>
+			*SigningMethodRSA : <a href="#name-SigningMethod">SigningMethod</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSA-fold-values"><label for="SigningMethodRSA-fold-values">As Types Of (<i>total 3</i>)</label><span id='SigningMethodRSA-fold-values-items' class="fold-items"><span>
+			  var <a href="#name-SigningMethodRS256">SigningMethodRS256</a> *<b>SigningMethodRSA</b></span><span>
+			  var <a href="#name-SigningMethodRS384">SigningMethodRS384</a> *<b>SigningMethodRSA</b></span><span>
+			  var <a href="#name-SigningMethodRS512">SigningMethodRS512</a> *<b>SigningMethodRSA</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-SigningMethodRSAPSS" data-popularity="215">	<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-content"><label for="SigningMethodRSAPSS-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-13">SigningMethodRSAPSS</a> <i>(struct)</i></label><span id='SigningMethodRSAPSS-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodRSAPSS implements the RSAPSS family of signing methods signing methods</span>
+
+		<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-fields"><label for="SigningMethodRSAPSS-fold-fields">Fields (<i>total 5</i>)</label><span id='SigningMethodRSAPSS-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-15">Options</a> <i>*<a href="../../../crypto/rsa.html">rsa</a>.<a href="../../../crypto/rsa.html#name-PSSOptions">PSSOptions</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-14">SigningMethodRSA</a> <i>*<a href="#name-SigningMethodRSA">SigningMethodRSA</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-14" class="path-duplicate">SigningMethodRSA</a>.<a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-13">Hash</a> <i><a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-Hash">Hash</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-14" class="path-duplicate">SigningMethodRSA</a>.<a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-12">Name</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-field-VerifyOptions"><label for="SigningMethodRSAPSS-fold-field-VerifyOptions"><a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-20">VerifyOptions</a> <i>*<a href="../../../crypto/rsa.html">rsa</a>.<a href="../../../crypto/rsa.html#name-PSSOptions">PSSOptions</a></i></label><span id='SigningMethodRSAPSS-fold-field-VerifyOptions-docs' class="fold-docs">
+<span class="md-text">				VerifyOptions is optional. If set overrides Options for rsa.VerifyPPS.
+				Used to accept tokens signed with rsa.PSSSaltLengthAuto, what doesn't follow
+				https://tools.ietf.org/html/rfc7518#section-3.5 but was used previously.
+				See https://github.com/dgrijalva/jwt-go/issues/285#issuecomment-437451244 for details.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-methods"><label for="SigningMethodRSAPSS-fold-methods">Methods (<i>total 3</i>)</label><span id='SigningMethodRSAPSS-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( SigningMethodRSAPSS) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-43">Alg</a>() <a href="../../../builtin.html#name-string">string</a></span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-method-Sign"><label for="SigningMethodRSAPSS-fold-method-Sign">(*SigningMethodRSAPSS) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-119">Sign</a>(signingString <a href="../../../builtin.html#name-string">string</a>, key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='SigningMethodRSAPSS-fold-method-Sign-docs' class="fold-docs">
+<span class="md-text">				Sign implements token signing for the SigningMethod.
+				For this signing method, key must be an rsa.PrivateKey struct</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-method-Verify"><label for="SigningMethodRSAPSS-fold-method-Verify">(*SigningMethodRSAPSS) <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-85">Verify</a>(signingString, signature <a href="../../../builtin.html#name-string">string</a>, key interface{}) <a href="../../../builtin.html#name-error">error</a></label><span id='SigningMethodRSAPSS-fold-method-Verify-docs' class="fold-docs">
+<span class="md-text">				Verify implements token verification for the SigningMethod.
+				For this verify method, key must be an rsa.PublicKey struct</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-impls"><label for="SigningMethodRSAPSS-fold-impls">Implements (<i>at least one exported</i>)</label><span id='SigningMethodRSAPSS-fold-impls-items' class="fold-items"><span>
+			*SigningMethodRSAPSS : <a href="#name-SigningMethod">SigningMethod</a></span></span>
+		<input type='checkbox' class="fold" id="SigningMethodRSAPSS-fold-values"><label for="SigningMethodRSAPSS-fold-values">As Types Of (<i>total 3</i>)</label><span id='SigningMethodRSAPSS-fold-values-items' class="fold-items"><span>
+			  var <a href="#name-SigningMethodPS256">SigningMethodPS256</a> *<b>SigningMethodRSAPSS</b></span><span>
+			  var <a href="#name-SigningMethodPS384">SigningMethodPS384</a> *<b>SigningMethodRSAPSS</b></span><span>
+			  var <a href="#name-SigningMethodPS512">SigningMethodPS512</a> *<b>SigningMethodRSAPSS</b></span></span>
+
+</span></div><div class="anchor type-res" id="name-StandardClaims" data-popularity="350">	<input type='checkbox' class="fold" id="StandardClaims-fold-content"><label for="StandardClaims-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-131">StandardClaims</a> <i>(struct)</i></label><span id='StandardClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		StandardClaims are a structured version of the JWT Claims Set, as referenced at
+		https://datatracker.ietf.org/doc/html/rfc7519#section-4. They do not follow the
+		specification exactly, since they were based on an earlier draft of the
+		specification and not updated. The main difference is that they only
+		support integer-based date fields and singular audiences. This might lead to
+		incompatibilities with other JWT implementations. The use of this is discouraged, instead
+		the newer RegisteredClaims struct should be used.
+		
+		Deprecated: Use RegisteredClaims instead for a forward-compatible way to access registered claims in a struct.</span>
+
+		<input type='checkbox' class="fold" id="StandardClaims-fold-fields"><label for="StandardClaims-fold-fields">Fields (<i>total 7</i>)</label><span id='StandardClaims-fold-fields-items' class="fold-items"><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-132">Audience</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-133">ExpiresAt</a> <i><a href="../../../builtin.html#name-int64">int64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-134">Id</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-135">IssuedAt</a> <i><a href="../../../builtin.html#name-int64">int64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-136">Issuer</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-137">NotBefore</a> <i><a href="../../../builtin.html#name-int64">int64</a></i></span></span><span>
+			<span class="nodocs"><a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-138">Subject</a> <i><a href="../../../builtin.html#name-string">string</a></i></span></span></span>
+		<input type='checkbox' class="fold" id="StandardClaims-fold-methods"><label for="StandardClaims-fold-methods">Methods (<i>total 6</i>)</label><span id='StandardClaims-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-Valid"><label for="StandardClaims-fold-method-Valid">( StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-144">Valid</a>() <a href="../../../builtin.html#name-error">error</a></label><span id='StandardClaims-fold-method-Valid-docs' class="fold-docs">
+<span class="md-text">				Valid validates time based claims "exp, iat, nbf". There is no accounting for clock skew.
+				As well, if any of the above claims are not in the token, it will still
+				be considered a valid claim.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-VerifyAudience"><label for="StandardClaims-fold-method-VerifyAudience">(*StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-175">VerifyAudience</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='StandardClaims-fold-method-VerifyAudience-docs' class="fold-docs">
+<span class="md-text">				VerifyAudience compares the aud claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-VerifyExpiresAt"><label for="StandardClaims-fold-method-VerifyExpiresAt">(*StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-181">VerifyExpiresAt</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='StandardClaims-fold-method-VerifyExpiresAt-docs' class="fold-docs">
+<span class="md-text">				VerifyExpiresAt compares the exp claim against cmp (cmp &lt; exp).
+				If req is false, it will return true, if exp is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-VerifyIssuedAt"><label for="StandardClaims-fold-method-VerifyIssuedAt">(*StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-192">VerifyIssuedAt</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='StandardClaims-fold-method-VerifyIssuedAt-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuedAt compares the iat claim against cmp (cmp &gt;= iat).
+				If req is false, it will return true, if iat is unset.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-VerifyIssuer"><label for="StandardClaims-fold-method-VerifyIssuer">(*StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-214">VerifyIssuer</a>(cmp <a href="../../../builtin.html#name-string">string</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='StandardClaims-fold-method-VerifyIssuer-docs' class="fold-docs">
+<span class="md-text">				VerifyIssuer compares the iss claim against cmp.
+				If required is false, this method will return true if the value matches or is unset</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="StandardClaims-fold-method-VerifyNotBefore"><label for="StandardClaims-fold-method-VerifyNotBefore">(*StandardClaims) <a href="../../../../src/github.com/golang-jwt/jwt/v4/claims.go.html#line-203">VerifyNotBefore</a>(cmp <a href="../../../builtin.html#name-int64">int64</a>, req <a href="../../../builtin.html#name-bool">bool</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='StandardClaims-fold-method-VerifyNotBefore-docs' class="fold-docs">
+<span class="md-text">				VerifyNotBefore compares the nbf claim against cmp (cmp &gt;= nbf).
+				If req is false, it will return true, if nbf is unset.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StandardClaims-fold-impls"><label for="StandardClaims-fold-impls">Implements (<i>at least one exported</i>)</label><span id='StandardClaims-fold-impls-items' class="fold-items"><span>
+			 StandardClaims : <a href="#name-Claims">Claims</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-Token" data-popularity="925">	<input type='checkbox' class="fold" id="Token-fold-content"><label for="Token-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-36">Token</a> <i>(struct)</i></label><span id='Token-fold-content-docs' class="fold-docs">
+<span class="md-text">		Token represents a JWT Token.  Different fields will be used depending on whether you're
+		creating or parsing/verifying a token.</span>
+
+		<input type='checkbox' class="fold" id="Token-fold-fields"><label for="Token-fold-fields">Fields (<i>total 6</i>)</label><span id='Token-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Claims"><label for="Token-fold-field-Claims"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-40">Claims</a> <i><a href="#name-Claims">Claims</a></i></label><span id='Token-fold-field-Claims-docs' class="fold-docs">
+<span class="md-text">				// The second segment of the token</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Header"><label for="Token-fold-field-Header"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-39">Header</a> <i>map[<a href="../../../builtin.html#name-string">string</a>]interface{}</i></label><span id='Token-fold-field-Header-docs' class="fold-docs">
+<span class="md-text">				// The first segment of the token</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Method"><label for="Token-fold-field-Method"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-38">Method</a> <i><a href="#name-SigningMethod">SigningMethod</a></i></label><span id='Token-fold-field-Method-docs' class="fold-docs">
+<span class="md-text">				// The signing method used or to be used</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Raw"><label for="Token-fold-field-Raw"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-37">Raw</a> <i><a href="../../../builtin.html#name-string">string</a></i></label><span id='Token-fold-field-Raw-docs' class="fold-docs">
+<span class="md-text">				// The raw token.  Populated when you Parse a token</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Signature"><label for="Token-fold-field-Signature"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-41">Signature</a> <i><a href="../../../builtin.html#name-string">string</a></i></label><span id='Token-fold-field-Signature-docs' class="fold-docs">
+<span class="md-text">				// The third segment of the token.  Populated when you Parse a token</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-field-Valid"><label for="Token-fold-field-Valid"><a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-42">Valid</a> <i><a href="../../../builtin.html#name-bool">bool</a></i></label><span id='Token-fold-field-Valid-docs' class="fold-docs">
+<span class="md-text">				// Is the token valid?  Populated when you Parse/Verify a token</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Token-fold-methods"><label for="Token-fold-methods">Methods (<i>total 2</i>)</label><span id='Token-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-SignedString"><label for="Token-fold-method-SignedString">(*Token) <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-64">SignedString</a>(key interface{}) (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='Token-fold-method-SignedString-docs' class="fold-docs">
+<span class="md-text">				SignedString creates and returns a complete, signed JWT.
+				The token is signed using the SigningMethod specified in the token.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Token-fold-method-SigningString"><label for="Token-fold-method-SigningString">(*Token) <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-80">SigningString</a>() (<a href="../../../builtin.html#name-string">string</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='Token-fold-method-SigningString-docs' class="fold-docs">
+<span class="md-text">				SigningString generates the signing string.  This is the
+				most expensive part of the whole deal.  Unless you
+				need this for something special, just go straight for
+				the SignedString.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Token-fold-results"><label for="Token-fold-results">As Outputs Of (<i>at least 11</i>)</label><span id='Token-fold-results-items' class="fold-items"><span>
+			func <a href="#name-New">New</a>(method <a href="#name-SigningMethod">SigningMethod</a>) *<b>Token</b></span><span>
+			func <a href="#name-NewWithClaims">NewWithClaims</a>(method <a href="#name-SigningMethod">SigningMethod</a>, claims <a href="#name-Claims">Claims</a>) *<b>Token</b></span><span>
+			func <a href="#name-Parse">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func <a href="#name-ParseWithClaims">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-41">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-125">ParseUnverified</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>) (token *<b>Token</b>, parts []<a href="../../../builtin.html#name-string">string</a>, err <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Parser">Parser</a>).<a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-52">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-447">DecodeAccessToken</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, accessToken, realm <a href="../../../builtin.html#name-string">string</a>) (*<b>Token</b>, *<a href="#name-MapClaims">MapClaims</a>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13.(*<a href="../../Nerzal^2bdbe/gocloak/v13.html#name-GoCloak">GoCloak</a>).<a href="../../../../src/github.com/Nerzal^2bdbe/gocloak/v13/client.go.html#line-457">DecodeAccessTokenCustomClaims</a>(ctx <a href="../../../context.html">context</a>.<a href="../../../context.html#name-Context">Context</a>, accessToken, realm <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-DecodeAccessTokenECDSACustomClaims">DecodeAccessTokenECDSACustomClaims</a>(accessToken <a href="../../../builtin.html#name-string">string</a>, x, y, crv *<a href="../../../builtin.html#name-string">string</a>, customClaims <a href="#name-Claims">Claims</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span><span>
+			func github.com/Nerzal/gocloak/v13/pkg/jwx.<a href="../../Nerzal^2bdbe/gocloak/v13/pkg/jwx.html#name-DecodeAccessTokenRSACustomClaims">DecodeAccessTokenRSACustomClaims</a>(accessToken <a href="../../../builtin.html#name-string">string</a>, e, n *<a href="../../../builtin.html#name-string">string</a>, customClaims <a href="#name-Claims">Claims</a>) (*<b>Token</b>, <a href="../../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-ValidationError" data-popularity="275">	<input type='checkbox' class="fold" id="ValidationError-fold-content"><label for="ValidationError-fold-content"> type <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-51">ValidationError</a> <i>(struct)</i></label><span id='ValidationError-fold-content-docs' class="fold-docs">
+<span class="md-text">		ValidationError represents an error from Parse if token is not valid</span>
+
+		<input type='checkbox' class="fold" id="ValidationError-fold-fields"><label for="ValidationError-fold-fields">Fields (<i>total 2</i>)</label><span id='ValidationError-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="ValidationError-fold-field-Errors"><label for="ValidationError-fold-field-Errors"><a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-53">Errors</a> <i><a href="../../../builtin.html#name-uint32">uint32</a></i></label><span id='ValidationError-fold-field-Errors-docs' class="fold-docs">
+<span class="md-text">				// bitfield.  see ValidationError... constants</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ValidationError-fold-field-Inner"><label for="ValidationError-fold-field-Inner"><a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-52">Inner</a> <i><a href="../../../builtin.html#name-error">error</a></i></label><span id='ValidationError-fold-field-Inner-docs' class="fold-docs">
+<span class="md-text">				// stores the error returned by external dependencies, i.e.: KeyFunc</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ValidationError-fold-methods"><label for="ValidationError-fold-methods">Methods (<i>total 3</i>)</label><span id='ValidationError-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="ValidationError-fold-method-Error"><label for="ValidationError-fold-method-Error">( ValidationError) <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-58">Error</a>() <a href="../../../builtin.html#name-string">string</a></label><span id='ValidationError-fold-method-Error-docs' class="fold-docs">
+<span class="md-text">				Error is the implementation of the err interface.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ValidationError-fold-method-Is"><label for="ValidationError-fold-method-Is">(*ValidationError) <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-81">Is</a>(err <a href="../../../builtin.html#name-error">error</a>) <a href="../../../builtin.html#name-bool">bool</a></label><span id='ValidationError-fold-method-Is-docs' class="fold-docs">
+<span class="md-text">				Is checks if this ValidationError is of the supplied error. We are first checking for the exact error message
+				by comparing the inner error message. If that fails, we compare using the error flags. This way we can use
+				custom error messages (mainly for backwards compatability) and still leverage errors.Is using the global error variables.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="ValidationError-fold-method-Unwrap"><label for="ValidationError-fold-method-Unwrap">(*ValidationError) <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-69">Unwrap</a>() <a href="../../../builtin.html#name-error">error</a></label><span id='ValidationError-fold-method-Unwrap-docs' class="fold-docs">
+<span class="md-text">				Unwrap gives errors.Is and errors.As access to the inner error.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="ValidationError-fold-impls"><label for="ValidationError-fold-impls">Implements (<i>at least one exported</i>)</label><span id='ValidationError-fold-impls-items' class="fold-items"><span>
+			 ValidationError : <a href="../../../builtin.html#name-error">error</a></span></span>
+		<input type='checkbox' class="fold" id="ValidationError-fold-results"><label for="ValidationError-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='ValidationError-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewValidationError">NewValidationError</a>(errorText <a href="../../../builtin.html#name-string">string</a>, errorFlags <a href="../../../builtin.html#name-uint32">uint32</a>) *<b>ValidationError</b></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 22)</i></span></span>
+
+<div class="anchor value-res" id="name-DecodeSegment">	<input type='checkbox' class="fold" id="DecodeSegment-fold-content"><label for="DecodeSegment-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-129">DecodeSegment</a>(seg <a href="../../../builtin.html#name-string">string</a>) ([]<a href="../../../builtin.html#name-byte">byte</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='DecodeSegment-fold-content-docs' class="fold-docs">
+<span class="md-text">		DecodeSegment decodes a JWT specific base64url encoding with padding stripped
+		
+		Deprecated: In a future release, we will demote this function to a non-exported function, since it
+		should only be used internally</span>
+
+</span></div><div class="anchor value-res" id="name-EncodeSegment">	<input type='checkbox' class="fold" id="EncodeSegment-fold-content"><label for="EncodeSegment-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-121">EncodeSegment</a>(seg []<a href="../../../builtin.html#name-byte">byte</a>) <a href="../../../builtin.html#name-string">string</a></label><span id='EncodeSegment-fold-content-docs' class="fold-docs">
+<span class="md-text">		EncodeSegment encodes a JWT specific base64url encoding with padding stripped
+		
+		Deprecated: In a future release, we will demote this function to a non-exported function, since it
+		should only be used internally</span>
+
+</span></div><div class="anchor value-res" id="name-GetAlgorithms">	<input type='checkbox' class="fold" id="GetAlgorithms-fold-content"><label for="GetAlgorithms-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-38">GetAlgorithms</a>() (algs []<a href="../../../builtin.html#name-string">string</a>)</label><span id='GetAlgorithms-fold-content-docs' class="fold-docs">
+<span class="md-text">		GetAlgorithms returns a list of registered "alg" names</span>
+
+</span></div><div class="anchor value-res" id="name-GetSigningMethod">	<input type='checkbox' class="fold" id="GetSigningMethod-fold-content"><label for="GetSigningMethod-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-27">GetSigningMethod</a>(alg <a href="../../../builtin.html#name-string">string</a>) (method <a href="#name-SigningMethod">SigningMethod</a>)</label><span id='GetSigningMethod-fold-content-docs' class="fold-docs">
+<span class="md-text">		GetSigningMethod retrieves a signing method from an "alg" string</span>
+
+</span></div><div class="anchor value-res" id="name-New">	<input type='checkbox' class="fold" id="New-fold-content"><label for="New-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-46">New</a>(method <a href="#name-SigningMethod">SigningMethod</a>) *<a href="#name-Token">Token</a></label><span id='New-fold-content-docs' class="fold-docs">
+<span class="md-text">		New creates a new Token with the specified signing method and an empty map of claims.</span>
+
+</span></div><div class="anchor value-res" id="name-NewNumericDate">	<input type='checkbox' class="fold" id="NewNumericDate-fold-content"><label for="NewNumericDate-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-38">NewNumericDate</a>(t <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a>) *<a href="#name-NumericDate">NumericDate</a></label><span id='NewNumericDate-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewNumericDate constructs a new *NumericDate from a standard library time.Time struct.
+		It will truncate the timestamp according to the precision specified in TimePrecision.</span>
+
+</span></div><div class="anchor value-res" id="name-NewParser">	<input type='checkbox' class="fold" id="NewParser-fold-content"><label for="NewParser-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser.go.html#line-28">NewParser</a>(options ...<a href="#name-ParserOption">ParserOption</a>) *<a href="#name-Parser">Parser</a></label><span id='NewParser-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewParser creates a new Parser with the specified options</span>
+
+</span></div><div class="anchor value-res" id="name-NewValidationError">	<input type='checkbox' class="fold" id="NewValidationError-fold-content"><label for="NewValidationError-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-43">NewValidationError</a>(errorText <a href="../../../builtin.html#name-string">string</a>, errorFlags <a href="../../../builtin.html#name-uint32">uint32</a>) *<a href="#name-ValidationError">ValidationError</a></label><span id='NewValidationError-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewValidationError is a helper for constructing a ValidationError with a string error message</span>
+
+</span></div><div class="anchor value-res" id="name-NewWithClaims">	<input type='checkbox' class="fold" id="NewWithClaims-fold-content"><label for="NewWithClaims-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-51">NewWithClaims</a>(method <a href="#name-SigningMethod">SigningMethod</a>, claims <a href="#name-Claims">Claims</a>) *<a href="#name-Token">Token</a></label><span id='NewWithClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewWithClaims creates a new Token with the specified signing method and claims.</span>
+
+</span></div><div class="anchor value-res" id="name-Parse">	<input type='checkbox' class="fold" id="Parse-fold-content"><label for="Parse-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-104">Parse</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='Parse-fold-content-docs' class="fold-docs">
+<span class="md-text">		Parse parses, validates, verifies the signature and returns the parsed token.
+		keyFunc will receive the parsed token and should return the cryptographic key
+		for verifying the signature.
+		The caller is strongly encouraged to set the WithValidMethods option to
+		validate the 'alg' claim in the token matches the expected algorithm.
+		For more details about the importance of validating the 'alg' claim,
+		see https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/</span>
+
+</span></div><div class="anchor value-res" id="name-ParseECPrivateKeyFromPEM">	<input type='checkbox' class="fold" id="ParseECPrivateKeyFromPEM-fold-content"><label for="ParseECPrivateKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa_utils.go.html#line-16">ParseECPrivateKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (*<a href="../../../crypto/ecdsa.html">ecdsa</a>.<a href="../../../crypto/ecdsa.html#name-PrivateKey">PrivateKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseECPrivateKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseECPrivateKeyFromPEM parses a PEM encoded Elliptic Curve Private Key Structure</span>
+
+</span></div><div class="anchor value-res" id="name-ParseECPublicKeyFromPEM">	<input type='checkbox' class="fold" id="ParseECPublicKeyFromPEM-fold-content"><label for="ParseECPublicKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa_utils.go.html#line-43">ParseECPublicKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (*<a href="../../../crypto/ecdsa.html">ecdsa</a>.<a href="../../../crypto/ecdsa.html#name-PublicKey">PublicKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseECPublicKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseECPublicKeyFromPEM parses a PEM encoded PKCS1 or PKCS8 public key</span>
+
+</span></div><div class="anchor value-res" id="name-ParseEdPrivateKeyFromPEM">	<input type='checkbox' class="fold" id="ParseEdPrivateKeyFromPEM-fold-content"><label for="ParseEdPrivateKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519_utils.go.html#line-17">ParseEdPrivateKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (<a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-PrivateKey">PrivateKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseEdPrivateKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseEdPrivateKeyFromPEM parses a PEM-encoded Edwards curve private key</span>
+
+</span></div><div class="anchor value-res" id="name-ParseEdPublicKeyFromPEM">	<input type='checkbox' class="fold" id="ParseEdPublicKeyFromPEM-fold-content"><label for="ParseEdPublicKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519_utils.go.html#line-42">ParseEdPublicKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (<a href="../../../crypto.html">crypto</a>.<a href="../../../crypto.html#name-PublicKey">PublicKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseEdPublicKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseEdPublicKeyFromPEM parses a PEM-encoded Edwards curve public key</span>
+
+</span></div><div class="anchor value-res" id="name-ParseRSAPrivateKeyFromPEM">	<input type='checkbox' class="fold" id="ParseRSAPrivateKeyFromPEM-fold-content"><label for="ParseRSAPrivateKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-17">ParseRSAPrivateKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (*<a href="../../../crypto/rsa.html">rsa</a>.<a href="../../../crypto/rsa.html#name-PrivateKey">PrivateKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseRSAPrivateKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseRSAPrivateKeyFromPEM parses a PEM encoded PKCS1 or PKCS8 private key</span>
+
+</span></div><div class="anchor value-res" id="name-ParseRSAPrivateKeyFromPEMWithPassword">	<input type='checkbox' class="fold" id="ParseRSAPrivateKeyFromPEMWithPassword-fold-content"><label for="ParseRSAPrivateKeyFromPEMWithPassword-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-47">ParseRSAPrivateKeyFromPEMWithPassword</a>(key []<a href="../../../builtin.html#name-byte">byte</a>, password <a href="../../../builtin.html#name-string">string</a>) (*<a href="../../../crypto/rsa.html">rsa</a>.<a href="../../../crypto/rsa.html#name-PrivateKey">PrivateKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseRSAPrivateKeyFromPEMWithPassword-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseRSAPrivateKeyFromPEMWithPassword parses a PEM encoded PKCS1 or PKCS8 private key protected with password
+		
+		Deprecated: This function is deprecated and should not be used anymore. It uses the deprecated x509.DecryptPEMBlock
+		function, which was deprecated since RFC 1423 is regarded insecure by design. Unfortunately, there is no alternative
+		in the Go standard library for now. See https://github.com/golang/go/issues/8860.</span>
+
+</span></div><div class="anchor value-res" id="name-ParseRSAPublicKeyFromPEM">	<input type='checkbox' class="fold" id="ParseRSAPublicKeyFromPEM-fold-content"><label for="ParseRSAPublicKeyFromPEM-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-79">ParseRSAPublicKeyFromPEM</a>(key []<a href="../../../builtin.html#name-byte">byte</a>) (*<a href="../../../crypto/rsa.html">rsa</a>.<a href="../../../crypto/rsa.html#name-PublicKey">PublicKey</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseRSAPublicKeyFromPEM-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseRSAPublicKeyFromPEM parses a PEM encoded PKCS1 or PKCS8 public key</span>
+
+</span></div><div class="anchor value-res" id="name-ParseWithClaims">	<input type='checkbox' class="fold" id="ParseWithClaims-fold-content"><label for="ParseWithClaims-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-113">ParseWithClaims</a>(tokenString <a href="../../../builtin.html#name-string">string</a>, claims <a href="#name-Claims">Claims</a>, keyFunc <a href="#name-Keyfunc">Keyfunc</a>, options ...<a href="#name-ParserOption">ParserOption</a>) (*<a href="#name-Token">Token</a>, <a href="../../../builtin.html#name-error">error</a>)</label><span id='ParseWithClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		ParseWithClaims is a shortcut for NewParser().ParseWithClaims().
+		
+		Note: If you provide a custom claim implementation that embeds one of the standard claims (such as RegisteredClaims),
+		make sure that a) you either embed a non-pointer version of the claims or b) if you are using a pointer, allocate the
+		proper memory for it before passing in the overall claims, otherwise you might run into a panic.</span>
+
+</span></div><div class="anchor value-res" id="name-RegisterSigningMethod">	<input type='checkbox' class="fold" id="RegisterSigningMethod-fold-content"><label for="RegisterSigningMethod-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/signing_method.go.html#line-19">RegisterSigningMethod</a>(alg <a href="../../../builtin.html#name-string">string</a>, f func() <a href="#name-SigningMethod">SigningMethod</a>)</label><span id='RegisterSigningMethod-fold-content-docs' class="fold-docs">
+<span class="md-text">		RegisterSigningMethod registers the "alg" name and a factory function for signing method.
+		This is typically done during init() in the method's implementation</span>
+
+</span></div><div class="anchor value-res" id="name-WithJSONNumber">	<input type='checkbox' class="fold" id="WithJSONNumber-fold-content"><label for="WithJSONNumber-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser_option.go.html#line-17">WithJSONNumber</a>() <a href="#name-ParserOption">ParserOption</a></label><span id='WithJSONNumber-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithJSONNumber is an option to configure the underlying JSON parser with UseNumber</span>
+
+</span></div><div class="anchor value-res" id="name-WithoutClaimsValidation">	<input type='checkbox' class="fold" id="WithoutClaimsValidation-fold-content"><label for="WithoutClaimsValidation-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser_option.go.html#line-25">WithoutClaimsValidation</a>() <a href="#name-ParserOption">ParserOption</a></label><span id='WithoutClaimsValidation-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithoutClaimsValidation is an option to disable claims validation. This option should only be used if you exactly know
+		what you are doing.</span>
+
+</span></div><div class="anchor value-res" id="name-WithValidMethods">	<input type='checkbox' class="fold" id="WithValidMethods-fold-content"><label for="WithValidMethods-fold-content"> func <a href="../../../../src/github.com/golang-jwt/jwt/v4/parser_option.go.html#line-10">WithValidMethods</a>(methods []<a href="../../../builtin.html#name-string">string</a>) <a href="#name-ParserOption">ParserOption</a></label><span id='WithValidMethods-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithValidMethods is an option to supply algorithm methods that the parser will check. Only those methods will be considered valid.
+		It is heavily encouraged to use this option in order to prevent attacks such as https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/.</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 43)</i></span></span>
+
+<div class="anchor value-res" id="name-DecodePaddingAllowed">	<input type='checkbox' class="fold" id="DecodePaddingAllowed-fold-content"><label for="DecodePaddingAllowed-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-15">DecodePaddingAllowed</a> <a href="../../../builtin.html#name-bool">bool</a></label><span id='DecodePaddingAllowed-fold-content-docs' class="fold-docs">
+<span class="md-text">		DecodePaddingAllowed will switch the codec used for decoding JWTs respectively. Note that the JWS RFC7515
+		states that the tokens will utilize a Base64url encoding with no padding. Unfortunately, some implementations
+		of JWT are producing non-standard tokens, and thus require support for decoding. Note that this is a global
+		variable, and updating it will change the behavior on a package level, and is also NOT go-routine safe.
+		To use the non-recommended decoding, set this boolean to `true` prior to using this package.</span>
+
+</span></div><div class="anchor value-res" id="name-DecodeStrict">	<input type='checkbox' class="fold" id="DecodeStrict-fold-content"><label for="DecodeStrict-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-21">DecodeStrict</a> <a href="../../../builtin.html#name-bool">bool</a></label><span id='DecodeStrict-fold-content-docs' class="fold-docs">
+<span class="md-text">		DecodeStrict will switch the codec used for decoding JWTs into strict mode.
+		In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.
+		Note that this is a global variable, and updating it will change the behavior on a package level, and is also NOT go-routine safe.
+		To use strict decoding, set this boolean to `true` prior to using this package.</span>
+
+</span></div><div class="anchor value-res" id="name-ErrECDSAVerification">	<input type='checkbox' class="fold" id="ErrECDSAVerification-fold-content"><label for="ErrECDSAVerification-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-13">ErrECDSAVerification</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrECDSAVerification-fold-content-docs' class="fold-docs">
+<span class="md-text">		Sadly this is missing from crypto/ecdsa compared to crypto/rsa</span>
+
+</span></div><div class="anchor value-res" id="name-ErrEd25519Verification">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-12">ErrEd25519Verification</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrHashUnavailable">	<input type='checkbox' class="fold" id="ErrHashUnavailable-fold-content"><label for="ErrHashUnavailable-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-11">ErrHashUnavailable</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrHashUnavailable-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidKey">	<input type='checkbox' class="fold" id="ErrInvalidKey-fold-content"><label for="ErrInvalidKey-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-9">ErrInvalidKey</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrInvalidKey-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidKeyType">	<input type='checkbox' class="fold" id="ErrInvalidKeyType-fold-content"><label for="ErrInvalidKeyType-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-10">ErrInvalidKeyType</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrInvalidKeyType-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrKeyMustBePEMEncoded">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-11">ErrKeyMustBePEMEncoded</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotECPrivateKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa_utils.go.html#line-12">ErrNotECPrivateKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotECPublicKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa_utils.go.html#line-11">ErrNotECPublicKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotEdPrivateKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519_utils.go.html#line-12">ErrNotEdPrivateKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotEdPublicKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519_utils.go.html#line-13">ErrNotEdPublicKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotRSAPrivateKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-12">ErrNotRSAPrivateKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrNotRSAPublicKey">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_utils.go.html#line-13">ErrNotRSAPublicKey</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrSignatureInvalid">	<input type='checkbox' class="fold" id="ErrSignatureInvalid-fold-content"><label for="ErrSignatureInvalid-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-21">ErrSignatureInvalid</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrSignatureInvalid-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for HS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenExpired">	<input type='checkbox' class="fold" id="ErrTokenExpired-fold-content"><label for="ErrTokenExpired-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-18">ErrTokenExpired</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenExpired-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenInvalidAudience">	<input type='checkbox' class="fold" id="ErrTokenInvalidAudience-fold-content"><label for="ErrTokenInvalidAudience-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-17">ErrTokenInvalidAudience</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenInvalidAudience-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenInvalidClaims">	<input type='checkbox' class="fold" id="ErrTokenInvalidClaims-fold-content"><label for="ErrTokenInvalidClaims-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-23">ErrTokenInvalidClaims</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenInvalidClaims-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenInvalidId">	<input type='checkbox' class="fold" id="ErrTokenInvalidId-fold-content"><label for="ErrTokenInvalidId-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-22">ErrTokenInvalidId</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenInvalidId-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenInvalidIssuer">	<input type='checkbox' class="fold" id="ErrTokenInvalidIssuer-fold-content"><label for="ErrTokenInvalidIssuer-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-20">ErrTokenInvalidIssuer</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenInvalidIssuer-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenMalformed">	<input type='checkbox' class="fold" id="ErrTokenMalformed-fold-content"><label for="ErrTokenMalformed-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-13">ErrTokenMalformed</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenMalformed-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenNotValidYet">	<input type='checkbox' class="fold" id="ErrTokenNotValidYet-fold-content"><label for="ErrTokenNotValidYet-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-21">ErrTokenNotValidYet</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenNotValidYet-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenSignatureInvalid">	<input type='checkbox' class="fold" id="ErrTokenSignatureInvalid-fold-content"><label for="ErrTokenSignatureInvalid-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-15">ErrTokenSignatureInvalid</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenSignatureInvalid-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenUnverifiable">	<input type='checkbox' class="fold" id="ErrTokenUnverifiable-fold-content"><label for="ErrTokenUnverifiable-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-14">ErrTokenUnverifiable</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenUnverifiable-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTokenUsedBeforeIssued">	<input type='checkbox' class="fold" id="ErrTokenUsedBeforeIssued-fold-content"><label for="ErrTokenUsedBeforeIssued-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-19">ErrTokenUsedBeforeIssued</a> <a href="../../../builtin.html#name-error">error</a></label><span id='ErrTokenUsedBeforeIssued-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error constants</span>
+
+</span></div><div class="anchor value-res" id="name-MarshalSingleStringAsArray">	<input type='checkbox' class="fold" id="MarshalSingleStringAsArray-fold-content"><label for="MarshalSingleStringAsArray-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-28">MarshalSingleStringAsArray</a> <a href="../../../builtin.html#name-bool">bool</a></label><span id='MarshalSingleStringAsArray-fold-content-docs' class="fold-docs">
+<span class="md-text">		MarshalSingleStringAsArray modifies the behaviour of the ClaimStrings type, especially
+		its MarshalJSON function.
+		
+		If it is set to true (the default), it will always serialize the type as an
+		array of strings, even if it just contains one element, defaulting to the behaviour
+		of the underlying []string. If it is set to false, it will serialize to a single
+		string, if it contains one element. Otherwise, it will serialize to an array of strings.</span>
+
+</span></div><div class="anchor value-res" id="name-NoneSignatureTypeDisallowedError">	<span class="nodocs">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html#line-9">NoneSignatureTypeDisallowedError</a> <a href="../../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-SigningMethodEdDSA">	<input type='checkbox' class="fold" id="SigningMethodEdDSA-fold-content"><label for="SigningMethodEdDSA-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ed25519.go.html#line-21">SigningMethodEdDSA</a> *<a href="#name-SigningMethodEd25519">SigningMethodEd25519</a></label><span id='SigningMethodEdDSA-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instance for EdDSA</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodES256">	<input type='checkbox' class="fold" id="SigningMethodES256-fold-content"><label for="SigningMethodES256-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-27">SigningMethodES256</a> *<a href="#name-SigningMethodECDSA">SigningMethodECDSA</a></label><span id='SigningMethodES256-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for EC256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodES384">	<input type='checkbox' class="fold" id="SigningMethodES384-fold-content"><label for="SigningMethodES384-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-28">SigningMethodES384</a> *<a href="#name-SigningMethodECDSA">SigningMethodECDSA</a></label><span id='SigningMethodES384-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for EC256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodES512">	<input type='checkbox' class="fold" id="SigningMethodES512-fold-content"><label for="SigningMethodES512-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/ecdsa.go.html#line-29">SigningMethodES512</a> *<a href="#name-SigningMethodECDSA">SigningMethodECDSA</a></label><span id='SigningMethodES512-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for EC256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodHS256">	<input type='checkbox' class="fold" id="SigningMethodHS256-fold-content"><label for="SigningMethodHS256-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-18">SigningMethodHS256</a> *<a href="#name-SigningMethodHMAC">SigningMethodHMAC</a></label><span id='SigningMethodHS256-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for HS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodHS384">	<input type='checkbox' class="fold" id="SigningMethodHS384-fold-content"><label for="SigningMethodHS384-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-19">SigningMethodHS384</a> *<a href="#name-SigningMethodHMAC">SigningMethodHMAC</a></label><span id='SigningMethodHS384-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for HS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodHS512">	<input type='checkbox' class="fold" id="SigningMethodHS512-fold-content"><label for="SigningMethodHS512-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/hmac.go.html#line-20">SigningMethodHS512</a> *<a href="#name-SigningMethodHMAC">SigningMethodHMAC</a></label><span id='SigningMethodHS512-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for HS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodNone">	<input type='checkbox' class="fold" id="SigningMethodNone-fold-content"><label for="SigningMethodNone-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html#line-5">SigningMethodNone</a> *<a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html#line-11">signingMethodNone</a></label><span id='SigningMethodNone-fold-content-docs' class="fold-docs">
+<span class="md-text">		SigningMethodNone implements the none signing method.  This is required by the spec
+		but you probably should never use it.</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodPS256">	<input type='checkbox' class="fold" id="SigningMethodPS256-fold-content"><label for="SigningMethodPS256-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-25">SigningMethodPS256</a> *<a href="#name-SigningMethodRSAPSS">SigningMethodRSAPSS</a></label><span id='SigningMethodPS256-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS/PS and company.</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodPS384">	<input type='checkbox' class="fold" id="SigningMethodPS384-fold-content"><label for="SigningMethodPS384-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-26">SigningMethodPS384</a> *<a href="#name-SigningMethodRSAPSS">SigningMethodRSAPSS</a></label><span id='SigningMethodPS384-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS/PS and company.</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodPS512">	<input type='checkbox' class="fold" id="SigningMethodPS512-fold-content"><label for="SigningMethodPS512-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa_pss.go.html#line-27">SigningMethodPS512</a> *<a href="#name-SigningMethodRSAPSS">SigningMethodRSAPSS</a></label><span id='SigningMethodPS512-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS/PS and company.</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodRS256">	<input type='checkbox' class="fold" id="SigningMethodRS256-fold-content"><label for="SigningMethodRS256-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-18">SigningMethodRS256</a> *<a href="#name-SigningMethodRSA">SigningMethodRSA</a></label><span id='SigningMethodRS256-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodRS384">	<input type='checkbox' class="fold" id="SigningMethodRS384-fold-content"><label for="SigningMethodRS384-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-19">SigningMethodRS384</a> *<a href="#name-SigningMethodRSA">SigningMethodRSA</a></label><span id='SigningMethodRS384-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-SigningMethodRS512">	<input type='checkbox' class="fold" id="SigningMethodRS512-fold-content"><label for="SigningMethodRS512-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/rsa.go.html#line-20">SigningMethodRS512</a> *<a href="#name-SigningMethodRSA">SigningMethodRSA</a></label><span id='SigningMethodRS512-fold-content-docs' class="fold-docs">
+<span class="md-text">		Specific instances for RS256 and company</span>
+
+</span></div><div class="anchor value-res" id="name-TimeFunc">	<input type='checkbox' class="fold" id="TimeFunc-fold-content"><label for="TimeFunc-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/token.go.html#line-26">TimeFunc</a> func() <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Time">Time</a></label><span id='TimeFunc-fold-content-docs' class="fold-docs">
+<span class="md-text">		TimeFunc provides the current time when parsing token to validate "exp" claim (expiration time).
+		You can override it to use another time value.  This is useful for testing or if your
+		server uses a different time zone than your tokens.</span>
+
+</span></div><div class="anchor value-res" id="name-TimePrecision">	<input type='checkbox' class="fold" id="TimePrecision-fold-content"><label for="TimePrecision-fold-content">  var <a href="../../../../src/github.com/golang-jwt/jwt/v4/types.go.html#line-19">TimePrecision</a> <a href="../../../time.html">time</a>.<a href="../../../time.html#name-Duration">Duration</a></label><span id='TimePrecision-fold-content-docs' class="fold-docs">
+<span class="md-text">		TimePrecision sets the precision of times and dates within this library.
+		This has an influence on the precision of times when comparing expiry or
+		other related time fields. Furthermore, it is also the precision of times
+		when serializing.
+		
+		For backwards compatibility the default precision is set to seconds, so that
+		no fractional timestamps are generated.</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 11)</i></span></span>
+
+<div class="anchor value-res" id="name-UnsafeAllowNoneSignatureType">	<span class="nodocs">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html#line-7">UnsafeAllowNoneSignatureType</a> <a href="../../../../src/github.com/golang-jwt/jwt/v4/none.go.html#line-12">unsafeNoneMagicConstant</a> = "none signing method allowed"</span></div><div class="anchor value-res" id="name-ValidationErrorAudience">	<input type='checkbox' class="fold" id="ValidationErrorAudience-fold-content"><label for="ValidationErrorAudience-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-33">ValidationErrorAudience</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 8 // <span class="md-text">AUD validation failed</span></label><span id='ValidationErrorAudience-fold-content-docs' class="fold-docs">
+<span class="md-text">		Standard Claim validation errors</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorClaimsInvalid">	<input type='checkbox' class="fold" id="ValidationErrorClaimsInvalid-fold-content"><label for="ValidationErrorClaimsInvalid-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-39">ValidationErrorClaimsInvalid</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 512 // <span class="md-text">Generic claims validation error</span></label><span id='ValidationErrorClaimsInvalid-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorExpired">	<input type='checkbox' class="fold" id="ValidationErrorExpired-fold-content"><label for="ValidationErrorExpired-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-34">ValidationErrorExpired</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 16 // <span class="md-text">EXP validation failed</span></label><span id='ValidationErrorExpired-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorId">	<input type='checkbox' class="fold" id="ValidationErrorId-fold-content"><label for="ValidationErrorId-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-38">ValidationErrorId</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 256 // <span class="md-text">JTI validation failed</span></label><span id='ValidationErrorId-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorIssuedAt">	<input type='checkbox' class="fold" id="ValidationErrorIssuedAt-fold-content"><label for="ValidationErrorIssuedAt-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-35">ValidationErrorIssuedAt</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 32 // <span class="md-text">IAT validation failed</span></label><span id='ValidationErrorIssuedAt-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorIssuer">	<input type='checkbox' class="fold" id="ValidationErrorIssuer-fold-content"><label for="ValidationErrorIssuer-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-36">ValidationErrorIssuer</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 64 // <span class="md-text">ISS validation failed</span></label><span id='ValidationErrorIssuer-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorMalformed">	<input type='checkbox' class="fold" id="ValidationErrorMalformed-fold-content"><label for="ValidationErrorMalformed-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-28">ValidationErrorMalformed</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 1 // <span class="md-text">Token is malformed</span></label><span id='ValidationErrorMalformed-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorNotValidYet">	<input type='checkbox' class="fold" id="ValidationErrorNotValidYet-fold-content"><label for="ValidationErrorNotValidYet-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-37">ValidationErrorNotValidYet</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 128 // <span class="md-text">NBF validation failed</span></label><span id='ValidationErrorNotValidYet-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorSignatureInvalid">	<input type='checkbox' class="fold" id="ValidationErrorSignatureInvalid-fold-content"><label for="ValidationErrorSignatureInvalid-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-30">ValidationErrorSignatureInvalid</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 4 // <span class="md-text">Signature validation failed</span></label><span id='ValidationErrorSignatureInvalid-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div><div class="anchor value-res" id="name-ValidationErrorUnverifiable">	<input type='checkbox' class="fold" id="ValidationErrorUnverifiable-fold-content"><label for="ValidationErrorUnverifiable-fold-content">const <a href="../../../../src/github.com/golang-jwt/jwt/v4/errors.go.html#line-29">ValidationErrorUnverifiable</a> <a href="../../../builtin.html#name-uint32">uint32</a> = 2 // <span class="md-text">Token could not be verified because of signing problems</span></label><span id='ValidationErrorUnverifiable-fold-content-docs' class="fold-docs">
+<span class="md-text">		The errors that might occur when parsing and validating a token</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

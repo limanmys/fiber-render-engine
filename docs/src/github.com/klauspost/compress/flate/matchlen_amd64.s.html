@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: matchlen_amd64.s in package github.com/klauspost/compress/flate</title>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	matchlen_amd64.s
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/klauspost/compress/flate.html">github.com/klauspost/compress/flate</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code>// Copied from S2 implementation.</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code>//go:build !appengine &amp;&amp; !noasm &amp;&amp; gc &amp;&amp; !noasm</code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code>#include "textflag.h"</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code>// func matchLen(a []byte, b []byte) int</code></span>
+<span class="codeline" id="line-8"><code>// Requires: BMI</code></span>
+<span class="codeline" id="line-9"><code>TEXT ·matchLen(SB), NOSPLIT, $0-56</code></span>
+<span class="codeline" id="line-10"><code>	MOVQ a_base+0(FP), AX</code></span>
+<span class="codeline" id="line-11"><code>	MOVQ b_base+24(FP), CX</code></span>
+<span class="codeline" id="line-12"><code>	MOVQ a_len+8(FP), DX</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code>	// matchLen</code></span>
+<span class="codeline" id="line-15"><code>	XORL SI, SI</code></span>
+<span class="codeline" id="line-16"><code>	CMPL DX, $0x08</code></span>
+<span class="codeline" id="line-17"><code>	JB   matchlen_match4_standalone</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>matchlen_loopback_standalone:</code></span>
+<span class="codeline" id="line-20"><code>	MOVQ  (AX)(SI*1), BX</code></span>
+<span class="codeline" id="line-21"><code>	XORQ  (CX)(SI*1), BX</code></span>
+<span class="codeline" id="line-22"><code>	TESTQ BX, BX</code></span>
+<span class="codeline" id="line-23"><code>	JZ    matchlen_loop_standalone</code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code>#ifdef GOAMD64_v3</code></span>
+<span class="codeline" id="line-26"><code>	TZCNTQ BX, BX</code></span>
+<span class="codeline" id="line-27"><code>#else</code></span>
+<span class="codeline" id="line-28"><code>	BSFQ BX, BX</code></span>
+<span class="codeline" id="line-29"><code>#endif</code></span>
+<span class="codeline" id="line-30"><code>	SARQ $0x03, BX</code></span>
+<span class="codeline" id="line-31"><code>	LEAL (SI)(BX*1), SI</code></span>
+<span class="codeline" id="line-32"><code>	JMP  gen_match_len_end</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code>matchlen_loop_standalone:</code></span>
+<span class="codeline" id="line-35"><code>	LEAL -8(DX), DX</code></span>
+<span class="codeline" id="line-36"><code>	LEAL 8(SI), SI</code></span>
+<span class="codeline" id="line-37"><code>	CMPL DX, $0x08</code></span>
+<span class="codeline" id="line-38"><code>	JAE  matchlen_loopback_standalone</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>matchlen_match4_standalone:</code></span>
+<span class="codeline" id="line-41"><code>	CMPL DX, $0x04</code></span>
+<span class="codeline" id="line-42"><code>	JB   matchlen_match2_standalone</code></span>
+<span class="codeline" id="line-43"><code>	MOVL (AX)(SI*1), BX</code></span>
+<span class="codeline" id="line-44"><code>	CMPL (CX)(SI*1), BX</code></span>
+<span class="codeline" id="line-45"><code>	JNE  matchlen_match2_standalone</code></span>
+<span class="codeline" id="line-46"><code>	LEAL -4(DX), DX</code></span>
+<span class="codeline" id="line-47"><code>	LEAL 4(SI), SI</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code>matchlen_match2_standalone:</code></span>
+<span class="codeline" id="line-50"><code>	CMPL DX, $0x02</code></span>
+<span class="codeline" id="line-51"><code>	JB   matchlen_match1_standalone</code></span>
+<span class="codeline" id="line-52"><code>	MOVW (AX)(SI*1), BX</code></span>
+<span class="codeline" id="line-53"><code>	CMPW (CX)(SI*1), BX</code></span>
+<span class="codeline" id="line-54"><code>	JNE  matchlen_match1_standalone</code></span>
+<span class="codeline" id="line-55"><code>	LEAL -2(DX), DX</code></span>
+<span class="codeline" id="line-56"><code>	LEAL 2(SI), SI</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code>matchlen_match1_standalone:</code></span>
+<span class="codeline" id="line-59"><code>	CMPL DX, $0x01</code></span>
+<span class="codeline" id="line-60"><code>	JB   gen_match_len_end</code></span>
+<span class="codeline" id="line-61"><code>	MOVB (AX)(SI*1), BL</code></span>
+<span class="codeline" id="line-62"><code>	CMPB (CX)(SI*1), BL</code></span>
+<span class="codeline" id="line-63"><code>	JNE  gen_match_len_end</code></span>
+<span class="codeline" id="line-64"><code>	INCL SI</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>gen_match_len_end:</code></span>
+<span class="codeline" id="line-67"><code>	MOVQ SI, ret+48(FP)</code></span>
+<span class="codeline" id="line-68"><code>	RET</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

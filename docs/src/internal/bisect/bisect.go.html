@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: bisect.go in package internal/bisect</title>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	bisect.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/bisect.html">internal/bisect</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124],
+input[id=r125]:checked ~pre label[for=r125],
+input[id=r126]:checked ~pre label[for=r126],
+input[id=r127]:checked ~pre label[for=r127],
+input[id=r128]:checked ~pre label[for=r128],
+input[id=r129]:checked ~pre label[for=r129],
+input[id=r130]:checked ~pre label[for=r130],
+input[id=r131]:checked ~pre label[for=r131],
+input[id=r132]:checked ~pre label[for=r132],
+input[id=r133]:checked ~pre label[for=r133],
+input[id=r134]:checked ~pre label[for=r134],
+input[id=r135]:checked ~pre label[for=r135],
+input[id=r136]:checked ~pre label[for=r136],
+input[id=r137]:checked ~pre label[for=r137],
+input[id=r138]:checked ~pre label[for=r138],
+input[id=r139]:checked ~pre label[for=r139],
+input[id=r140]:checked ~pre label[for=r140],
+input[id=r141]:checked ~pre label[for=r141],
+input[id=r142]:checked ~pre label[for=r142],
+input[id=r143]:checked ~pre label[for=r143],
+input[id=r144]:checked ~pre label[for=r144],
+input[id=r145]:checked ~pre label[for=r145],
+input[id=r146]:checked ~pre label[for=r146],
+input[id=r147]:checked ~pre label[for=r147],
+input[id=r148]:checked ~pre label[for=r148],
+input[id=r149]:checked ~pre label[for=r149],
+input[id=r150]:checked ~pre label[for=r150],
+input[id=r151]:checked ~pre label[for=r151],
+input[id=r152]:checked ~pre label[for=r152],
+input[id=r153]:checked ~pre label[for=r153],
+input[id=r154]:checked ~pre label[for=r154],
+input[id=r155]:checked ~pre label[for=r155],
+input[id=r156]:checked ~pre label[for=r156],
+input[id=r157]:checked ~pre label[for=r157],
+input[id=r158]:checked ~pre label[for=r158],
+input[id=r159]:checked ~pre label[for=r159],
+input[id=r160]:checked ~pre label[for=r160],
+input[id=r161]:checked ~pre label[for=r161],
+input[id=r162]:checked ~pre label[for=r162],
+input[id=r163]:checked ~pre label[for=r163],
+input[id=r164]:checked ~pre label[for=r164],
+input[id=r165]:checked ~pre label[for=r165],
+input[id=r166]:checked ~pre label[for=r166],
+input[id=r167]:checked ~pre label[for=r167],
+input[id=r168]:checked ~pre label[for=r168],
+input[id=r169]:checked ~pre label[for=r169],
+input[id=r170]:checked ~pre label[for=r170],
+input[id=r171]:checked ~pre label[for=r171],
+input[id=r172]:checked ~pre label[for=r172],
+input[id=r173]:checked ~pre label[for=r173],
+input[id=r174]:checked ~pre label[for=r174],
+input[id=r175]:checked ~pre label[for=r175],
+input[id=r176]:checked ~pre label[for=r176],
+input[id=r177]:checked ~pre label[for=r177],
+input[id=r178]:checked ~pre label[for=r178],
+input[id=r179]:checked ~pre label[for=r179],
+input[id=r180]:checked ~pre label[for=r180],
+input[id=r181]:checked ~pre label[for=r181]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="r125" type="radio" name="g"/>
+<input id="r126" type="radio" name="g"/>
+<input id="r127" type="radio" name="g"/>
+<input id="r128" type="radio" name="g"/>
+<input id="r129" type="radio" name="g"/>
+<input id="r130" type="radio" name="g"/>
+<input id="r131" type="radio" name="g"/>
+<input id="r132" type="radio" name="g"/>
+<input id="r133" type="radio" name="g"/>
+<input id="r134" type="radio" name="g"/>
+<input id="r135" type="radio" name="g"/>
+<input id="r136" type="radio" name="g"/>
+<input id="r137" type="radio" name="g"/>
+<input id="r138" type="radio" name="g"/>
+<input id="r139" type="radio" name="g"/>
+<input id="r140" type="radio" name="g"/>
+<input id="r141" type="radio" name="g"/>
+<input id="r142" type="radio" name="g"/>
+<input id="r143" type="radio" name="g"/>
+<input id="r144" type="radio" name="g"/>
+<input id="r145" type="radio" name="g"/>
+<input id="r146" type="radio" name="g"/>
+<input id="r147" type="radio" name="g"/>
+<input id="r148" type="radio" name="g"/>
+<input id="r149" type="radio" name="g"/>
+<input id="r150" type="radio" name="g"/>
+<input id="r151" type="radio" name="g"/>
+<input id="r152" type="radio" name="g"/>
+<input id="r153" type="radio" name="g"/>
+<input id="r154" type="radio" name="g"/>
+<input id="r155" type="radio" name="g"/>
+<input id="r156" type="radio" name="g"/>
+<input id="r157" type="radio" name="g"/>
+<input id="r158" type="radio" name="g"/>
+<input id="r159" type="radio" name="g"/>
+<input id="r160" type="radio" name="g"/>
+<input id="r161" type="radio" name="g"/>
+<input id="r162" type="radio" name="g"/>
+<input id="r163" type="radio" name="g"/>
+<input id="r164" type="radio" name="g"/>
+<input id="r165" type="radio" name="g"/>
+<input id="r166" type="radio" name="g"/>
+<input id="r167" type="radio" name="g"/>
+<input id="r168" type="radio" name="g"/>
+<input id="r169" type="radio" name="g"/>
+<input id="r170" type="radio" name="g"/>
+<input id="r171" type="radio" name="g"/>
+<input id="r172" type="radio" name="g"/>
+<input id="r173" type="radio" name="g"/>
+<input id="r174" type="radio" name="g"/>
+<input id="r175" type="radio" name="g"/>
+<input id="r176" type="radio" name="g"/>
+<input id="r177" type="radio" name="g"/>
+<input id="r178" type="radio" name="g"/>
+<input id="r179" type="radio" name="g"/>
+<input id="r180" type="radio" name="g"/>
+<input id="r181" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2023 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package bisect can be used by compilers and other programs</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// to serve as a target for the bisect debugging tool.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// See [golang.org/x/tools/cmd/bisect] for details about using the tool.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// To be a bisect target, allowing bisect to help determine which of a set of independent</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// changes provokes a failure, a program needs to:</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">//  1. Define a way to accept a change pattern on its command line or in its environment.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">//     The most common mechanism is a command-line flag.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//     The pattern can be passed to [New] to create a [Matcher], the compiled form of a pattern.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">//  2. Assign each change a unique ID. One possibility is to use a sequence number,</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">//     but the most common mechanism is to hash some kind of identifying information</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">//     like the file and line number where the change might be applied.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">//     [Hash] hashes its arguments to compute an ID.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">//  3. Enable each change that the pattern says should be enabled.</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">//     The [Matcher.ShouldEnable] method answers this question for a given change ID.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//  4. Print a report identifying each change that the pattern says should be printed.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//     The [Matcher.ShouldPrint] method answers this question for a given change ID.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">//     The report consists of one more lines on standard error or standard output</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">//     that contain a “match marker”. [Marker] returns the match marker for a given ID.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">//     When bisect reports a change as causing the failure, it identifies the change</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">//     by printing the report lines with the match marker removed.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// # Example Usage</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// A program starts by defining how it receives the pattern. In this example, we will assume a flag.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// The next step is to compile the pattern:</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">//	m, err := bisect.New(patternFlag)</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//	if err != nil {</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">//		log.Fatal(err)</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// Then, each time a potential change is considered, the program computes</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// a change ID by hashing identifying information (source file and line, in this case)</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// and then calls m.ShouldPrint and m.ShouldEnable to decide whether to</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// print and enable the change, respectively. The two can return different values</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// depending on whether bisect is trying to find a minimal set of changes to</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// disable or to enable to provoke the failure.</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// It is usually helpful to write a helper function that accepts the identifying information</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// and then takes care of hashing, printing, and reporting whether the identified change</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// should be enabled. For example, a helper for changes identified by a file and line number</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// would be:</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">//	func ShouldEnable(file string, line int) {</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">//		h := bisect.Hash(file, line)</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">//		if m.ShouldPrint(h) {</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">//			fmt.Fprintf(os.Stderr, "%v %s:%d\n", bisect.Marker(h), file, line)</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">//		return m.ShouldEnable(h)</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// Finally, note that New returns a nil Matcher when there is no pattern,</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// meaning that the target is not running under bisect at all,</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// so all changes should be enabled and none should be printed.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">// In that common case, the computation of the hash can be avoided entirely</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">// by checking for m == nil first:</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">//	func ShouldEnable(file string, line int) bool {</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">//		if m == nil {</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">//			return false</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">//		h := bisect.Hash(file, line)</span></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">//		if m.ShouldPrint(h) {</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">//			fmt.Fprintf(os.Stderr, "%v %s:%d\n", bisect.Marker(h), file, line)</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">//		return m.ShouldEnable(h)</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">// When the identifying information is expensive to format, this code can call</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">// [Matcher.MarkerOnly] to find out whether short report lines containing only the</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">// marker are permitted for a given run. (Bisect permits such lines when it is</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">// still exploring the space of possible changes and will not be showing the</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// output to the user.) If so, the client can choose to print only the marker:</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">//	func ShouldEnable(file string, line int) bool {</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">//		if m == nil {</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">//			return false</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">//		h := bisect.Hash(file, line)</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">//		if m.ShouldPrint(h) {</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">//			if m.MarkerOnly() {</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">//				bisect.PrintMarker(os.Stderr)</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">//			} else {</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">//				fmt.Fprintf(os.Stderr, "%v %s:%d\n", bisect.Marker(h), file, line)</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">//			}</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">//		return m.ShouldEnable(h)</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">// This specific helper – deciding whether to enable a change identified by</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// file and line number and printing about the change when necessary – is</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// provided by the [Matcher.FileLine] method.</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">// Another common usage is deciding whether to make a change in a function</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">// based on the caller's stack, to identify the specific calling contexts that the</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">// change breaks. The [Matcher.Stack] method takes care of obtaining the stack,</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">// printing it when necessary, and reporting whether to enable the change</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">// based on that stack.</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">// # Pattern Syntax</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// Patterns are generated by the bisect tool and interpreted by [New].</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// Users should not have to understand the patterns except when</span></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">// debugging a target's bisect support or debugging the bisect tool itself.</span></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">// The pattern syntax selecting a change is a sequence of bit strings</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// separated by + and - operators. Each bit string denotes the set of</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// changes with IDs ending in those bits, + is set addition, - is set subtraction,</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">// and the expression is evaluated in the usual left-to-right order.</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// The special binary number “y” denotes the set of all changes,</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// standing in for the empty bit string.</span></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">// In the expression, all the + operators must appear before all the - operators.</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">// A leading + adds to an empty set. A leading - subtracts from the set of all</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">// possible suffixes.</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">// For example:</span></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">//   - “01+10” and “+01+10” both denote the set of changes</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">//     with IDs ending with the bits 01 or 10.</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">//   - “01+10-1001” denotes the set of changes with IDs</span></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">//     ending with the bits 01 or 10, but excluding those ending in 1001.</span></code></span>
+<span class="codeline" id="line-132"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">//   - “-01-1000” and “y-01-1000 both denote the set of all changes</span></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">//     with IDs not ending in 01 nor 1000.</span></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">//   - “0+1-01+001” is not a valid pattern, because all the + operators do not</span></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">//     appear before all the - operators.</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">// In the syntaxes described so far, the pattern specifies the changes to</span></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">// enable and report. If a pattern is prefixed by a “!”, the meaning</span></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// changes: the pattern specifies the changes to DISABLE and report. This</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">// mode of operation is needed when a program passes with all changes</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">// enabled but fails with no changes enabled. In this case, bisect</span></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">// searches for minimal sets of changes to disable.</span></code></span>
+<span class="codeline" id="line-145"><code><span class="comment">// Put another way, the leading “!” inverts the result from [Matcher.ShouldEnable]</span></code></span>
+<span class="codeline" id="line-146"><code><span class="comment">// but does not invert the result from [Matcher.ShouldPrint].</span></code></span>
+<span class="codeline" id="line-147"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-148"><code><span class="comment">// As a convenience for manual debugging, “n” is an alias for “!y”,</span></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">// meaning to disable and report all changes.</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">// Finally, a leading “v” in the pattern indicates that the reports will be shown</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">// to the user of bisect to describe the changes involved in a failure.</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">// At the API level, the leading “v” causes [Matcher.Visible] to return true.</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">// See the next section for details.</span></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">// # Match Reports</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">// The target program must enable only those changed matched</span></code></span>
+<span class="codeline" id="line-159"><code><span class="comment">// by the pattern, and it must print a match report for each such change.</span></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">// A match report consists of one or more lines of text that will be</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">// printed by the bisect tool to describe a change implicated in causing</span></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">// a failure. Each line in the report for a given change must contain a</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">// match marker with that change ID, as returned by [Marker].</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">// The markers are elided when displaying the lines to the user.</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">// A match marker has the form “[bisect-match 0x1234]” where</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">// 0x1234 is the change ID in hexadecimal.</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">// An alternate form is “[bisect-match 010101]”, giving the change ID in binary.</span></code></span>
+<span class="codeline" id="line-169"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-170"><code><span class="comment">// When [Matcher.Visible] returns false, the match reports are only</span></code></span>
+<span class="codeline" id="line-171"><code><span class="comment">// being processed by bisect to learn the set of enabled changes,</span></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">// not shown to the user, meaning that each report can be a match</span></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">// marker on a line by itself, eliding the usual textual description.</span></code></span>
+<span class="codeline" id="line-174"><code><span class="comment">// When the textual description is expensive to compute,</span></code></span>
+<span class="codeline" id="line-175"><code><span class="comment">// checking [Matcher.Visible] can help the avoid that expense</span></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">// in most runs.</span></code></span></div><span class="codeline" id="line-177"><code><span class="keyword">package</span> bisect</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-180"><code>	<label for="i0"><span class="lit-string i0">"runtime"</span></label></code></span>
+<span class="codeline" id="line-181"><code>	<label for="i1"><span class="lit-string i1">"sync"</span></label></code></span>
+<span class="codeline" id="line-182"><code>	<label for="i2"><span class="lit-string i2">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-183"><code>	<label for="i3"><span class="lit-string i3">"unsafe"</span></label></code></span>
+<span class="codeline" id="line-184"><code>)</code></span>
+<span class="codeline" id="line-185"><code></code></span>
+<span class="codeline" id="line-186"><code><span class="comment">// New creates and returns a new Matcher implementing the given pattern.</span></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">// The pattern syntax is defined in the package doc comment.</span></code></span>
+<span class="codeline" id="line-188"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-189"><code><span class="comment">// In addition to the pattern syntax syntax, New("") returns nil, nil.</span></code></span>
+<span class="codeline" id="line-190"><code><span class="comment">// The nil *Matcher is valid for use: it returns true from ShouldEnable</span></code></span>
+<span class="codeline" id="line-191"><code><span class="comment">// and false from ShouldPrint for all changes. Callers can avoid calling</span></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">// [Hash], [Matcher.ShouldEnable], and [Matcher.ShouldPrint] entirely</span></code></span>
+<span class="codeline" id="line-193"><code><span class="comment">// when they recognize the nil Matcher.</span></code></span>
+<span class="codeline" id="line-194"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/internal/bisect.html#name-New" class="ident">New</a></label>(<label for="r1" class="ident">pattern</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) (*<a href="#line-309" class="ident">Matcher</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-195"><code>	<span class="keyword">if</span> <label for="r1" class="ident">pattern</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-196"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-197"><code>	}</code></span>
+<span class="codeline" id="line-198"><code></code></span>
+<span class="codeline" id="line-199"><code>	<label for="r2" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-309" class="ident">Matcher</a>)</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code>	<label for="r3" class="ident">p</label> := <label for="r1" class="ident">pattern</label></code></span>
+<span class="codeline" id="line-202"><code>	<span class="comment">// Special case for leading 'q' so that 'qn' quietly disables, e.g. fmahash=qn to disable fma</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">	// Any instance of 'v' disables 'q'.</span></code></span>
+<span class="codeline" id="line-204"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r3" class="ident">p</label>[<span class="lit-number">0</span>] == <span class="lit-number">'q'</span> {</code></span>
+<span class="codeline" id="line-205"><code>		<label for="r2" class="ident">m</label>.<a href="#line-311" class="ident">quiet</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-206"><code>		<label for="r3" class="ident">p</label> = <label for="r3" class="ident">p</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-207"><code>		<span class="keyword">if</span> <label for="r3" class="ident">p</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-208"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-209"><code>		}</code></span>
+<span class="codeline" id="line-210"><code>	}</code></span>
+<span class="codeline" id="line-211"><code>	<span class="comment">// Allow multiple v, so that “bisect cmd vPATTERN” can force verbose all the time.</span></code></span>
+<span class="codeline" id="line-212"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r3" class="ident">p</label>[<span class="lit-number">0</span>] == <span class="lit-number">'v'</span> {</code></span>
+<span class="codeline" id="line-213"><code>		<label for="r2" class="ident">m</label>.<a href="#line-310" class="ident">verbose</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-214"><code>		<label for="r2" class="ident">m</label>.<a href="#line-311" class="ident">quiet</a> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-215"><code>		<label for="r3" class="ident">p</label> = <label for="r3" class="ident">p</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-216"><code>		<span class="keyword">if</span> <label for="r3" class="ident">p</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-217"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-218"><code>		}</code></span>
+<span class="codeline" id="line-219"><code>	}</code></span>
+<span class="codeline" id="line-220"><code></code></span>
+<span class="codeline" id="line-221"><code>	<span class="comment">// Allow multiple !, each negating the last, so that “bisect cmd !PATTERN” works</span></code></span>
+<span class="codeline" id="line-222"><code><span class="comment">	// even when bisect chooses to add its own !.</span></code></span>
+<span class="codeline" id="line-223"><code>	<label for="r2" class="ident">m</label>.<a href="#line-312" class="ident">enable</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-224"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r3" class="ident">p</label>[<span class="lit-number">0</span>] == <span class="lit-number">'!'</span> {</code></span>
+<span class="codeline" id="line-225"><code>		<label for="r2" class="ident">m</label>.<a href="#line-312" class="ident">enable</a> = !<label for="r2" class="ident">m</label>.<a href="#line-312" class="ident">enable</a></code></span>
+<span class="codeline" id="line-226"><code>		<label for="r3" class="ident">p</label> = <label for="r3" class="ident">p</label>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-227"><code>		<span class="keyword">if</span> <label for="r3" class="ident">p</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-228"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-229"><code>		}</code></span>
+<span class="codeline" id="line-230"><code>	}</code></span>
+<span class="codeline" id="line-231"><code></code></span>
+<span class="codeline" id="line-232"><code>	<span class="keyword">if</span> <label for="r3" class="ident">p</label> == <span class="lit-string">"n"</span> {</code></span>
+<span class="codeline" id="line-233"><code>		<span class="comment">// n is an alias for !y.</span></code></span>
+<span class="codeline" id="line-234"><code>		<label for="r2" class="ident">m</label>.<a href="#line-312" class="ident">enable</a> = !<label for="r2" class="ident">m</label>.<a href="#line-312" class="ident">enable</a></code></span>
+<span class="codeline" id="line-235"><code>		<label for="r3" class="ident">p</label> = <span class="lit-string">"y"</span></code></span>
+<span class="codeline" id="line-236"><code>	}</code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code>	<span class="comment">// Parse actual pattern syntax.</span></code></span>
+<span class="codeline" id="line-239"><code>	<label for="r4" class="ident">result</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-240"><code>	<label for="r5" class="ident">bits</label> := <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-241"><code>	<label for="r6" class="ident">start</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-242"><code>	<label for="r7" class="ident">wid</label> := <span class="lit-number">1</span> <span class="comment">// 1-bit (binary); sometimes 4-bit (hex)</span></code></span>
+<span class="codeline" id="line-243"><code>	<span class="keyword">for</span> <label for="r8" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r8" class="ident">i</label> &lt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>); <label for="r8" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-244"><code>		<span class="comment">// Imagine a trailing - at the end of the pattern to flush final suffix</span></code></span>
+<span class="codeline" id="line-245"><code>		<label for="r9" class="ident">c</label> := <a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-number">'-'</span>)</code></span>
+<span class="codeline" id="line-246"><code>		<span class="keyword">if</span> <label for="r8" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) {</code></span>
+<span class="codeline" id="line-247"><code>			<label for="r9" class="ident">c</label> = <label for="r3" class="ident">p</label>[<label for="r8" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-248"><code>		}</code></span>
+<span class="codeline" id="line-249"><code>		<span class="keyword">if</span> <label for="r8" class="ident">i</label> == <label for="r6" class="ident">start</label> &amp;&amp; <label for="r7" class="ident">wid</label> == <span class="lit-number">1</span> &amp;&amp; <label for="r9" class="ident">c</label> == <span class="lit-number">'x'</span> { <span class="comment">// leading x for hex</span></code></span>
+<span class="codeline" id="line-250"><code>			<label for="r6" class="ident">start</label> = <label for="r8" class="ident">i</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-251"><code>			<label for="r7" class="ident">wid</label> = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-252"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-253"><code>		}</code></span>
+<span class="codeline" id="line-254"><code>		<span class="keyword">switch</span> <label for="r9" class="ident">c</label> {</code></span>
+<span class="codeline" id="line-255"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-256"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-257"><code>		<span class="keyword">case</span> <span class="lit-number">'2'</span>, <span class="lit-number">'3'</span>, <span class="lit-number">'4'</span>, <span class="lit-number">'5'</span>, <span class="lit-number">'6'</span>, <span class="lit-number">'7'</span>, <span class="lit-number">'8'</span>, <span class="lit-number">'9'</span>:</code></span>
+<span class="codeline" id="line-258"><code>			<span class="keyword">if</span> <label for="r7" class="ident">wid</label> != <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-259"><code>				<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-260"><code>			}</code></span>
+<span class="codeline" id="line-261"><code>			<span class="keyword">fallthrough</span></code></span>
+<span class="codeline" id="line-262"><code>		<span class="keyword">case</span> <span class="lit-number">'0'</span>, <span class="lit-number">'1'</span>:</code></span>
+<span class="codeline" id="line-263"><code>			<label for="r5" class="ident">bits</label> &lt;&lt;= <label for="r7" class="ident">wid</label></code></span>
+<span class="codeline" id="line-264"><code>			<label for="r5" class="ident">bits</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r9" class="ident">c</label> - <span class="lit-number">'0'</span>)</code></span>
+<span class="codeline" id="line-265"><code>		<span class="keyword">case</span> <span class="lit-number">'a'</span>, <span class="lit-number">'b'</span>, <span class="lit-number">'c'</span>, <span class="lit-number">'d'</span>, <span class="lit-number">'e'</span>, <span class="lit-number">'f'</span>, <span class="lit-number">'A'</span>, <span class="lit-number">'B'</span>, <span class="lit-number">'C'</span>, <span class="lit-number">'D'</span>, <span class="lit-number">'E'</span>, <span class="lit-number">'F'</span>:</code></span>
+<span class="codeline" id="line-266"><code>			<span class="keyword">if</span> <label for="r7" class="ident">wid</label> != <span class="lit-number">4</span> {</code></span>
+<span class="codeline" id="line-267"><code>				<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-268"><code>			}</code></span>
+<span class="codeline" id="line-269"><code>			<label for="r5" class="ident">bits</label> &lt;&lt;= <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-270"><code>			<label for="r5" class="ident">bits</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r9" class="ident">c</label>&amp;^<span class="lit-number">0x20</span> - <span class="lit-number">'A'</span> + <span class="lit-number">10</span>)</code></span>
+<span class="codeline" id="line-271"><code>		<span class="keyword">case</span> <span class="lit-number">'y'</span>:</code></span>
+<span class="codeline" id="line-272"><code>			<span class="keyword">if</span> <label for="r8" class="ident">i</label>+<span class="lit-number">1</span> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r3" class="ident">p</label>) &amp;&amp; (<label for="r3" class="ident">p</label>[<label for="r8" class="ident">i</label>+<span class="lit-number">1</span>] == <span class="lit-number">'0'</span> || <label for="r3" class="ident">p</label>[<label for="r8" class="ident">i</label>+<span class="lit-number">1</span>] == <span class="lit-number">'1'</span>) {</code></span>
+<span class="codeline" id="line-273"><code>				<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-274"><code>			}</code></span>
+<span class="codeline" id="line-275"><code>			<label for="r5" class="ident">bits</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-276"><code>		<span class="keyword">case</span> <span class="lit-number">'+'</span>, <span class="lit-number">'-'</span>:</code></span>
+<span class="codeline" id="line-277"><code>			<span class="keyword">if</span> <label for="r9" class="ident">c</label> == <span class="lit-number">'+'</span> &amp;&amp; <label for="r4" class="ident">result</label> == <a href="../../../pkg/builtin.html#name-false" class="ident">false</a> {</code></span>
+<span class="codeline" id="line-278"><code>				<span class="comment">// Have already seen a -. Should be - from here on.</span></code></span>
+<span class="codeline" id="line-279"><code>				<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax (+ after -): "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-280"><code>			}</code></span>
+<span class="codeline" id="line-281"><code>			<span class="keyword">if</span> <label for="r8" class="ident">i</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-282"><code>				<label for="r10" class="ident">n</label> := (<label for="r8" class="ident">i</label> - <label for="r6" class="ident">start</label>) * <label for="r7" class="ident">wid</label></code></span>
+<span class="codeline" id="line-283"><code>				<span class="keyword">if</span> <label for="r10" class="ident">n</label> &gt; <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-284"><code>					<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"pattern bits too long: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-285"><code>				}</code></span>
+<span class="codeline" id="line-286"><code>				<span class="keyword">if</span> <label for="r10" class="ident">n</label> &lt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-287"><code>					<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, &amp;<a href="#line-702" class="ident">parseError</a>{<span class="lit-string">"invalid pattern syntax: "</span> + <label for="r1" class="ident">pattern</label>}</code></span>
+<span class="codeline" id="line-288"><code>				}</code></span>
+<span class="codeline" id="line-289"><code>				<span class="keyword">if</span> <label for="r3" class="ident">p</label>[<label for="r6" class="ident">start</label>] == <span class="lit-number">'y'</span> {</code></span>
+<span class="codeline" id="line-290"><code>					<label for="r10" class="ident">n</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-291"><code>				}</code></span>
+<span class="codeline" id="line-292"><code>				<label for="r11" class="ident">mask</label> := <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<span class="lit-number">1</span>)&lt;&lt;<label for="r10" class="ident">n</label> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-293"><code>				<label for="r2" class="ident">m</label>.<a href="#line-313" class="ident">list</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r2" class="ident">m</label>.<a href="#line-313" class="ident">list</a>, <a href="#line-334" class="ident">cond</a>{<label for="r11" class="ident">mask</label>, <label for="r5" class="ident">bits</label>, <label for="r4" class="ident">result</label>})</code></span>
+<span class="codeline" id="line-294"><code>			} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r9" class="ident">c</label> == <span class="lit-number">'-'</span> {</code></span>
+<span class="codeline" id="line-295"><code>				<span class="comment">// leading - subtracts from complete set</span></code></span>
+<span class="codeline" id="line-296"><code>				<label for="r2" class="ident">m</label>.<a href="#line-313" class="ident">list</a> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r2" class="ident">m</label>.<a href="#line-313" class="ident">list</a>, <a href="#line-334" class="ident">cond</a>{<span class="lit-number">0</span>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>})</code></span>
+<span class="codeline" id="line-297"><code>			}</code></span>
+<span class="codeline" id="line-298"><code>			<label for="r5" class="ident">bits</label> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-299"><code>			<label for="r4" class="ident">result</label> = <label for="r9" class="ident">c</label> == <span class="lit-number">'+'</span></code></span>
+<span class="codeline" id="line-300"><code>			<label for="r6" class="ident">start</label> = <label for="r8" class="ident">i</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-301"><code>			<label for="r7" class="ident">wid</label> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-302"><code>		}</code></span>
+<span class="codeline" id="line-303"><code>	}</code></span>
+<span class="codeline" id="line-304"><code>	<span class="keyword">return</span> <label for="r2" class="ident">m</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-305"><code>}</code></span>
+<span class="codeline" id="line-306"><code></code></span>
+<span class="codeline" id="line-307"><code><span class="comment">// A Matcher is the parsed, compiled form of a PATTERN string.</span></code></span>
+<span class="codeline" id="line-308"><code><span class="comment">// The nil *Matcher is valid: it has all changes enabled but none reported.</span></code></span>
+<span class="codeline" id="line-309"><code><span class="keyword">type</span> <a href="../../../pkg/internal/bisect.html#name-Matcher" class="ident">Matcher</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-310"><code>	verbose <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>   <span class="comment">// annotate reporting with human-helpful information</span></code></span>
+<span class="codeline" id="line-311"><code>	quiet   <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>   <span class="comment">// disables all reporting.  reset if verbose is true. use case is -d=fmahash=qn</span></code></span>
+<span class="codeline" id="line-312"><code>	enable  <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>   <span class="comment">// when true, list is for “enable and report” (when false, “disable and report”)</span></code></span>
+<span class="codeline" id="line-313"><code>	list    []<a href="#line-334" class="ident">cond</a> <span class="comment">// conditions; later ones win over earlier ones</span></code></span>
+<span class="codeline" id="line-314"><code>	dedup   <a href="#line-320" class="ident">atomicPointerDedup</a></code></span>
+<span class="codeline" id="line-315"><code>}</code></span>
+<span class="codeline" id="line-316"><code></code></span>
+<span class="codeline" id="line-317"><code><span class="comment">// atomicPointerDedup is an atomic.Pointer[dedup],</span></code></span>
+<span class="codeline" id="line-318"><code><span class="comment">// but we are avoiding using Go 1.19's atomic.Pointer</span></code></span>
+<span class="codeline" id="line-319"><code><span class="comment">// until the bootstrap toolchain can be relied upon to have it.</span></code></span>
+<span class="codeline" id="line-320"><code><span class="keyword">type</span> atomicPointerDedup <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-321"><code>	p <a href="../../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a></code></span>
+<span class="codeline" id="line-322"><code>}</code></span>
+<span class="codeline" id="line-323"><code></code></span>
+<span class="codeline" id="line-324"><code><span class="keyword">func</span> (<label for="r12" class="ident">p</label> *<a href="#line-320" class="ident">atomicPointerDedup</a>) <label for="r13" class="ident">Load</label>() *<a href="#line-754" class="ident">dedup</a> {</code></span>
+<span class="codeline" id="line-325"><code>	<span class="keyword">return</span> (*<a href="#line-754" class="ident">dedup</a>)(<a href="../../../pkg/sync/atomic.html" class="ident i2">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-166" class="ident">LoadPointer</a>(&amp;<label for="r12" class="ident">p</label>.<a href="#line-321" class="ident">p</a>))</code></span>
+<span class="codeline" id="line-326"><code>}</code></span>
+<span class="codeline" id="line-327"><code></code></span>
+<span class="codeline" id="line-328"><code><span class="keyword">func</span> (<label for="r14" class="ident">p</label> *<a href="#line-320" class="ident">atomicPointerDedup</a>) <label for="r15" class="ident">CompareAndSwap</label>(<label for="r16" class="ident">old</label>, <label for="r17" class="ident">new</label> *<a href="#line-754" class="ident">dedup</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-329"><code>	<span class="keyword">return</span> <a href="../../../pkg/sync/atomic.html" class="ident i2">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-114" class="ident">CompareAndSwapPointer</a>(&amp;<label for="r14" class="ident">p</label>.<a href="#line-321" class="ident">p</a>, <a href="../../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r16" class="ident">old</label>), <a href="../../../pkg/unsafe.html" class="ident i3">unsafe</a>.<a href="../../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r17" class="ident">new</label>))</code></span>
+<span class="codeline" id="line-330"><code>}</code></span>
+<span class="codeline" id="line-331"><code></code></span>
+<span class="codeline" id="line-332"><code><span class="comment">// A cond is a single condition in the matcher.</span></code></span>
+<span class="codeline" id="line-333"><code><span class="comment">// Given an input id, if id&amp;mask == bits, return the result.</span></code></span>
+<span class="codeline" id="line-334"><code><span class="keyword">type</span> cond <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-335"><code>	mask   <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-336"><code>	bits   <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-337"><code>	result <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-338"><code>}</code></span>
+<span class="codeline" id="line-339"><code></code></span>
+<span class="codeline" id="line-340"><code><span class="comment">// MarkerOnly reports whether it is okay to print only the marker for</span></code></span>
+<span class="codeline" id="line-341"><code><span class="comment">// a given change, omitting the identifying information.</span></code></span>
+<span class="codeline" id="line-342"><code><span class="comment">// MarkerOnly returns true when bisect is using the printed reports</span></code></span>
+<span class="codeline" id="line-343"><code><span class="comment">// only for an intermediate search step, not for showing to users.</span></code></span>
+<span class="codeline" id="line-344"><code><span class="keyword">func</span> (<label for="r18" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r19" class="ident">MarkerOnly</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-345"><code>	<span class="keyword">return</span> !<label for="r18" class="ident">m</label>.<a href="#line-310" class="ident">verbose</a></code></span>
+<span class="codeline" id="line-346"><code>}</code></span>
+<span class="codeline" id="line-347"><code></code></span>
+<span class="codeline" id="line-348"><code><span class="comment">// ShouldEnable reports whether the change with the given id should be enabled.</span></code></span>
+<span class="codeline" id="line-349"><code><span class="keyword">func</span> (<label for="r20" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r21" class="ident">ShouldEnable</label>(<label for="r22" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-350"><code>	<span class="keyword">if</span> <label for="r20" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-351"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-352"><code>	}</code></span>
+<span class="codeline" id="line-353"><code>	<span class="keyword">return</span> <label for="r20" class="ident">m</label>.<a href="#line-365" class="ident">matchResult</a>(<label for="r22" class="ident">id</label>) == <label for="r20" class="ident">m</label>.<a href="#line-312" class="ident">enable</a></code></span>
+<span class="codeline" id="line-354"><code>}</code></span>
+<span class="codeline" id="line-355"><code></code></span>
+<span class="codeline" id="line-356"><code><span class="comment">// ShouldPrint reports whether to print identifying information about the change with the given id.</span></code></span>
+<span class="codeline" id="line-357"><code><span class="keyword">func</span> (<label for="r23" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r24" class="ident">ShouldPrint</label>(<label for="r25" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-358"><code>	<span class="keyword">if</span> <label for="r23" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> || <label for="r23" class="ident">m</label>.<a href="#line-311" class="ident">quiet</a> {</code></span>
+<span class="codeline" id="line-359"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-360"><code>	}</code></span>
+<span class="codeline" id="line-361"><code>	<span class="keyword">return</span> <label for="r23" class="ident">m</label>.<a href="#line-365" class="ident">matchResult</a>(<label for="r25" class="ident">id</label>)</code></span>
+<span class="codeline" id="line-362"><code>}</code></span>
+<span class="codeline" id="line-363"><code></code></span>
+<span class="codeline" id="line-364"><code><span class="comment">// matchResult returns the result from the first condition that matches id.</span></code></span>
+<span class="codeline" id="line-365"><code><span class="keyword">func</span> (<label for="r26" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r27" class="ident">matchResult</label>(<label for="r28" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-366"><code>	<span class="keyword">for</span> <label for="r29" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r26" class="ident">m</label>.<a href="#line-313" class="ident">list</a>) - <span class="lit-number">1</span>; <label for="r29" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r29" class="ident">i</label>-- {</code></span>
+<span class="codeline" id="line-367"><code>		<label for="r30" class="ident">c</label> := &amp;<label for="r26" class="ident">m</label>.<a href="#line-313" class="ident">list</a>[<label for="r29" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-368"><code>		<span class="keyword">if</span> <label for="r28" class="ident">id</label>&amp;<label for="r30" class="ident">c</label>.<a href="#line-335" class="ident">mask</a> == <label for="r30" class="ident">c</label>.<a href="#line-336" class="ident">bits</a> {</code></span>
+<span class="codeline" id="line-369"><code>			<span class="keyword">return</span> <label for="r30" class="ident">c</label>.<a href="#line-337" class="ident">result</a></code></span>
+<span class="codeline" id="line-370"><code>		}</code></span>
+<span class="codeline" id="line-371"><code>	}</code></span>
+<span class="codeline" id="line-372"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-373"><code>}</code></span>
+<span class="codeline" id="line-374"><code></code></span>
+<span class="codeline" id="line-375"><code><span class="comment">// FileLine reports whether the change identified by file and line should be enabled.</span></code></span>
+<span class="codeline" id="line-376"><code><span class="comment">// If the change should be printed, FileLine prints a one-line report to w.</span></code></span>
+<span class="codeline" id="line-377"><code><span class="keyword">func</span> (<label for="r31" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r32" class="ident">FileLine</label>(<label for="r33" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>, <label for="r34" class="ident">file</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r35" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-378"><code>	<span class="keyword">if</span> <label for="r31" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-379"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-380"><code>	}</code></span>
+<span class="codeline" id="line-381"><code>	<span class="keyword">return</span> <label for="r31" class="ident">m</label>.<a href="#line-386" class="ident">fileLine</a>(<label for="r33" class="ident">w</label>, <label for="r34" class="ident">file</label>, <label for="r35" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-382"><code>}</code></span>
+<span class="codeline" id="line-383"><code></code></span>
+<span class="codeline" id="line-384"><code><span class="comment">// fileLine does the real work for FileLine.</span></code></span>
+<span class="codeline" id="line-385"><code><span class="comment">// This lets FileLine's body handle m == nil and potentially be inlined.</span></code></span>
+<span class="codeline" id="line-386"><code><span class="keyword">func</span> (<label for="r36" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r37" class="ident">fileLine</label>(<label for="r38" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>, <label for="r39" class="ident">file</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r40" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-387"><code>	<label for="r41" class="ident">h</label> := <a href="#line-628" class="ident">Hash</a>(<label for="r39" class="ident">file</label>, <label for="r40" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-388"><code>	<span class="keyword">if</span> <label for="r36" class="ident">m</label>.<a href="#line-357" class="ident">ShouldPrint</a>(<label for="r41" class="ident">h</label>) {</code></span>
+<span class="codeline" id="line-389"><code>		<span class="keyword">if</span> <label for="r36" class="ident">m</label>.<a href="#line-344" class="ident">MarkerOnly</a>() {</code></span>
+<span class="codeline" id="line-390"><code>			<a href="#line-496" class="ident">PrintMarker</a>(<label for="r38" class="ident">w</label>, <label for="r41" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-391"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-392"><code>			<a href="#line-399" class="ident">printFileLine</a>(<label for="r38" class="ident">w</label>, <label for="r41" class="ident">h</label>, <label for="r39" class="ident">file</label>, <label for="r40" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-393"><code>		}</code></span>
+<span class="codeline" id="line-394"><code>	}</code></span>
+<span class="codeline" id="line-395"><code>	<span class="keyword">return</span> <label for="r36" class="ident">m</label>.<a href="#line-349" class="ident">ShouldEnable</a>(<label for="r41" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-396"><code>}</code></span>
+<span class="codeline" id="line-397"><code></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">// printFileLine prints a non-marker-only report for file:line to w.</span></code></span>
+<span class="codeline" id="line-399"><code><span class="keyword">func</span> printFileLine(<label for="r43" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>, <label for="r44" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r45" class="ident">file</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r46" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-400"><code>	<span class="keyword">const</span> <label for="r47" class="ident">markerLen</label> = <span class="lit-number">40</span> <span class="comment">// overestimate</span></code></span>
+<span class="codeline" id="line-401"><code>	<label for="r48" class="ident">b</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <label for="r47" class="ident">markerLen</label>+<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r45" class="ident">file</label>)+<span class="lit-number">24</span>)</code></span>
+<span class="codeline" id="line-402"><code>	<label for="r48" class="ident">b</label> = <a href="#line-540" class="ident">AppendMarker</a>(<label for="r48" class="ident">b</label>, <label for="r44" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-403"><code>	<label for="r48" class="ident">b</label> = <a href="#line-410" class="ident">appendFileLine</a>(<label for="r48" class="ident">b</label>, <label for="r45" class="ident">file</label>, <label for="r46" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-404"><code>	<label for="r48" class="ident">b</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r48" class="ident">b</label>, <span class="lit-number">'\n'</span>)</code></span>
+<span class="codeline" id="line-405"><code>	<label for="r49" class="ident">_</label>, <label for="r50" class="ident">err</label> := <label for="r43" class="ident">w</label>.<a href="#line-491" class="ident">Write</a>(<label for="r48" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-406"><code>	<span class="keyword">return</span> <label for="r50" class="ident">err</label></code></span>
+<span class="codeline" id="line-407"><code>}</code></span>
+<span class="codeline" id="line-408"><code></code></span>
+<span class="codeline" id="line-409"><code><span class="comment">// appendFileLine appends file:line to dst, returning the extended slice.</span></code></span>
+<span class="codeline" id="line-410"><code><span class="keyword">func</span> appendFileLine(<label for="r52" class="ident">dst</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r53" class="ident">file</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r54" class="ident">line</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-411"><code>	<label for="r52" class="ident">dst</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r52" class="ident">dst</label>, <label for="r53" class="ident">file</label>...)</code></span>
+<span class="codeline" id="line-412"><code>	<label for="r52" class="ident">dst</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r52" class="ident">dst</label>, <span class="lit-number">':'</span>)</code></span>
+<span class="codeline" id="line-413"><code>	<label for="r55" class="ident">u</label> := <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r54" class="ident">line</label>)</code></span>
+<span class="codeline" id="line-414"><code>	<span class="keyword">if</span> <label for="r54" class="ident">line</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-415"><code>		<label for="r52" class="ident">dst</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r52" class="ident">dst</label>, <span class="lit-number">'-'</span>)</code></span>
+<span class="codeline" id="line-416"><code>		<label for="r55" class="ident">u</label> = -<label for="r55" class="ident">u</label></code></span>
+<span class="codeline" id="line-417"><code>	}</code></span>
+<span class="codeline" id="line-418"><code>	<span class="keyword">var</span> <label for="r56" class="ident">buf</label> [<span class="lit-number">24</span>]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-419"><code>	<label for="r57" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r56" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-420"><code>	<span class="keyword">for</span> <label for="r57" class="ident">i</label> == <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r56" class="ident">buf</label>) || <label for="r55" class="ident">u</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-421"><code>		<label for="r57" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-422"><code>		<label for="r56" class="ident">buf</label>[<label for="r57" class="ident">i</label>] = <span class="lit-number">'0'</span> + <a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r55" class="ident">u</label>%<span class="lit-number">10</span>)</code></span>
+<span class="codeline" id="line-423"><code>		<label for="r55" class="ident">u</label> /= <span class="lit-number">10</span></code></span>
+<span class="codeline" id="line-424"><code>	}</code></span>
+<span class="codeline" id="line-425"><code>	<label for="r52" class="ident">dst</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r52" class="ident">dst</label>, <label for="r56" class="ident">buf</label>[<label for="r57" class="ident">i</label>:]...)</code></span>
+<span class="codeline" id="line-426"><code>	<span class="keyword">return</span> <label for="r52" class="ident">dst</label></code></span>
+<span class="codeline" id="line-427"><code>}</code></span>
+<span class="codeline" id="line-428"><code></code></span>
+<span class="codeline" id="line-429"><code><span class="comment">// MatchStack assigns the current call stack a change ID.</span></code></span>
+<span class="codeline" id="line-430"><code><span class="comment">// If the stack should be printed, MatchStack prints it.</span></code></span>
+<span class="codeline" id="line-431"><code><span class="comment">// Then MatchStack reports whether a change at the current call stack should be enabled.</span></code></span>
+<span class="codeline" id="line-432"><code><span class="keyword">func</span> (<label for="r58" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r59" class="ident">Stack</label>(<label for="r60" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-433"><code>	<span class="keyword">if</span> <label for="r58" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-434"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-435"><code>	}</code></span>
+<span class="codeline" id="line-436"><code>	<span class="keyword">return</span> <label for="r58" class="ident">m</label>.<a href="#line-441" class="ident">stack</a>(<label for="r60" class="ident">w</label>)</code></span>
+<span class="codeline" id="line-437"><code>}</code></span>
+<span class="codeline" id="line-438"><code></code></span>
+<span class="codeline" id="line-439"><code><span class="comment">// stack does the real work for Stack.</span></code></span>
+<span class="codeline" id="line-440"><code><span class="comment">// This lets stack's body handle m == nil and potentially be inlined.</span></code></span>
+<span class="codeline" id="line-441"><code><span class="keyword">func</span> (<label for="r61" class="ident">m</label> *<a href="#line-309" class="ident">Matcher</a>) <label for="r62" class="ident">stack</label>(<label for="r63" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-442"><code>	<span class="keyword">const</span> <label for="r64" class="ident">maxStack</label> = <span class="lit-number">16</span></code></span>
+<span class="codeline" id="line-443"><code>	<span class="keyword">var</span> <label for="r65" class="ident">stk</label> [<label for="r64" class="ident">maxStack</label>]<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a></code></span>
+<span class="codeline" id="line-444"><code>	<label for="r66" class="ident">n</label> := <a href="../../../pkg/runtime.html" class="ident i0">runtime</a>.<a href="../../runtime/extern.go.html#line-294" class="ident">Callers</a>(<span class="lit-number">2</span>, <label for="r65" class="ident">stk</label>[:])</code></span>
+<span class="codeline" id="line-445"><code>	<span class="comment">// caller #2 is not for printing; need it to normalize PCs if ASLR.</span></code></span>
+<span class="codeline" id="line-446"><code>	<span class="keyword">if</span> <label for="r66" class="ident">n</label> &lt;= <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-447"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-448"><code>	}</code></span>
+<span class="codeline" id="line-449"><code></code></span>
+<span class="codeline" id="line-450"><code>	<label for="r67" class="ident">base</label> := <label for="r65" class="ident">stk</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-451"><code>	<span class="comment">// normalize PCs</span></code></span>
+<span class="codeline" id="line-452"><code>	<span class="keyword">for</span> <label for="r68" class="ident">i</label> := <span class="keyword">range</span> <label for="r65" class="ident">stk</label>[:<label for="r66" class="ident">n</label>] {</code></span>
+<span class="codeline" id="line-453"><code>		<label for="r65" class="ident">stk</label>[<label for="r68" class="ident">i</label>] -= <label for="r67" class="ident">base</label></code></span>
+<span class="codeline" id="line-454"><code>	}</code></span>
+<span class="codeline" id="line-455"><code></code></span>
+<span class="codeline" id="line-456"><code>	<label for="r69" class="ident">h</label> := <a href="#line-628" class="ident">Hash</a>(<label for="r65" class="ident">stk</label>[:<label for="r66" class="ident">n</label>])</code></span>
+<span class="codeline" id="line-457"><code>	<span class="keyword">if</span> <label for="r61" class="ident">m</label>.<a href="#line-357" class="ident">ShouldPrint</a>(<label for="r69" class="ident">h</label>) {</code></span>
+<span class="codeline" id="line-458"><code>		<span class="keyword">var</span> <label for="r70" class="ident">d</label> *<a href="#line-754" class="ident">dedup</a></code></span>
+<span class="codeline" id="line-459"><code>		<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-460"><code>			<label for="r70" class="ident">d</label> = <label for="r61" class="ident">m</label>.<a href="#line-314" class="ident">dedup</a>.<a href="#line-324" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-461"><code>			<span class="keyword">if</span> <label for="r70" class="ident">d</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-462"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-463"><code>			}</code></span>
+<span class="codeline" id="line-464"><code>			<label for="r70" class="ident">d</label> = <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-754" class="ident">dedup</a>)</code></span>
+<span class="codeline" id="line-465"><code>			<span class="keyword">if</span> <label for="r61" class="ident">m</label>.<a href="#line-314" class="ident">dedup</a>.<a href="#line-328" class="ident">CompareAndSwap</a>(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r70" class="ident">d</label>) {</code></span>
+<span class="codeline" id="line-466"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-467"><code>			}</code></span>
+<span class="codeline" id="line-468"><code>		}</code></span>
+<span class="codeline" id="line-469"><code></code></span>
+<span class="codeline" id="line-470"><code>		<span class="keyword">if</span> <label for="r61" class="ident">m</label>.<a href="#line-344" class="ident">MarkerOnly</a>() {</code></span>
+<span class="codeline" id="line-471"><code>			<span class="keyword">if</span> !<label for="r70" class="ident">d</label>.<a href="#line-780" class="ident">seenLossy</a>(<label for="r69" class="ident">h</label>) {</code></span>
+<span class="codeline" id="line-472"><code>				<a href="#line-496" class="ident">PrintMarker</a>(<label for="r63" class="ident">w</label>, <label for="r69" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-473"><code>			}</code></span>
+<span class="codeline" id="line-474"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-475"><code>			<span class="keyword">if</span> !<label for="r70" class="ident">d</label>.<a href="#line-765" class="ident">seen</a>(<label for="r69" class="ident">h</label>) {</code></span>
+<span class="codeline" id="line-476"><code>				<span class="comment">// Restore PCs in stack for printing</span></code></span>
+<span class="codeline" id="line-477"><code>				<span class="keyword">for</span> <label for="r71" class="ident">i</label> := <span class="keyword">range</span> <label for="r65" class="ident">stk</label>[:<label for="r66" class="ident">n</label>] {</code></span>
+<span class="codeline" id="line-478"><code>					<label for="r65" class="ident">stk</label>[<label for="r71" class="ident">i</label>] += <label for="r67" class="ident">base</label></code></span>
+<span class="codeline" id="line-479"><code>				}</code></span>
+<span class="codeline" id="line-480"><code>				<a href="#line-506" class="ident">printStack</a>(<label for="r63" class="ident">w</label>, <label for="r69" class="ident">h</label>, <label for="r65" class="ident">stk</label>[<span class="lit-number">1</span>:<label for="r66" class="ident">n</label>])</code></span>
+<span class="codeline" id="line-481"><code>			}</code></span>
+<span class="codeline" id="line-482"><code>		}</code></span>
+<span class="codeline" id="line-483"><code>	}</code></span>
+<span class="codeline" id="line-484"><code>	<span class="keyword">return</span> <label for="r61" class="ident">m</label>.<a href="#line-349" class="ident">ShouldEnable</a>(<label for="r69" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-485"><code></code></span>
+<span class="codeline" id="line-486"><code>}</code></span>
+<span class="codeline" id="line-487"><code></code></span>
+<span class="codeline" id="line-488"><code><span class="comment">// Writer is the same interface as io.Writer.</span></code></span>
+<span class="codeline" id="line-489"><code><span class="comment">// It is duplicated here to avoid importing io.</span></code></span>
+<span class="codeline" id="line-490"><code><span class="keyword">type</span> <a href="../../../pkg/internal/bisect.html#name-Writer" class="ident">Writer</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-491"><code>	<a href="../../../imp/internal/bisect.Writer.html#name-Write" class="ident">Write</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-492"><code>}</code></span>
+<span class="codeline" id="line-493"><code></code></span>
+<span class="codeline" id="line-494"><code><span class="comment">// PrintMarker prints to w a one-line report containing only the marker for h.</span></code></span>
+<span class="codeline" id="line-495"><code><span class="comment">// It is appropriate to use when [Matcher.ShouldPrint] and [Matcher.MarkerOnly] both return true.</span></code></span>
+<span class="codeline" id="line-496"><code><span class="keyword">func</span> <label for="r72" class="ident"><a href="../../../pkg/internal/bisect.html#name-PrintMarker" class="ident">PrintMarker</a></label>(<label for="r73" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>, <label for="r74" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-497"><code>	<span class="keyword">var</span> <label for="r75" class="ident">buf</label> [<span class="lit-number">50</span>]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-498"><code>	<label for="r76" class="ident">b</label> := <a href="#line-540" class="ident">AppendMarker</a>(<label for="r75" class="ident">buf</label>[:], <label for="r74" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-499"><code>	<label for="r76" class="ident">b</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r76" class="ident">b</label>, <span class="lit-number">'\n'</span>)</code></span>
+<span class="codeline" id="line-500"><code>	<label for="r77" class="ident">_</label>, <label for="r78" class="ident">err</label> := <label for="r73" class="ident">w</label>.<a href="#line-491" class="ident">Write</a>(<label for="r76" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-501"><code>	<span class="keyword">return</span> <label for="r78" class="ident">err</label></code></span>
+<span class="codeline" id="line-502"><code>}</code></span>
+<span class="codeline" id="line-503"><code></code></span>
+<span class="codeline" id="line-504"><code><span class="comment">// printStack prints to w a multi-line report containing a formatting of the call stack stk,</span></code></span>
+<span class="codeline" id="line-505"><code><span class="comment">// with each line preceded by the marker for h.</span></code></span>
+<span class="codeline" id="line-506"><code><span class="keyword">func</span> printStack(<label for="r80" class="ident">w</label> <a href="#line-490" class="ident">Writer</a>, <label for="r81" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r82" class="ident">stk</label> []<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-507"><code>	<label for="r83" class="ident">buf</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <span class="lit-number">2048</span>)</code></span>
+<span class="codeline" id="line-508"><code></code></span>
+<span class="codeline" id="line-509"><code>	<span class="keyword">var</span> <label for="r84" class="ident">prefixBuf</label> [<span class="lit-number">100</span>]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-510"><code>	<label for="r85" class="ident">prefix</label> := <a href="#line-540" class="ident">AppendMarker</a>(<label for="r84" class="ident">prefixBuf</label>[:<span class="lit-number">0</span>], <label for="r81" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-511"><code></code></span>
+<span class="codeline" id="line-512"><code>	<label for="r86" class="ident">frames</label> := <a href="../../../pkg/runtime.html" class="ident i0">runtime</a>.<a href="../../runtime/symtab.go.html#line-76" class="ident">CallersFrames</a>(<label for="r82" class="ident">stk</label>)</code></span>
+<span class="codeline" id="line-513"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-514"><code>		<label for="r87" class="ident">f</label>, <label for="r88" class="ident">more</label> := <label for="r86" class="ident">frames</label>.<a href="../../runtime/symtab.go.html#line-91" class="ident">Next</a>()</code></span>
+<span class="codeline" id="line-515"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <label for="r85" class="ident">prefix</label>...)</code></span>
+<span class="codeline" id="line-516"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <label for="r87" class="ident">f</label>.<a href="../../runtime/symtab.go.html#line-37" class="ident">Func</a>.<a href="../../runtime/symtab.go.html#line-679" class="ident">Name</a>()...)</code></span>
+<span class="codeline" id="line-517"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <span class="lit-string">"()\n"</span>...)</code></span>
+<span class="codeline" id="line-518"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <label for="r85" class="ident">prefix</label>...)</code></span>
+<span class="codeline" id="line-519"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <span class="lit-number">'\t'</span>)</code></span>
+<span class="codeline" id="line-520"><code>		<label for="r83" class="ident">buf</label> = <a href="#line-410" class="ident">appendFileLine</a>(<label for="r83" class="ident">buf</label>, <label for="r87" class="ident">f</label>.<a href="../../runtime/symtab.go.html#line-50" class="ident">File</a>, <label for="r87" class="ident">f</label>.<a href="../../runtime/symtab.go.html#line-51" class="ident">Line</a>)</code></span>
+<span class="codeline" id="line-521"><code>		<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <span class="lit-number">'\n'</span>)</code></span>
+<span class="codeline" id="line-522"><code>		<span class="keyword">if</span> !<label for="r88" class="ident">more</label> {</code></span>
+<span class="codeline" id="line-523"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-524"><code>		}</code></span>
+<span class="codeline" id="line-525"><code>	}</code></span>
+<span class="codeline" id="line-526"><code>	<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <label for="r85" class="ident">prefix</label>...)</code></span>
+<span class="codeline" id="line-527"><code>	<label for="r83" class="ident">buf</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r83" class="ident">buf</label>, <span class="lit-number">'\n'</span>)</code></span>
+<span class="codeline" id="line-528"><code>	<label for="r89" class="ident">_</label>, <label for="r90" class="ident">err</label> := <label for="r80" class="ident">w</label>.<a href="#line-491" class="ident">Write</a>(<label for="r83" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-529"><code>	<span class="keyword">return</span> <label for="r90" class="ident">err</label></code></span>
+<span class="codeline" id="line-530"><code>}</code></span>
+<span class="codeline" id="line-531"><code></code></span>
+<span class="codeline" id="line-532"><code><span class="comment">// Marker returns the match marker text to use on any line reporting details</span></code></span>
+<span class="codeline" id="line-533"><code><span class="comment">// about a match of the given ID.</span></code></span>
+<span class="codeline" id="line-534"><code><span class="comment">// It always returns the hexadecimal format.</span></code></span>
+<span class="codeline" id="line-535"><code><span class="keyword">func</span> <label for="r91" class="ident"><a href="../../../pkg/internal/bisect.html#name-Marker" class="ident">Marker</a></label>(<label for="r92" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-536"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>(<a href="#line-540" class="ident">AppendMarker</a>(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r92" class="ident">id</label>))</code></span>
+<span class="codeline" id="line-537"><code>}</code></span>
+<span class="codeline" id="line-538"><code></code></span>
+<span class="codeline" id="line-539"><code><span class="comment">// AppendMarker is like [Marker] but appends the marker to dst.</span></code></span>
+<span class="codeline" id="line-540"><code><span class="keyword">func</span> <label for="r93" class="ident"><a href="../../../pkg/internal/bisect.html#name-AppendMarker" class="ident">AppendMarker</a></label>(<label for="r94" class="ident">dst</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r95" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-541"><code>	<span class="keyword">const</span> <label for="r96" class="ident">prefix</label> = <span class="lit-string">"[bisect-match 0x"</span></code></span>
+<span class="codeline" id="line-542"><code>	<span class="keyword">var</span> <label for="r97" class="ident">buf</label> [<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r96" class="ident">prefix</label>) + <span class="lit-number">16</span> + <span class="lit-number">1</span>]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-543"><code>	<a href="../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r97" class="ident">buf</label>[:], <label for="r96" class="ident">prefix</label>)</code></span>
+<span class="codeline" id="line-544"><code>	<span class="keyword">for</span> <label for="r98" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r98" class="ident">i</label> &lt; <span class="lit-number">16</span>; <label for="r98" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-545"><code>		<label for="r97" class="ident">buf</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r96" class="ident">prefix</label>)+<label for="r98" class="ident">i</label>] = <span class="lit-string">"0123456789abcdef"</span>[<label for="r95" class="ident">id</label>&gt;&gt;<span class="lit-number">60</span>]</code></span>
+<span class="codeline" id="line-546"><code>		<label for="r95" class="ident">id</label> &lt;&lt;= <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-547"><code>	}</code></span>
+<span class="codeline" id="line-548"><code>	<label for="r97" class="ident">buf</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r96" class="ident">prefix</label>)+<span class="lit-number">16</span>] = <span class="lit-number">']'</span></code></span>
+<span class="codeline" id="line-549"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r94" class="ident">dst</label>, <label for="r97" class="ident">buf</label>[:]...)</code></span>
+<span class="codeline" id="line-550"><code>}</code></span>
+<span class="codeline" id="line-551"><code></code></span>
+<span class="codeline" id="line-552"><code><span class="comment">// CutMarker finds the first match marker in line and removes it,</span></code></span>
+<span class="codeline" id="line-553"><code><span class="comment">// returning the shortened line (with the marker removed),</span></code></span>
+<span class="codeline" id="line-554"><code><span class="comment">// the ID from the match marker,</span></code></span>
+<span class="codeline" id="line-555"><code><span class="comment">// and whether a marker was found at all.</span></code></span>
+<span class="codeline" id="line-556"><code><span class="comment">// If there is no marker, CutMarker returns line, 0, false.</span></code></span>
+<span class="codeline" id="line-557"><code><span class="keyword">func</span> <label for="r99" class="ident"><a href="../../../pkg/internal/bisect.html#name-CutMarker" class="ident">CutMarker</a></label>(<label for="r100" class="ident">line</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r101" class="ident">short</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r102" class="ident">id</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r103" class="ident">ok</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-558"><code>	<span class="comment">// Find first instance of prefix.</span></code></span>
+<span class="codeline" id="line-559"><code>	<label for="r104" class="ident">prefix</label> := <span class="lit-string">"[bisect-match "</span></code></span>
+<span class="codeline" id="line-560"><code>	<label for="r105" class="ident">i</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-561"><code>	<span class="keyword">for</span> ; ; <label for="r105" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-562"><code>		<span class="keyword">if</span> <label for="r105" class="ident">i</label> &gt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r100" class="ident">line</label>)-<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r104" class="ident">prefix</label>) {</code></span>
+<span class="codeline" id="line-563"><code>			<span class="keyword">return</span> <label for="r100" class="ident">line</label>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-564"><code>		}</code></span>
+<span class="codeline" id="line-565"><code>		<span class="keyword">if</span> <label for="r100" class="ident">line</label>[<label for="r105" class="ident">i</label>] == <span class="lit-number">'['</span> &amp;&amp; <label for="r100" class="ident">line</label>[<label for="r105" class="ident">i</label>:<label for="r105" class="ident">i</label>+<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r104" class="ident">prefix</label>)] == <label for="r104" class="ident">prefix</label> {</code></span>
+<span class="codeline" id="line-566"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-567"><code>		}</code></span>
+<span class="codeline" id="line-568"><code>	}</code></span>
+<span class="codeline" id="line-569"><code></code></span>
+<span class="codeline" id="line-570"><code>	<span class="comment">// Scan to ].</span></code></span>
+<span class="codeline" id="line-571"><code>	<label for="r106" class="ident">j</label> := <label for="r105" class="ident">i</label> + <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r104" class="ident">prefix</label>)</code></span>
+<span class="codeline" id="line-572"><code>	<span class="keyword">for</span> <label for="r106" class="ident">j</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r100" class="ident">line</label>) &amp;&amp; <label for="r100" class="ident">line</label>[<label for="r106" class="ident">j</label>] != <span class="lit-number">']'</span> {</code></span>
+<span class="codeline" id="line-573"><code>		<label for="r106" class="ident">j</label>++</code></span>
+<span class="codeline" id="line-574"><code>	}</code></span>
+<span class="codeline" id="line-575"><code>	<span class="keyword">if</span> <label for="r106" class="ident">j</label> &gt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r100" class="ident">line</label>) {</code></span>
+<span class="codeline" id="line-576"><code>		<span class="keyword">return</span> <label for="r100" class="ident">line</label>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-577"><code>	}</code></span>
+<span class="codeline" id="line-578"><code></code></span>
+<span class="codeline" id="line-579"><code>	<span class="comment">// Parse id.</span></code></span>
+<span class="codeline" id="line-580"><code>	<label for="r107" class="ident">idstr</label> := <label for="r100" class="ident">line</label>[<label for="r105" class="ident">i</label>+<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r104" class="ident">prefix</label>) : <label for="r106" class="ident">j</label>]</code></span>
+<span class="codeline" id="line-581"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">idstr</label>) &gt;= <span class="lit-number">3</span> &amp;&amp; <label for="r107" class="ident">idstr</label>[:<span class="lit-number">2</span>] == <span class="lit-string">"0x"</span> {</code></span>
+<span class="codeline" id="line-582"><code>		<span class="comment">// parse hex</span></code></span>
+<span class="codeline" id="line-583"><code>		<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">idstr</label>) &gt; <span class="lit-number">2</span>+<span class="lit-number">16</span> { <span class="comment">// max 0x + 16 digits</span></code></span>
+<span class="codeline" id="line-584"><code>			<span class="keyword">return</span> <label for="r100" class="ident">line</label>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-585"><code>		}</code></span>
+<span class="codeline" id="line-586"><code>		<span class="keyword">for</span> <label for="r108" class="ident">i</label> := <span class="lit-number">2</span>; <label for="r108" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">idstr</label>); <label for="r108" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-587"><code>			<label for="r102" class="ident">id</label> &lt;&lt;= <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-588"><code>			<span class="keyword">switch</span> <label for="r109" class="ident">c</label> := <label for="r107" class="ident">idstr</label>[<label for="r108" class="ident">i</label>]; {</code></span>
+<span class="codeline" id="line-589"><code>			<span class="keyword">case</span> <span class="lit-number">'0'</span> &lt;= <label for="r109" class="ident">c</label> &amp;&amp; <label for="r109" class="ident">c</label> &lt;= <span class="lit-number">'9'</span>:</code></span>
+<span class="codeline" id="line-590"><code>				<label for="r102" class="ident">id</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r109" class="ident">c</label> - <span class="lit-number">'0'</span>)</code></span>
+<span class="codeline" id="line-591"><code>			<span class="keyword">case</span> <span class="lit-number">'a'</span> &lt;= <label for="r109" class="ident">c</label> &amp;&amp; <label for="r109" class="ident">c</label> &lt;= <span class="lit-number">'f'</span>:</code></span>
+<span class="codeline" id="line-592"><code>				<label for="r102" class="ident">id</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r109" class="ident">c</label> - <span class="lit-number">'a'</span> + <span class="lit-number">10</span>)</code></span>
+<span class="codeline" id="line-593"><code>			<span class="keyword">case</span> <span class="lit-number">'A'</span> &lt;= <label for="r109" class="ident">c</label> &amp;&amp; <label for="r109" class="ident">c</label> &lt;= <span class="lit-number">'F'</span>:</code></span>
+<span class="codeline" id="line-594"><code>				<label for="r102" class="ident">id</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r109" class="ident">c</label> - <span class="lit-number">'A'</span> + <span class="lit-number">10</span>)</code></span>
+<span class="codeline" id="line-595"><code>			}</code></span>
+<span class="codeline" id="line-596"><code>		}</code></span>
+<span class="codeline" id="line-597"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-598"><code>		<span class="keyword">if</span> <label for="r107" class="ident">idstr</label> == <span class="lit-string">""</span> || <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">idstr</label>) &gt; <span class="lit-number">64</span> { <span class="comment">// min 1 digit, max 64 digits</span></code></span>
+<span class="codeline" id="line-599"><code>			<span class="keyword">return</span> <label for="r100" class="ident">line</label>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-600"><code>		}</code></span>
+<span class="codeline" id="line-601"><code>		<span class="comment">// parse binary</span></code></span>
+<span class="codeline" id="line-602"><code>		<span class="keyword">for</span> <label for="r110" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r110" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r107" class="ident">idstr</label>); <label for="r110" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-603"><code>			<label for="r102" class="ident">id</label> &lt;&lt;= <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-604"><code>			<span class="keyword">switch</span> <label for="r111" class="ident">c</label> := <label for="r107" class="ident">idstr</label>[<label for="r110" class="ident">i</label>]; <label for="r111" class="ident">c</label> {</code></span>
+<span class="codeline" id="line-605"><code>			<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-606"><code>				<span class="keyword">return</span> <label for="r100" class="ident">line</label>, <span class="lit-number">0</span>, <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-607"><code>			<span class="keyword">case</span> <span class="lit-number">'0'</span>, <span class="lit-number">'1'</span>:</code></span>
+<span class="codeline" id="line-608"><code>				<label for="r102" class="ident">id</label> |= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r111" class="ident">c</label> - <span class="lit-number">'0'</span>)</code></span>
+<span class="codeline" id="line-609"><code>			}</code></span>
+<span class="codeline" id="line-610"><code>		}</code></span>
+<span class="codeline" id="line-611"><code>	}</code></span>
+<span class="codeline" id="line-612"><code></code></span>
+<span class="codeline" id="line-613"><code>	<span class="comment">// Construct shortened line.</span></code></span>
+<span class="codeline" id="line-614"><code><span class="comment">	// Remove at most one space from around the marker,</span></code></span>
+<span class="codeline" id="line-615"><code><span class="comment">	// so that "foo [marker] bar" shortens to "foo bar".</span></code></span>
+<span class="codeline" id="line-616"><code>	<label for="r106" class="ident">j</label>++ <span class="comment">// skip ]</span></code></span>
+<span class="codeline" id="line-617"><code>	<span class="keyword">if</span> <label for="r105" class="ident">i</label> &gt; <span class="lit-number">0</span> &amp;&amp; <label for="r100" class="ident">line</label>[<label for="r105" class="ident">i</label>-<span class="lit-number">1</span>] == <span class="lit-number">' '</span> {</code></span>
+<span class="codeline" id="line-618"><code>		<label for="r105" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-619"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r106" class="ident">j</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r100" class="ident">line</label>) &amp;&amp; <label for="r100" class="ident">line</label>[<label for="r106" class="ident">j</label>] == <span class="lit-number">' '</span> {</code></span>
+<span class="codeline" id="line-620"><code>		<label for="r106" class="ident">j</label>++</code></span>
+<span class="codeline" id="line-621"><code>	}</code></span>
+<span class="codeline" id="line-622"><code>	<label for="r101" class="ident">short</label> = <label for="r100" class="ident">line</label>[:<label for="r105" class="ident">i</label>] + <label for="r100" class="ident">line</label>[<label for="r106" class="ident">j</label>:]</code></span>
+<span class="codeline" id="line-623"><code>	<span class="keyword">return</span> <label for="r101" class="ident">short</label>, <label for="r102" class="ident">id</label>, <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-624"><code>}</code></span>
+<span class="codeline" id="line-625"><code></code></span>
+<span class="codeline" id="line-626"><code><span class="comment">// Hash computes a hash of the data arguments,</span></code></span>
+<span class="codeline" id="line-627"><code><span class="comment">// each of which must be of type string, byte, int, uint, int32, uint32, int64, uint64, uintptr, or a slice of one of those types.</span></code></span>
+<span class="codeline" id="line-628"><code><span class="keyword">func</span> <label for="r112" class="ident"><a href="../../../pkg/internal/bisect.html#name-Hash" class="ident">Hash</a></label>(<label for="r113" class="ident">data</label> ...<a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-629"><code>	<label for="r114" class="ident">h</label> := <a href="#line-711" class="ident">offset64</a></code></span>
+<span class="codeline" id="line-630"><code>	<span class="keyword">for</span> <label for="r115" class="ident">_</label>, <label for="r116" class="ident">v</label> := <span class="keyword">range</span> <label for="r113" class="ident">data</label> {</code></span>
+<span class="codeline" id="line-631"><code>		<span class="keyword">switch</span> v := <label for="r116" class="ident">v</label>.(<span class="keyword">type</span>) {</code></span>
+<span class="codeline" id="line-632"><code>		<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-633"><code>			<span class="comment">// Note: Not printing the type, because reflect.ValueOf(v)</span></code></span>
+<span class="codeline" id="line-634"><code><span class="comment">			// would make the interfaces prepared by the caller escape</span></code></span>
+<span class="codeline" id="line-635"><code><span class="comment">			// and therefore allocate. This way, Hash(file, line) runs</span></code></span>
+<span class="codeline" id="line-636"><code><span class="comment">			// without any allocation. It should be clear from the</span></code></span>
+<span class="codeline" id="line-637"><code><span class="comment">			// source code calling Hash what the bad argument was.</span></code></span>
+<span class="codeline" id="line-638"><code>			<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"bisect.Hash: unexpected argument type"</span>)</code></span>
+<span class="codeline" id="line-639"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>:</code></span>
+<span class="codeline" id="line-640"><code>			<label for="r114" class="ident">h</label> = <a href="#line-721" class="ident">fnvString</a>(<label for="r114" class="ident">h</label>, <label for="r117" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-641"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>:</code></span>
+<span class="codeline" id="line-642"><code>			<label for="r114" class="ident">h</label> = <a href="#line-715" class="ident">fnv</a>(<label for="r114" class="ident">h</label>, <label for="r118" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-643"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>:</code></span>
+<span class="codeline" id="line-644"><code>			<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r119" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-645"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>:</code></span>
+<span class="codeline" id="line-646"><code>			<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r120" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-647"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-int32" class="ident">int32</a>:</code></span>
+<span class="codeline" id="line-648"><code>			<label for="r114" class="ident">h</label> = <a href="#line-738" class="ident">fnvUint32</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r121" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-649"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>:</code></span>
+<span class="codeline" id="line-650"><code>			<label for="r114" class="ident">h</label> = <a href="#line-738" class="ident">fnvUint32</a>(<label for="r114" class="ident">h</label>, <label for="r122" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-651"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>:</code></span>
+<span class="codeline" id="line-652"><code>			<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r123" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-653"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>:</code></span>
+<span class="codeline" id="line-654"><code>			<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <label for="r124" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-655"><code>		<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>:</code></span>
+<span class="codeline" id="line-656"><code>			<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r125" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-657"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-string" class="ident">string</a>:</code></span>
+<span class="codeline" id="line-658"><code>			<span class="keyword">for</span> <label for="r126" class="ident">_</label>, <label for="r127" class="ident">x</label> := <span class="keyword">range</span> <label for="r128" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-659"><code>				<label for="r114" class="ident">h</label> = <a href="#line-721" class="ident">fnvString</a>(<label for="r114" class="ident">h</label>, <label for="r127" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-660"><code>			}</code></span>
+<span class="codeline" id="line-661"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>:</code></span>
+<span class="codeline" id="line-662"><code>			<span class="keyword">for</span> <label for="r129" class="ident">_</label>, <label for="r130" class="ident">x</label> := <span class="keyword">range</span> <label for="r131" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-663"><code>				<label for="r114" class="ident">h</label> = <a href="#line-715" class="ident">fnv</a>(<label for="r114" class="ident">h</label>, <label for="r130" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-664"><code>			}</code></span>
+<span class="codeline" id="line-665"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>:</code></span>
+<span class="codeline" id="line-666"><code>			<span class="keyword">for</span> <label for="r132" class="ident">_</label>, <label for="r133" class="ident">x</label> := <span class="keyword">range</span> <label for="r134" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-667"><code>				<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r133" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-668"><code>			}</code></span>
+<span class="codeline" id="line-669"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>:</code></span>
+<span class="codeline" id="line-670"><code>			<span class="keyword">for</span> <label for="r135" class="ident">_</label>, <label for="r136" class="ident">x</label> := <span class="keyword">range</span> <label for="r137" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-671"><code>				<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r136" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-672"><code>			}</code></span>
+<span class="codeline" id="line-673"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-int32" class="ident">int32</a>:</code></span>
+<span class="codeline" id="line-674"><code>			<span class="keyword">for</span> <label for="r138" class="ident">_</label>, <label for="r139" class="ident">x</label> := <span class="keyword">range</span> <label for="r140" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-675"><code>				<label for="r114" class="ident">h</label> = <a href="#line-738" class="ident">fnvUint32</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>(<label for="r139" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-676"><code>			}</code></span>
+<span class="codeline" id="line-677"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>:</code></span>
+<span class="codeline" id="line-678"><code>			<span class="keyword">for</span> <label for="r141" class="ident">_</label>, <label for="r142" class="ident">x</label> := <span class="keyword">range</span> <label for="r143" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-679"><code>				<label for="r114" class="ident">h</label> = <a href="#line-738" class="ident">fnvUint32</a>(<label for="r114" class="ident">h</label>, <label for="r142" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-680"><code>			}</code></span>
+<span class="codeline" id="line-681"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>:</code></span>
+<span class="codeline" id="line-682"><code>			<span class="keyword">for</span> <label for="r144" class="ident">_</label>, <label for="r145" class="ident">x</label> := <span class="keyword">range</span> <label for="r146" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-683"><code>				<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r145" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-684"><code>			}</code></span>
+<span class="codeline" id="line-685"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>:</code></span>
+<span class="codeline" id="line-686"><code>			<span class="keyword">for</span> <label for="r147" class="ident">_</label>, <label for="r148" class="ident">x</label> := <span class="keyword">range</span> <label for="r149" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-687"><code>				<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <label for="r148" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-688"><code>			}</code></span>
+<span class="codeline" id="line-689"><code>		<span class="keyword">case</span> []<a href="../../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>:</code></span>
+<span class="codeline" id="line-690"><code>			<span class="keyword">for</span> <label for="r150" class="ident">_</label>, <label for="r151" class="ident">x</label> := <span class="keyword">range</span> <label for="r152" class="ident">v</label> {</code></span>
+<span class="codeline" id="line-691"><code>				<label for="r114" class="ident">h</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r114" class="ident">h</label>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r151" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-692"><code>			}</code></span>
+<span class="codeline" id="line-693"><code>		}</code></span>
+<span class="codeline" id="line-694"><code>	}</code></span>
+<span class="codeline" id="line-695"><code>	<span class="keyword">return</span> <label for="r114" class="ident">h</label></code></span>
+<span class="codeline" id="line-696"><code>}</code></span>
+<span class="codeline" id="line-697"><code></code></span>
+<span class="codeline" id="line-698"><code><span class="comment">// Trivial error implementation, here to avoid importing errors.</span></code></span>
+<span class="codeline" id="line-699"><code></code></span>
+<span class="codeline" id="line-700"><code><span class="comment">// parseError is a trivial error implementation,</span></code></span>
+<span class="codeline" id="line-701"><code><span class="comment">// defined here to avoid importing errors.</span></code></span>
+<span class="codeline" id="line-702"><code><span class="keyword">type</span> parseError <span class="keyword">struct</span>{ text <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> }</code></span>
+<span class="codeline" id="line-703"><code></code></span>
+<span class="codeline" id="line-704"><code><span class="keyword">func</span> (<label for="r153" class="ident">e</label> *<a href="#line-702" class="ident">parseError</a>) <label for="r154" class="ident">Error</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> { <span class="keyword">return</span> <label for="r153" class="ident">e</label>.<a href="#line-702" class="ident">text</a> }</code></span>
+<span class="codeline" id="line-705"><code></code></span>
+<span class="codeline" id="line-706"><code><span class="comment">// FNV-1a implementation. See Go's hash/fnv/fnv.go.</span></code></span>
+<span class="codeline" id="line-707"><code><span class="comment">// Copied here for simplicity (can handle integers more directly)</span></code></span>
+<span class="codeline" id="line-708"><code><span class="comment">// and to avoid importing hash/fnv.</span></code></span>
+<span class="codeline" id="line-709"><code></code></span>
+<span class="codeline" id="line-710"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-711"><code>	offset64 <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> = <span class="lit-number">14695981039346656037</span></code></span>
+<span class="codeline" id="line-712"><code>	prime64  <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> = <span class="lit-number">1099511628211</span></code></span>
+<span class="codeline" id="line-713"><code>)</code></span>
+<span class="codeline" id="line-714"><code></code></span>
+<span class="codeline" id="line-715"><code><span class="keyword">func</span> fnv(<label for="r156" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r157" class="ident">x</label> <a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-716"><code>	<label for="r156" class="ident">h</label> ^= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r157" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-717"><code>	<label for="r156" class="ident">h</label> *= <a href="#line-712" class="ident">prime64</a></code></span>
+<span class="codeline" id="line-718"><code>	<span class="keyword">return</span> <label for="r156" class="ident">h</label></code></span>
+<span class="codeline" id="line-719"><code>}</code></span>
+<span class="codeline" id="line-720"><code></code></span>
+<span class="codeline" id="line-721"><code><span class="keyword">func</span> fnvString(<label for="r159" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r160" class="ident">x</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-722"><code>	<span class="keyword">for</span> <label for="r161" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r161" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r160" class="ident">x</label>); <label for="r161" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-723"><code>		<label for="r159" class="ident">h</label> ^= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r160" class="ident">x</label>[<label for="r161" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-724"><code>		<label for="r159" class="ident">h</label> *= <a href="#line-712" class="ident">prime64</a></code></span>
+<span class="codeline" id="line-725"><code>	}</code></span>
+<span class="codeline" id="line-726"><code>	<span class="keyword">return</span> <label for="r159" class="ident">h</label></code></span>
+<span class="codeline" id="line-727"><code>}</code></span>
+<span class="codeline" id="line-728"><code></code></span>
+<span class="codeline" id="line-729"><code><span class="keyword">func</span> fnvUint64(<label for="r163" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r164" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-730"><code>	<span class="keyword">for</span> <label for="r165" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r165" class="ident">i</label> &lt; <span class="lit-number">8</span>; <label for="r165" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-731"><code>		<label for="r163" class="ident">h</label> ^= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r164" class="ident">x</label> &amp; <span class="lit-number">0xFF</span>)</code></span>
+<span class="codeline" id="line-732"><code>		<label for="r164" class="ident">x</label> &gt;&gt;= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-733"><code>		<label for="r163" class="ident">h</label> *= <a href="#line-712" class="ident">prime64</a></code></span>
+<span class="codeline" id="line-734"><code>	}</code></span>
+<span class="codeline" id="line-735"><code>	<span class="keyword">return</span> <label for="r163" class="ident">h</label></code></span>
+<span class="codeline" id="line-736"><code>}</code></span>
+<span class="codeline" id="line-737"><code></code></span>
+<span class="codeline" id="line-738"><code><span class="keyword">func</span> fnvUint32(<label for="r167" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>, <label for="r168" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint32" class="ident">uint32</a>) <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-739"><code>	<span class="keyword">for</span> <label for="r169" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r169" class="ident">i</label> &lt; <span class="lit-number">4</span>; <label for="r169" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-740"><code>		<label for="r167" class="ident">h</label> ^= <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r168" class="ident">x</label> &amp; <span class="lit-number">0xFF</span>)</code></span>
+<span class="codeline" id="line-741"><code>		<label for="r168" class="ident">x</label> &gt;&gt;= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-742"><code>		<label for="r167" class="ident">h</label> *= <a href="#line-712" class="ident">prime64</a></code></span>
+<span class="codeline" id="line-743"><code>	}</code></span>
+<span class="codeline" id="line-744"><code>	<span class="keyword">return</span> <label for="r167" class="ident">h</label></code></span>
+<span class="codeline" id="line-745"><code>}</code></span>
+<span class="codeline" id="line-746"><code></code></span>
+<span class="codeline" id="line-747"><code><span class="comment">// A dedup is a deduplicator for call stacks, so that we only print</span></code></span>
+<span class="codeline" id="line-748"><code><span class="comment">// a report for new call stacks, not for call stacks we've already</span></code></span>
+<span class="codeline" id="line-749"><code><span class="comment">// reported.</span></code></span>
+<span class="codeline" id="line-750"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-751"><code><span class="comment">// It has two modes: an approximate but lock-free mode that</span></code></span>
+<span class="codeline" id="line-752"><code><span class="comment">// may still emit some duplicates, and a precise mode that uses</span></code></span>
+<span class="codeline" id="line-753"><code><span class="comment">// a lock and never emits duplicates.</span></code></span>
+<span class="codeline" id="line-754"><code><span class="keyword">type</span> dedup <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-755"><code>	<span class="comment">// 128-entry 4-way, lossy cache for seenLossy</span></code></span>
+<span class="codeline" id="line-756"><code>	recent [<span class="lit-number">128</span>][<span class="lit-number">4</span>]<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a></code></span>
+<span class="codeline" id="line-757"><code></code></span>
+<span class="codeline" id="line-758"><code>	<span class="comment">// complete history for seen</span></code></span>
+<span class="codeline" id="line-759"><code>	mu <a href="../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-760"><code>	m  <span class="keyword">map</span>[<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>]<a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-761"><code>}</code></span>
+<span class="codeline" id="line-762"><code></code></span>
+<span class="codeline" id="line-763"><code><span class="comment">// seen records that h has now been seen and reports whether it was seen before.</span></code></span>
+<span class="codeline" id="line-764"><code><span class="comment">// When seen returns false, the caller is expected to print a report for h.</span></code></span>
+<span class="codeline" id="line-765"><code><span class="keyword">func</span> (<label for="r170" class="ident">d</label> *<a href="#line-754" class="ident">dedup</a>) <label for="r171" class="ident">seen</label>(<label for="r172" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-766"><code>	<label for="r170" class="ident">d</label>.<a href="#line-759" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-767"><code>	<span class="keyword">if</span> <label for="r170" class="ident">d</label>.<a href="#line-760" class="ident">m</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-768"><code>		<label for="r170" class="ident">d</label>.<a href="#line-760" class="ident">m</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>]<a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-769"><code>	}</code></span>
+<span class="codeline" id="line-770"><code>	<label for="r173" class="ident">seen</label> := <label for="r170" class="ident">d</label>.<a href="#line-760" class="ident">m</a>[<label for="r172" class="ident">h</label>]</code></span>
+<span class="codeline" id="line-771"><code>	<label for="r170" class="ident">d</label>.<a href="#line-760" class="ident">m</a>[<label for="r172" class="ident">h</label>] = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-772"><code>	<label for="r170" class="ident">d</label>.<a href="#line-759" class="ident">mu</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-773"><code>	<span class="keyword">return</span> <label for="r173" class="ident">seen</label></code></span>
+<span class="codeline" id="line-774"><code>}</code></span>
+<span class="codeline" id="line-775"><code></code></span>
+<span class="codeline" id="line-776"><code><span class="comment">// seenLossy is a variant of seen that avoids a lock by using a cache of recently seen hashes.</span></code></span>
+<span class="codeline" id="line-777"><code><span class="comment">// Each cache entry is N-way set-associative: h can appear in any of the slots.</span></code></span>
+<span class="codeline" id="line-778"><code><span class="comment">// If h does not appear in any of them, then it is inserted into a random slot,</span></code></span>
+<span class="codeline" id="line-779"><code><span class="comment">// overwriting whatever was there before.</span></code></span>
+<span class="codeline" id="line-780"><code><span class="keyword">func</span> (<label for="r174" class="ident">d</label> *<a href="#line-754" class="ident">dedup</a>) <label for="r175" class="ident">seenLossy</label>(<label for="r176" class="ident">h</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-781"><code>	<label for="r177" class="ident">cache</label> := &amp;<label for="r174" class="ident">d</label>.<a href="#line-756" class="ident">recent</a>[<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r176" class="ident">h</label>)%<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r174" class="ident">d</label>.<a href="#line-756" class="ident">recent</a>))]</code></span>
+<span class="codeline" id="line-782"><code>	<span class="keyword">for</span> <label for="r178" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r178" class="ident">i</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r177" class="ident">cache</label>); <label for="r178" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-783"><code>		<span class="keyword">if</span> <a href="../../../pkg/sync/atomic.html" class="ident i2">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-158" class="ident">LoadUint64</a>(&amp;<label for="r177" class="ident">cache</label>[<label for="r178" class="ident">i</label>]) == <label for="r176" class="ident">h</label> {</code></span>
+<span class="codeline" id="line-784"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-785"><code>		}</code></span>
+<span class="codeline" id="line-786"><code>	}</code></span>
+<span class="codeline" id="line-787"><code></code></span>
+<span class="codeline" id="line-788"><code>	<span class="comment">// Compute index in set to evict as hash of current set.</span></code></span>
+<span class="codeline" id="line-789"><code>	<label for="r179" class="ident">ch</label> := <a href="#line-711" class="ident">offset64</a></code></span>
+<span class="codeline" id="line-790"><code>	<span class="keyword">for</span> <label for="r180" class="ident">_</label>, <label for="r181" class="ident">x</label> := <span class="keyword">range</span> <label for="r177" class="ident">cache</label> {</code></span>
+<span class="codeline" id="line-791"><code>		<label for="r179" class="ident">ch</label> = <a href="#line-729" class="ident">fnvUint64</a>(<label for="r179" class="ident">ch</label>, <label for="r181" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-792"><code>	}</code></span>
+<span class="codeline" id="line-793"><code>	<a href="../../../pkg/sync/atomic.html" class="ident i2">atomic</a>.<a href="../../sync/atomic/doc.go.html#line-184" class="ident">StoreUint64</a>(&amp;<label for="r177" class="ident">cache</label>[<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r179" class="ident">ch</label>)%<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r177" class="ident">cache</label>))], <label for="r176" class="ident">h</label>)</code></span>
+<span class="codeline" id="line-794"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-795"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

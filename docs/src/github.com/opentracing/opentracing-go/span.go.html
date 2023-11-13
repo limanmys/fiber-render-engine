@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: span.go in package github.com/opentracing/opentracing-go</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	span.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/opentracing/opentracing-go.html">github.com/opentracing/opentracing-go</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> opentracing</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"time"</span></label></code></span>
+<span class="codeline" id="line-5"><code></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"github.com/opentracing/opentracing-go/log"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// SpanContext represents Span state that must propagate to descendant Spans and across process</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// boundaries (e.g., a &lt;trace_id, span_id, sampled&gt; tuple).</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-SpanContext" class="ident">SpanContext</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-12"><code>	<span class="comment">// ForeachBaggageItem grants access to all baggage items stored in the</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">	// SpanContext.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">	// The handler function will be called for each baggage key/value pair.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">	// The ordering of items is not guaranteed.</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">	// The bool return value indicates if the handler wants to continue iterating</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">	// through the rest of the baggage items; for example if the handler is trying to</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">	// find some baggage item by pattern matching the name, it can return false</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">	// as soon as the item is found to stop further iterations.</span></code></span>
+<span class="codeline" id="line-21"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.SpanContext.html#name-ForeachBaggageItem" class="ident">ForeachBaggageItem</a>(handler <span class="keyword">func</span>(k, v <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a>)</code></span>
+<span class="codeline" id="line-22"><code>}</code></span>
+<span class="codeline" id="line-23"><code></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// Span represents an active, un-finished span in the OpenTracing system.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// Spans are created by the Tracer interface.</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-Span" class="ident">Span</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-28"><code>	<span class="comment">// Sets the end timestamp and finalizes Span state.</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">	// With the exception of calls to Context() (which are always allowed),</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">	// Finish() must be the last call made to any span instance, and to do</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">	// otherwise leads to undefined behavior.</span></code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-Finish" class="ident">Finish</a>()</code></span>
+<span class="codeline" id="line-34"><code>	<span class="comment">// FinishWithOptions is like Finish() but with explicit control over</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">	// timestamps and log data.</span></code></span>
+<span class="codeline" id="line-36"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-FinishWithOptions" class="ident">FinishWithOptions</a>(opts <a href="#line-134" class="ident">FinishOptions</a>)</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code>	<span class="comment">// Context() yields the SpanContext for this Span. Note that the return</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">	// value of Context() is still valid after a call to Span.Finish(), as is</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">	// a call to Span.Context() after a call to Span.Finish().</span></code></span>
+<span class="codeline" id="line-41"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-Context" class="ident">Context</a>() <a href="#line-11" class="ident">SpanContext</a></code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code>	<span class="comment">// Sets or changes the operation name.</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">	// Returns a reference to this Span for chaining.</span></code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-SetOperationName" class="ident">SetOperationName</a>(operationName <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-27" class="ident">Span</a></code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code>	<span class="comment">// Adds a tag to the span.</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">	// If there is a pre-existing tag set for `key`, it is overwritten.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">	// Tag values can be numeric types, strings, or bools. The behavior of</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">	// other tag value types is undefined at the OpenTracing level. If a</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">	// tracing system does not know how to handle a particular value type, it</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">	// may ignore the tag, but shall not panic.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">	// Returns a reference to this Span for chaining.</span></code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-SetTag" class="ident">SetTag</a>(key <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, value <span class="keyword">interface</span>{}) <a href="#line-27" class="ident">Span</a></code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// LogFields is an efficient and type-checked way to record key:value</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">	// logging data about a Span, though the programming interface is a little</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">	// more verbose than LogKV(). Here's an example:</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">	//    span.LogFields(</span></code></span>
+<span class="codeline" id="line-65"><code><span class="comment">	//        log.String("event", "soft error"),</span></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">	//        log.String("type", "cache timeout"),</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">	//        log.Int("waited.millis", 1500))</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">	// Also see Span.FinishWithOptions() and FinishOptions.BulkLogData.</span></code></span>
+<span class="codeline" id="line-70"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-LogFields" class="ident">LogFields</a>(fields ...<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-32" class="ident">Field</a>)</code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code>	<span class="comment">// LogKV is a concise, readable way to record key:value logging data about</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">	// a Span, though unfortunately this also makes it less efficient and less</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">	// type-safe than LogFields(). Here's an example:</span></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">	//    span.LogKV(</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">	//        "event", "soft error",</span></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">	//        "type", "cache timeout",</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">	//        "waited.millis", 1500)</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-81"><code><span class="comment">	// For LogKV (as opposed to LogFields()), the parameters must appear as</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">	// key-value pairs, like</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">	//    span.LogKV(key1, val1, key2, val2, key3, val3, ...)</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">	// The keys must all be strings. The values may be strings, numeric types,</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">	// bools, Go error instances, or arbitrary structs.</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">	// (Note to implementors: consider the log.InterleavedKVToFields() helper)</span></code></span>
+<span class="codeline" id="line-90"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-LogKV" class="ident">LogKV</a>(alternatingKeyValues ...<span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code>	<span class="comment">// SetBaggageItem sets a key:value pair on this Span and its SpanContext</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">	// that also propagates to descendants of this Span.</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">	// SetBaggageItem() enables powerful functionality given a full-stack</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">	// opentracing integration (e.g., arbitrary application data from a mobile</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">	// app can make it, transparently, all the way into the depths of a storage</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">	// system), and with it some powerful costs: use this feature with care.</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">	// IMPORTANT NOTE #1: SetBaggageItem() will only propagate baggage items to</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">	// *future* causal descendants of the associated Span.</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">	// IMPORTANT NOTE #2: Use this thoughtfully and with care. Every key and</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">	// value is copied into every local *and remote* child of the associated</span></code></span>
+<span class="codeline" id="line-105"><code><span class="comment">	// Span, and that can add up to a lot of network and cpu overhead.</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">	// Returns a reference to this Span for chaining.</span></code></span>
+<span class="codeline" id="line-108"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-SetBaggageItem" class="ident">SetBaggageItem</a>(restrictedKey, value <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="#line-27" class="ident">Span</a></code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code>	<span class="comment">// Gets the value for a baggage item given its key. Returns the empty string</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">	// if the value isn't found in this Span.</span></code></span>
+<span class="codeline" id="line-112"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-BaggageItem" class="ident">BaggageItem</a>(restrictedKey <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code>	<span class="comment">// Provides access to the Tracer that created this Span.</span></code></span>
+<span class="codeline" id="line-115"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-Tracer" class="ident">Tracer</a>() <a href="tracer.go.html#line-7" class="ident">Tracer</a></code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code>	<span class="comment">// Deprecated: use LogFields or LogKV</span></code></span>
+<span class="codeline" id="line-118"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-LogEvent" class="ident">LogEvent</a>(event <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>)</code></span>
+<span class="codeline" id="line-119"><code>	<span class="comment">// Deprecated: use LogFields or LogKV</span></code></span>
+<span class="codeline" id="line-120"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-LogEventWithPayload" class="ident">LogEventWithPayload</a>(event <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, payload <span class="keyword">interface</span>{})</code></span>
+<span class="codeline" id="line-121"><code>	<span class="comment">// Deprecated: use LogFields or LogKV</span></code></span>
+<span class="codeline" id="line-122"><code>	<a href="../../../../imp/github.com/opentracing/opentracing-go.Span.html#name-Log" class="ident">Log</a>(data <a href="#line-161" class="ident">LogData</a>)</code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">// LogRecord is data associated with a single Span log. Every LogRecord</span></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">// instance must specify at least one Field.</span></code></span>
+<span class="codeline" id="line-127"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-LogRecord" class="ident">LogRecord</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-128"><code>	Timestamp <a href="../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-129"><code>	Fields    []<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-32" class="ident">Field</a></code></span>
+<span class="codeline" id="line-130"><code>}</code></span>
+<span class="codeline" id="line-131"><code></code></span>
+<span class="codeline" id="line-132"><code><span class="comment">// FinishOptions allows Span.FinishWithOptions callers to override the finish</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">// timestamp and provide log data via a bulk interface.</span></code></span>
+<span class="codeline" id="line-134"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-FinishOptions" class="ident">FinishOptions</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-135"><code>	<span class="comment">// FinishTime overrides the Span's finish time, or implicitly becomes</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">	// time.Now() if FinishTime.IsZero().</span></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">	// FinishTime must resolve to a timestamp that's &gt;= the Span's StartTime</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">	// (per StartSpanOptions).</span></code></span>
+<span class="codeline" id="line-140"><code>	FinishTime <a href="../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-141"><code></code></span>
+<span class="codeline" id="line-142"><code>	<span class="comment">// LogRecords allows the caller to specify the contents of many LogFields()</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">	// calls with a single slice. May be nil.</span></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-145"><code><span class="comment">	// None of the LogRecord.Timestamp values may be .IsZero() (i.e., they must</span></code></span>
+<span class="codeline" id="line-146"><code><span class="comment">	// be set explicitly). Also, they must be &gt;= the Span's start timestamp and</span></code></span>
+<span class="codeline" id="line-147"><code><span class="comment">	// &lt;= the FinishTime (or time.Now() if FinishTime.IsZero()). Otherwise the</span></code></span>
+<span class="codeline" id="line-148"><code><span class="comment">	// behavior of FinishWithOptions() is undefined.</span></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">	// If specified, the caller hands off ownership of LogRecords at</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">	// FinishWithOptions() invocation time.</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">	// If specified, the (deprecated) BulkLogData must be nil or empty.</span></code></span>
+<span class="codeline" id="line-154"><code>	LogRecords []<a href="#line-127" class="ident">LogRecord</a></code></span>
+<span class="codeline" id="line-155"><code></code></span>
+<span class="codeline" id="line-156"><code>	<span class="comment">// BulkLogData is DEPRECATED.</span></code></span>
+<span class="codeline" id="line-157"><code>	BulkLogData []<a href="#line-161" class="ident">LogData</a></code></span>
+<span class="codeline" id="line-158"><code>}</code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">// LogData is DEPRECATED</span></code></span>
+<span class="codeline" id="line-161"><code><span class="keyword">type</span> <a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-LogData" class="ident">LogData</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-162"><code>	Timestamp <a href="../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-163"><code>	Event     <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-164"><code>	Payload   <span class="keyword">interface</span>{}</code></span>
+<span class="codeline" id="line-165"><code>}</code></span>
+<span class="codeline" id="line-166"><code></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">// ToLogRecord converts a deprecated LogData to a non-deprecated LogRecord</span></code></span>
+<span class="codeline" id="line-168"><code><span class="keyword">func</span> (<label for="r0" class="ident">ld</label> *<a href="#line-161" class="ident">LogData</a>) <label for="r1" class="ident">ToLogRecord</label>() <a href="#line-127" class="ident">LogRecord</a> {</code></span>
+<span class="codeline" id="line-169"><code>	<span class="keyword">var</span> <label for="r2" class="ident">literalTimestamp</label> <a href="../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../time/time.go.html#line-129" class="ident">Time</a></code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">if</span> <label for="r0" class="ident">ld</label>.<a href="#line-162" class="ident">Timestamp</a>.<a href="../../../time/time.go.html#line-455" class="ident">IsZero</a>() {</code></span>
+<span class="codeline" id="line-171"><code>		<label for="r2" class="ident">literalTimestamp</label> = <a href="../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../time/time.go.html#line-1110" class="ident">Now</a>()</code></span>
+<span class="codeline" id="line-172"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-173"><code>		<label for="r2" class="ident">literalTimestamp</label> = <label for="r0" class="ident">ld</label>.<a href="#line-162" class="ident">Timestamp</a></code></span>
+<span class="codeline" id="line-174"><code>	}</code></span>
+<span class="codeline" id="line-175"><code>	<label for="r3" class="ident">rval</label> := <a href="#line-127" class="ident">LogRecord</a>{</code></span>
+<span class="codeline" id="line-176"><code>		<a href="#line-128" class="ident">Timestamp</a>: <label for="r2" class="ident">literalTimestamp</label>,</code></span>
+<span class="codeline" id="line-177"><code>	}</code></span>
+<span class="codeline" id="line-178"><code>	<span class="keyword">if</span> <label for="r0" class="ident">ld</label>.<a href="#line-164" class="ident">Payload</a> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-179"><code>		<label for="r3" class="ident">rval</label>.<a href="#line-129" class="ident">Fields</a> = []<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-32" class="ident">Field</a>{</code></span>
+<span class="codeline" id="line-180"><code>			<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-41" class="ident">String</a>(<span class="lit-string">"event"</span>, <label for="r0" class="ident">ld</label>.<a href="#line-163" class="ident">Event</a>),</code></span>
+<span class="codeline" id="line-181"><code>		}</code></span>
+<span class="codeline" id="line-182"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-183"><code>		<label for="r3" class="ident">rval</label>.<a href="#line-129" class="ident">Fields</a> = []<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-32" class="ident">Field</a>{</code></span>
+<span class="codeline" id="line-184"><code>			<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-41" class="ident">String</a>(<span class="lit-string">"event"</span>, <label for="r0" class="ident">ld</label>.<a href="#line-163" class="ident">Event</a>),</code></span>
+<span class="codeline" id="line-185"><code>			<a href="../../../../pkg/github.com/opentracing/opentracing-go/log.html" class="ident i1">log</a>.<a href="log/field.go.html#line-138" class="ident">Object</a>(<span class="lit-string">"payload"</span>, <label for="r0" class="ident">ld</label>.<a href="#line-164" class="ident">Payload</a>),</code></span>
+<span class="codeline" id="line-186"><code>		}</code></span>
+<span class="codeline" id="line-187"><code>	}</code></span>
+<span class="codeline" id="line-188"><code>	<span class="keyword">return</span> <label for="r3" class="ident">rval</label></code></span>
+<span class="codeline" id="line-189"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

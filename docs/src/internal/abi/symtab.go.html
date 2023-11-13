@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: symtab.go in package internal/abi</title>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	symtab.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/abi.html">internal/abi</a>
+</code></pre>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2023 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> abi</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// A FuncFlag records bits about a function, passed to the runtime.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="keyword">type</span> <a href="../../../pkg/internal/abi.html#name-FuncFlag" class="ident">FuncFlag</a> <a href="../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-11"><code>	<span class="comment">// FuncFlagTopFrame indicates a function that appears at the top of its stack.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">	// The traceback routine stop at such a function and consider that a</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">	// successful, complete traversal of the stack.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">	// Examples of TopFrame functions include goexit, which appears</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">	// at the top of a user goroutine stack, and mstart, which appears</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">	// at the top of a system goroutine stack.</span></code></span>
+<span class="codeline" id="line-17"><code>	<a href="../../../pkg/internal/abi.html#name-FuncFlagTopFrame" class="ident">FuncFlagTopFrame</a> <a href="#line-8" class="ident">FuncFlag</a> = <span class="lit-number">1</span> &lt;&lt; <a href="../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code>	<span class="comment">// FuncFlagSPWrite indicates a function that writes an arbitrary value to SP</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">	// (any write other than adding or subtracting a constant amount).</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">	// The traceback routines cannot encode such changes into the</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">	// pcsp tables, so the function traceback cannot safely unwind past</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">	// SPWrite functions. Stopping at an SPWrite function is considered</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">	// to be an incomplete unwinding of the stack. In certain contexts</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">	// (in particular garbage collector stack scans) that is a fatal error.</span></code></span>
+<span class="codeline" id="line-26"><code>	<a href="../../../pkg/internal/abi.html#name-FuncFlagSPWrite" class="ident">FuncFlagSPWrite</a></code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<span class="comment">// FuncFlagAsm indicates that a function was implemented in assembly.</span></code></span>
+<span class="codeline" id="line-29"><code>	<a href="../../../pkg/internal/abi.html#name-FuncFlagAsm" class="ident">FuncFlagAsm</a></code></span>
+<span class="codeline" id="line-30"><code>)</code></span>
+<span class="codeline" id="line-31"><code></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// A FuncID identifies particular functions that need to be treated</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// specially by the runtime.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// Note that in some situations involving plugins, there may be multiple</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// copies of a particular special runtime function.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">type</span> <a href="../../../pkg/internal/abi.html#name-FuncID" class="ident">FuncID</a> <a href="../../../pkg/builtin.html#name-uint8" class="ident">uint8</a></code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-39"><code>	<span class="comment">// If you add a FuncID, you probably also want to add an entry to the map in</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">	// ../../cmd/internal/objabi/funcid.go</span></code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code>	<a href="../../../pkg/internal/abi.html#name-FuncIDNormal" class="ident">FuncIDNormal</a> <a href="#line-36" class="ident">FuncID</a> = <a href="../../../pkg/builtin.html#name-iota" class="ident">iota</a> <span class="comment">// not a special function</span></code></span>
+<span class="codeline" id="line-43"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_abort" class="ident">FuncID_abort</a></code></span>
+<span class="codeline" id="line-44"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_asmcgocall" class="ident">FuncID_asmcgocall</a></code></span>
+<span class="codeline" id="line-45"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_asyncPreempt" class="ident">FuncID_asyncPreempt</a></code></span>
+<span class="codeline" id="line-46"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_cgocallback" class="ident">FuncID_cgocallback</a></code></span>
+<span class="codeline" id="line-47"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_debugCallV2" class="ident">FuncID_debugCallV2</a></code></span>
+<span class="codeline" id="line-48"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_gcBgMarkWorker" class="ident">FuncID_gcBgMarkWorker</a></code></span>
+<span class="codeline" id="line-49"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_goexit" class="ident">FuncID_goexit</a></code></span>
+<span class="codeline" id="line-50"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_gogo" class="ident">FuncID_gogo</a></code></span>
+<span class="codeline" id="line-51"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_gopanic" class="ident">FuncID_gopanic</a></code></span>
+<span class="codeline" id="line-52"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_handleAsyncEvent" class="ident">FuncID_handleAsyncEvent</a></code></span>
+<span class="codeline" id="line-53"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_mcall" class="ident">FuncID_mcall</a></code></span>
+<span class="codeline" id="line-54"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_morestack" class="ident">FuncID_morestack</a></code></span>
+<span class="codeline" id="line-55"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_mstart" class="ident">FuncID_mstart</a></code></span>
+<span class="codeline" id="line-56"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_panicwrap" class="ident">FuncID_panicwrap</a></code></span>
+<span class="codeline" id="line-57"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_rt0_go" class="ident">FuncID_rt0_go</a></code></span>
+<span class="codeline" id="line-58"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_runfinq" class="ident">FuncID_runfinq</a></code></span>
+<span class="codeline" id="line-59"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_runtime_main" class="ident">FuncID_runtime_main</a></code></span>
+<span class="codeline" id="line-60"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_sigpanic" class="ident">FuncID_sigpanic</a></code></span>
+<span class="codeline" id="line-61"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_systemstack" class="ident">FuncID_systemstack</a></code></span>
+<span class="codeline" id="line-62"><code>	<a href="../../../pkg/internal/abi.html#name-FuncID_systemstack_switch" class="ident">FuncID_systemstack_switch</a></code></span>
+<span class="codeline" id="line-63"><code>	<a href="../../../pkg/internal/abi.html#name-FuncIDWrapper" class="ident">FuncIDWrapper</a> <span class="comment">// any autogenerated code (hash/eq algorithms, method wrappers, etc.)</span></code></span>
+<span class="codeline" id="line-64"><code>)</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">// ArgsSizeUnknown is set in Func.argsize to mark all functions</span></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// whose argument size is unknown (C vararg functions, and</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// assembly code without an explicit specification).</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// This value is generated by the compiler, assembler, or linker.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="keyword">const</span> <a href="../../../pkg/internal/abi.html#name-ArgsSizeUnknown" class="ident">ArgsSizeUnknown</a> = -<span class="lit-number">0x80000000</span></code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code><span class="comment">// IDs for PCDATA and FUNCDATA tables in Go binaries.</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// These must agree with ../../../runtime/funcdata.h.</span></code></span>
+<span class="codeline" id="line-75"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-76"><code>	<a href="../../../pkg/internal/abi.html#name-PCDATA_UnsafePoint" class="ident">PCDATA_UnsafePoint</a>   = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-77"><code>	<a href="../../../pkg/internal/abi.html#name-PCDATA_StackMapIndex" class="ident">PCDATA_StackMapIndex</a> = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-78"><code>	<a href="../../../pkg/internal/abi.html#name-PCDATA_InlTreeIndex" class="ident">PCDATA_InlTreeIndex</a>  = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-79"><code>	<a href="../../../pkg/internal/abi.html#name-PCDATA_ArgLiveIndex" class="ident">PCDATA_ArgLiveIndex</a>  = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-80"><code></code></span>
+<span class="codeline" id="line-81"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_ArgsPointerMaps" class="ident">FUNCDATA_ArgsPointerMaps</a>    = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-82"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_LocalsPointerMaps" class="ident">FUNCDATA_LocalsPointerMaps</a>  = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-83"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_StackObjects" class="ident">FUNCDATA_StackObjects</a>       = <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-84"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_InlTree" class="ident">FUNCDATA_InlTree</a>            = <span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-85"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_OpenCodedDeferInfo" class="ident">FUNCDATA_OpenCodedDeferInfo</a> = <span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-86"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_ArgInfo" class="ident">FUNCDATA_ArgInfo</a>            = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-87"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_ArgLiveInfo" class="ident">FUNCDATA_ArgLiveInfo</a>        = <span class="lit-number">6</span></code></span>
+<span class="codeline" id="line-88"><code>	<a href="../../../pkg/internal/abi.html#name-FUNCDATA_WrapInfo" class="ident">FUNCDATA_WrapInfo</a>           = <span class="lit-number">7</span></code></span>
+<span class="codeline" id="line-89"><code>)</code></span>
+<span class="codeline" id="line-90"><code></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// Special values for the PCDATA_UnsafePoint table.</span></code></span>
+<span class="codeline" id="line-92"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-93"><code>	<a href="../../../pkg/internal/abi.html#name-UnsafePointSafe" class="ident">UnsafePointSafe</a>   = -<span class="lit-number">1</span> <span class="comment">// Safe for async preemption</span></code></span>
+<span class="codeline" id="line-94"><code>	<a href="../../../pkg/internal/abi.html#name-UnsafePointUnsafe" class="ident">UnsafePointUnsafe</a> = -<span class="lit-number">2</span> <span class="comment">// Unsafe for async preemption</span></code></span>
+<span class="codeline" id="line-95"><code></code></span>
+<span class="codeline" id="line-96"><code>	<span class="comment">// UnsafePointRestart1(2) apply on a sequence of instructions, within</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">	// which if an async preemption happens, we should back off the PC</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">	// to the start of the sequence when resuming.</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">	// We need two so we can distinguish the start/end of the sequence</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">	// in case that two sequences are next to each other.</span></code></span>
+<span class="codeline" id="line-101"><code>	<a href="../../../pkg/internal/abi.html#name-UnsafePointRestart1" class="ident">UnsafePointRestart1</a> = -<span class="lit-number">3</span></code></span>
+<span class="codeline" id="line-102"><code>	<a href="../../../pkg/internal/abi.html#name-UnsafePointRestart2" class="ident">UnsafePointRestart2</a> = -<span class="lit-number">4</span></code></span>
+<span class="codeline" id="line-103"><code></code></span>
+<span class="codeline" id="line-104"><code>	<span class="comment">// Like UnsafePointRestart1, but back to function entry if async preempted.</span></code></span>
+<span class="codeline" id="line-105"><code>	<a href="../../../pkg/internal/abi.html#name-UnsafePointRestartAtEntry" class="ident">UnsafePointRestartAtEntry</a> = -<span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-106"><code>)</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

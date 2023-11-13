@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: sys_linux_amd64.s in package runtime</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -52,731 +52,680 @@
 <span class="codeline" id="line-33"><code>#define SYS_clone		56</code></span>
 <span class="codeline" id="line-34"><code>#define SYS_exit		60</code></span>
 <span class="codeline" id="line-35"><code>#define SYS_kill		62</code></span>
-<span class="codeline" id="line-36"><code>#define SYS_fcntl		72</code></span>
-<span class="codeline" id="line-37"><code>#define SYS_sigaltstack 	131</code></span>
-<span class="codeline" id="line-38"><code>#define SYS_arch_prctl		158</code></span>
-<span class="codeline" id="line-39"><code>#define SYS_gettid		186</code></span>
-<span class="codeline" id="line-40"><code>#define SYS_futex		202</code></span>
-<span class="codeline" id="line-41"><code>#define SYS_sched_getaffinity	204</code></span>
-<span class="codeline" id="line-42"><code>#define SYS_epoll_create	213</code></span>
-<span class="codeline" id="line-43"><code>#define SYS_timer_create	222</code></span>
-<span class="codeline" id="line-44"><code>#define SYS_timer_settime	223</code></span>
-<span class="codeline" id="line-45"><code>#define SYS_timer_delete	226</code></span>
-<span class="codeline" id="line-46"><code>#define SYS_clock_gettime	228</code></span>
-<span class="codeline" id="line-47"><code>#define SYS_exit_group		231</code></span>
-<span class="codeline" id="line-48"><code>#define SYS_epoll_ctl		233</code></span>
-<span class="codeline" id="line-49"><code>#define SYS_tgkill		234</code></span>
-<span class="codeline" id="line-50"><code>#define SYS_openat		257</code></span>
-<span class="codeline" id="line-51"><code>#define SYS_faccessat		269</code></span>
-<span class="codeline" id="line-52"><code>#define SYS_epoll_pwait		281</code></span>
-<span class="codeline" id="line-53"><code>#define SYS_epoll_create1	291</code></span>
-<span class="codeline" id="line-54"><code>#define SYS_pipe2		293</code></span>
-<span class="codeline" id="line-55"><code></code></span>
-<span class="codeline" id="line-56"><code>TEXT runtime·exit(SB),NOSPLIT,$0-4</code></span>
-<span class="codeline" id="line-57"><code>	MOVL	code+0(FP), DI</code></span>
-<span class="codeline" id="line-58"><code>	MOVL	$SYS_exit_group, AX</code></span>
-<span class="codeline" id="line-59"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-60"><code>	RET</code></span>
-<span class="codeline" id="line-61"><code></code></span>
-<span class="codeline" id="line-62"><code>// func exitThread(wait *uint32)</code></span>
-<span class="codeline" id="line-63"><code>TEXT runtime·exitThread(SB),NOSPLIT,$0-8</code></span>
-<span class="codeline" id="line-64"><code>	MOVQ	wait+0(FP), AX</code></span>
-<span class="codeline" id="line-65"><code>	// We're done using the stack.</code></span>
-<span class="codeline" id="line-66"><code>	MOVL	$0, (AX)</code></span>
-<span class="codeline" id="line-67"><code>	MOVL	$0, DI	// exit code</code></span>
-<span class="codeline" id="line-68"><code>	MOVL	$SYS_exit, AX</code></span>
-<span class="codeline" id="line-69"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-70"><code>	// We may not even have a stack any more.</code></span>
-<span class="codeline" id="line-71"><code>	INT	$3</code></span>
-<span class="codeline" id="line-72"><code>	JMP	0(PC)</code></span>
-<span class="codeline" id="line-73"><code></code></span>
-<span class="codeline" id="line-74"><code>TEXT runtime·open(SB),NOSPLIT,$0-20</code></span>
-<span class="codeline" id="line-75"><code>	// This uses openat instead of open, because Android O blocks open.</code></span>
-<span class="codeline" id="line-76"><code>	MOVL	$AT_FDCWD, DI // AT_FDCWD, so this acts like open</code></span>
-<span class="codeline" id="line-77"><code>	MOVQ	name+0(FP), SI</code></span>
-<span class="codeline" id="line-78"><code>	MOVL	mode+8(FP), DX</code></span>
-<span class="codeline" id="line-79"><code>	MOVL	perm+12(FP), R10</code></span>
-<span class="codeline" id="line-80"><code>	MOVL	$SYS_openat, AX</code></span>
-<span class="codeline" id="line-81"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-82"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-83"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-84"><code>	MOVL	$-1, AX</code></span>
-<span class="codeline" id="line-85"><code>	MOVL	AX, ret+16(FP)</code></span>
-<span class="codeline" id="line-86"><code>	RET</code></span>
-<span class="codeline" id="line-87"><code></code></span>
-<span class="codeline" id="line-88"><code>TEXT runtime·closefd(SB),NOSPLIT,$0-12</code></span>
-<span class="codeline" id="line-89"><code>	MOVL	fd+0(FP), DI</code></span>
-<span class="codeline" id="line-90"><code>	MOVL	$SYS_close, AX</code></span>
-<span class="codeline" id="line-91"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-92"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-93"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-94"><code>	MOVL	$-1, AX</code></span>
-<span class="codeline" id="line-95"><code>	MOVL	AX, ret+8(FP)</code></span>
-<span class="codeline" id="line-96"><code>	RET</code></span>
-<span class="codeline" id="line-97"><code></code></span>
-<span class="codeline" id="line-98"><code>TEXT runtime·write1(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-99"><code>	MOVQ	fd+0(FP), DI</code></span>
-<span class="codeline" id="line-100"><code>	MOVQ	p+8(FP), SI</code></span>
-<span class="codeline" id="line-101"><code>	MOVL	n+16(FP), DX</code></span>
-<span class="codeline" id="line-102"><code>	MOVL	$SYS_write, AX</code></span>
-<span class="codeline" id="line-103"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-104"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-105"><code>	RET</code></span>
-<span class="codeline" id="line-106"><code></code></span>
-<span class="codeline" id="line-107"><code>TEXT runtime·read(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-108"><code>	MOVL	fd+0(FP), DI</code></span>
-<span class="codeline" id="line-109"><code>	MOVQ	p+8(FP), SI</code></span>
-<span class="codeline" id="line-110"><code>	MOVL	n+16(FP), DX</code></span>
-<span class="codeline" id="line-111"><code>	MOVL	$SYS_read, AX</code></span>
-<span class="codeline" id="line-112"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-113"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-114"><code>	RET</code></span>
-<span class="codeline" id="line-115"><code></code></span>
-<span class="codeline" id="line-116"><code>// func pipe2(flags int32) (r, w int32, errno int32)</code></span>
-<span class="codeline" id="line-117"><code>TEXT runtime·pipe2(SB),NOSPLIT,$0-20</code></span>
-<span class="codeline" id="line-118"><code>	LEAQ	r+8(FP), DI</code></span>
-<span class="codeline" id="line-119"><code>	MOVL	flags+0(FP), SI</code></span>
-<span class="codeline" id="line-120"><code>	MOVL	$SYS_pipe2, AX</code></span>
-<span class="codeline" id="line-121"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-122"><code>	MOVL	AX, errno+16(FP)</code></span>
-<span class="codeline" id="line-123"><code>	RET</code></span>
-<span class="codeline" id="line-124"><code></code></span>
-<span class="codeline" id="line-125"><code>TEXT runtime·usleep(SB),NOSPLIT,$16</code></span>
-<span class="codeline" id="line-126"><code>	MOVL	$0, DX</code></span>
-<span class="codeline" id="line-127"><code>	MOVL	usec+0(FP), AX</code></span>
-<span class="codeline" id="line-128"><code>	MOVL	$1000000, CX</code></span>
-<span class="codeline" id="line-129"><code>	DIVL	CX</code></span>
-<span class="codeline" id="line-130"><code>	MOVQ	AX, 0(SP)</code></span>
-<span class="codeline" id="line-131"><code>	MOVL	$1000, AX	// usec to nsec</code></span>
-<span class="codeline" id="line-132"><code>	MULL	DX</code></span>
-<span class="codeline" id="line-133"><code>	MOVQ	AX, 8(SP)</code></span>
-<span class="codeline" id="line-134"><code></code></span>
-<span class="codeline" id="line-135"><code>	// nanosleep(&amp;ts, 0)</code></span>
-<span class="codeline" id="line-136"><code>	MOVQ	SP, DI</code></span>
-<span class="codeline" id="line-137"><code>	MOVL	$0, SI</code></span>
-<span class="codeline" id="line-138"><code>	MOVL	$SYS_nanosleep, AX</code></span>
+<span class="codeline" id="line-36"><code>#define SYS_sigaltstack 	131</code></span>
+<span class="codeline" id="line-37"><code>#define SYS_arch_prctl		158</code></span>
+<span class="codeline" id="line-38"><code>#define SYS_gettid		186</code></span>
+<span class="codeline" id="line-39"><code>#define SYS_futex		202</code></span>
+<span class="codeline" id="line-40"><code>#define SYS_sched_getaffinity	204</code></span>
+<span class="codeline" id="line-41"><code>#define SYS_timer_create	222</code></span>
+<span class="codeline" id="line-42"><code>#define SYS_timer_settime	223</code></span>
+<span class="codeline" id="line-43"><code>#define SYS_timer_delete	226</code></span>
+<span class="codeline" id="line-44"><code>#define SYS_clock_gettime	228</code></span>
+<span class="codeline" id="line-45"><code>#define SYS_exit_group		231</code></span>
+<span class="codeline" id="line-46"><code>#define SYS_tgkill		234</code></span>
+<span class="codeline" id="line-47"><code>#define SYS_openat		257</code></span>
+<span class="codeline" id="line-48"><code>#define SYS_faccessat		269</code></span>
+<span class="codeline" id="line-49"><code>#define SYS_pipe2		293</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code>TEXT runtime·exit(SB),NOSPLIT,$0-4</code></span>
+<span class="codeline" id="line-52"><code>	MOVL	code+0(FP), DI</code></span>
+<span class="codeline" id="line-53"><code>	MOVL	$SYS_exit_group, AX</code></span>
+<span class="codeline" id="line-54"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-55"><code>	RET</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>// func exitThread(wait *atomic.Uint32)</code></span>
+<span class="codeline" id="line-58"><code>TEXT runtime·exitThread(SB),NOSPLIT,$0-8</code></span>
+<span class="codeline" id="line-59"><code>	MOVQ	wait+0(FP), AX</code></span>
+<span class="codeline" id="line-60"><code>	// We're done using the stack.</code></span>
+<span class="codeline" id="line-61"><code>	MOVL	$0, (AX)</code></span>
+<span class="codeline" id="line-62"><code>	MOVL	$0, DI	// exit code</code></span>
+<span class="codeline" id="line-63"><code>	MOVL	$SYS_exit, AX</code></span>
+<span class="codeline" id="line-64"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-65"><code>	// We may not even have a stack any more.</code></span>
+<span class="codeline" id="line-66"><code>	INT	$3</code></span>
+<span class="codeline" id="line-67"><code>	JMP	0(PC)</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>TEXT runtime·open(SB),NOSPLIT,$0-20</code></span>
+<span class="codeline" id="line-70"><code>	// This uses openat instead of open, because Android O blocks open.</code></span>
+<span class="codeline" id="line-71"><code>	MOVL	$AT_FDCWD, DI // AT_FDCWD, so this acts like open</code></span>
+<span class="codeline" id="line-72"><code>	MOVQ	name+0(FP), SI</code></span>
+<span class="codeline" id="line-73"><code>	MOVL	mode+8(FP), DX</code></span>
+<span class="codeline" id="line-74"><code>	MOVL	perm+12(FP), R10</code></span>
+<span class="codeline" id="line-75"><code>	MOVL	$SYS_openat, AX</code></span>
+<span class="codeline" id="line-76"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-77"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-78"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-79"><code>	MOVL	$-1, AX</code></span>
+<span class="codeline" id="line-80"><code>	MOVL	AX, ret+16(FP)</code></span>
+<span class="codeline" id="line-81"><code>	RET</code></span>
+<span class="codeline" id="line-82"><code></code></span>
+<span class="codeline" id="line-83"><code>TEXT runtime·closefd(SB),NOSPLIT,$0-12</code></span>
+<span class="codeline" id="line-84"><code>	MOVL	fd+0(FP), DI</code></span>
+<span class="codeline" id="line-85"><code>	MOVL	$SYS_close, AX</code></span>
+<span class="codeline" id="line-86"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-87"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-88"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-89"><code>	MOVL	$-1, AX</code></span>
+<span class="codeline" id="line-90"><code>	MOVL	AX, ret+8(FP)</code></span>
+<span class="codeline" id="line-91"><code>	RET</code></span>
+<span class="codeline" id="line-92"><code></code></span>
+<span class="codeline" id="line-93"><code>TEXT runtime·write1(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-94"><code>	MOVQ	fd+0(FP), DI</code></span>
+<span class="codeline" id="line-95"><code>	MOVQ	p+8(FP), SI</code></span>
+<span class="codeline" id="line-96"><code>	MOVL	n+16(FP), DX</code></span>
+<span class="codeline" id="line-97"><code>	MOVL	$SYS_write, AX</code></span>
+<span class="codeline" id="line-98"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-99"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-100"><code>	RET</code></span>
+<span class="codeline" id="line-101"><code></code></span>
+<span class="codeline" id="line-102"><code>TEXT runtime·read(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-103"><code>	MOVL	fd+0(FP), DI</code></span>
+<span class="codeline" id="line-104"><code>	MOVQ	p+8(FP), SI</code></span>
+<span class="codeline" id="line-105"><code>	MOVL	n+16(FP), DX</code></span>
+<span class="codeline" id="line-106"><code>	MOVL	$SYS_read, AX</code></span>
+<span class="codeline" id="line-107"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-108"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-109"><code>	RET</code></span>
+<span class="codeline" id="line-110"><code></code></span>
+<span class="codeline" id="line-111"><code>// func pipe2(flags int32) (r, w int32, errno int32)</code></span>
+<span class="codeline" id="line-112"><code>TEXT runtime·pipe2(SB),NOSPLIT,$0-20</code></span>
+<span class="codeline" id="line-113"><code>	LEAQ	r+8(FP), DI</code></span>
+<span class="codeline" id="line-114"><code>	MOVL	flags+0(FP), SI</code></span>
+<span class="codeline" id="line-115"><code>	MOVL	$SYS_pipe2, AX</code></span>
+<span class="codeline" id="line-116"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-117"><code>	MOVL	AX, errno+16(FP)</code></span>
+<span class="codeline" id="line-118"><code>	RET</code></span>
+<span class="codeline" id="line-119"><code></code></span>
+<span class="codeline" id="line-120"><code>TEXT runtime·usleep(SB),NOSPLIT,$16</code></span>
+<span class="codeline" id="line-121"><code>	MOVL	$0, DX</code></span>
+<span class="codeline" id="line-122"><code>	MOVL	usec+0(FP), AX</code></span>
+<span class="codeline" id="line-123"><code>	MOVL	$1000000, CX</code></span>
+<span class="codeline" id="line-124"><code>	DIVL	CX</code></span>
+<span class="codeline" id="line-125"><code>	MOVQ	AX, 0(SP)</code></span>
+<span class="codeline" id="line-126"><code>	MOVL	$1000, AX	// usec to nsec</code></span>
+<span class="codeline" id="line-127"><code>	MULL	DX</code></span>
+<span class="codeline" id="line-128"><code>	MOVQ	AX, 8(SP)</code></span>
+<span class="codeline" id="line-129"><code></code></span>
+<span class="codeline" id="line-130"><code>	// nanosleep(&amp;ts, 0)</code></span>
+<span class="codeline" id="line-131"><code>	MOVQ	SP, DI</code></span>
+<span class="codeline" id="line-132"><code>	MOVL	$0, SI</code></span>
+<span class="codeline" id="line-133"><code>	MOVL	$SYS_nanosleep, AX</code></span>
+<span class="codeline" id="line-134"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-135"><code>	RET</code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code>TEXT runtime·gettid(SB),NOSPLIT,$0-4</code></span>
+<span class="codeline" id="line-138"><code>	MOVL	$SYS_gettid, AX</code></span>
 <span class="codeline" id="line-139"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-140"><code>	RET</code></span>
-<span class="codeline" id="line-141"><code></code></span>
-<span class="codeline" id="line-142"><code>TEXT runtime·gettid(SB),NOSPLIT,$0-4</code></span>
-<span class="codeline" id="line-143"><code>	MOVL	$SYS_gettid, AX</code></span>
-<span class="codeline" id="line-144"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-145"><code>	MOVL	AX, ret+0(FP)</code></span>
-<span class="codeline" id="line-146"><code>	RET</code></span>
-<span class="codeline" id="line-147"><code></code></span>
-<span class="codeline" id="line-148"><code>TEXT runtime·raise(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-149"><code>	MOVL	$SYS_getpid, AX</code></span>
-<span class="codeline" id="line-150"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-151"><code>	MOVL	AX, R12</code></span>
-<span class="codeline" id="line-152"><code>	MOVL	$SYS_gettid, AX</code></span>
+<span class="codeline" id="line-140"><code>	MOVL	AX, ret+0(FP)</code></span>
+<span class="codeline" id="line-141"><code>	RET</code></span>
+<span class="codeline" id="line-142"><code></code></span>
+<span class="codeline" id="line-143"><code>TEXT runtime·raise(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-144"><code>	MOVL	$SYS_getpid, AX</code></span>
+<span class="codeline" id="line-145"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-146"><code>	MOVL	AX, R12</code></span>
+<span class="codeline" id="line-147"><code>	MOVL	$SYS_gettid, AX</code></span>
+<span class="codeline" id="line-148"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-149"><code>	MOVL	AX, SI	// arg 2 tid</code></span>
+<span class="codeline" id="line-150"><code>	MOVL	R12, DI	// arg 1 pid</code></span>
+<span class="codeline" id="line-151"><code>	MOVL	sig+0(FP), DX	// arg 3</code></span>
+<span class="codeline" id="line-152"><code>	MOVL	$SYS_tgkill, AX</code></span>
 <span class="codeline" id="line-153"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-154"><code>	MOVL	AX, SI	// arg 2 tid</code></span>
-<span class="codeline" id="line-155"><code>	MOVL	R12, DI	// arg 1 pid</code></span>
-<span class="codeline" id="line-156"><code>	MOVL	sig+0(FP), DX	// arg 3</code></span>
-<span class="codeline" id="line-157"><code>	MOVL	$SYS_tgkill, AX</code></span>
+<span class="codeline" id="line-154"><code>	RET</code></span>
+<span class="codeline" id="line-155"><code></code></span>
+<span class="codeline" id="line-156"><code>TEXT runtime·raiseproc(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-157"><code>	MOVL	$SYS_getpid, AX</code></span>
 <span class="codeline" id="line-158"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-159"><code>	RET</code></span>
-<span class="codeline" id="line-160"><code></code></span>
-<span class="codeline" id="line-161"><code>TEXT runtime·raiseproc(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-162"><code>	MOVL	$SYS_getpid, AX</code></span>
-<span class="codeline" id="line-163"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-164"><code>	MOVL	AX, DI	// arg 1 pid</code></span>
-<span class="codeline" id="line-165"><code>	MOVL	sig+0(FP), SI	// arg 2</code></span>
-<span class="codeline" id="line-166"><code>	MOVL	$SYS_kill, AX</code></span>
+<span class="codeline" id="line-159"><code>	MOVL	AX, DI	// arg 1 pid</code></span>
+<span class="codeline" id="line-160"><code>	MOVL	sig+0(FP), SI	// arg 2</code></span>
+<span class="codeline" id="line-161"><code>	MOVL	$SYS_kill, AX</code></span>
+<span class="codeline" id="line-162"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-163"><code>	RET</code></span>
+<span class="codeline" id="line-164"><code></code></span>
+<span class="codeline" id="line-165"><code>TEXT ·getpid(SB),NOSPLIT,$0-8</code></span>
+<span class="codeline" id="line-166"><code>	MOVL	$SYS_getpid, AX</code></span>
 <span class="codeline" id="line-167"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-168"><code>	RET</code></span>
-<span class="codeline" id="line-169"><code></code></span>
-<span class="codeline" id="line-170"><code>TEXT ·getpid(SB),NOSPLIT,$0-8</code></span>
-<span class="codeline" id="line-171"><code>	MOVL	$SYS_getpid, AX</code></span>
-<span class="codeline" id="line-172"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-173"><code>	MOVQ	AX, ret+0(FP)</code></span>
-<span class="codeline" id="line-174"><code>	RET</code></span>
-<span class="codeline" id="line-175"><code></code></span>
-<span class="codeline" id="line-176"><code>TEXT ·tgkill(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-177"><code>	MOVQ	tgid+0(FP), DI</code></span>
-<span class="codeline" id="line-178"><code>	MOVQ	tid+8(FP), SI</code></span>
-<span class="codeline" id="line-179"><code>	MOVQ	sig+16(FP), DX</code></span>
-<span class="codeline" id="line-180"><code>	MOVL	$SYS_tgkill, AX</code></span>
-<span class="codeline" id="line-181"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-182"><code>	RET</code></span>
-<span class="codeline" id="line-183"><code></code></span>
-<span class="codeline" id="line-184"><code>TEXT runtime·setitimer(SB),NOSPLIT,$0-24</code></span>
-<span class="codeline" id="line-185"><code>	MOVL	mode+0(FP), DI</code></span>
-<span class="codeline" id="line-186"><code>	MOVQ	new+8(FP), SI</code></span>
-<span class="codeline" id="line-187"><code>	MOVQ	old+16(FP), DX</code></span>
-<span class="codeline" id="line-188"><code>	MOVL	$SYS_setittimer, AX</code></span>
-<span class="codeline" id="line-189"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-190"><code>	RET</code></span>
-<span class="codeline" id="line-191"><code></code></span>
-<span class="codeline" id="line-192"><code>TEXT runtime·timer_create(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-193"><code>	MOVL	clockid+0(FP), DI</code></span>
-<span class="codeline" id="line-194"><code>	MOVQ	sevp+8(FP), SI</code></span>
-<span class="codeline" id="line-195"><code>	MOVQ	timerid+16(FP), DX</code></span>
-<span class="codeline" id="line-196"><code>	MOVL	$SYS_timer_create, AX</code></span>
-<span class="codeline" id="line-197"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-198"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-199"><code>	RET</code></span>
-<span class="codeline" id="line-200"><code></code></span>
-<span class="codeline" id="line-201"><code>TEXT runtime·timer_settime(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-202"><code>	MOVL	timerid+0(FP), DI</code></span>
-<span class="codeline" id="line-203"><code>	MOVL	flags+4(FP), SI</code></span>
-<span class="codeline" id="line-204"><code>	MOVQ	new+8(FP), DX</code></span>
-<span class="codeline" id="line-205"><code>	MOVQ	old+16(FP), R10</code></span>
-<span class="codeline" id="line-206"><code>	MOVL	$SYS_timer_settime, AX</code></span>
-<span class="codeline" id="line-207"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-208"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-209"><code>	RET</code></span>
-<span class="codeline" id="line-210"><code></code></span>
-<span class="codeline" id="line-211"><code>TEXT runtime·timer_delete(SB),NOSPLIT,$0-12</code></span>
-<span class="codeline" id="line-212"><code>	MOVL	timerid+0(FP), DI</code></span>
-<span class="codeline" id="line-213"><code>	MOVL	$SYS_timer_delete, AX</code></span>
-<span class="codeline" id="line-214"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-215"><code>	MOVL	AX, ret+8(FP)</code></span>
-<span class="codeline" id="line-216"><code>	RET</code></span>
-<span class="codeline" id="line-217"><code></code></span>
-<span class="codeline" id="line-218"><code>TEXT runtime·mincore(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-219"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-220"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-221"><code>	MOVQ	dst+16(FP), DX</code></span>
-<span class="codeline" id="line-222"><code>	MOVL	$SYS_mincore, AX</code></span>
-<span class="codeline" id="line-223"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-224"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-225"><code>	RET</code></span>
-<span class="codeline" id="line-226"><code></code></span>
-<span class="codeline" id="line-227"><code>// func nanotime1() int64</code></span>
-<span class="codeline" id="line-228"><code>TEXT runtime·nanotime1(SB),NOSPLIT,$16-8</code></span>
-<span class="codeline" id="line-229"><code>	// We don't know how much stack space the VDSO code will need,</code></span>
-<span class="codeline" id="line-230"><code>	// so switch to g0.</code></span>
-<span class="codeline" id="line-231"><code>	// In particular, a kernel configured with CONFIG_OPTIMIZE_INLINING=n</code></span>
-<span class="codeline" id="line-232"><code>	// and hardening can use a full page of stack space in gettime_sym</code></span>
-<span class="codeline" id="line-233"><code>	// due to stack probes inserted to avoid stack/heap collisions.</code></span>
-<span class="codeline" id="line-234"><code>	// See issue #20427.</code></span>
-<span class="codeline" id="line-235"><code></code></span>
-<span class="codeline" id="line-236"><code>	MOVQ	SP, R12	// Save old SP; R12 unchanged by C code.</code></span>
-<span class="codeline" id="line-237"><code></code></span>
-<span class="codeline" id="line-238"><code>	MOVQ	g_m(R14), BX // BX unchanged by C code.</code></span>
-<span class="codeline" id="line-239"><code></code></span>
-<span class="codeline" id="line-240"><code>	// Set vdsoPC and vdsoSP for SIGPROF traceback.</code></span>
-<span class="codeline" id="line-241"><code>	// Save the old values on stack and restore them on exit,</code></span>
-<span class="codeline" id="line-242"><code>	// so this function is reentrant.</code></span>
-<span class="codeline" id="line-243"><code>	MOVQ	m_vdsoPC(BX), CX</code></span>
-<span class="codeline" id="line-244"><code>	MOVQ	m_vdsoSP(BX), DX</code></span>
-<span class="codeline" id="line-245"><code>	MOVQ	CX, 0(SP)</code></span>
-<span class="codeline" id="line-246"><code>	MOVQ	DX, 8(SP)</code></span>
+<span class="codeline" id="line-168"><code>	MOVQ	AX, ret+0(FP)</code></span>
+<span class="codeline" id="line-169"><code>	RET</code></span>
+<span class="codeline" id="line-170"><code></code></span>
+<span class="codeline" id="line-171"><code>TEXT ·tgkill(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-172"><code>	MOVQ	tgid+0(FP), DI</code></span>
+<span class="codeline" id="line-173"><code>	MOVQ	tid+8(FP), SI</code></span>
+<span class="codeline" id="line-174"><code>	MOVQ	sig+16(FP), DX</code></span>
+<span class="codeline" id="line-175"><code>	MOVL	$SYS_tgkill, AX</code></span>
+<span class="codeline" id="line-176"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-177"><code>	RET</code></span>
+<span class="codeline" id="line-178"><code></code></span>
+<span class="codeline" id="line-179"><code>TEXT runtime·setitimer(SB),NOSPLIT,$0-24</code></span>
+<span class="codeline" id="line-180"><code>	MOVL	mode+0(FP), DI</code></span>
+<span class="codeline" id="line-181"><code>	MOVQ	new+8(FP), SI</code></span>
+<span class="codeline" id="line-182"><code>	MOVQ	old+16(FP), DX</code></span>
+<span class="codeline" id="line-183"><code>	MOVL	$SYS_setittimer, AX</code></span>
+<span class="codeline" id="line-184"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-185"><code>	RET</code></span>
+<span class="codeline" id="line-186"><code></code></span>
+<span class="codeline" id="line-187"><code>TEXT runtime·timer_create(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-188"><code>	MOVL	clockid+0(FP), DI</code></span>
+<span class="codeline" id="line-189"><code>	MOVQ	sevp+8(FP), SI</code></span>
+<span class="codeline" id="line-190"><code>	MOVQ	timerid+16(FP), DX</code></span>
+<span class="codeline" id="line-191"><code>	MOVL	$SYS_timer_create, AX</code></span>
+<span class="codeline" id="line-192"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-193"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-194"><code>	RET</code></span>
+<span class="codeline" id="line-195"><code></code></span>
+<span class="codeline" id="line-196"><code>TEXT runtime·timer_settime(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-197"><code>	MOVL	timerid+0(FP), DI</code></span>
+<span class="codeline" id="line-198"><code>	MOVL	flags+4(FP), SI</code></span>
+<span class="codeline" id="line-199"><code>	MOVQ	new+8(FP), DX</code></span>
+<span class="codeline" id="line-200"><code>	MOVQ	old+16(FP), R10</code></span>
+<span class="codeline" id="line-201"><code>	MOVL	$SYS_timer_settime, AX</code></span>
+<span class="codeline" id="line-202"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-203"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-204"><code>	RET</code></span>
+<span class="codeline" id="line-205"><code></code></span>
+<span class="codeline" id="line-206"><code>TEXT runtime·timer_delete(SB),NOSPLIT,$0-12</code></span>
+<span class="codeline" id="line-207"><code>	MOVL	timerid+0(FP), DI</code></span>
+<span class="codeline" id="line-208"><code>	MOVL	$SYS_timer_delete, AX</code></span>
+<span class="codeline" id="line-209"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-210"><code>	MOVL	AX, ret+8(FP)</code></span>
+<span class="codeline" id="line-211"><code>	RET</code></span>
+<span class="codeline" id="line-212"><code></code></span>
+<span class="codeline" id="line-213"><code>TEXT runtime·mincore(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-214"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-215"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-216"><code>	MOVQ	dst+16(FP), DX</code></span>
+<span class="codeline" id="line-217"><code>	MOVL	$SYS_mincore, AX</code></span>
+<span class="codeline" id="line-218"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-219"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-220"><code>	RET</code></span>
+<span class="codeline" id="line-221"><code></code></span>
+<span class="codeline" id="line-222"><code>// func nanotime1() int64</code></span>
+<span class="codeline" id="line-223"><code>TEXT runtime·nanotime1(SB),NOSPLIT,$16-8</code></span>
+<span class="codeline" id="line-224"><code>	// We don't know how much stack space the VDSO code will need,</code></span>
+<span class="codeline" id="line-225"><code>	// so switch to g0.</code></span>
+<span class="codeline" id="line-226"><code>	// In particular, a kernel configured with CONFIG_OPTIMIZE_INLINING=n</code></span>
+<span class="codeline" id="line-227"><code>	// and hardening can use a full page of stack space in gettime_sym</code></span>
+<span class="codeline" id="line-228"><code>	// due to stack probes inserted to avoid stack/heap collisions.</code></span>
+<span class="codeline" id="line-229"><code>	// See issue #20427.</code></span>
+<span class="codeline" id="line-230"><code></code></span>
+<span class="codeline" id="line-231"><code>	MOVQ	SP, R12	// Save old SP; R12 unchanged by C code.</code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code>	MOVQ	g_m(R14), BX // BX unchanged by C code.</code></span>
+<span class="codeline" id="line-234"><code></code></span>
+<span class="codeline" id="line-235"><code>	// Set vdsoPC and vdsoSP for SIGPROF traceback.</code></span>
+<span class="codeline" id="line-236"><code>	// Save the old values on stack and restore them on exit,</code></span>
+<span class="codeline" id="line-237"><code>	// so this function is reentrant.</code></span>
+<span class="codeline" id="line-238"><code>	MOVQ	m_vdsoPC(BX), CX</code></span>
+<span class="codeline" id="line-239"><code>	MOVQ	m_vdsoSP(BX), DX</code></span>
+<span class="codeline" id="line-240"><code>	MOVQ	CX, 0(SP)</code></span>
+<span class="codeline" id="line-241"><code>	MOVQ	DX, 8(SP)</code></span>
+<span class="codeline" id="line-242"><code></code></span>
+<span class="codeline" id="line-243"><code>	LEAQ	ret+0(FP), DX</code></span>
+<span class="codeline" id="line-244"><code>	MOVQ	-8(DX), CX</code></span>
+<span class="codeline" id="line-245"><code>	MOVQ	CX, m_vdsoPC(BX)</code></span>
+<span class="codeline" id="line-246"><code>	MOVQ	DX, m_vdsoSP(BX)</code></span>
 <span class="codeline" id="line-247"><code></code></span>
-<span class="codeline" id="line-248"><code>	LEAQ	ret+0(FP), DX</code></span>
-<span class="codeline" id="line-249"><code>	MOVQ	-8(DX), CX</code></span>
-<span class="codeline" id="line-250"><code>	MOVQ	CX, m_vdsoPC(BX)</code></span>
-<span class="codeline" id="line-251"><code>	MOVQ	DX, m_vdsoSP(BX)</code></span>
-<span class="codeline" id="line-252"><code></code></span>
-<span class="codeline" id="line-253"><code>	CMPQ	R14, m_curg(BX)	// Only switch if on curg.</code></span>
-<span class="codeline" id="line-254"><code>	JNE	noswitch</code></span>
-<span class="codeline" id="line-255"><code></code></span>
-<span class="codeline" id="line-256"><code>	MOVQ	m_g0(BX), DX</code></span>
-<span class="codeline" id="line-257"><code>	MOVQ	(g_sched+gobuf_sp)(DX), SP	// Set SP to g0 stack</code></span>
-<span class="codeline" id="line-258"><code></code></span>
-<span class="codeline" id="line-259"><code>noswitch:</code></span>
-<span class="codeline" id="line-260"><code>	SUBQ	$16, SP		// Space for results</code></span>
-<span class="codeline" id="line-261"><code>	ANDQ	$~15, SP	// Align for C code</code></span>
-<span class="codeline" id="line-262"><code></code></span>
-<span class="codeline" id="line-263"><code>	MOVL	$1, DI // CLOCK_MONOTONIC</code></span>
-<span class="codeline" id="line-264"><code>	LEAQ	0(SP), SI</code></span>
-<span class="codeline" id="line-265"><code>	MOVQ	runtime·vdsoClockgettimeSym(SB), AX</code></span>
-<span class="codeline" id="line-266"><code>	CMPQ	AX, $0</code></span>
-<span class="codeline" id="line-267"><code>	JEQ	fallback</code></span>
-<span class="codeline" id="line-268"><code>	CALL	AX</code></span>
-<span class="codeline" id="line-269"><code>ret:</code></span>
-<span class="codeline" id="line-270"><code>	MOVQ	0(SP), AX	// sec</code></span>
-<span class="codeline" id="line-271"><code>	MOVQ	8(SP), DX	// nsec</code></span>
-<span class="codeline" id="line-272"><code>	MOVQ	R12, SP		// Restore real SP</code></span>
-<span class="codeline" id="line-273"><code>	// Restore vdsoPC, vdsoSP</code></span>
-<span class="codeline" id="line-274"><code>	// We don't worry about being signaled between the two stores.</code></span>
-<span class="codeline" id="line-275"><code>	// If we are not in a signal handler, we'll restore vdsoSP to 0,</code></span>
-<span class="codeline" id="line-276"><code>	// and no one will care about vdsoPC. If we are in a signal handler,</code></span>
-<span class="codeline" id="line-277"><code>	// we cannot receive another signal.</code></span>
-<span class="codeline" id="line-278"><code>	MOVQ	8(SP), CX</code></span>
-<span class="codeline" id="line-279"><code>	MOVQ	CX, m_vdsoSP(BX)</code></span>
-<span class="codeline" id="line-280"><code>	MOVQ	0(SP), CX</code></span>
-<span class="codeline" id="line-281"><code>	MOVQ	CX, m_vdsoPC(BX)</code></span>
-<span class="codeline" id="line-282"><code>	// sec is in AX, nsec in DX</code></span>
-<span class="codeline" id="line-283"><code>	// return nsec in AX</code></span>
-<span class="codeline" id="line-284"><code>	IMULQ	$1000000000, AX</code></span>
-<span class="codeline" id="line-285"><code>	ADDQ	DX, AX</code></span>
-<span class="codeline" id="line-286"><code>	MOVQ	AX, ret+0(FP)</code></span>
-<span class="codeline" id="line-287"><code>	RET</code></span>
-<span class="codeline" id="line-288"><code>fallback:</code></span>
-<span class="codeline" id="line-289"><code>	MOVQ	$SYS_clock_gettime, AX</code></span>
-<span class="codeline" id="line-290"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-291"><code>	JMP	ret</code></span>
-<span class="codeline" id="line-292"><code></code></span>
-<span class="codeline" id="line-293"><code>TEXT runtime·rtsigprocmask(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-294"><code>	MOVL	how+0(FP), DI</code></span>
-<span class="codeline" id="line-295"><code>	MOVQ	new+8(FP), SI</code></span>
-<span class="codeline" id="line-296"><code>	MOVQ	old+16(FP), DX</code></span>
-<span class="codeline" id="line-297"><code>	MOVL	size+24(FP), R10</code></span>
-<span class="codeline" id="line-298"><code>	MOVL	$SYS_rt_sigprocmask, AX</code></span>
-<span class="codeline" id="line-299"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-300"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-301"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-302"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
-<span class="codeline" id="line-303"><code>	RET</code></span>
-<span class="codeline" id="line-304"><code></code></span>
-<span class="codeline" id="line-305"><code>TEXT runtime·rt_sigaction(SB),NOSPLIT,$0-36</code></span>
-<span class="codeline" id="line-306"><code>	MOVQ	sig+0(FP), DI</code></span>
-<span class="codeline" id="line-307"><code>	MOVQ	new+8(FP), SI</code></span>
-<span class="codeline" id="line-308"><code>	MOVQ	old+16(FP), DX</code></span>
-<span class="codeline" id="line-309"><code>	MOVQ	size+24(FP), R10</code></span>
-<span class="codeline" id="line-310"><code>	MOVL	$SYS_rt_sigaction, AX</code></span>
-<span class="codeline" id="line-311"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-312"><code>	MOVL	AX, ret+32(FP)</code></span>
-<span class="codeline" id="line-313"><code>	RET</code></span>
-<span class="codeline" id="line-314"><code></code></span>
-<span class="codeline" id="line-315"><code>// Call the function stored in _cgo_sigaction using the GCC calling convention.</code></span>
-<span class="codeline" id="line-316"><code>TEXT runtime·callCgoSigaction(SB),NOSPLIT,$16</code></span>
-<span class="codeline" id="line-317"><code>	MOVQ	sig+0(FP), DI</code></span>
-<span class="codeline" id="line-318"><code>	MOVQ	new+8(FP), SI</code></span>
-<span class="codeline" id="line-319"><code>	MOVQ	old+16(FP), DX</code></span>
-<span class="codeline" id="line-320"><code>	MOVQ	_cgo_sigaction(SB), AX</code></span>
-<span class="codeline" id="line-321"><code>	MOVQ	SP, BX	// callee-saved</code></span>
-<span class="codeline" id="line-322"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
-<span class="codeline" id="line-323"><code>	CALL	AX</code></span>
-<span class="codeline" id="line-324"><code>	MOVQ	BX, SP</code></span>
-<span class="codeline" id="line-325"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-326"><code>	RET</code></span>
-<span class="codeline" id="line-327"><code></code></span>
-<span class="codeline" id="line-328"><code>TEXT runtime·sigfwd(SB),NOSPLIT,$0-32</code></span>
-<span class="codeline" id="line-329"><code>	MOVQ	fn+0(FP),    AX</code></span>
-<span class="codeline" id="line-330"><code>	MOVL	sig+8(FP),   DI</code></span>
-<span class="codeline" id="line-331"><code>	MOVQ	info+16(FP), SI</code></span>
-<span class="codeline" id="line-332"><code>	MOVQ	ctx+24(FP),  DX</code></span>
-<span class="codeline" id="line-333"><code>	PUSHQ	BP</code></span>
-<span class="codeline" id="line-334"><code>	MOVQ	SP, BP</code></span>
-<span class="codeline" id="line-335"><code>	ANDQ	$~15, SP     // alignment for x86_64 ABI</code></span>
-<span class="codeline" id="line-336"><code>	CALL	AX</code></span>
-<span class="codeline" id="line-337"><code>	MOVQ	BP, SP</code></span>
-<span class="codeline" id="line-338"><code>	POPQ	BP</code></span>
-<span class="codeline" id="line-339"><code>	RET</code></span>
-<span class="codeline" id="line-340"><code></code></span>
-<span class="codeline" id="line-341"><code>// Called using C ABI.</code></span>
-<span class="codeline" id="line-342"><code>TEXT runtime·sigtramp(SB),NOSPLIT|TOPFRAME,$0</code></span>
-<span class="codeline" id="line-343"><code>	// Transition from C ABI to Go ABI.</code></span>
-<span class="codeline" id="line-344"><code>	PUSH_REGS_HOST_TO_ABI0()</code></span>
-<span class="codeline" id="line-345"><code></code></span>
-<span class="codeline" id="line-346"><code>	// Set up ABIInternal environment: g in R14, cleared X15.</code></span>
-<span class="codeline" id="line-347"><code>	get_tls(R12)</code></span>
-<span class="codeline" id="line-348"><code>	MOVQ	g(R12), R14</code></span>
-<span class="codeline" id="line-349"><code>	PXOR	X15, X15</code></span>
-<span class="codeline" id="line-350"><code></code></span>
-<span class="codeline" id="line-351"><code>	// Reserve space for spill slots.</code></span>
-<span class="codeline" id="line-352"><code>	NOP	SP		// disable vet stack checking</code></span>
-<span class="codeline" id="line-353"><code>	ADJSP   $24</code></span>
-<span class="codeline" id="line-354"><code></code></span>
-<span class="codeline" id="line-355"><code>	// Call into the Go signal handler</code></span>
-<span class="codeline" id="line-356"><code>	MOVQ	DI, AX	// sig</code></span>
-<span class="codeline" id="line-357"><code>	MOVQ	SI, BX	// info</code></span>
-<span class="codeline" id="line-358"><code>	MOVQ	DX, CX	// ctx</code></span>
-<span class="codeline" id="line-359"><code>	CALL	·sigtrampgo&lt;ABIInternal&gt;(SB)</code></span>
-<span class="codeline" id="line-360"><code></code></span>
-<span class="codeline" id="line-361"><code>	ADJSP	$-24</code></span>
-<span class="codeline" id="line-362"><code></code></span>
-<span class="codeline" id="line-363"><code>        POP_REGS_HOST_TO_ABI0()</code></span>
-<span class="codeline" id="line-364"><code>	RET</code></span>
-<span class="codeline" id="line-365"><code></code></span>
-<span class="codeline" id="line-366"><code>// Called using C ABI.</code></span>
-<span class="codeline" id="line-367"><code>TEXT runtime·sigprofNonGoWrapper&lt;&gt;(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-368"><code>	// Transition from C ABI to Go ABI.</code></span>
-<span class="codeline" id="line-369"><code>	PUSH_REGS_HOST_TO_ABI0()</code></span>
-<span class="codeline" id="line-370"><code></code></span>
-<span class="codeline" id="line-371"><code>	// Set up ABIInternal environment: g in R14, cleared X15.</code></span>
-<span class="codeline" id="line-372"><code>	get_tls(R12)</code></span>
-<span class="codeline" id="line-373"><code>	MOVQ	g(R12), R14</code></span>
-<span class="codeline" id="line-374"><code>	PXOR	X15, X15</code></span>
-<span class="codeline" id="line-375"><code></code></span>
-<span class="codeline" id="line-376"><code>	// Reserve space for spill slots.</code></span>
-<span class="codeline" id="line-377"><code>	NOP	SP		// disable vet stack checking</code></span>
-<span class="codeline" id="line-378"><code>	ADJSP   $24</code></span>
-<span class="codeline" id="line-379"><code></code></span>
-<span class="codeline" id="line-380"><code>	// Call into the Go signal handler</code></span>
-<span class="codeline" id="line-381"><code>	MOVQ	DI, AX	// sig</code></span>
-<span class="codeline" id="line-382"><code>	MOVQ	SI, BX	// info</code></span>
-<span class="codeline" id="line-383"><code>	MOVQ	DX, CX	// ctx</code></span>
-<span class="codeline" id="line-384"><code>	CALL	·sigprofNonGo&lt;ABIInternal&gt;(SB)</code></span>
-<span class="codeline" id="line-385"><code></code></span>
-<span class="codeline" id="line-386"><code>	ADJSP	$-24</code></span>
-<span class="codeline" id="line-387"><code></code></span>
-<span class="codeline" id="line-388"><code>	POP_REGS_HOST_TO_ABI0()</code></span>
-<span class="codeline" id="line-389"><code>	RET</code></span>
-<span class="codeline" id="line-390"><code></code></span>
-<span class="codeline" id="line-391"><code>// Used instead of sigtramp in programs that use cgo.</code></span>
-<span class="codeline" id="line-392"><code>// Arguments from kernel are in DI, SI, DX.</code></span>
-<span class="codeline" id="line-393"><code>TEXT runtime·cgoSigtramp(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-394"><code>	// If no traceback function, do usual sigtramp.</code></span>
-<span class="codeline" id="line-395"><code>	MOVQ	runtime·cgoTraceback(SB), AX</code></span>
-<span class="codeline" id="line-396"><code>	TESTQ	AX, AX</code></span>
-<span class="codeline" id="line-397"><code>	JZ	sigtramp</code></span>
-<span class="codeline" id="line-398"><code></code></span>
-<span class="codeline" id="line-399"><code>	// If no traceback support function, which means that</code></span>
-<span class="codeline" id="line-400"><code>	// runtime/cgo was not linked in, do usual sigtramp.</code></span>
-<span class="codeline" id="line-401"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
+<span class="codeline" id="line-248"><code>	CMPQ	R14, m_curg(BX)	// Only switch if on curg.</code></span>
+<span class="codeline" id="line-249"><code>	JNE	noswitch</code></span>
+<span class="codeline" id="line-250"><code></code></span>
+<span class="codeline" id="line-251"><code>	MOVQ	m_g0(BX), DX</code></span>
+<span class="codeline" id="line-252"><code>	MOVQ	(g_sched+gobuf_sp)(DX), SP	// Set SP to g0 stack</code></span>
+<span class="codeline" id="line-253"><code></code></span>
+<span class="codeline" id="line-254"><code>noswitch:</code></span>
+<span class="codeline" id="line-255"><code>	SUBQ	$16, SP		// Space for results</code></span>
+<span class="codeline" id="line-256"><code>	ANDQ	$~15, SP	// Align for C code</code></span>
+<span class="codeline" id="line-257"><code></code></span>
+<span class="codeline" id="line-258"><code>	MOVL	$1, DI // CLOCK_MONOTONIC</code></span>
+<span class="codeline" id="line-259"><code>	LEAQ	0(SP), SI</code></span>
+<span class="codeline" id="line-260"><code>	MOVQ	runtime·vdsoClockgettimeSym(SB), AX</code></span>
+<span class="codeline" id="line-261"><code>	CMPQ	AX, $0</code></span>
+<span class="codeline" id="line-262"><code>	JEQ	fallback</code></span>
+<span class="codeline" id="line-263"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-264"><code>ret:</code></span>
+<span class="codeline" id="line-265"><code>	MOVQ	0(SP), AX	// sec</code></span>
+<span class="codeline" id="line-266"><code>	MOVQ	8(SP), DX	// nsec</code></span>
+<span class="codeline" id="line-267"><code>	MOVQ	R12, SP		// Restore real SP</code></span>
+<span class="codeline" id="line-268"><code>	// Restore vdsoPC, vdsoSP</code></span>
+<span class="codeline" id="line-269"><code>	// We don't worry about being signaled between the two stores.</code></span>
+<span class="codeline" id="line-270"><code>	// If we are not in a signal handler, we'll restore vdsoSP to 0,</code></span>
+<span class="codeline" id="line-271"><code>	// and no one will care about vdsoPC. If we are in a signal handler,</code></span>
+<span class="codeline" id="line-272"><code>	// we cannot receive another signal.</code></span>
+<span class="codeline" id="line-273"><code>	MOVQ	8(SP), CX</code></span>
+<span class="codeline" id="line-274"><code>	MOVQ	CX, m_vdsoSP(BX)</code></span>
+<span class="codeline" id="line-275"><code>	MOVQ	0(SP), CX</code></span>
+<span class="codeline" id="line-276"><code>	MOVQ	CX, m_vdsoPC(BX)</code></span>
+<span class="codeline" id="line-277"><code>	// sec is in AX, nsec in DX</code></span>
+<span class="codeline" id="line-278"><code>	// return nsec in AX</code></span>
+<span class="codeline" id="line-279"><code>	IMULQ	$1000000000, AX</code></span>
+<span class="codeline" id="line-280"><code>	ADDQ	DX, AX</code></span>
+<span class="codeline" id="line-281"><code>	MOVQ	AX, ret+0(FP)</code></span>
+<span class="codeline" id="line-282"><code>	RET</code></span>
+<span class="codeline" id="line-283"><code>fallback:</code></span>
+<span class="codeline" id="line-284"><code>	MOVQ	$SYS_clock_gettime, AX</code></span>
+<span class="codeline" id="line-285"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-286"><code>	JMP	ret</code></span>
+<span class="codeline" id="line-287"><code></code></span>
+<span class="codeline" id="line-288"><code>TEXT runtime·rtsigprocmask(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-289"><code>	MOVL	how+0(FP), DI</code></span>
+<span class="codeline" id="line-290"><code>	MOVQ	new+8(FP), SI</code></span>
+<span class="codeline" id="line-291"><code>	MOVQ	old+16(FP), DX</code></span>
+<span class="codeline" id="line-292"><code>	MOVL	size+24(FP), R10</code></span>
+<span class="codeline" id="line-293"><code>	MOVL	$SYS_rt_sigprocmask, AX</code></span>
+<span class="codeline" id="line-294"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-295"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-296"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-297"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
+<span class="codeline" id="line-298"><code>	RET</code></span>
+<span class="codeline" id="line-299"><code></code></span>
+<span class="codeline" id="line-300"><code>TEXT runtime·rt_sigaction(SB),NOSPLIT,$0-36</code></span>
+<span class="codeline" id="line-301"><code>	MOVQ	sig+0(FP), DI</code></span>
+<span class="codeline" id="line-302"><code>	MOVQ	new+8(FP), SI</code></span>
+<span class="codeline" id="line-303"><code>	MOVQ	old+16(FP), DX</code></span>
+<span class="codeline" id="line-304"><code>	MOVQ	size+24(FP), R10</code></span>
+<span class="codeline" id="line-305"><code>	MOVL	$SYS_rt_sigaction, AX</code></span>
+<span class="codeline" id="line-306"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-307"><code>	MOVL	AX, ret+32(FP)</code></span>
+<span class="codeline" id="line-308"><code>	RET</code></span>
+<span class="codeline" id="line-309"><code></code></span>
+<span class="codeline" id="line-310"><code>// Call the function stored in _cgo_sigaction using the GCC calling convention.</code></span>
+<span class="codeline" id="line-311"><code>TEXT runtime·callCgoSigaction(SB),NOSPLIT,$16</code></span>
+<span class="codeline" id="line-312"><code>	MOVQ	sig+0(FP), DI</code></span>
+<span class="codeline" id="line-313"><code>	MOVQ	new+8(FP), SI</code></span>
+<span class="codeline" id="line-314"><code>	MOVQ	old+16(FP), DX</code></span>
+<span class="codeline" id="line-315"><code>	MOVQ	_cgo_sigaction(SB), AX</code></span>
+<span class="codeline" id="line-316"><code>	MOVQ	SP, BX	// callee-saved</code></span>
+<span class="codeline" id="line-317"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
+<span class="codeline" id="line-318"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-319"><code>	MOVQ	BX, SP</code></span>
+<span class="codeline" id="line-320"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-321"><code>	RET</code></span>
+<span class="codeline" id="line-322"><code></code></span>
+<span class="codeline" id="line-323"><code>TEXT runtime·sigfwd(SB),NOSPLIT,$0-32</code></span>
+<span class="codeline" id="line-324"><code>	MOVQ	fn+0(FP),    AX</code></span>
+<span class="codeline" id="line-325"><code>	MOVL	sig+8(FP),   DI</code></span>
+<span class="codeline" id="line-326"><code>	MOVQ	info+16(FP), SI</code></span>
+<span class="codeline" id="line-327"><code>	MOVQ	ctx+24(FP),  DX</code></span>
+<span class="codeline" id="line-328"><code>	MOVQ	SP, BX		// callee-saved</code></span>
+<span class="codeline" id="line-329"><code>	ANDQ	$~15, SP     // alignment for x86_64 ABI</code></span>
+<span class="codeline" id="line-330"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-331"><code>	MOVQ	BX, SP</code></span>
+<span class="codeline" id="line-332"><code>	RET</code></span>
+<span class="codeline" id="line-333"><code></code></span>
+<span class="codeline" id="line-334"><code>// Called using C ABI.</code></span>
+<span class="codeline" id="line-335"><code>TEXT runtime·sigtramp(SB),NOSPLIT|TOPFRAME|NOFRAME,$0</code></span>
+<span class="codeline" id="line-336"><code>	// Transition from C ABI to Go ABI.</code></span>
+<span class="codeline" id="line-337"><code>	PUSH_REGS_HOST_TO_ABI0()</code></span>
+<span class="codeline" id="line-338"><code></code></span>
+<span class="codeline" id="line-339"><code>	// Set up ABIInternal environment: g in R14, cleared X15.</code></span>
+<span class="codeline" id="line-340"><code>	get_tls(R12)</code></span>
+<span class="codeline" id="line-341"><code>	MOVQ	g(R12), R14</code></span>
+<span class="codeline" id="line-342"><code>	PXOR	X15, X15</code></span>
+<span class="codeline" id="line-343"><code></code></span>
+<span class="codeline" id="line-344"><code>	// Reserve space for spill slots.</code></span>
+<span class="codeline" id="line-345"><code>	NOP	SP		// disable vet stack checking</code></span>
+<span class="codeline" id="line-346"><code>	ADJSP   $24</code></span>
+<span class="codeline" id="line-347"><code></code></span>
+<span class="codeline" id="line-348"><code>	// Call into the Go signal handler</code></span>
+<span class="codeline" id="line-349"><code>	MOVQ	DI, AX	// sig</code></span>
+<span class="codeline" id="line-350"><code>	MOVQ	SI, BX	// info</code></span>
+<span class="codeline" id="line-351"><code>	MOVQ	DX, CX	// ctx</code></span>
+<span class="codeline" id="line-352"><code>	CALL	·sigtrampgo&lt;ABIInternal&gt;(SB)</code></span>
+<span class="codeline" id="line-353"><code></code></span>
+<span class="codeline" id="line-354"><code>	ADJSP	$-24</code></span>
+<span class="codeline" id="line-355"><code></code></span>
+<span class="codeline" id="line-356"><code>	POP_REGS_HOST_TO_ABI0()</code></span>
+<span class="codeline" id="line-357"><code>	RET</code></span>
+<span class="codeline" id="line-358"><code></code></span>
+<span class="codeline" id="line-359"><code>// Called using C ABI.</code></span>
+<span class="codeline" id="line-360"><code>TEXT runtime·sigprofNonGoWrapper&lt;&gt;(SB),NOSPLIT|NOFRAME,$0</code></span>
+<span class="codeline" id="line-361"><code>	// Transition from C ABI to Go ABI.</code></span>
+<span class="codeline" id="line-362"><code>	PUSH_REGS_HOST_TO_ABI0()</code></span>
+<span class="codeline" id="line-363"><code></code></span>
+<span class="codeline" id="line-364"><code>	// Set up ABIInternal environment: g in R14, cleared X15.</code></span>
+<span class="codeline" id="line-365"><code>	get_tls(R12)</code></span>
+<span class="codeline" id="line-366"><code>	MOVQ	g(R12), R14</code></span>
+<span class="codeline" id="line-367"><code>	PXOR	X15, X15</code></span>
+<span class="codeline" id="line-368"><code></code></span>
+<span class="codeline" id="line-369"><code>	// Reserve space for spill slots.</code></span>
+<span class="codeline" id="line-370"><code>	NOP	SP		// disable vet stack checking</code></span>
+<span class="codeline" id="line-371"><code>	ADJSP   $24</code></span>
+<span class="codeline" id="line-372"><code></code></span>
+<span class="codeline" id="line-373"><code>	// Call into the Go signal handler</code></span>
+<span class="codeline" id="line-374"><code>	MOVQ	DI, AX	// sig</code></span>
+<span class="codeline" id="line-375"><code>	MOVQ	SI, BX	// info</code></span>
+<span class="codeline" id="line-376"><code>	MOVQ	DX, CX	// ctx</code></span>
+<span class="codeline" id="line-377"><code>	CALL	·sigprofNonGo&lt;ABIInternal&gt;(SB)</code></span>
+<span class="codeline" id="line-378"><code></code></span>
+<span class="codeline" id="line-379"><code>	ADJSP	$-24</code></span>
+<span class="codeline" id="line-380"><code></code></span>
+<span class="codeline" id="line-381"><code>	POP_REGS_HOST_TO_ABI0()</code></span>
+<span class="codeline" id="line-382"><code>	RET</code></span>
+<span class="codeline" id="line-383"><code></code></span>
+<span class="codeline" id="line-384"><code>// Used instead of sigtramp in programs that use cgo.</code></span>
+<span class="codeline" id="line-385"><code>// Arguments from kernel are in DI, SI, DX.</code></span>
+<span class="codeline" id="line-386"><code>TEXT runtime·cgoSigtramp(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-387"><code>	// If no traceback function, do usual sigtramp.</code></span>
+<span class="codeline" id="line-388"><code>	MOVQ	runtime·cgoTraceback(SB), AX</code></span>
+<span class="codeline" id="line-389"><code>	TESTQ	AX, AX</code></span>
+<span class="codeline" id="line-390"><code>	JZ	sigtramp</code></span>
+<span class="codeline" id="line-391"><code></code></span>
+<span class="codeline" id="line-392"><code>	// If no traceback support function, which means that</code></span>
+<span class="codeline" id="line-393"><code>	// runtime/cgo was not linked in, do usual sigtramp.</code></span>
+<span class="codeline" id="line-394"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
+<span class="codeline" id="line-395"><code>	TESTQ	AX, AX</code></span>
+<span class="codeline" id="line-396"><code>	JZ	sigtramp</code></span>
+<span class="codeline" id="line-397"><code></code></span>
+<span class="codeline" id="line-398"><code>	// Figure out if we are currently in a cgo call.</code></span>
+<span class="codeline" id="line-399"><code>	// If not, just do usual sigtramp.</code></span>
+<span class="codeline" id="line-400"><code>	get_tls(CX)</code></span>
+<span class="codeline" id="line-401"><code>	MOVQ	g(CX),AX</code></span>
 <span class="codeline" id="line-402"><code>	TESTQ	AX, AX</code></span>
-<span class="codeline" id="line-403"><code>	JZ	sigtramp</code></span>
-<span class="codeline" id="line-404"><code></code></span>
-<span class="codeline" id="line-405"><code>	// Figure out if we are currently in a cgo call.</code></span>
-<span class="codeline" id="line-406"><code>	// If not, just do usual sigtramp.</code></span>
-<span class="codeline" id="line-407"><code>	get_tls(CX)</code></span>
-<span class="codeline" id="line-408"><code>	MOVQ	g(CX),AX</code></span>
-<span class="codeline" id="line-409"><code>	TESTQ	AX, AX</code></span>
-<span class="codeline" id="line-410"><code>	JZ	sigtrampnog     // g == nil</code></span>
-<span class="codeline" id="line-411"><code>	MOVQ	g_m(AX), AX</code></span>
-<span class="codeline" id="line-412"><code>	TESTQ	AX, AX</code></span>
-<span class="codeline" id="line-413"><code>	JZ	sigtramp        // g.m == nil</code></span>
-<span class="codeline" id="line-414"><code>	MOVL	m_ncgo(AX), CX</code></span>
-<span class="codeline" id="line-415"><code>	TESTL	CX, CX</code></span>
-<span class="codeline" id="line-416"><code>	JZ	sigtramp        // g.m.ncgo == 0</code></span>
-<span class="codeline" id="line-417"><code>	MOVQ	m_curg(AX), CX</code></span>
-<span class="codeline" id="line-418"><code>	TESTQ	CX, CX</code></span>
-<span class="codeline" id="line-419"><code>	JZ	sigtramp        // g.m.curg == nil</code></span>
-<span class="codeline" id="line-420"><code>	MOVQ	g_syscallsp(CX), CX</code></span>
-<span class="codeline" id="line-421"><code>	TESTQ	CX, CX</code></span>
-<span class="codeline" id="line-422"><code>	JZ	sigtramp        // g.m.curg.syscallsp == 0</code></span>
-<span class="codeline" id="line-423"><code>	MOVQ	m_cgoCallers(AX), R8</code></span>
-<span class="codeline" id="line-424"><code>	TESTQ	R8, R8</code></span>
-<span class="codeline" id="line-425"><code>	JZ	sigtramp        // g.m.cgoCallers == nil</code></span>
-<span class="codeline" id="line-426"><code>	MOVL	m_cgoCallersUse(AX), CX</code></span>
-<span class="codeline" id="line-427"><code>	TESTL	CX, CX</code></span>
-<span class="codeline" id="line-428"><code>	JNZ	sigtramp	// g.m.cgoCallersUse != 0</code></span>
-<span class="codeline" id="line-429"><code></code></span>
-<span class="codeline" id="line-430"><code>	// Jump to a function in runtime/cgo.</code></span>
-<span class="codeline" id="line-431"><code>	// That function, written in C, will call the user's traceback</code></span>
-<span class="codeline" id="line-432"><code>	// function with proper unwind info, and will then call back here.</code></span>
-<span class="codeline" id="line-433"><code>	// The first three arguments, and the fifth, are already in registers.</code></span>
-<span class="codeline" id="line-434"><code>	// Set the two remaining arguments now.</code></span>
-<span class="codeline" id="line-435"><code>	MOVQ	runtime·cgoTraceback(SB), CX</code></span>
-<span class="codeline" id="line-436"><code>	MOVQ	$runtime·sigtramp(SB), R9</code></span>
-<span class="codeline" id="line-437"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
-<span class="codeline" id="line-438"><code>	JMP	AX</code></span>
-<span class="codeline" id="line-439"><code></code></span>
-<span class="codeline" id="line-440"><code>sigtramp:</code></span>
-<span class="codeline" id="line-441"><code>	JMP	runtime·sigtramp(SB)</code></span>
-<span class="codeline" id="line-442"><code></code></span>
-<span class="codeline" id="line-443"><code>sigtrampnog:</code></span>
-<span class="codeline" id="line-444"><code>	// Signal arrived on a non-Go thread. If this is SIGPROF, get a</code></span>
-<span class="codeline" id="line-445"><code>	// stack trace.</code></span>
-<span class="codeline" id="line-446"><code>	CMPL	DI, $27 // 27 == SIGPROF</code></span>
-<span class="codeline" id="line-447"><code>	JNZ	sigtramp</code></span>
-<span class="codeline" id="line-448"><code></code></span>
-<span class="codeline" id="line-449"><code>	// Lock sigprofCallersUse.</code></span>
-<span class="codeline" id="line-450"><code>	MOVL	$0, AX</code></span>
-<span class="codeline" id="line-451"><code>	MOVL	$1, CX</code></span>
-<span class="codeline" id="line-452"><code>	MOVQ	$runtime·sigprofCallersUse(SB), R11</code></span>
-<span class="codeline" id="line-453"><code>	LOCK</code></span>
-<span class="codeline" id="line-454"><code>	CMPXCHGL	CX, 0(R11)</code></span>
-<span class="codeline" id="line-455"><code>	JNZ	sigtramp  // Skip stack trace if already locked.</code></span>
-<span class="codeline" id="line-456"><code></code></span>
-<span class="codeline" id="line-457"><code>	// Jump to the traceback function in runtime/cgo.</code></span>
-<span class="codeline" id="line-458"><code>	// It will call back to sigprofNonGo, via sigprofNonGoWrapper, to convert</code></span>
-<span class="codeline" id="line-459"><code>	// the arguments to the Go calling convention.</code></span>
-<span class="codeline" id="line-460"><code>	// First three arguments to traceback function are in registers already.</code></span>
-<span class="codeline" id="line-461"><code>	MOVQ	runtime·cgoTraceback(SB), CX</code></span>
-<span class="codeline" id="line-462"><code>	MOVQ	$runtime·sigprofCallers(SB), R8</code></span>
-<span class="codeline" id="line-463"><code>	MOVQ	$runtime·sigprofNonGoWrapper&lt;&gt;(SB), R9</code></span>
-<span class="codeline" id="line-464"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
-<span class="codeline" id="line-465"><code>	JMP	AX</code></span>
-<span class="codeline" id="line-466"><code></code></span>
-<span class="codeline" id="line-467"><code>// For cgo unwinding to work, this function must look precisely like</code></span>
-<span class="codeline" id="line-468"><code>// the one in glibc.  The glibc source code is:</code></span>
-<span class="codeline" id="line-469"><code>// https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/unix/sysv/linux/x86_64/sigaction.c</code></span>
-<span class="codeline" id="line-470"><code>// The code that cares about the precise instructions used is:</code></span>
-<span class="codeline" id="line-471"><code>// https://gcc.gnu.org/viewcvs/gcc/trunk/libgcc/config/i386/linux-unwind.h?revision=219188&amp;view=markup</code></span>
-<span class="codeline" id="line-472"><code>TEXT runtime·sigreturn(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-473"><code>	MOVQ	$SYS_rt_sigreturn, AX</code></span>
-<span class="codeline" id="line-474"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-475"><code>	INT $3	// not reached</code></span>
-<span class="codeline" id="line-476"><code></code></span>
-<span class="codeline" id="line-477"><code>TEXT runtime·sysMmap(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-478"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-479"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-480"><code>	MOVL	prot+16(FP), DX</code></span>
-<span class="codeline" id="line-481"><code>	MOVL	flags+20(FP), R10</code></span>
-<span class="codeline" id="line-482"><code>	MOVL	fd+24(FP), R8</code></span>
-<span class="codeline" id="line-483"><code>	MOVL	off+28(FP), R9</code></span>
-<span class="codeline" id="line-484"><code></code></span>
-<span class="codeline" id="line-485"><code>	MOVL	$SYS_mmap, AX</code></span>
-<span class="codeline" id="line-486"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-487"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-488"><code>	JLS	ok</code></span>
-<span class="codeline" id="line-489"><code>	NOTQ	AX</code></span>
-<span class="codeline" id="line-490"><code>	INCQ	AX</code></span>
-<span class="codeline" id="line-491"><code>	MOVQ	$0, p+32(FP)</code></span>
-<span class="codeline" id="line-492"><code>	MOVQ	AX, err+40(FP)</code></span>
-<span class="codeline" id="line-493"><code>	RET</code></span>
-<span class="codeline" id="line-494"><code>ok:</code></span>
-<span class="codeline" id="line-495"><code>	MOVQ	AX, p+32(FP)</code></span>
-<span class="codeline" id="line-496"><code>	MOVQ	$0, err+40(FP)</code></span>
-<span class="codeline" id="line-497"><code>	RET</code></span>
-<span class="codeline" id="line-498"><code></code></span>
-<span class="codeline" id="line-499"><code>// Call the function stored in _cgo_mmap using the GCC calling convention.</code></span>
-<span class="codeline" id="line-500"><code>// This must be called on the system stack.</code></span>
-<span class="codeline" id="line-501"><code>TEXT runtime·callCgoMmap(SB),NOSPLIT,$16</code></span>
-<span class="codeline" id="line-502"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-503"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-504"><code>	MOVL	prot+16(FP), DX</code></span>
-<span class="codeline" id="line-505"><code>	MOVL	flags+20(FP), CX</code></span>
-<span class="codeline" id="line-506"><code>	MOVL	fd+24(FP), R8</code></span>
-<span class="codeline" id="line-507"><code>	MOVL	off+28(FP), R9</code></span>
-<span class="codeline" id="line-508"><code>	MOVQ	_cgo_mmap(SB), AX</code></span>
-<span class="codeline" id="line-509"><code>	MOVQ	SP, BX</code></span>
-<span class="codeline" id="line-510"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
-<span class="codeline" id="line-511"><code>	MOVQ	BX, 0(SP)</code></span>
-<span class="codeline" id="line-512"><code>	CALL	AX</code></span>
-<span class="codeline" id="line-513"><code>	MOVQ	0(SP), SP</code></span>
-<span class="codeline" id="line-514"><code>	MOVQ	AX, ret+32(FP)</code></span>
-<span class="codeline" id="line-515"><code>	RET</code></span>
-<span class="codeline" id="line-516"><code></code></span>
-<span class="codeline" id="line-517"><code>TEXT runtime·sysMunmap(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-518"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-519"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-520"><code>	MOVQ	$SYS_munmap, AX</code></span>
-<span class="codeline" id="line-521"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-522"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-523"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-524"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
-<span class="codeline" id="line-525"><code>	RET</code></span>
-<span class="codeline" id="line-526"><code></code></span>
-<span class="codeline" id="line-527"><code>// Call the function stored in _cgo_munmap using the GCC calling convention.</code></span>
-<span class="codeline" id="line-528"><code>// This must be called on the system stack.</code></span>
-<span class="codeline" id="line-529"><code>TEXT runtime·callCgoMunmap(SB),NOSPLIT,$16-16</code></span>
-<span class="codeline" id="line-530"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-531"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-532"><code>	MOVQ	_cgo_munmap(SB), AX</code></span>
-<span class="codeline" id="line-533"><code>	MOVQ	SP, BX</code></span>
-<span class="codeline" id="line-534"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
-<span class="codeline" id="line-535"><code>	MOVQ	BX, 0(SP)</code></span>
-<span class="codeline" id="line-536"><code>	CALL	AX</code></span>
-<span class="codeline" id="line-537"><code>	MOVQ	0(SP), SP</code></span>
-<span class="codeline" id="line-538"><code>	RET</code></span>
-<span class="codeline" id="line-539"><code></code></span>
-<span class="codeline" id="line-540"><code>TEXT runtime·madvise(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-541"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-542"><code>	MOVQ	n+8(FP), SI</code></span>
-<span class="codeline" id="line-543"><code>	MOVL	flags+16(FP), DX</code></span>
-<span class="codeline" id="line-544"><code>	MOVQ	$SYS_madvise, AX</code></span>
-<span class="codeline" id="line-545"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-546"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-547"><code>	RET</code></span>
-<span class="codeline" id="line-548"><code></code></span>
-<span class="codeline" id="line-549"><code>// int64 futex(int32 *uaddr, int32 op, int32 val,</code></span>
-<span class="codeline" id="line-550"><code>//	struct timespec *timeout, int32 *uaddr2, int32 val2);</code></span>
-<span class="codeline" id="line-551"><code>TEXT runtime·futex(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-552"><code>	MOVQ	addr+0(FP), DI</code></span>
-<span class="codeline" id="line-553"><code>	MOVL	op+8(FP), SI</code></span>
-<span class="codeline" id="line-554"><code>	MOVL	val+12(FP), DX</code></span>
-<span class="codeline" id="line-555"><code>	MOVQ	ts+16(FP), R10</code></span>
-<span class="codeline" id="line-556"><code>	MOVQ	addr2+24(FP), R8</code></span>
-<span class="codeline" id="line-557"><code>	MOVL	val3+32(FP), R9</code></span>
-<span class="codeline" id="line-558"><code>	MOVL	$SYS_futex, AX</code></span>
-<span class="codeline" id="line-559"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-560"><code>	MOVL	AX, ret+40(FP)</code></span>
-<span class="codeline" id="line-561"><code>	RET</code></span>
-<span class="codeline" id="line-562"><code></code></span>
-<span class="codeline" id="line-563"><code>// int32 clone(int32 flags, void *stk, M *mp, G *gp, void (*fn)(void));</code></span>
-<span class="codeline" id="line-564"><code>TEXT runtime·clone(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-565"><code>	MOVL	flags+0(FP), DI</code></span>
-<span class="codeline" id="line-566"><code>	MOVQ	stk+8(FP), SI</code></span>
-<span class="codeline" id="line-567"><code>	MOVQ	$0, DX</code></span>
-<span class="codeline" id="line-568"><code>	MOVQ	$0, R10</code></span>
-<span class="codeline" id="line-569"><code>	MOVQ    $0, R8</code></span>
-<span class="codeline" id="line-570"><code>	// Copy mp, gp, fn off parent stack for use by child.</code></span>
-<span class="codeline" id="line-571"><code>	// Careful: Linux system call clobbers CX and R11.</code></span>
-<span class="codeline" id="line-572"><code>	MOVQ	mp+16(FP), R13</code></span>
-<span class="codeline" id="line-573"><code>	MOVQ	gp+24(FP), R9</code></span>
-<span class="codeline" id="line-574"><code>	MOVQ	fn+32(FP), R12</code></span>
-<span class="codeline" id="line-575"><code>	CMPQ	R13, $0    // m</code></span>
+<span class="codeline" id="line-403"><code>	JZ	sigtrampnog     // g == nil</code></span>
+<span class="codeline" id="line-404"><code>	MOVQ	g_m(AX), AX</code></span>
+<span class="codeline" id="line-405"><code>	TESTQ	AX, AX</code></span>
+<span class="codeline" id="line-406"><code>	JZ	sigtramp        // g.m == nil</code></span>
+<span class="codeline" id="line-407"><code>	MOVL	m_ncgo(AX), CX</code></span>
+<span class="codeline" id="line-408"><code>	TESTL	CX, CX</code></span>
+<span class="codeline" id="line-409"><code>	JZ	sigtramp        // g.m.ncgo == 0</code></span>
+<span class="codeline" id="line-410"><code>	MOVQ	m_curg(AX), CX</code></span>
+<span class="codeline" id="line-411"><code>	TESTQ	CX, CX</code></span>
+<span class="codeline" id="line-412"><code>	JZ	sigtramp        // g.m.curg == nil</code></span>
+<span class="codeline" id="line-413"><code>	MOVQ	g_syscallsp(CX), CX</code></span>
+<span class="codeline" id="line-414"><code>	TESTQ	CX, CX</code></span>
+<span class="codeline" id="line-415"><code>	JZ	sigtramp        // g.m.curg.syscallsp == 0</code></span>
+<span class="codeline" id="line-416"><code>	MOVQ	m_cgoCallers(AX), R8</code></span>
+<span class="codeline" id="line-417"><code>	TESTQ	R8, R8</code></span>
+<span class="codeline" id="line-418"><code>	JZ	sigtramp        // g.m.cgoCallers == nil</code></span>
+<span class="codeline" id="line-419"><code>	MOVL	m_cgoCallersUse(AX), CX</code></span>
+<span class="codeline" id="line-420"><code>	TESTL	CX, CX</code></span>
+<span class="codeline" id="line-421"><code>	JNZ	sigtramp	// g.m.cgoCallersUse != 0</code></span>
+<span class="codeline" id="line-422"><code></code></span>
+<span class="codeline" id="line-423"><code>	// Jump to a function in runtime/cgo.</code></span>
+<span class="codeline" id="line-424"><code>	// That function, written in C, will call the user's traceback</code></span>
+<span class="codeline" id="line-425"><code>	// function with proper unwind info, and will then call back here.</code></span>
+<span class="codeline" id="line-426"><code>	// The first three arguments, and the fifth, are already in registers.</code></span>
+<span class="codeline" id="line-427"><code>	// Set the two remaining arguments now.</code></span>
+<span class="codeline" id="line-428"><code>	MOVQ	runtime·cgoTraceback(SB), CX</code></span>
+<span class="codeline" id="line-429"><code>	MOVQ	$runtime·sigtramp(SB), R9</code></span>
+<span class="codeline" id="line-430"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
+<span class="codeline" id="line-431"><code>	JMP	AX</code></span>
+<span class="codeline" id="line-432"><code></code></span>
+<span class="codeline" id="line-433"><code>sigtramp:</code></span>
+<span class="codeline" id="line-434"><code>	JMP	runtime·sigtramp(SB)</code></span>
+<span class="codeline" id="line-435"><code></code></span>
+<span class="codeline" id="line-436"><code>sigtrampnog:</code></span>
+<span class="codeline" id="line-437"><code>	// Signal arrived on a non-Go thread. If this is SIGPROF, get a</code></span>
+<span class="codeline" id="line-438"><code>	// stack trace.</code></span>
+<span class="codeline" id="line-439"><code>	CMPL	DI, $27 // 27 == SIGPROF</code></span>
+<span class="codeline" id="line-440"><code>	JNZ	sigtramp</code></span>
+<span class="codeline" id="line-441"><code></code></span>
+<span class="codeline" id="line-442"><code>	// Lock sigprofCallersUse.</code></span>
+<span class="codeline" id="line-443"><code>	MOVL	$0, AX</code></span>
+<span class="codeline" id="line-444"><code>	MOVL	$1, CX</code></span>
+<span class="codeline" id="line-445"><code>	MOVQ	$runtime·sigprofCallersUse(SB), R11</code></span>
+<span class="codeline" id="line-446"><code>	LOCK</code></span>
+<span class="codeline" id="line-447"><code>	CMPXCHGL	CX, 0(R11)</code></span>
+<span class="codeline" id="line-448"><code>	JNZ	sigtramp  // Skip stack trace if already locked.</code></span>
+<span class="codeline" id="line-449"><code></code></span>
+<span class="codeline" id="line-450"><code>	// Jump to the traceback function in runtime/cgo.</code></span>
+<span class="codeline" id="line-451"><code>	// It will call back to sigprofNonGo, via sigprofNonGoWrapper, to convert</code></span>
+<span class="codeline" id="line-452"><code>	// the arguments to the Go calling convention.</code></span>
+<span class="codeline" id="line-453"><code>	// First three arguments to traceback function are in registers already.</code></span>
+<span class="codeline" id="line-454"><code>	MOVQ	runtime·cgoTraceback(SB), CX</code></span>
+<span class="codeline" id="line-455"><code>	MOVQ	$runtime·sigprofCallers(SB), R8</code></span>
+<span class="codeline" id="line-456"><code>	MOVQ	$runtime·sigprofNonGoWrapper&lt;&gt;(SB), R9</code></span>
+<span class="codeline" id="line-457"><code>	MOVQ	_cgo_callers(SB), AX</code></span>
+<span class="codeline" id="line-458"><code>	JMP	AX</code></span>
+<span class="codeline" id="line-459"><code></code></span>
+<span class="codeline" id="line-460"><code>// For cgo unwinding to work, this function must look precisely like</code></span>
+<span class="codeline" id="line-461"><code>// the one in glibc. The glibc source code is:</code></span>
+<span class="codeline" id="line-462"><code>// https://sourceware.org/git/?p=glibc.git;a=blob;f=sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c;h=afdce87381228f0cf32fa9fa6c8c4efa5179065c#l80</code></span>
+<span class="codeline" id="line-463"><code>// The code that cares about the precise instructions used is:</code></span>
+<span class="codeline" id="line-464"><code>// https://gcc.gnu.org/git/?p=gcc.git;a=blob;f=libgcc/config/i386/linux-unwind.h;h=5486223d60272c73d5103b29ae592d2ee998e1cf#l49</code></span>
+<span class="codeline" id="line-465"><code>//</code></span>
+<span class="codeline" id="line-466"><code>// For gdb unwinding to work, this function must look precisely like the one in</code></span>
+<span class="codeline" id="line-467"><code>// glibc and must be named "__restore_rt" or contain the string "sigaction" in</code></span>
+<span class="codeline" id="line-468"><code>// the name. The gdb source code is:</code></span>
+<span class="codeline" id="line-469"><code>// https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=gdb/amd64-linux-tdep.c;h=cbbac1a0c64e1deb8181b9d0ff6404e328e2979d#l178</code></span>
+<span class="codeline" id="line-470"><code>TEXT runtime·sigreturn__sigaction(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-471"><code>	MOVQ	$SYS_rt_sigreturn, AX</code></span>
+<span class="codeline" id="line-472"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-473"><code>	INT $3	// not reached</code></span>
+<span class="codeline" id="line-474"><code></code></span>
+<span class="codeline" id="line-475"><code>TEXT runtime·sysMmap(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-476"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-477"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-478"><code>	MOVL	prot+16(FP), DX</code></span>
+<span class="codeline" id="line-479"><code>	MOVL	flags+20(FP), R10</code></span>
+<span class="codeline" id="line-480"><code>	MOVL	fd+24(FP), R8</code></span>
+<span class="codeline" id="line-481"><code>	MOVL	off+28(FP), R9</code></span>
+<span class="codeline" id="line-482"><code></code></span>
+<span class="codeline" id="line-483"><code>	MOVL	$SYS_mmap, AX</code></span>
+<span class="codeline" id="line-484"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-485"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-486"><code>	JLS	ok</code></span>
+<span class="codeline" id="line-487"><code>	NOTQ	AX</code></span>
+<span class="codeline" id="line-488"><code>	INCQ	AX</code></span>
+<span class="codeline" id="line-489"><code>	MOVQ	$0, p+32(FP)</code></span>
+<span class="codeline" id="line-490"><code>	MOVQ	AX, err+40(FP)</code></span>
+<span class="codeline" id="line-491"><code>	RET</code></span>
+<span class="codeline" id="line-492"><code>ok:</code></span>
+<span class="codeline" id="line-493"><code>	MOVQ	AX, p+32(FP)</code></span>
+<span class="codeline" id="line-494"><code>	MOVQ	$0, err+40(FP)</code></span>
+<span class="codeline" id="line-495"><code>	RET</code></span>
+<span class="codeline" id="line-496"><code></code></span>
+<span class="codeline" id="line-497"><code>// Call the function stored in _cgo_mmap using the GCC calling convention.</code></span>
+<span class="codeline" id="line-498"><code>// This must be called on the system stack.</code></span>
+<span class="codeline" id="line-499"><code>TEXT runtime·callCgoMmap(SB),NOSPLIT,$16</code></span>
+<span class="codeline" id="line-500"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-501"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-502"><code>	MOVL	prot+16(FP), DX</code></span>
+<span class="codeline" id="line-503"><code>	MOVL	flags+20(FP), CX</code></span>
+<span class="codeline" id="line-504"><code>	MOVL	fd+24(FP), R8</code></span>
+<span class="codeline" id="line-505"><code>	MOVL	off+28(FP), R9</code></span>
+<span class="codeline" id="line-506"><code>	MOVQ	_cgo_mmap(SB), AX</code></span>
+<span class="codeline" id="line-507"><code>	MOVQ	SP, BX</code></span>
+<span class="codeline" id="line-508"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
+<span class="codeline" id="line-509"><code>	MOVQ	BX, 0(SP)</code></span>
+<span class="codeline" id="line-510"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-511"><code>	MOVQ	0(SP), SP</code></span>
+<span class="codeline" id="line-512"><code>	MOVQ	AX, ret+32(FP)</code></span>
+<span class="codeline" id="line-513"><code>	RET</code></span>
+<span class="codeline" id="line-514"><code></code></span>
+<span class="codeline" id="line-515"><code>TEXT runtime·sysMunmap(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-516"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-517"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-518"><code>	MOVQ	$SYS_munmap, AX</code></span>
+<span class="codeline" id="line-519"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-520"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-521"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-522"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
+<span class="codeline" id="line-523"><code>	RET</code></span>
+<span class="codeline" id="line-524"><code></code></span>
+<span class="codeline" id="line-525"><code>// Call the function stored in _cgo_munmap using the GCC calling convention.</code></span>
+<span class="codeline" id="line-526"><code>// This must be called on the system stack.</code></span>
+<span class="codeline" id="line-527"><code>TEXT runtime·callCgoMunmap(SB),NOSPLIT,$16-16</code></span>
+<span class="codeline" id="line-528"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-529"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-530"><code>	MOVQ	_cgo_munmap(SB), AX</code></span>
+<span class="codeline" id="line-531"><code>	MOVQ	SP, BX</code></span>
+<span class="codeline" id="line-532"><code>	ANDQ	$~15, SP	// alignment as per amd64 psABI</code></span>
+<span class="codeline" id="line-533"><code>	MOVQ	BX, 0(SP)</code></span>
+<span class="codeline" id="line-534"><code>	CALL	AX</code></span>
+<span class="codeline" id="line-535"><code>	MOVQ	0(SP), SP</code></span>
+<span class="codeline" id="line-536"><code>	RET</code></span>
+<span class="codeline" id="line-537"><code></code></span>
+<span class="codeline" id="line-538"><code>TEXT runtime·madvise(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-539"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-540"><code>	MOVQ	n+8(FP), SI</code></span>
+<span class="codeline" id="line-541"><code>	MOVL	flags+16(FP), DX</code></span>
+<span class="codeline" id="line-542"><code>	MOVQ	$SYS_madvise, AX</code></span>
+<span class="codeline" id="line-543"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-544"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-545"><code>	RET</code></span>
+<span class="codeline" id="line-546"><code></code></span>
+<span class="codeline" id="line-547"><code>// int64 futex(int32 *uaddr, int32 op, int32 val,</code></span>
+<span class="codeline" id="line-548"><code>//	struct timespec *timeout, int32 *uaddr2, int32 val2);</code></span>
+<span class="codeline" id="line-549"><code>TEXT runtime·futex(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-550"><code>	MOVQ	addr+0(FP), DI</code></span>
+<span class="codeline" id="line-551"><code>	MOVL	op+8(FP), SI</code></span>
+<span class="codeline" id="line-552"><code>	MOVL	val+12(FP), DX</code></span>
+<span class="codeline" id="line-553"><code>	MOVQ	ts+16(FP), R10</code></span>
+<span class="codeline" id="line-554"><code>	MOVQ	addr2+24(FP), R8</code></span>
+<span class="codeline" id="line-555"><code>	MOVL	val3+32(FP), R9</code></span>
+<span class="codeline" id="line-556"><code>	MOVL	$SYS_futex, AX</code></span>
+<span class="codeline" id="line-557"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-558"><code>	MOVL	AX, ret+40(FP)</code></span>
+<span class="codeline" id="line-559"><code>	RET</code></span>
+<span class="codeline" id="line-560"><code></code></span>
+<span class="codeline" id="line-561"><code>// int32 clone(int32 flags, void *stk, M *mp, G *gp, void (*fn)(void));</code></span>
+<span class="codeline" id="line-562"><code>TEXT runtime·clone(SB),NOSPLIT|NOFRAME,$0</code></span>
+<span class="codeline" id="line-563"><code>	MOVL	flags+0(FP), DI</code></span>
+<span class="codeline" id="line-564"><code>	MOVQ	stk+8(FP), SI</code></span>
+<span class="codeline" id="line-565"><code>	MOVQ	$0, DX</code></span>
+<span class="codeline" id="line-566"><code>	MOVQ	$0, R10</code></span>
+<span class="codeline" id="line-567"><code>	MOVQ    $0, R8</code></span>
+<span class="codeline" id="line-568"><code>	// Copy mp, gp, fn off parent stack for use by child.</code></span>
+<span class="codeline" id="line-569"><code>	// Careful: Linux system call clobbers CX and R11.</code></span>
+<span class="codeline" id="line-570"><code>	MOVQ	mp+16(FP), R13</code></span>
+<span class="codeline" id="line-571"><code>	MOVQ	gp+24(FP), R9</code></span>
+<span class="codeline" id="line-572"><code>	MOVQ	fn+32(FP), R12</code></span>
+<span class="codeline" id="line-573"><code>	CMPQ	R13, $0    // m</code></span>
+<span class="codeline" id="line-574"><code>	JEQ	nog1</code></span>
+<span class="codeline" id="line-575"><code>	CMPQ	R9, $0    // g</code></span>
 <span class="codeline" id="line-576"><code>	JEQ	nog1</code></span>
-<span class="codeline" id="line-577"><code>	CMPQ	R9, $0    // g</code></span>
-<span class="codeline" id="line-578"><code>	JEQ	nog1</code></span>
-<span class="codeline" id="line-579"><code>	LEAQ	m_tls(R13), R8</code></span>
-<span class="codeline" id="line-580"><code>#ifdef GOOS_android</code></span>
-<span class="codeline" id="line-581"><code>	// Android stores the TLS offset in runtime·tls_g.</code></span>
-<span class="codeline" id="line-582"><code>	SUBQ	runtime·tls_g(SB), R8</code></span>
-<span class="codeline" id="line-583"><code>#else</code></span>
-<span class="codeline" id="line-584"><code>	ADDQ	$8, R8	// ELF wants to use -8(FS)</code></span>
-<span class="codeline" id="line-585"><code>#endif</code></span>
-<span class="codeline" id="line-586"><code>	ORQ 	$0x00080000, DI //add flag CLONE_SETTLS(0x00080000) to call clone</code></span>
-<span class="codeline" id="line-587"><code>nog1:</code></span>
-<span class="codeline" id="line-588"><code>	MOVL	$SYS_clone, AX</code></span>
-<span class="codeline" id="line-589"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-590"><code></code></span>
-<span class="codeline" id="line-591"><code>	// In parent, return.</code></span>
-<span class="codeline" id="line-592"><code>	CMPQ	AX, $0</code></span>
-<span class="codeline" id="line-593"><code>	JEQ	3(PC)</code></span>
-<span class="codeline" id="line-594"><code>	MOVL	AX, ret+40(FP)</code></span>
-<span class="codeline" id="line-595"><code>	RET</code></span>
-<span class="codeline" id="line-596"><code></code></span>
-<span class="codeline" id="line-597"><code>	// In child, on new stack.</code></span>
-<span class="codeline" id="line-598"><code>	MOVQ	SI, SP</code></span>
-<span class="codeline" id="line-599"><code></code></span>
-<span class="codeline" id="line-600"><code>	// If g or m are nil, skip Go-related setup.</code></span>
-<span class="codeline" id="line-601"><code>	CMPQ	R13, $0    // m</code></span>
+<span class="codeline" id="line-577"><code>	LEAQ	m_tls(R13), R8</code></span>
+<span class="codeline" id="line-578"><code>#ifdef GOOS_android</code></span>
+<span class="codeline" id="line-579"><code>	// Android stores the TLS offset in runtime·tls_g.</code></span>
+<span class="codeline" id="line-580"><code>	SUBQ	runtime·tls_g(SB), R8</code></span>
+<span class="codeline" id="line-581"><code>#else</code></span>
+<span class="codeline" id="line-582"><code>	ADDQ	$8, R8	// ELF wants to use -8(FS)</code></span>
+<span class="codeline" id="line-583"><code>#endif</code></span>
+<span class="codeline" id="line-584"><code>	ORQ 	$0x00080000, DI //add flag CLONE_SETTLS(0x00080000) to call clone</code></span>
+<span class="codeline" id="line-585"><code>nog1:</code></span>
+<span class="codeline" id="line-586"><code>	MOVL	$SYS_clone, AX</code></span>
+<span class="codeline" id="line-587"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-588"><code></code></span>
+<span class="codeline" id="line-589"><code>	// In parent, return.</code></span>
+<span class="codeline" id="line-590"><code>	CMPQ	AX, $0</code></span>
+<span class="codeline" id="line-591"><code>	JEQ	3(PC)</code></span>
+<span class="codeline" id="line-592"><code>	MOVL	AX, ret+40(FP)</code></span>
+<span class="codeline" id="line-593"><code>	RET</code></span>
+<span class="codeline" id="line-594"><code></code></span>
+<span class="codeline" id="line-595"><code>	// In child, on new stack.</code></span>
+<span class="codeline" id="line-596"><code>	MOVQ	SI, SP</code></span>
+<span class="codeline" id="line-597"><code></code></span>
+<span class="codeline" id="line-598"><code>	// If g or m are nil, skip Go-related setup.</code></span>
+<span class="codeline" id="line-599"><code>	CMPQ	R13, $0    // m</code></span>
+<span class="codeline" id="line-600"><code>	JEQ	nog2</code></span>
+<span class="codeline" id="line-601"><code>	CMPQ	R9, $0    // g</code></span>
 <span class="codeline" id="line-602"><code>	JEQ	nog2</code></span>
-<span class="codeline" id="line-603"><code>	CMPQ	R9, $0    // g</code></span>
-<span class="codeline" id="line-604"><code>	JEQ	nog2</code></span>
-<span class="codeline" id="line-605"><code></code></span>
-<span class="codeline" id="line-606"><code>	// Initialize m-&gt;procid to Linux tid</code></span>
-<span class="codeline" id="line-607"><code>	MOVL	$SYS_gettid, AX</code></span>
-<span class="codeline" id="line-608"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-609"><code>	MOVQ	AX, m_procid(R13)</code></span>
-<span class="codeline" id="line-610"><code></code></span>
-<span class="codeline" id="line-611"><code>	// In child, set up new stack</code></span>
-<span class="codeline" id="line-612"><code>	get_tls(CX)</code></span>
-<span class="codeline" id="line-613"><code>	MOVQ	R13, g_m(R9)</code></span>
-<span class="codeline" id="line-614"><code>	MOVQ	R9, g(CX)</code></span>
-<span class="codeline" id="line-615"><code>	MOVQ	R9, R14 // set g register</code></span>
-<span class="codeline" id="line-616"><code>	CALL	runtime·stackcheck(SB)</code></span>
-<span class="codeline" id="line-617"><code></code></span>
-<span class="codeline" id="line-618"><code>nog2:</code></span>
-<span class="codeline" id="line-619"><code>	// Call fn. This is the PC of an ABI0 function.</code></span>
-<span class="codeline" id="line-620"><code>	CALL	R12</code></span>
-<span class="codeline" id="line-621"><code></code></span>
-<span class="codeline" id="line-622"><code>	// It shouldn't return. If it does, exit that thread.</code></span>
-<span class="codeline" id="line-623"><code>	MOVL	$111, DI</code></span>
-<span class="codeline" id="line-624"><code>	MOVL	$SYS_exit, AX</code></span>
-<span class="codeline" id="line-625"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-626"><code>	JMP	-3(PC)	// keep exiting</code></span>
-<span class="codeline" id="line-627"><code></code></span>
-<span class="codeline" id="line-628"><code>TEXT runtime·sigaltstack(SB),NOSPLIT,$-8</code></span>
-<span class="codeline" id="line-629"><code>	MOVQ	new+0(FP), DI</code></span>
-<span class="codeline" id="line-630"><code>	MOVQ	old+8(FP), SI</code></span>
-<span class="codeline" id="line-631"><code>	MOVQ	$SYS_sigaltstack, AX</code></span>
-<span class="codeline" id="line-632"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-633"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-634"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-635"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
-<span class="codeline" id="line-636"><code>	RET</code></span>
-<span class="codeline" id="line-637"><code></code></span>
-<span class="codeline" id="line-638"><code>// set tls base to DI</code></span>
-<span class="codeline" id="line-639"><code>TEXT runtime·settls(SB),NOSPLIT,$32</code></span>
-<span class="codeline" id="line-640"><code>#ifdef GOOS_android</code></span>
-<span class="codeline" id="line-641"><code>	// Android stores the TLS offset in runtime·tls_g.</code></span>
-<span class="codeline" id="line-642"><code>	SUBQ	runtime·tls_g(SB), DI</code></span>
-<span class="codeline" id="line-643"><code>#else</code></span>
-<span class="codeline" id="line-644"><code>	ADDQ	$8, DI	// ELF wants to use -8(FS)</code></span>
-<span class="codeline" id="line-645"><code>#endif</code></span>
-<span class="codeline" id="line-646"><code>	MOVQ	DI, SI</code></span>
-<span class="codeline" id="line-647"><code>	MOVQ	$0x1002, DI	// ARCH_SET_FS</code></span>
-<span class="codeline" id="line-648"><code>	MOVQ	$SYS_arch_prctl, AX</code></span>
-<span class="codeline" id="line-649"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-650"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
-<span class="codeline" id="line-651"><code>	JLS	2(PC)</code></span>
-<span class="codeline" id="line-652"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
-<span class="codeline" id="line-653"><code>	RET</code></span>
-<span class="codeline" id="line-654"><code></code></span>
-<span class="codeline" id="line-655"><code>TEXT runtime·osyield(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-656"><code>	MOVL	$SYS_sched_yield, AX</code></span>
-<span class="codeline" id="line-657"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-658"><code>	RET</code></span>
-<span class="codeline" id="line-659"><code></code></span>
-<span class="codeline" id="line-660"><code>TEXT runtime·sched_getaffinity(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-661"><code>	MOVQ	pid+0(FP), DI</code></span>
-<span class="codeline" id="line-662"><code>	MOVQ	len+8(FP), SI</code></span>
-<span class="codeline" id="line-663"><code>	MOVQ	buf+16(FP), DX</code></span>
-<span class="codeline" id="line-664"><code>	MOVL	$SYS_sched_getaffinity, AX</code></span>
-<span class="codeline" id="line-665"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-666"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-667"><code>	RET</code></span>
-<span class="codeline" id="line-668"><code></code></span>
-<span class="codeline" id="line-669"><code>// int32 runtime·epollcreate(int32 size);</code></span>
-<span class="codeline" id="line-670"><code>TEXT runtime·epollcreate(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-671"><code>	MOVL    size+0(FP), DI</code></span>
-<span class="codeline" id="line-672"><code>	MOVL    $SYS_epoll_create, AX</code></span>
-<span class="codeline" id="line-673"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-674"><code>	MOVL	AX, ret+8(FP)</code></span>
-<span class="codeline" id="line-675"><code>	RET</code></span>
-<span class="codeline" id="line-676"><code></code></span>
-<span class="codeline" id="line-677"><code>// int32 runtime·epollcreate1(int32 flags);</code></span>
-<span class="codeline" id="line-678"><code>TEXT runtime·epollcreate1(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-679"><code>	MOVL	flags+0(FP), DI</code></span>
-<span class="codeline" id="line-680"><code>	MOVL	$SYS_epoll_create1, AX</code></span>
-<span class="codeline" id="line-681"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-682"><code>	MOVL	AX, ret+8(FP)</code></span>
-<span class="codeline" id="line-683"><code>	RET</code></span>
-<span class="codeline" id="line-684"><code></code></span>
-<span class="codeline" id="line-685"><code>// func epollctl(epfd, op, fd int32, ev *epollEvent) int</code></span>
-<span class="codeline" id="line-686"><code>TEXT runtime·epollctl(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-687"><code>	MOVL	epfd+0(FP), DI</code></span>
-<span class="codeline" id="line-688"><code>	MOVL	op+4(FP), SI</code></span>
-<span class="codeline" id="line-689"><code>	MOVL	fd+8(FP), DX</code></span>
-<span class="codeline" id="line-690"><code>	MOVQ	ev+16(FP), R10</code></span>
-<span class="codeline" id="line-691"><code>	MOVL	$SYS_epoll_ctl, AX</code></span>
-<span class="codeline" id="line-692"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-693"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-694"><code>	RET</code></span>
-<span class="codeline" id="line-695"><code></code></span>
-<span class="codeline" id="line-696"><code>// int32 runtime·epollwait(int32 epfd, EpollEvent *ev, int32 nev, int32 timeout);</code></span>
-<span class="codeline" id="line-697"><code>TEXT runtime·epollwait(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-698"><code>	// This uses pwait instead of wait, because Android O blocks wait.</code></span>
-<span class="codeline" id="line-699"><code>	MOVL	epfd+0(FP), DI</code></span>
-<span class="codeline" id="line-700"><code>	MOVQ	ev+8(FP), SI</code></span>
-<span class="codeline" id="line-701"><code>	MOVL	nev+16(FP), DX</code></span>
-<span class="codeline" id="line-702"><code>	MOVL	timeout+20(FP), R10</code></span>
-<span class="codeline" id="line-703"><code>	MOVQ	$0, R8</code></span>
-<span class="codeline" id="line-704"><code>	MOVL	$SYS_epoll_pwait, AX</code></span>
-<span class="codeline" id="line-705"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-706"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-707"><code>	RET</code></span>
-<span class="codeline" id="line-708"><code></code></span>
-<span class="codeline" id="line-709"><code>// void runtime·closeonexec(int32 fd);</code></span>
-<span class="codeline" id="line-710"><code>TEXT runtime·closeonexec(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-711"><code>	MOVL    fd+0(FP), DI  // fd</code></span>
-<span class="codeline" id="line-712"><code>	MOVQ    $2, SI  // F_SETFD</code></span>
-<span class="codeline" id="line-713"><code>	MOVQ    $1, DX  // FD_CLOEXEC</code></span>
-<span class="codeline" id="line-714"><code>	MOVL	$SYS_fcntl, AX</code></span>
-<span class="codeline" id="line-715"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-716"><code>	RET</code></span>
-<span class="codeline" id="line-717"><code></code></span>
-<span class="codeline" id="line-718"><code>// int access(const char *name, int mode)</code></span>
-<span class="codeline" id="line-719"><code>TEXT runtime·access(SB),NOSPLIT,$0</code></span>
-<span class="codeline" id="line-720"><code>	// This uses faccessat instead of access, because Android O blocks access.</code></span>
-<span class="codeline" id="line-721"><code>	MOVL	$AT_FDCWD, DI // AT_FDCWD, so this acts like access</code></span>
-<span class="codeline" id="line-722"><code>	MOVQ	name+0(FP), SI</code></span>
-<span class="codeline" id="line-723"><code>	MOVL	mode+8(FP), DX</code></span>
-<span class="codeline" id="line-724"><code>	MOVL	$0, R10</code></span>
-<span class="codeline" id="line-725"><code>	MOVL	$SYS_faccessat, AX</code></span>
-<span class="codeline" id="line-726"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-727"><code>	MOVL	AX, ret+16(FP)</code></span>
-<span class="codeline" id="line-728"><code>	RET</code></span>
-<span class="codeline" id="line-729"><code></code></span>
-<span class="codeline" id="line-730"><code>// int connect(int fd, const struct sockaddr *addr, socklen_t addrlen)</code></span>
-<span class="codeline" id="line-731"><code>TEXT runtime·connect(SB),NOSPLIT,$0-28</code></span>
-<span class="codeline" id="line-732"><code>	MOVL	fd+0(FP), DI</code></span>
-<span class="codeline" id="line-733"><code>	MOVQ	addr+8(FP), SI</code></span>
-<span class="codeline" id="line-734"><code>	MOVL	len+16(FP), DX</code></span>
-<span class="codeline" id="line-735"><code>	MOVL	$SYS_connect, AX</code></span>
-<span class="codeline" id="line-736"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-737"><code>	MOVL	AX, ret+24(FP)</code></span>
-<span class="codeline" id="line-738"><code>	RET</code></span>
-<span class="codeline" id="line-739"><code></code></span>
-<span class="codeline" id="line-740"><code>// int socket(int domain, int type, int protocol)</code></span>
-<span class="codeline" id="line-741"><code>TEXT runtime·socket(SB),NOSPLIT,$0-20</code></span>
-<span class="codeline" id="line-742"><code>	MOVL	domain+0(FP), DI</code></span>
-<span class="codeline" id="line-743"><code>	MOVL	typ+4(FP), SI</code></span>
-<span class="codeline" id="line-744"><code>	MOVL	prot+8(FP), DX</code></span>
-<span class="codeline" id="line-745"><code>	MOVL	$SYS_socket, AX</code></span>
-<span class="codeline" id="line-746"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-747"><code>	MOVL	AX, ret+16(FP)</code></span>
-<span class="codeline" id="line-748"><code>	RET</code></span>
-<span class="codeline" id="line-749"><code></code></span>
-<span class="codeline" id="line-750"><code>// func sbrk0() uintptr</code></span>
-<span class="codeline" id="line-751"><code>TEXT runtime·sbrk0(SB),NOSPLIT,$0-8</code></span>
-<span class="codeline" id="line-752"><code>	// Implemented as brk(NULL).</code></span>
-<span class="codeline" id="line-753"><code>	MOVQ	$0, DI</code></span>
-<span class="codeline" id="line-754"><code>	MOVL	$SYS_brk, AX</code></span>
-<span class="codeline" id="line-755"><code>	SYSCALL</code></span>
-<span class="codeline" id="line-756"><code>	MOVQ	AX, ret+0(FP)</code></span>
-<span class="codeline" id="line-757"><code>	RET</code></span>
+<span class="codeline" id="line-603"><code></code></span>
+<span class="codeline" id="line-604"><code>	// Initialize m-&gt;procid to Linux tid</code></span>
+<span class="codeline" id="line-605"><code>	MOVL	$SYS_gettid, AX</code></span>
+<span class="codeline" id="line-606"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-607"><code>	MOVQ	AX, m_procid(R13)</code></span>
+<span class="codeline" id="line-608"><code></code></span>
+<span class="codeline" id="line-609"><code>	// In child, set up new stack</code></span>
+<span class="codeline" id="line-610"><code>	get_tls(CX)</code></span>
+<span class="codeline" id="line-611"><code>	MOVQ	R13, g_m(R9)</code></span>
+<span class="codeline" id="line-612"><code>	MOVQ	R9, g(CX)</code></span>
+<span class="codeline" id="line-613"><code>	MOVQ	R9, R14 // set g register</code></span>
+<span class="codeline" id="line-614"><code>	CALL	runtime·stackcheck(SB)</code></span>
+<span class="codeline" id="line-615"><code></code></span>
+<span class="codeline" id="line-616"><code>nog2:</code></span>
+<span class="codeline" id="line-617"><code>	// Call fn. This is the PC of an ABI0 function.</code></span>
+<span class="codeline" id="line-618"><code>	CALL	R12</code></span>
+<span class="codeline" id="line-619"><code></code></span>
+<span class="codeline" id="line-620"><code>	// It shouldn't return. If it does, exit that thread.</code></span>
+<span class="codeline" id="line-621"><code>	MOVL	$111, DI</code></span>
+<span class="codeline" id="line-622"><code>	MOVL	$SYS_exit, AX</code></span>
+<span class="codeline" id="line-623"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-624"><code>	JMP	-3(PC)	// keep exiting</code></span>
+<span class="codeline" id="line-625"><code></code></span>
+<span class="codeline" id="line-626"><code>TEXT runtime·sigaltstack(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-627"><code>	MOVQ	new+0(FP), DI</code></span>
+<span class="codeline" id="line-628"><code>	MOVQ	old+8(FP), SI</code></span>
+<span class="codeline" id="line-629"><code>	MOVQ	$SYS_sigaltstack, AX</code></span>
+<span class="codeline" id="line-630"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-631"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-632"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-633"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
+<span class="codeline" id="line-634"><code>	RET</code></span>
+<span class="codeline" id="line-635"><code></code></span>
+<span class="codeline" id="line-636"><code>// set tls base to DI</code></span>
+<span class="codeline" id="line-637"><code>TEXT runtime·settls(SB),NOSPLIT,$32</code></span>
+<span class="codeline" id="line-638"><code>#ifdef GOOS_android</code></span>
+<span class="codeline" id="line-639"><code>	// Android stores the TLS offset in runtime·tls_g.</code></span>
+<span class="codeline" id="line-640"><code>	SUBQ	runtime·tls_g(SB), DI</code></span>
+<span class="codeline" id="line-641"><code>#else</code></span>
+<span class="codeline" id="line-642"><code>	ADDQ	$8, DI	// ELF wants to use -8(FS)</code></span>
+<span class="codeline" id="line-643"><code>#endif</code></span>
+<span class="codeline" id="line-644"><code>	MOVQ	DI, SI</code></span>
+<span class="codeline" id="line-645"><code>	MOVQ	$0x1002, DI	// ARCH_SET_FS</code></span>
+<span class="codeline" id="line-646"><code>	MOVQ	$SYS_arch_prctl, AX</code></span>
+<span class="codeline" id="line-647"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-648"><code>	CMPQ	AX, $0xfffffffffffff001</code></span>
+<span class="codeline" id="line-649"><code>	JLS	2(PC)</code></span>
+<span class="codeline" id="line-650"><code>	MOVL	$0xf1, 0xf1  // crash</code></span>
+<span class="codeline" id="line-651"><code>	RET</code></span>
+<span class="codeline" id="line-652"><code></code></span>
+<span class="codeline" id="line-653"><code>TEXT runtime·osyield(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-654"><code>	MOVL	$SYS_sched_yield, AX</code></span>
+<span class="codeline" id="line-655"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-656"><code>	RET</code></span>
+<span class="codeline" id="line-657"><code></code></span>
+<span class="codeline" id="line-658"><code>TEXT runtime·sched_getaffinity(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-659"><code>	MOVQ	pid+0(FP), DI</code></span>
+<span class="codeline" id="line-660"><code>	MOVQ	len+8(FP), SI</code></span>
+<span class="codeline" id="line-661"><code>	MOVQ	buf+16(FP), DX</code></span>
+<span class="codeline" id="line-662"><code>	MOVL	$SYS_sched_getaffinity, AX</code></span>
+<span class="codeline" id="line-663"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-664"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-665"><code>	RET</code></span>
+<span class="codeline" id="line-666"><code></code></span>
+<span class="codeline" id="line-667"><code>// int access(const char *name, int mode)</code></span>
+<span class="codeline" id="line-668"><code>TEXT runtime·access(SB),NOSPLIT,$0</code></span>
+<span class="codeline" id="line-669"><code>	// This uses faccessat instead of access, because Android O blocks access.</code></span>
+<span class="codeline" id="line-670"><code>	MOVL	$AT_FDCWD, DI // AT_FDCWD, so this acts like access</code></span>
+<span class="codeline" id="line-671"><code>	MOVQ	name+0(FP), SI</code></span>
+<span class="codeline" id="line-672"><code>	MOVL	mode+8(FP), DX</code></span>
+<span class="codeline" id="line-673"><code>	MOVL	$0, R10</code></span>
+<span class="codeline" id="line-674"><code>	MOVL	$SYS_faccessat, AX</code></span>
+<span class="codeline" id="line-675"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-676"><code>	MOVL	AX, ret+16(FP)</code></span>
+<span class="codeline" id="line-677"><code>	RET</code></span>
+<span class="codeline" id="line-678"><code></code></span>
+<span class="codeline" id="line-679"><code>// int connect(int fd, const struct sockaddr *addr, socklen_t addrlen)</code></span>
+<span class="codeline" id="line-680"><code>TEXT runtime·connect(SB),NOSPLIT,$0-28</code></span>
+<span class="codeline" id="line-681"><code>	MOVL	fd+0(FP), DI</code></span>
+<span class="codeline" id="line-682"><code>	MOVQ	addr+8(FP), SI</code></span>
+<span class="codeline" id="line-683"><code>	MOVL	len+16(FP), DX</code></span>
+<span class="codeline" id="line-684"><code>	MOVL	$SYS_connect, AX</code></span>
+<span class="codeline" id="line-685"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-686"><code>	MOVL	AX, ret+24(FP)</code></span>
+<span class="codeline" id="line-687"><code>	RET</code></span>
+<span class="codeline" id="line-688"><code></code></span>
+<span class="codeline" id="line-689"><code>// int socket(int domain, int type, int protocol)</code></span>
+<span class="codeline" id="line-690"><code>TEXT runtime·socket(SB),NOSPLIT,$0-20</code></span>
+<span class="codeline" id="line-691"><code>	MOVL	domain+0(FP), DI</code></span>
+<span class="codeline" id="line-692"><code>	MOVL	typ+4(FP), SI</code></span>
+<span class="codeline" id="line-693"><code>	MOVL	prot+8(FP), DX</code></span>
+<span class="codeline" id="line-694"><code>	MOVL	$SYS_socket, AX</code></span>
+<span class="codeline" id="line-695"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-696"><code>	MOVL	AX, ret+16(FP)</code></span>
+<span class="codeline" id="line-697"><code>	RET</code></span>
+<span class="codeline" id="line-698"><code></code></span>
+<span class="codeline" id="line-699"><code>// func sbrk0() uintptr</code></span>
+<span class="codeline" id="line-700"><code>TEXT runtime·sbrk0(SB),NOSPLIT,$0-8</code></span>
+<span class="codeline" id="line-701"><code>	// Implemented as brk(NULL).</code></span>
+<span class="codeline" id="line-702"><code>	MOVQ	$0, DI</code></span>
+<span class="codeline" id="line-703"><code>	MOVL	$SYS_brk, AX</code></span>
+<span class="codeline" id="line-704"><code>	SYSCALL</code></span>
+<span class="codeline" id="line-705"><code>	MOVQ	AX, ret+0(FP)</code></span>
+<span class="codeline" id="line-706"><code>	RET</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

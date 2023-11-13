@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: error.go in package go.uber.org/multierr</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -91,14 +91,7 @@ input[id=r71]:checked ~pre label[for=r71],
 input[id=r72]:checked ~pre label[for=r72],
 input[id=r73]:checked ~pre label[for=r73],
 input[id=r74]:checked ~pre label[for=r74],
-input[id=r75]:checked ~pre label[for=r75],
-input[id=r76]:checked ~pre label[for=r76],
-input[id=r77]:checked ~pre label[for=r77],
-input[id=r78]:checked ~pre label[for=r78],
-input[id=r79]:checked ~pre label[for=r79],
-input[id=r80]:checked ~pre label[for=r80],
-input[id=r81]:checked ~pre label[for=r81],
-input[id=r82]:checked ~pre label[for=r82]
+input[id=r75]:checked ~pre label[for=r75]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0,
 input[id=i1]:checked ~pre .i1,
@@ -184,13 +177,6 @@ input[id=i6]:checked ~pre .i6
 <input id="r73" type="radio" name="g"/>
 <input id="r74" type="radio" name="g"/>
 <input id="r75" type="radio" name="g"/>
-<input id="r76" type="radio" name="g"/>
-<input id="r77" type="radio" name="g"/>
-<input id="r78" type="radio" name="g"/>
-<input id="r79" type="radio" name="g"/>
-<input id="r80" type="radio" name="g"/>
-<input id="r81" type="radio" name="g"/>
-<input id="r82" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 <input id="i1" type="radio" name="i"/>
 <input id="i2" type="radio" name="i"/>
@@ -200,7 +186,7 @@ input[id=i6]:checked ~pre .i6
 <input id="i6" type="radio" name="i"/>
 
 <pre class="line-numbers">
-<span class="codeline" id="line-1"><code><span class="comment">// Copyright (c) 2017-2021 Uber Technologies, Inc.</span></code></span>
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright (c) 2017-2023 Uber Technologies, Inc.</span></code></span>
 <span class="codeline" id="line-2"><code><span class="comment">//</span></code></span>
 <span class="codeline" id="line-3"><code><span class="comment">// Permission is hereby granted, free of charge, to any person obtaining a copy</span></code></span>
 <span class="codeline" id="line-4"><code><span class="comment">// of this software and associated documentation files (the "Software"), to deal</span></code></span>
@@ -348,541 +334,506 @@ input[id=i6]:checked ~pre .i6
 <span class="codeline" id="line-147"><code>	<label for="i3"><span class="lit-string i3">"io"</span></label></code></span>
 <span class="codeline" id="line-148"><code>	<label for="i4"><span class="lit-string i4">"strings"</span></label></code></span>
 <span class="codeline" id="line-149"><code>	<label for="i5"><span class="lit-string i5">"sync"</span></label></code></span>
-<span class="codeline" id="line-150"><code></code></span>
-<span class="codeline" id="line-151"><code>	<label for="i6"><span class="lit-string i6">"go.uber.org/atomic"</span></label></code></span>
-<span class="codeline" id="line-152"><code>)</code></span>
-<span class="codeline" id="line-153"><code></code></span>
-<span class="codeline" id="line-154"><code><span class="keyword">var</span> (</code></span>
-<span class="codeline" id="line-155"><code>	<span class="comment">// Separator for single-line error messages.</span></code></span>
-<span class="codeline" id="line-156"><code>	_singlelineSeparator = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"; "</span>)</code></span>
-<span class="codeline" id="line-157"><code></code></span>
-<span class="codeline" id="line-158"><code>	<span class="comment">// Prefix for multi-line messages</span></code></span>
-<span class="codeline" id="line-159"><code>	_multilinePrefix = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"the following errors occurred:"</span>)</code></span>
-<span class="codeline" id="line-160"><code></code></span>
-<span class="codeline" id="line-161"><code>	<span class="comment">// Prefix for the first and following lines of an item in a list of</span></code></span>
-<span class="codeline" id="line-162"><code><span class="comment">	// multi-line error messages.</span></code></span>
-<span class="codeline" id="line-163"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-164"><code><span class="comment">	// For example, if a single item is:</span></code></span>
-<span class="codeline" id="line-165"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-166"><code><span class="comment">	// 	foo</span></code></span>
-<span class="codeline" id="line-167"><code><span class="comment">	// 	bar</span></code></span>
-<span class="codeline" id="line-168"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-169"><code><span class="comment">	// It will become,</span></code></span>
-<span class="codeline" id="line-170"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-171"><code><span class="comment">	// 	 -  foo</span></code></span>
-<span class="codeline" id="line-172"><code><span class="comment">	// 	    bar</span></code></span>
-<span class="codeline" id="line-173"><code>	_multilineSeparator = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"\n -  "</span>)</code></span>
-<span class="codeline" id="line-174"><code>	_multilineIndent    = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"    "</span>)</code></span>
-<span class="codeline" id="line-175"><code>)</code></span>
-<span class="codeline" id="line-176"><code></code></span>
-<span class="codeline" id="line-177"><code><span class="comment">// _bufferPool is a pool of bytes.Buffers.</span></code></span>
-<span class="codeline" id="line-178"><code><span class="keyword">var</span> _bufferPool = <a href="../../../pkg/sync.html" class="ident i5">sync</a>.<a href="../../sync/pool.go.html#line-49" class="ident">Pool</a>{</code></span>
-<span class="codeline" id="line-179"><code>	<a href="../../sync/pool.go.html#line-61" class="ident">New</a>: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {</code></span>
-<span class="codeline" id="line-180"><code>		<span class="keyword">return</span> &amp;<a href="../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../bytes/buffer.go.html#line-20" class="ident">Buffer</a>{}</code></span>
-<span class="codeline" id="line-181"><code>	},</code></span>
-<span class="codeline" id="line-182"><code>}</code></span>
-<span class="codeline" id="line-183"><code></code></span>
-<span class="codeline" id="line-184"><code><span class="keyword">type</span> errorGroup <span class="keyword">interface</span> {</code></span>
-<span class="codeline" id="line-185"><code>	Errors() []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-186"><code>}</code></span>
-<span class="codeline" id="line-187"><code></code></span>
-<span class="codeline" id="line-188"><code><span class="comment">// Errors returns a slice containing zero or more errors that the supplied</span></code></span>
-<span class="codeline" id="line-189"><code><span class="comment">// error is composed of. If the error is nil, a nil slice is returned.</span></code></span>
-<span class="codeline" id="line-190"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-191"><code><span class="comment">//	err := multierr.Append(r.Close(), w.Close())</span></code></span>
-<span class="codeline" id="line-192"><code><span class="comment">//	errors := multierr.Errors(err)</span></code></span>
-<span class="codeline" id="line-193"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-194"><code><span class="comment">// If the error is not composed of other errors, the returned slice contains</span></code></span>
-<span class="codeline" id="line-195"><code><span class="comment">// just the error that was passed in.</span></code></span>
-<span class="codeline" id="line-196"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-197"><code><span class="comment">// Callers of this function are free to modify the returned slice.</span></code></span>
-<span class="codeline" id="line-198"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Errors" class="ident">Errors</a></label>(<label for="r1" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-199"><code>	<span class="keyword">if</span> <label for="r1" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-200"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-201"><code>	}</code></span>
-<span class="codeline" id="line-202"><code></code></span>
-<span class="codeline" id="line-203"><code>	<span class="comment">// Note that we're casting to multiError, not errorGroup. Our contract is</span></code></span>
-<span class="codeline" id="line-204"><code><span class="comment">	// that returned errors MAY implement errorGroup. Errors, however, only</span></code></span>
-<span class="codeline" id="line-205"><code><span class="comment">	// has special behavior for multierr-specific error objects.</span></code></span>
-<span class="codeline" id="line-206"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-207"><code><span class="comment">	// This behavior can be expanded in the future but I think it's prudent to</span></code></span>
-<span class="codeline" id="line-208"><code><span class="comment">	// start with as little as possible in terms of contract and possibility</span></code></span>
-<span class="codeline" id="line-209"><code><span class="comment">	// of misuse.</span></code></span>
-<span class="codeline" id="line-210"><code>	<label for="r2" class="ident">eg</label>, <label for="r3" class="ident">ok</label> := <label for="r1" class="ident">err</label>.(*<a href="#line-225" class="ident">multiError</a>)</code></span>
-<span class="codeline" id="line-211"><code>	<span class="keyword">if</span> !<label for="r3" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-212"><code>		<span class="keyword">return</span> []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>{<label for="r1" class="ident">err</label>}</code></span>
-<span class="codeline" id="line-213"><code>	}</code></span>
-<span class="codeline" id="line-214"><code></code></span>
-<span class="codeline" id="line-215"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(([]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>), <label for="r2" class="ident">eg</label>.<a href="#line-235" class="ident">Errors</a>()...)</code></span>
-<span class="codeline" id="line-216"><code>}</code></span>
-<span class="codeline" id="line-217"><code></code></span>
-<span class="codeline" id="line-218"><code><span class="comment">// multiError is an error that holds one or more errors.</span></code></span>
-<span class="codeline" id="line-219"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-220"><code><span class="comment">// An instance of this is guaranteed to be non-empty and flattened. That is,</span></code></span>
-<span class="codeline" id="line-221"><code><span class="comment">// none of the errors inside multiError are other multiErrors.</span></code></span>
-<span class="codeline" id="line-222"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-223"><code><span class="comment">// multiError formats to a semi-colon delimited list of error messages with</span></code></span>
-<span class="codeline" id="line-224"><code><span class="comment">// %v and with a more readable multi-line format with %+v.</span></code></span>
-<span class="codeline" id="line-225"><code><span class="keyword">type</span> multiError <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-226"><code>	copyNeeded <a href="../../../pkg/go.uber.org/atomic.html" class="ident i6">atomic</a>.<a href="../atomic/bool.go.html#line-30" class="ident">Bool</a></code></span>
-<span class="codeline" id="line-227"><code>	errors     []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-228"><code>}</code></span>
-<span class="codeline" id="line-229"><code></code></span>
-<span class="codeline" id="line-230"><code><span class="keyword">var</span> _ <a href="#line-184" class="ident">errorGroup</a> = (*<a href="#line-225" class="ident">multiError</a>)(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>)</code></span>
-<span class="codeline" id="line-231"><code></code></span>
-<span class="codeline" id="line-232"><code><span class="comment">// Errors returns the list of underlying errors.</span></code></span>
-<span class="codeline" id="line-233"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-234"><code><span class="comment">// This slice MUST NOT be modified.</span></code></span>
-<span class="codeline" id="line-235"><code><span class="keyword">func</span> (<label for="r4" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r5" class="ident">Errors</label>() []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-236"><code>	<span class="keyword">if</span> <label for="r4" class="ident">merr</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-237"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-238"><code>	}</code></span>
-<span class="codeline" id="line-239"><code>	<span class="keyword">return</span> <label for="r4" class="ident">merr</label>.<a href="#line-227" class="ident">errors</a></code></span>
-<span class="codeline" id="line-240"><code>}</code></span>
-<span class="codeline" id="line-241"><code></code></span>
-<span class="codeline" id="line-242"><code><span class="comment">// As attempts to find the first error in the error list that matches the type</span></code></span>
-<span class="codeline" id="line-243"><code><span class="comment">// of the value that target points to.</span></code></span>
-<span class="codeline" id="line-244"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-245"><code><span class="comment">// This function allows errors.As to traverse the values stored on the</span></code></span>
-<span class="codeline" id="line-246"><code><span class="comment">// multierr error.</span></code></span>
-<span class="codeline" id="line-247"><code><span class="keyword">func</span> (<label for="r6" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r7" class="ident">As</label>(<label for="r8" class="ident">target</label> <span class="keyword">interface</span>{}) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-248"><code>	<span class="keyword">for</span> <label for="r9" class="ident">_</label>, <label for="r10" class="ident">err</label> := <span class="keyword">range</span> <label for="r6" class="ident">merr</label>.<a href="#line-235" class="ident">Errors</a>() {</code></span>
-<span class="codeline" id="line-249"><code>		<span class="keyword">if</span> <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/wrap.go.html#line-78" class="ident">As</a>(<label for="r10" class="ident">err</label>, <label for="r8" class="ident">target</label>) {</code></span>
-<span class="codeline" id="line-250"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-251"><code>		}</code></span>
-<span class="codeline" id="line-252"><code>	}</code></span>
-<span class="codeline" id="line-253"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-254"><code>}</code></span>
-<span class="codeline" id="line-255"><code></code></span>
-<span class="codeline" id="line-256"><code><span class="comment">// Is attempts to match the provided error against errors in the error list.</span></code></span>
-<span class="codeline" id="line-257"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-258"><code><span class="comment">// This function allows errors.Is to traverse the values stored on the</span></code></span>
-<span class="codeline" id="line-259"><code><span class="comment">// multierr error.</span></code></span>
-<span class="codeline" id="line-260"><code><span class="keyword">func</span> (<label for="r11" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r12" class="ident">Is</label>(<label for="r13" class="ident">target</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-261"><code>	<span class="keyword">for</span> <label for="r14" class="ident">_</label>, <label for="r15" class="ident">err</label> := <span class="keyword">range</span> <label for="r11" class="ident">merr</label>.<a href="#line-235" class="ident">Errors</a>() {</code></span>
-<span class="codeline" id="line-262"><code>		<span class="keyword">if</span> <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/wrap.go.html#line-40" class="ident">Is</a>(<label for="r15" class="ident">err</label>, <label for="r13" class="ident">target</label>) {</code></span>
-<span class="codeline" id="line-263"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-150"><code>	<label for="i6"><span class="lit-string i6">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-151"><code>)</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-154"><code>	<span class="comment">// Separator for single-line error messages.</span></code></span>
+<span class="codeline" id="line-155"><code>	_singlelineSeparator = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"; "</span>)</code></span>
+<span class="codeline" id="line-156"><code></code></span>
+<span class="codeline" id="line-157"><code>	<span class="comment">// Prefix for multi-line messages</span></code></span>
+<span class="codeline" id="line-158"><code>	_multilinePrefix = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"the following errors occurred:"</span>)</code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code>	<span class="comment">// Prefix for the first and following lines of an item in a list of</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">	// multi-line error messages.</span></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">	// For example, if a single item is:</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">	// 	foo</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">	// 	bar</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">	// It will become,</span></code></span>
+<span class="codeline" id="line-169"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-170"><code><span class="comment">	// 	 -  foo</span></code></span>
+<span class="codeline" id="line-171"><code><span class="comment">	// 	    bar</span></code></span>
+<span class="codeline" id="line-172"><code>	_multilineSeparator = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"\n -  "</span>)</code></span>
+<span class="codeline" id="line-173"><code>	_multilineIndent    = []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<span class="lit-string">"    "</span>)</code></span>
+<span class="codeline" id="line-174"><code>)</code></span>
+<span class="codeline" id="line-175"><code></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">// _bufferPool is a pool of bytes.Buffers.</span></code></span>
+<span class="codeline" id="line-177"><code><span class="keyword">var</span> _bufferPool = <a href="../../../pkg/sync.html" class="ident i5">sync</a>.<a href="../../sync/pool.go.html#line-49" class="ident">Pool</a>{</code></span>
+<span class="codeline" id="line-178"><code>	<a href="../../sync/pool.go.html#line-61" class="ident">New</a>: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {</code></span>
+<span class="codeline" id="line-179"><code>		<span class="keyword">return</span> &amp;<a href="../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../bytes/buffer.go.html#line-20" class="ident">Buffer</a>{}</code></span>
+<span class="codeline" id="line-180"><code>	},</code></span>
+<span class="codeline" id="line-181"><code>}</code></span>
+<span class="codeline" id="line-182"><code></code></span>
+<span class="codeline" id="line-183"><code><span class="keyword">type</span> errorGroup <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-184"><code>	Errors() []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-185"><code>}</code></span>
+<span class="codeline" id="line-186"><code></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">// Errors returns a slice containing zero or more errors that the supplied</span></code></span>
+<span class="codeline" id="line-188"><code><span class="comment">// error is composed of. If the error is nil, a nil slice is returned.</span></code></span>
+<span class="codeline" id="line-189"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-190"><code><span class="comment">//	err := multierr.Append(r.Close(), w.Close())</span></code></span>
+<span class="codeline" id="line-191"><code><span class="comment">//	errors := multierr.Errors(err)</span></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-193"><code><span class="comment">// If the error is not composed of other errors, the returned slice contains</span></code></span>
+<span class="codeline" id="line-194"><code><span class="comment">// just the error that was passed in.</span></code></span>
+<span class="codeline" id="line-195"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-196"><code><span class="comment">// Callers of this function are free to modify the returned slice.</span></code></span>
+<span class="codeline" id="line-197"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Errors" class="ident">Errors</a></label>(<label for="r1" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-198"><code>	<span class="keyword">return</span> <a href="error_post_go120.go.html#line-35" class="ident">extractErrors</a>(<label for="r1" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-199"><code>}</code></span>
+<span class="codeline" id="line-200"><code></code></span>
+<span class="codeline" id="line-201"><code><span class="comment">// multiError is an error that holds one or more errors.</span></code></span>
+<span class="codeline" id="line-202"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">// An instance of this is guaranteed to be non-empty and flattened. That is,</span></code></span>
+<span class="codeline" id="line-204"><code><span class="comment">// none of the errors inside multiError are other multiErrors.</span></code></span>
+<span class="codeline" id="line-205"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-206"><code><span class="comment">// multiError formats to a semi-colon delimited list of error messages with</span></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">// %v and with a more readable multi-line format with %+v.</span></code></span>
+<span class="codeline" id="line-208"><code><span class="keyword">type</span> multiError <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-209"><code>	copyNeeded <a href="../../../pkg/sync/atomic.html" class="ident i6">atomic</a>.<a href="../../sync/atomic/type.go.html#line-11" class="ident">Bool</a></code></span>
+<span class="codeline" id="line-210"><code>	errors     []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-211"><code>}</code></span>
+<span class="codeline" id="line-212"><code></code></span>
+<span class="codeline" id="line-213"><code><span class="comment">// Errors returns the list of underlying errors.</span></code></span>
+<span class="codeline" id="line-214"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-215"><code><span class="comment">// This slice MUST NOT be modified.</span></code></span>
+<span class="codeline" id="line-216"><code><span class="keyword">func</span> (<label for="r2" class="ident">merr</label> *<a href="#line-208" class="ident">multiError</a>) <label for="r3" class="ident">Errors</label>() []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-217"><code>	<span class="keyword">if</span> <label for="r2" class="ident">merr</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-218"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-219"><code>	}</code></span>
+<span class="codeline" id="line-220"><code>	<span class="keyword">return</span> <label for="r2" class="ident">merr</label>.<a href="#line-210" class="ident">errors</a></code></span>
+<span class="codeline" id="line-221"><code>}</code></span>
+<span class="codeline" id="line-222"><code></code></span>
+<span class="codeline" id="line-223"><code><span class="keyword">func</span> (<label for="r4" class="ident">merr</label> *<a href="#line-208" class="ident">multiError</a>) <label for="r5" class="ident">Error</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-224"><code>	<span class="keyword">if</span> <label for="r4" class="ident">merr</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-225"><code>		<span class="keyword">return</span> <span class="lit-string">""</span></code></span>
+<span class="codeline" id="line-226"><code>	}</code></span>
+<span class="codeline" id="line-227"><code></code></span>
+<span class="codeline" id="line-228"><code>	<label for="r6" class="ident">buff</label> := <a href="#line-177" class="ident">_bufferPool</a>.<a href="../../sync/pool.go.html#line-127" class="ident">Get</a>().(*<a href="../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../bytes/buffer.go.html#line-20" class="ident">Buffer</a>)</code></span>
+<span class="codeline" id="line-229"><code>	<label for="r6" class="ident">buff</label>.<a href="../../bytes/buffer.go.html#line-106" class="ident">Reset</a>()</code></span>
+<span class="codeline" id="line-230"><code></code></span>
+<span class="codeline" id="line-231"><code>	<label for="r4" class="ident">merr</label>.<a href="#line-257" class="ident">writeSingleline</a>(<label for="r6" class="ident">buff</label>)</code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code>	<label for="r7" class="ident">result</label> := <label for="r6" class="ident">buff</label>.<a href="../../bytes/buffer.go.html#line-66" class="ident">String</a>()</code></span>
+<span class="codeline" id="line-234"><code>	<a href="#line-177" class="ident">_bufferPool</a>.<a href="../../sync/pool.go.html#line-95" class="ident">Put</a>(<label for="r6" class="ident">buff</label>)</code></span>
+<span class="codeline" id="line-235"><code>	<span class="keyword">return</span> <label for="r7" class="ident">result</label></code></span>
+<span class="codeline" id="line-236"><code>}</code></span>
+<span class="codeline" id="line-237"><code></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">// Every compares every error in the given err against the given target error</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">// using [errors.Is], and returns true only if every comparison returned true.</span></code></span>
+<span class="codeline" id="line-240"><code><span class="keyword">func</span> <label for="r8" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Every" class="ident">Every</a></label>(<label for="r9" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r10" class="ident">target</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-241"><code>	<span class="keyword">for</span> <label for="r11" class="ident">_</label>, <label for="r12" class="ident">e</label> := <span class="keyword">range</span> <a href="error_post_go120.go.html#line-35" class="ident">extractErrors</a>(<label for="r9" class="ident">err</label>) {</code></span>
+<span class="codeline" id="line-242"><code>		<span class="keyword">if</span> !<a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/wrap.go.html#line-44" class="ident">Is</a>(<label for="r12" class="ident">e</label>, <label for="r10" class="ident">target</label>) {</code></span>
+<span class="codeline" id="line-243"><code>			<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-244"><code>		}</code></span>
+<span class="codeline" id="line-245"><code>	}</code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-247"><code>}</code></span>
+<span class="codeline" id="line-248"><code></code></span>
+<span class="codeline" id="line-249"><code><span class="keyword">func</span> (<label for="r13" class="ident">merr</label> *<a href="#line-208" class="ident">multiError</a>) <label for="r14" class="ident">Format</label>(<label for="r15" class="ident">f</label> <a href="../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../fmt/print.go.html#line-39" class="ident">State</a>, <label for="r16" class="ident">c</label> <a href="../../../pkg/builtin.html#name-rune" class="ident">rune</a>) {</code></span>
+<span class="codeline" id="line-250"><code>	<span class="keyword">if</span> <label for="r16" class="ident">c</label> == <span class="lit-number">'v'</span> &amp;&amp; <label for="r15" class="ident">f</label>.<a href="../../fmt/print.go.html#line-48" class="ident">Flag</a>(<span class="lit-number">'+'</span>) {</code></span>
+<span class="codeline" id="line-251"><code>		<label for="r13" class="ident">merr</label>.<a href="#line-269" class="ident">writeMultiline</a>(<label for="r15" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-252"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-253"><code>		<label for="r13" class="ident">merr</label>.<a href="#line-257" class="ident">writeSingleline</a>(<label for="r15" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-254"><code>	}</code></span>
+<span class="codeline" id="line-255"><code>}</code></span>
+<span class="codeline" id="line-256"><code></code></span>
+<span class="codeline" id="line-257"><code><span class="keyword">func</span> (<label for="r17" class="ident">merr</label> *<a href="#line-208" class="ident">multiError</a>) <label for="r18" class="ident">writeSingleline</label>(<label for="r19" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-99" class="ident">Writer</a>) {</code></span>
+<span class="codeline" id="line-258"><code>	<label for="r20" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-259"><code>	<span class="keyword">for</span> <label for="r21" class="ident">_</label>, <label for="r22" class="ident">item</label> := <span class="keyword">range</span> <label for="r17" class="ident">merr</label>.<a href="#line-210" class="ident">errors</a> {</code></span>
+<span class="codeline" id="line-260"><code>		<span class="keyword">if</span> <label for="r20" class="ident">first</label> {</code></span>
+<span class="codeline" id="line-261"><code>			<label for="r20" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-262"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-263"><code>			<label for="r19" class="ident">w</label>.<a href="../../io/io.go.html#line-100" class="ident">Write</a>(<a href="#line-155" class="ident">_singlelineSeparator</a>)</code></span>
 <span class="codeline" id="line-264"><code>		}</code></span>
-<span class="codeline" id="line-265"><code>	}</code></span>
-<span class="codeline" id="line-266"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-265"><code>		<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-314" class="ident">WriteString</a>(<label for="r19" class="ident">w</label>, <label for="r22" class="ident">item</label>.Error())</code></span>
+<span class="codeline" id="line-266"><code>	}</code></span>
 <span class="codeline" id="line-267"><code>}</code></span>
 <span class="codeline" id="line-268"><code></code></span>
-<span class="codeline" id="line-269"><code><span class="keyword">func</span> (<label for="r16" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r17" class="ident">Error</label>() <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
-<span class="codeline" id="line-270"><code>	<span class="keyword">if</span> <label for="r16" class="ident">merr</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-271"><code>		<span class="keyword">return</span> <span class="lit-string">""</span></code></span>
-<span class="codeline" id="line-272"><code>	}</code></span>
-<span class="codeline" id="line-273"><code></code></span>
-<span class="codeline" id="line-274"><code>	<label for="r18" class="ident">buff</label> := <a href="#line-178" class="ident">_bufferPool</a>.<a href="../../sync/pool.go.html#line-127" class="ident">Get</a>().(*<a href="../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../bytes/buffer.go.html#line-20" class="ident">Buffer</a>)</code></span>
-<span class="codeline" id="line-275"><code>	<label for="r18" class="ident">buff</label>.<a href="../../bytes/buffer.go.html#line-97" class="ident">Reset</a>()</code></span>
+<span class="codeline" id="line-269"><code><span class="keyword">func</span> (<label for="r23" class="ident">merr</label> *<a href="#line-208" class="ident">multiError</a>) <label for="r24" class="ident">writeMultiline</label>(<label for="r25" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-99" class="ident">Writer</a>) {</code></span>
+<span class="codeline" id="line-270"><code>	<label for="r25" class="ident">w</label>.<a href="../../io/io.go.html#line-100" class="ident">Write</a>(<a href="#line-158" class="ident">_multilinePrefix</a>)</code></span>
+<span class="codeline" id="line-271"><code>	<span class="keyword">for</span> <label for="r26" class="ident">_</label>, <label for="r27" class="ident">item</label> := <span class="keyword">range</span> <label for="r23" class="ident">merr</label>.<a href="#line-210" class="ident">errors</a> {</code></span>
+<span class="codeline" id="line-272"><code>		<label for="r25" class="ident">w</label>.<a href="../../io/io.go.html#line-100" class="ident">Write</a>(<a href="#line-172" class="ident">_multilineSeparator</a>)</code></span>
+<span class="codeline" id="line-273"><code>		<a href="#line-279" class="ident">writePrefixLine</a>(<label for="r25" class="ident">w</label>, <a href="#line-173" class="ident">_multilineIndent</a>, <a href="../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../fmt/print.go.html#line-237" class="ident">Sprintf</a>(<span class="lit-string">"%+v"</span>, <label for="r27" class="ident">item</label>))</code></span>
+<span class="codeline" id="line-274"><code>	}</code></span>
+<span class="codeline" id="line-275"><code>}</code></span>
 <span class="codeline" id="line-276"><code></code></span>
-<span class="codeline" id="line-277"><code>	<label for="r16" class="ident">merr</label>.<a href="#line-292" class="ident">writeSingleline</a>(<label for="r18" class="ident">buff</label>)</code></span>
-<span class="codeline" id="line-278"><code></code></span>
-<span class="codeline" id="line-279"><code>	<label for="r19" class="ident">result</label> := <label for="r18" class="ident">buff</label>.<a href="../../bytes/buffer.go.html#line-60" class="ident">String</a>()</code></span>
-<span class="codeline" id="line-280"><code>	<a href="#line-178" class="ident">_bufferPool</a>.<a href="../../sync/pool.go.html#line-95" class="ident">Put</a>(<label for="r18" class="ident">buff</label>)</code></span>
-<span class="codeline" id="line-281"><code>	<span class="keyword">return</span> <label for="r19" class="ident">result</label></code></span>
-<span class="codeline" id="line-282"><code>}</code></span>
-<span class="codeline" id="line-283"><code></code></span>
-<span class="codeline" id="line-284"><code><span class="keyword">func</span> (<label for="r20" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r21" class="ident">Format</label>(<label for="r22" class="ident">f</label> <a href="../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../fmt/print.go.html#line-38" class="ident">State</a>, <label for="r23" class="ident">c</label> <a href="../../../pkg/builtin.html#name-rune" class="ident">rune</a>) {</code></span>
-<span class="codeline" id="line-285"><code>	<span class="keyword">if</span> <label for="r23" class="ident">c</label> == <span class="lit-number">'v'</span> &amp;&amp; <label for="r22" class="ident">f</label>.<a href="../../fmt/print.go.html#line-47" class="ident">Flag</a>(<span class="lit-number">'+'</span>) {</code></span>
-<span class="codeline" id="line-286"><code>		<label for="r20" class="ident">merr</label>.<a href="#line-304" class="ident">writeMultiline</a>(<label for="r22" class="ident">f</label>)</code></span>
-<span class="codeline" id="line-287"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-288"><code>		<label for="r20" class="ident">merr</label>.<a href="#line-292" class="ident">writeSingleline</a>(<label for="r22" class="ident">f</label>)</code></span>
-<span class="codeline" id="line-289"><code>	}</code></span>
-<span class="codeline" id="line-290"><code>}</code></span>
-<span class="codeline" id="line-291"><code></code></span>
-<span class="codeline" id="line-292"><code><span class="keyword">func</span> (<label for="r24" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r25" class="ident">writeSingleline</label>(<label for="r26" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>) {</code></span>
-<span class="codeline" id="line-293"><code>	<label for="r27" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-294"><code>	<span class="keyword">for</span> <label for="r28" class="ident">_</label>, <label for="r29" class="ident">item</label> := <span class="keyword">range</span> <label for="r24" class="ident">merr</label>.<a href="#line-227" class="ident">errors</a> {</code></span>
-<span class="codeline" id="line-295"><code>		<span class="keyword">if</span> <label for="r27" class="ident">first</label> {</code></span>
-<span class="codeline" id="line-296"><code>			<label for="r27" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-297"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-298"><code>			<label for="r26" class="ident">w</label>.<a href="../../io/io.go.html#line-97" class="ident">Write</a>(<a href="#line-156" class="ident">_singlelineSeparator</a>)</code></span>
-<span class="codeline" id="line-299"><code>		}</code></span>
-<span class="codeline" id="line-300"><code>		<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-311" class="ident">WriteString</a>(<label for="r26" class="ident">w</label>, <label for="r29" class="ident">item</label>.Error())</code></span>
-<span class="codeline" id="line-301"><code>	}</code></span>
-<span class="codeline" id="line-302"><code>}</code></span>
-<span class="codeline" id="line-303"><code></code></span>
-<span class="codeline" id="line-304"><code><span class="keyword">func</span> (<label for="r30" class="ident">merr</label> *<a href="#line-225" class="ident">multiError</a>) <label for="r31" class="ident">writeMultiline</label>(<label for="r32" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>) {</code></span>
-<span class="codeline" id="line-305"><code>	<label for="r32" class="ident">w</label>.<a href="../../io/io.go.html#line-97" class="ident">Write</a>(<a href="#line-159" class="ident">_multilinePrefix</a>)</code></span>
-<span class="codeline" id="line-306"><code>	<span class="keyword">for</span> <label for="r33" class="ident">_</label>, <label for="r34" class="ident">item</label> := <span class="keyword">range</span> <label for="r30" class="ident">merr</label>.<a href="#line-227" class="ident">errors</a> {</code></span>
-<span class="codeline" id="line-307"><code>		<label for="r32" class="ident">w</label>.<a href="../../io/io.go.html#line-97" class="ident">Write</a>(<a href="#line-173" class="ident">_multilineSeparator</a>)</code></span>
-<span class="codeline" id="line-308"><code>		<a href="#line-314" class="ident">writePrefixLine</a>(<label for="r32" class="ident">w</label>, <a href="#line-174" class="ident">_multilineIndent</a>, <a href="../../../pkg/fmt.html" class="ident i2">fmt</a>.<a href="../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"%+v"</span>, <label for="r34" class="ident">item</label>))</code></span>
-<span class="codeline" id="line-309"><code>	}</code></span>
-<span class="codeline" id="line-310"><code>}</code></span>
-<span class="codeline" id="line-311"><code></code></span>
-<span class="codeline" id="line-312"><code><span class="comment">// Writes s to the writer with the given prefix added before each line after</span></code></span>
-<span class="codeline" id="line-313"><code><span class="comment">// the first.</span></code></span>
-<span class="codeline" id="line-314"><code><span class="keyword">func</span> writePrefixLine(<label for="r36" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-96" class="ident">Writer</a>, <label for="r37" class="ident">prefix</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r38" class="ident">s</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
-<span class="codeline" id="line-315"><code>	<label for="r39" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-316"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r38" class="ident">s</label>) &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-317"><code>		<span class="keyword">if</span> <label for="r39" class="ident">first</label> {</code></span>
-<span class="codeline" id="line-318"><code>			<label for="r39" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-319"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-320"><code>			<label for="r36" class="ident">w</label>.<a href="../../io/io.go.html#line-97" class="ident">Write</a>(<label for="r37" class="ident">prefix</label>)</code></span>
-<span class="codeline" id="line-321"><code>		}</code></span>
-<span class="codeline" id="line-322"><code></code></span>
-<span class="codeline" id="line-323"><code>		<label for="r40" class="ident">idx</label> := <a href="../../../pkg/strings.html" class="ident i4">strings</a>.<a href="../../strings/strings.go.html#line-113" class="ident">IndexByte</a>(<label for="r38" class="ident">s</label>, <span class="lit-number">'\n'</span>)</code></span>
-<span class="codeline" id="line-324"><code>		<span class="keyword">if</span> <label for="r40" class="ident">idx</label> &lt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-325"><code>			<label for="r40" class="ident">idx</label> = <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r38" class="ident">s</label>) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-277"><code><span class="comment">// Writes s to the writer with the given prefix added before each line after</span></code></span>
+<span class="codeline" id="line-278"><code><span class="comment">// the first.</span></code></span>
+<span class="codeline" id="line-279"><code><span class="keyword">func</span> writePrefixLine(<label for="r29" class="ident">w</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-99" class="ident">Writer</a>, <label for="r30" class="ident">prefix</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r31" class="ident">s</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
+<span class="codeline" id="line-280"><code>	<label for="r32" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-281"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r31" class="ident">s</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-282"><code>		<span class="keyword">if</span> <label for="r32" class="ident">first</label> {</code></span>
+<span class="codeline" id="line-283"><code>			<label for="r32" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-284"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-285"><code>			<label for="r29" class="ident">w</label>.<a href="../../io/io.go.html#line-100" class="ident">Write</a>(<label for="r30" class="ident">prefix</label>)</code></span>
+<span class="codeline" id="line-286"><code>		}</code></span>
+<span class="codeline" id="line-287"><code></code></span>
+<span class="codeline" id="line-288"><code>		<label for="r33" class="ident">idx</label> := <a href="../../../pkg/strings.html" class="ident i4">strings</a>.<a href="../../strings/strings.go.html#line-117" class="ident">IndexByte</a>(<label for="r31" class="ident">s</label>, <span class="lit-number">'\n'</span>)</code></span>
+<span class="codeline" id="line-289"><code>		<span class="keyword">if</span> <label for="r33" class="ident">idx</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-290"><code>			<label for="r33" class="ident">idx</label> = <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r31" class="ident">s</label>) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-291"><code>		}</code></span>
+<span class="codeline" id="line-292"><code></code></span>
+<span class="codeline" id="line-293"><code>		<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-314" class="ident">WriteString</a>(<label for="r29" class="ident">w</label>, <label for="r31" class="ident">s</label>[:<label for="r33" class="ident">idx</label>+<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-294"><code>		<label for="r31" class="ident">s</label> = <label for="r31" class="ident">s</label>[<label for="r33" class="ident">idx</label>+<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-295"><code>	}</code></span>
+<span class="codeline" id="line-296"><code>}</code></span>
+<span class="codeline" id="line-297"><code></code></span>
+<span class="codeline" id="line-298"><code><span class="keyword">type</span> inspectResult <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-299"><code>	<span class="comment">// Number of top-level non-nil errors</span></code></span>
+<span class="codeline" id="line-300"><code>	Count <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-301"><code></code></span>
+<span class="codeline" id="line-302"><code>	<span class="comment">// Total number of errors including multiErrors</span></code></span>
+<span class="codeline" id="line-303"><code>	Capacity <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-304"><code></code></span>
+<span class="codeline" id="line-305"><code>	<span class="comment">// Index of the first non-nil error in the list. Value is meaningless if</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">	// Count is zero.</span></code></span>
+<span class="codeline" id="line-307"><code>	FirstErrorIdx <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-308"><code></code></span>
+<span class="codeline" id="line-309"><code>	<span class="comment">// Whether the list contains at least one multiError</span></code></span>
+<span class="codeline" id="line-310"><code>	ContainsMultiError <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-311"><code>}</code></span>
+<span class="codeline" id="line-312"><code></code></span>
+<span class="codeline" id="line-313"><code><span class="comment">// Inspects the given slice of errors so that we can efficiently allocate</span></code></span>
+<span class="codeline" id="line-314"><code><span class="comment">// space for it.</span></code></span>
+<span class="codeline" id="line-315"><code><span class="keyword">func</span> inspect(<label for="r35" class="ident">errors</label> []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) (<label for="r36" class="ident">res</label> <a href="#line-298" class="ident">inspectResult</a>) {</code></span>
+<span class="codeline" id="line-316"><code>	<label for="r37" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-317"><code>	<span class="keyword">for</span> <label for="r38" class="ident">i</label>, <label for="r39" class="ident">err</label> := <span class="keyword">range</span> <label for="r35" class="ident">errors</label> {</code></span>
+<span class="codeline" id="line-318"><code>		<span class="keyword">if</span> <label for="r39" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-319"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-320"><code>		}</code></span>
+<span class="codeline" id="line-321"><code></code></span>
+<span class="codeline" id="line-322"><code>		<label for="r36" class="ident">res</label>.<a href="#line-300" class="ident">Count</a>++</code></span>
+<span class="codeline" id="line-323"><code>		<span class="keyword">if</span> <label for="r37" class="ident">first</label> {</code></span>
+<span class="codeline" id="line-324"><code>			<label for="r37" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-325"><code>			<label for="r36" class="ident">res</label>.<a href="#line-307" class="ident">FirstErrorIdx</a> = <label for="r38" class="ident">i</label></code></span>
 <span class="codeline" id="line-326"><code>		}</code></span>
 <span class="codeline" id="line-327"><code></code></span>
-<span class="codeline" id="line-328"><code>		<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-311" class="ident">WriteString</a>(<label for="r36" class="ident">w</label>, <label for="r38" class="ident">s</label>[:<label for="r40" class="ident">idx</label>+<span class="lit-number">1</span>])</code></span>
-<span class="codeline" id="line-329"><code>		<label for="r38" class="ident">s</label> = <label for="r38" class="ident">s</label>[<label for="r40" class="ident">idx</label>+<span class="lit-number">1</span>:]</code></span>
-<span class="codeline" id="line-330"><code>	}</code></span>
-<span class="codeline" id="line-331"><code>}</code></span>
-<span class="codeline" id="line-332"><code></code></span>
-<span class="codeline" id="line-333"><code><span class="keyword">type</span> inspectResult <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-334"><code>	<span class="comment">// Number of top-level non-nil errors</span></code></span>
-<span class="codeline" id="line-335"><code>	Count <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-336"><code></code></span>
-<span class="codeline" id="line-337"><code>	<span class="comment">// Total number of errors including multiErrors</span></code></span>
-<span class="codeline" id="line-338"><code>	Capacity <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-339"><code></code></span>
-<span class="codeline" id="line-340"><code>	<span class="comment">// Index of the first non-nil error in the list. Value is meaningless if</span></code></span>
-<span class="codeline" id="line-341"><code><span class="comment">	// Count is zero.</span></code></span>
-<span class="codeline" id="line-342"><code>	FirstErrorIdx <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-343"><code></code></span>
-<span class="codeline" id="line-344"><code>	<span class="comment">// Whether the list contains at least one multiError</span></code></span>
-<span class="codeline" id="line-345"><code>	ContainsMultiError <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
-<span class="codeline" id="line-346"><code>}</code></span>
+<span class="codeline" id="line-328"><code>		<span class="keyword">if</span> <label for="r40" class="ident">merr</label>, <label for="r41" class="ident">ok</label> := <label for="r39" class="ident">err</label>.(*<a href="#line-208" class="ident">multiError</a>); <label for="r41" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-329"><code>			<label for="r36" class="ident">res</label>.<a href="#line-303" class="ident">Capacity</a> += <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r40" class="ident">merr</label>.<a href="#line-210" class="ident">errors</a>)</code></span>
+<span class="codeline" id="line-330"><code>			<label for="r36" class="ident">res</label>.<a href="#line-310" class="ident">ContainsMultiError</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-331"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-332"><code>			<label for="r36" class="ident">res</label>.<a href="#line-303" class="ident">Capacity</a>++</code></span>
+<span class="codeline" id="line-333"><code>		}</code></span>
+<span class="codeline" id="line-334"><code>	}</code></span>
+<span class="codeline" id="line-335"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-336"><code>}</code></span>
+<span class="codeline" id="line-337"><code></code></span>
+<span class="codeline" id="line-338"><code><span class="comment">// fromSlice converts the given list of errors into a single error.</span></code></span>
+<span class="codeline" id="line-339"><code><span class="keyword">func</span> fromSlice(<label for="r43" class="ident">errors</label> []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-340"><code>	<span class="comment">// Don't pay to inspect small slices.</span></code></span>
+<span class="codeline" id="line-341"><code>	<span class="keyword">switch</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r43" class="ident">errors</label>) {</code></span>
+<span class="codeline" id="line-342"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-343"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-344"><code>	<span class="keyword">case</span> <span class="lit-number">1</span>:</code></span>
+<span class="codeline" id="line-345"><code>		<span class="keyword">return</span> <label for="r43" class="ident">errors</label>[<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-346"><code>	}</code></span>
 <span class="codeline" id="line-347"><code></code></span>
-<span class="codeline" id="line-348"><code><span class="comment">// Inspects the given slice of errors so that we can efficiently allocate</span></code></span>
-<span class="codeline" id="line-349"><code><span class="comment">// space for it.</span></code></span>
-<span class="codeline" id="line-350"><code><span class="keyword">func</span> inspect(<label for="r42" class="ident">errors</label> []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) (<label for="r43" class="ident">res</label> <a href="#line-333" class="ident">inspectResult</a>) {</code></span>
-<span class="codeline" id="line-351"><code>	<label for="r44" class="ident">first</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-352"><code>	<span class="keyword">for</span> <label for="r45" class="ident">i</label>, <label for="r46" class="ident">err</label> := <span class="keyword">range</span> <label for="r42" class="ident">errors</label> {</code></span>
-<span class="codeline" id="line-353"><code>		<span class="keyword">if</span> <label for="r46" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-354"><code>			<span class="keyword">continue</span></code></span>
-<span class="codeline" id="line-355"><code>		}</code></span>
-<span class="codeline" id="line-356"><code></code></span>
-<span class="codeline" id="line-357"><code>		<label for="r43" class="ident">res</label>.<a href="#line-335" class="ident">Count</a>++</code></span>
-<span class="codeline" id="line-358"><code>		<span class="keyword">if</span> <label for="r44" class="ident">first</label> {</code></span>
-<span class="codeline" id="line-359"><code>			<label for="r44" class="ident">first</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-360"><code>			<label for="r43" class="ident">res</label>.<a href="#line-342" class="ident">FirstErrorIdx</a> = <label for="r45" class="ident">i</label></code></span>
-<span class="codeline" id="line-361"><code>		}</code></span>
-<span class="codeline" id="line-362"><code></code></span>
-<span class="codeline" id="line-363"><code>		<span class="keyword">if</span> <label for="r47" class="ident">merr</label>, <label for="r48" class="ident">ok</label> := <label for="r46" class="ident">err</label>.(*<a href="#line-225" class="ident">multiError</a>); <label for="r48" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-364"><code>			<label for="r43" class="ident">res</label>.<a href="#line-338" class="ident">Capacity</a> += <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r47" class="ident">merr</label>.<a href="#line-227" class="ident">errors</a>)</code></span>
-<span class="codeline" id="line-365"><code>			<label for="r43" class="ident">res</label>.<a href="#line-345" class="ident">ContainsMultiError</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-366"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-367"><code>			<label for="r43" class="ident">res</label>.<a href="#line-338" class="ident">Capacity</a>++</code></span>
-<span class="codeline" id="line-368"><code>		}</code></span>
-<span class="codeline" id="line-369"><code>	}</code></span>
-<span class="codeline" id="line-370"><code>	<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-371"><code>}</code></span>
-<span class="codeline" id="line-372"><code></code></span>
-<span class="codeline" id="line-373"><code><span class="comment">// fromSlice converts the given list of errors into a single error.</span></code></span>
-<span class="codeline" id="line-374"><code><span class="keyword">func</span> fromSlice(<label for="r50" class="ident">errors</label> []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-375"><code>	<span class="comment">// Don't pay to inspect small slices.</span></code></span>
-<span class="codeline" id="line-376"><code>	<span class="keyword">switch</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r50" class="ident">errors</label>) {</code></span>
-<span class="codeline" id="line-377"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
-<span class="codeline" id="line-378"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-379"><code>	<span class="keyword">case</span> <span class="lit-number">1</span>:</code></span>
-<span class="codeline" id="line-380"><code>		<span class="keyword">return</span> <label for="r50" class="ident">errors</label>[<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-381"><code>	}</code></span>
-<span class="codeline" id="line-382"><code></code></span>
-<span class="codeline" id="line-383"><code>	<label for="r51" class="ident">res</label> := <a href="#line-350" class="ident">inspect</a>(<label for="r50" class="ident">errors</label>)</code></span>
-<span class="codeline" id="line-384"><code>	<span class="keyword">switch</span> <label for="r51" class="ident">res</label>.<a href="#line-335" class="ident">Count</a> {</code></span>
-<span class="codeline" id="line-385"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
-<span class="codeline" id="line-386"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-387"><code>	<span class="keyword">case</span> <span class="lit-number">1</span>:</code></span>
-<span class="codeline" id="line-388"><code>		<span class="comment">// only one non-nil entry</span></code></span>
-<span class="codeline" id="line-389"><code>		<span class="keyword">return</span> <label for="r50" class="ident">errors</label>[<label for="r51" class="ident">res</label>.<a href="#line-342" class="ident">FirstErrorIdx</a>]</code></span>
-<span class="codeline" id="line-390"><code>	<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r50" class="ident">errors</label>):</code></span>
-<span class="codeline" id="line-391"><code>		<span class="keyword">if</span> !<label for="r51" class="ident">res</label>.<a href="#line-345" class="ident">ContainsMultiError</a> {</code></span>
-<span class="codeline" id="line-392"><code>			<span class="comment">// Error list is flat. Make a copy of it</span></code></span>
-<span class="codeline" id="line-393"><code><span class="comment">			// Otherwise "errors" escapes to the heap</span></code></span>
-<span class="codeline" id="line-394"><code><span class="comment">			// unconditionally for all other cases.</span></code></span>
-<span class="codeline" id="line-395"><code><span class="comment">			// This lets us optimize for the "no errors" case.</span></code></span>
-<span class="codeline" id="line-396"><code>			<label for="r52" class="ident">out</label> := <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(([]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>), <label for="r50" class="ident">errors</label>...)</code></span>
-<span class="codeline" id="line-397"><code>			<span class="keyword">return</span> &amp;<a href="#line-225" class="ident">multiError</a>{<a href="#line-227" class="ident">errors</a>: <label for="r52" class="ident">out</label>}</code></span>
-<span class="codeline" id="line-398"><code>		}</code></span>
-<span class="codeline" id="line-399"><code>	}</code></span>
-<span class="codeline" id="line-400"><code></code></span>
-<span class="codeline" id="line-401"><code>	<label for="r53" class="ident">nonNilErrs</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <span class="lit-number">0</span>, <label for="r51" class="ident">res</label>.<a href="#line-338" class="ident">Capacity</a>)</code></span>
-<span class="codeline" id="line-402"><code>	<span class="keyword">for</span> <label for="r54" class="ident">_</label>, <label for="r55" class="ident">err</label> := <span class="keyword">range</span> <label for="r50" class="ident">errors</label>[<label for="r51" class="ident">res</label>.<a href="#line-342" class="ident">FirstErrorIdx</a>:] {</code></span>
-<span class="codeline" id="line-403"><code>		<span class="keyword">if</span> <label for="r55" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-404"><code>			<span class="keyword">continue</span></code></span>
-<span class="codeline" id="line-405"><code>		}</code></span>
-<span class="codeline" id="line-406"><code></code></span>
-<span class="codeline" id="line-407"><code>		<span class="keyword">if</span> <label for="r56" class="ident">nested</label>, <label for="r57" class="ident">ok</label> := <label for="r55" class="ident">err</label>.(*<a href="#line-225" class="ident">multiError</a>); <label for="r57" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-408"><code>			<label for="r53" class="ident">nonNilErrs</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r53" class="ident">nonNilErrs</label>, <label for="r56" class="ident">nested</label>.<a href="#line-227" class="ident">errors</a>...)</code></span>
-<span class="codeline" id="line-409"><code>		} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-410"><code>			<label for="r53" class="ident">nonNilErrs</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r53" class="ident">nonNilErrs</label>, <label for="r55" class="ident">err</label>)</code></span>
-<span class="codeline" id="line-411"><code>		}</code></span>
-<span class="codeline" id="line-412"><code>	}</code></span>
-<span class="codeline" id="line-413"><code></code></span>
-<span class="codeline" id="line-414"><code>	<span class="keyword">return</span> &amp;<a href="#line-225" class="ident">multiError</a>{<a href="#line-227" class="ident">errors</a>: <label for="r53" class="ident">nonNilErrs</label>}</code></span>
+<span class="codeline" id="line-348"><code>	<label for="r44" class="ident">res</label> := <a href="#line-315" class="ident">inspect</a>(<label for="r43" class="ident">errors</label>)</code></span>
+<span class="codeline" id="line-349"><code>	<span class="keyword">switch</span> <label for="r44" class="ident">res</label>.<a href="#line-300" class="ident">Count</a> {</code></span>
+<span class="codeline" id="line-350"><code>	<span class="keyword">case</span> <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-351"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-352"><code>	<span class="keyword">case</span> <span class="lit-number">1</span>:</code></span>
+<span class="codeline" id="line-353"><code>		<span class="comment">// only one non-nil entry</span></code></span>
+<span class="codeline" id="line-354"><code>		<span class="keyword">return</span> <label for="r43" class="ident">errors</label>[<label for="r44" class="ident">res</label>.<a href="#line-307" class="ident">FirstErrorIdx</a>]</code></span>
+<span class="codeline" id="line-355"><code>	<span class="keyword">case</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r43" class="ident">errors</label>):</code></span>
+<span class="codeline" id="line-356"><code>		<span class="keyword">if</span> !<label for="r44" class="ident">res</label>.<a href="#line-310" class="ident">ContainsMultiError</a> {</code></span>
+<span class="codeline" id="line-357"><code>			<span class="comment">// Error list is flat. Make a copy of it</span></code></span>
+<span class="codeline" id="line-358"><code><span class="comment">			// Otherwise "errors" escapes to the heap</span></code></span>
+<span class="codeline" id="line-359"><code><span class="comment">			// unconditionally for all other cases.</span></code></span>
+<span class="codeline" id="line-360"><code><span class="comment">			// This lets us optimize for the "no errors" case.</span></code></span>
+<span class="codeline" id="line-361"><code>			<label for="r45" class="ident">out</label> := <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(([]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>)(<a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>), <label for="r43" class="ident">errors</label>...)</code></span>
+<span class="codeline" id="line-362"><code>			<span class="keyword">return</span> &amp;<a href="#line-208" class="ident">multiError</a>{<a href="#line-210" class="ident">errors</a>: <label for="r45" class="ident">out</label>}</code></span>
+<span class="codeline" id="line-363"><code>		}</code></span>
+<span class="codeline" id="line-364"><code>	}</code></span>
+<span class="codeline" id="line-365"><code></code></span>
+<span class="codeline" id="line-366"><code>	<label for="r46" class="ident">nonNilErrs</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <span class="lit-number">0</span>, <label for="r44" class="ident">res</label>.<a href="#line-303" class="ident">Capacity</a>)</code></span>
+<span class="codeline" id="line-367"><code>	<span class="keyword">for</span> <label for="r47" class="ident">_</label>, <label for="r48" class="ident">err</label> := <span class="keyword">range</span> <label for="r43" class="ident">errors</label>[<label for="r44" class="ident">res</label>.<a href="#line-307" class="ident">FirstErrorIdx</a>:] {</code></span>
+<span class="codeline" id="line-368"><code>		<span class="keyword">if</span> <label for="r48" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-369"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-370"><code>		}</code></span>
+<span class="codeline" id="line-371"><code></code></span>
+<span class="codeline" id="line-372"><code>		<span class="keyword">if</span> <label for="r49" class="ident">nested</label>, <label for="r50" class="ident">ok</label> := <label for="r48" class="ident">err</label>.(*<a href="#line-208" class="ident">multiError</a>); <label for="r50" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-373"><code>			<label for="r46" class="ident">nonNilErrs</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r46" class="ident">nonNilErrs</label>, <label for="r49" class="ident">nested</label>.<a href="#line-210" class="ident">errors</a>...)</code></span>
+<span class="codeline" id="line-374"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-375"><code>			<label for="r46" class="ident">nonNilErrs</label> = <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r46" class="ident">nonNilErrs</label>, <label for="r48" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-376"><code>		}</code></span>
+<span class="codeline" id="line-377"><code>	}</code></span>
+<span class="codeline" id="line-378"><code></code></span>
+<span class="codeline" id="line-379"><code>	<span class="keyword">return</span> &amp;<a href="#line-208" class="ident">multiError</a>{<a href="#line-210" class="ident">errors</a>: <label for="r46" class="ident">nonNilErrs</label>}</code></span>
+<span class="codeline" id="line-380"><code>}</code></span>
+<span class="codeline" id="line-381"><code></code></span>
+<span class="codeline" id="line-382"><code><span class="comment">// Combine combines the passed errors into a single error.</span></code></span>
+<span class="codeline" id="line-383"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-384"><code><span class="comment">// If zero arguments were passed or if all items are nil, a nil error is</span></code></span>
+<span class="codeline" id="line-385"><code><span class="comment">// returned.</span></code></span>
+<span class="codeline" id="line-386"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-387"><code><span class="comment">//	Combine(nil, nil)  // == nil</span></code></span>
+<span class="codeline" id="line-388"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-389"><code><span class="comment">// If only a single error was passed, it is returned as-is.</span></code></span>
+<span class="codeline" id="line-390"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-391"><code><span class="comment">//	Combine(err)  // == err</span></code></span>
+<span class="codeline" id="line-392"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-393"><code><span class="comment">// Combine skips over nil arguments so this function may be used to combine</span></code></span>
+<span class="codeline" id="line-394"><code><span class="comment">// together errors from operations that fail independently of each other.</span></code></span>
+<span class="codeline" id="line-395"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-396"><code><span class="comment">//	multierr.Combine(</span></code></span>
+<span class="codeline" id="line-397"><code><span class="comment">//		reader.Close(),</span></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">//		writer.Close(),</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">//		pipe.Close(),</span></code></span>
+<span class="codeline" id="line-400"><code><span class="comment">//	)</span></code></span>
+<span class="codeline" id="line-401"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-402"><code><span class="comment">// If any of the passed errors is a multierr error, it will be flattened along</span></code></span>
+<span class="codeline" id="line-403"><code><span class="comment">// with the other errors.</span></code></span>
+<span class="codeline" id="line-404"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-405"><code><span class="comment">//	multierr.Combine(multierr.Combine(err1, err2), err3)</span></code></span>
+<span class="codeline" id="line-406"><code><span class="comment">//	// is the same as</span></code></span>
+<span class="codeline" id="line-407"><code><span class="comment">//	multierr.Combine(err1, err2, err3)</span></code></span>
+<span class="codeline" id="line-408"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-409"><code><span class="comment">// The returned error formats into a readable multi-line error message if</span></code></span>
+<span class="codeline" id="line-410"><code><span class="comment">// formatted with %+v.</span></code></span>
+<span class="codeline" id="line-411"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-412"><code><span class="comment">//	fmt.Sprintf("%+v", multierr.Combine(err1, err2))</span></code></span>
+<span class="codeline" id="line-413"><code><span class="keyword">func</span> <label for="r51" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Combine" class="ident">Combine</a></label>(<label for="r52" class="ident">errors</label> ...<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-414"><code>	<span class="keyword">return</span> <a href="#line-339" class="ident">fromSlice</a>(<label for="r52" class="ident">errors</label>)</code></span>
 <span class="codeline" id="line-415"><code>}</code></span>
 <span class="codeline" id="line-416"><code></code></span>
-<span class="codeline" id="line-417"><code><span class="comment">// Combine combines the passed errors into a single error.</span></code></span>
+<span class="codeline" id="line-417"><code><span class="comment">// Append appends the given errors together. Either value may be nil.</span></code></span>
 <span class="codeline" id="line-418"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-419"><code><span class="comment">// If zero arguments were passed or if all items are nil, a nil error is</span></code></span>
-<span class="codeline" id="line-420"><code><span class="comment">// returned.</span></code></span>
+<span class="codeline" id="line-419"><code><span class="comment">// This function is a specialization of Combine for the common case where</span></code></span>
+<span class="codeline" id="line-420"><code><span class="comment">// there are only two errors.</span></code></span>
 <span class="codeline" id="line-421"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-422"><code><span class="comment">//	Combine(nil, nil)  // == nil</span></code></span>
+<span class="codeline" id="line-422"><code><span class="comment">//	err = multierr.Append(reader.Close(), writer.Close())</span></code></span>
 <span class="codeline" id="line-423"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-424"><code><span class="comment">// If only a single error was passed, it is returned as-is.</span></code></span>
-<span class="codeline" id="line-425"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-426"><code><span class="comment">//	Combine(err)  // == err</span></code></span>
-<span class="codeline" id="line-427"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-428"><code><span class="comment">// Combine skips over nil arguments so this function may be used to combine</span></code></span>
-<span class="codeline" id="line-429"><code><span class="comment">// together errors from operations that fail independently of each other.</span></code></span>
-<span class="codeline" id="line-430"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-431"><code><span class="comment">//	multierr.Combine(</span></code></span>
-<span class="codeline" id="line-432"><code><span class="comment">//		reader.Close(),</span></code></span>
-<span class="codeline" id="line-433"><code><span class="comment">//		writer.Close(),</span></code></span>
-<span class="codeline" id="line-434"><code><span class="comment">//		pipe.Close(),</span></code></span>
-<span class="codeline" id="line-435"><code><span class="comment">//	)</span></code></span>
-<span class="codeline" id="line-436"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-437"><code><span class="comment">// If any of the passed errors is a multierr error, it will be flattened along</span></code></span>
-<span class="codeline" id="line-438"><code><span class="comment">// with the other errors.</span></code></span>
-<span class="codeline" id="line-439"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-440"><code><span class="comment">//	multierr.Combine(multierr.Combine(err1, err2), err3)</span></code></span>
-<span class="codeline" id="line-441"><code><span class="comment">//	// is the same as</span></code></span>
-<span class="codeline" id="line-442"><code><span class="comment">//	multierr.Combine(err1, err2, err3)</span></code></span>
-<span class="codeline" id="line-443"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-444"><code><span class="comment">// The returned error formats into a readable multi-line error message if</span></code></span>
-<span class="codeline" id="line-445"><code><span class="comment">// formatted with %+v.</span></code></span>
-<span class="codeline" id="line-446"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-447"><code><span class="comment">//	fmt.Sprintf("%+v", multierr.Combine(err1, err2))</span></code></span>
-<span class="codeline" id="line-448"><code><span class="keyword">func</span> <label for="r58" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Combine" class="ident">Combine</a></label>(<label for="r59" class="ident">errors</label> ...<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-449"><code>	<span class="keyword">return</span> <a href="#line-374" class="ident">fromSlice</a>(<label for="r59" class="ident">errors</label>)</code></span>
-<span class="codeline" id="line-450"><code>}</code></span>
-<span class="codeline" id="line-451"><code></code></span>
-<span class="codeline" id="line-452"><code><span class="comment">// Append appends the given errors together. Either value may be nil.</span></code></span>
-<span class="codeline" id="line-453"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-454"><code><span class="comment">// This function is a specialization of Combine for the common case where</span></code></span>
-<span class="codeline" id="line-455"><code><span class="comment">// there are only two errors.</span></code></span>
-<span class="codeline" id="line-456"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-457"><code><span class="comment">//	err = multierr.Append(reader.Close(), writer.Close())</span></code></span>
-<span class="codeline" id="line-458"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-459"><code><span class="comment">// The following pattern may also be used to record failure of deferred</span></code></span>
-<span class="codeline" id="line-460"><code><span class="comment">// operations without losing information about the original error.</span></code></span>
-<span class="codeline" id="line-461"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-462"><code><span class="comment">//	func doSomething(..) (err error) {</span></code></span>
-<span class="codeline" id="line-463"><code><span class="comment">//		f := acquireResource()</span></code></span>
-<span class="codeline" id="line-464"><code><span class="comment">//		defer func() {</span></code></span>
-<span class="codeline" id="line-465"><code><span class="comment">//			err = multierr.Append(err, f.Close())</span></code></span>
-<span class="codeline" id="line-466"><code><span class="comment">//		}()</span></code></span>
+<span class="codeline" id="line-424"><code><span class="comment">// The following pattern may also be used to record failure of deferred</span></code></span>
+<span class="codeline" id="line-425"><code><span class="comment">// operations without losing information about the original error.</span></code></span>
+<span class="codeline" id="line-426"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-427"><code><span class="comment">//	func doSomething(..) (err error) {</span></code></span>
+<span class="codeline" id="line-428"><code><span class="comment">//		f := acquireResource()</span></code></span>
+<span class="codeline" id="line-429"><code><span class="comment">//		defer func() {</span></code></span>
+<span class="codeline" id="line-430"><code><span class="comment">//			err = multierr.Append(err, f.Close())</span></code></span>
+<span class="codeline" id="line-431"><code><span class="comment">//		}()</span></code></span>
+<span class="codeline" id="line-432"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-433"><code><span class="comment">// Note that the variable MUST be a named return to append an error to it from</span></code></span>
+<span class="codeline" id="line-434"><code><span class="comment">// the defer statement. See also [AppendInvoke].</span></code></span>
+<span class="codeline" id="line-435"><code><span class="keyword">func</span> <label for="r53" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Append" class="ident">Append</a></label>(<label for="r54" class="ident">left</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r55" class="ident">right</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-436"><code>	<span class="keyword">switch</span> {</code></span>
+<span class="codeline" id="line-437"><code>	<span class="keyword">case</span> <label for="r54" class="ident">left</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>:</code></span>
+<span class="codeline" id="line-438"><code>		<span class="keyword">return</span> <label for="r55" class="ident">right</label></code></span>
+<span class="codeline" id="line-439"><code>	<span class="keyword">case</span> <label for="r55" class="ident">right</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>:</code></span>
+<span class="codeline" id="line-440"><code>		<span class="keyword">return</span> <label for="r54" class="ident">left</label></code></span>
+<span class="codeline" id="line-441"><code>	}</code></span>
+<span class="codeline" id="line-442"><code></code></span>
+<span class="codeline" id="line-443"><code>	<span class="keyword">if</span> <label for="r56" class="ident">_</label>, <label for="r57" class="ident">ok</label> := <label for="r55" class="ident">right</label>.(*<a href="#line-208" class="ident">multiError</a>); !<label for="r57" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-444"><code>		<span class="keyword">if</span> <label for="r58" class="ident">l</label>, <label for="r59" class="ident">ok</label> := <label for="r54" class="ident">left</label>.(*<a href="#line-208" class="ident">multiError</a>); <label for="r59" class="ident">ok</label> &amp;&amp; !<label for="r58" class="ident">l</label>.<a href="#line-209" class="ident">copyNeeded</a>.<a href="../../sync/atomic/type.go.html#line-23" class="ident">Swap</a>(<a href="../../../pkg/builtin.html#name-true" class="ident">true</a>) {</code></span>
+<span class="codeline" id="line-445"><code>			<span class="comment">// Common case where the error on the left is constantly being</span></code></span>
+<span class="codeline" id="line-446"><code><span class="comment">			// appended to.</span></code></span>
+<span class="codeline" id="line-447"><code>			<label for="r60" class="ident">errs</label> := <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r58" class="ident">l</label>.<a href="#line-210" class="ident">errors</a>, <label for="r55" class="ident">right</label>)</code></span>
+<span class="codeline" id="line-448"><code>			<span class="keyword">return</span> &amp;<a href="#line-208" class="ident">multiError</a>{<a href="#line-210" class="ident">errors</a>: <label for="r60" class="ident">errs</label>}</code></span>
+<span class="codeline" id="line-449"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> !<label for="r59" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-450"><code>			<span class="comment">// Both errors are single errors.</span></code></span>
+<span class="codeline" id="line-451"><code>			<span class="keyword">return</span> &amp;<a href="#line-208" class="ident">multiError</a>{<a href="#line-210" class="ident">errors</a>: []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>{<label for="r54" class="ident">left</label>, <label for="r55" class="ident">right</label>}}</code></span>
+<span class="codeline" id="line-452"><code>		}</code></span>
+<span class="codeline" id="line-453"><code>	}</code></span>
+<span class="codeline" id="line-454"><code></code></span>
+<span class="codeline" id="line-455"><code>	<span class="comment">// Either right or both, left and right, are multiErrors. Rely on usual</span></code></span>
+<span class="codeline" id="line-456"><code><span class="comment">	// expensive logic.</span></code></span>
+<span class="codeline" id="line-457"><code>	<label for="r61" class="ident">errors</label> := [<span class="lit-number">2</span>]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>{<label for="r54" class="ident">left</label>, <label for="r55" class="ident">right</label>}</code></span>
+<span class="codeline" id="line-458"><code>	<span class="keyword">return</span> <a href="#line-339" class="ident">fromSlice</a>(<label for="r61" class="ident">errors</label>[<span class="lit-number">0</span>:])</code></span>
+<span class="codeline" id="line-459"><code>}</code></span>
+<span class="codeline" id="line-460"><code></code></span>
+<span class="codeline" id="line-461"><code><span class="comment">// AppendInto appends an error into the destination of an error pointer and</span></code></span>
+<span class="codeline" id="line-462"><code><span class="comment">// returns whether the error being appended was non-nil.</span></code></span>
+<span class="codeline" id="line-463"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-464"><code><span class="comment">//	var err error</span></code></span>
+<span class="codeline" id="line-465"><code><span class="comment">//	multierr.AppendInto(&amp;err, r.Close())</span></code></span>
+<span class="codeline" id="line-466"><code><span class="comment">//	multierr.AppendInto(&amp;err, w.Close())</span></code></span>
 <span class="codeline" id="line-467"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-468"><code><span class="comment">// Note that the variable MUST be a named return to append an error to it from</span></code></span>
-<span class="codeline" id="line-469"><code><span class="comment">// the defer statement. See also [AppendInvoke].</span></code></span>
-<span class="codeline" id="line-470"><code><span class="keyword">func</span> <label for="r60" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Append" class="ident">Append</a></label>(<label for="r61" class="ident">left</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r62" class="ident">right</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-471"><code>	<span class="keyword">switch</span> {</code></span>
-<span class="codeline" id="line-472"><code>	<span class="keyword">case</span> <label for="r61" class="ident">left</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>:</code></span>
-<span class="codeline" id="line-473"><code>		<span class="keyword">return</span> <label for="r62" class="ident">right</label></code></span>
-<span class="codeline" id="line-474"><code>	<span class="keyword">case</span> <label for="r62" class="ident">right</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a>:</code></span>
-<span class="codeline" id="line-475"><code>		<span class="keyword">return</span> <label for="r61" class="ident">left</label></code></span>
-<span class="codeline" id="line-476"><code>	}</code></span>
-<span class="codeline" id="line-477"><code></code></span>
-<span class="codeline" id="line-478"><code>	<span class="keyword">if</span> <label for="r63" class="ident">_</label>, <label for="r64" class="ident">ok</label> := <label for="r62" class="ident">right</label>.(*<a href="#line-225" class="ident">multiError</a>); !<label for="r64" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-479"><code>		<span class="keyword">if</span> <label for="r65" class="ident">l</label>, <label for="r66" class="ident">ok</label> := <label for="r61" class="ident">left</label>.(*<a href="#line-225" class="ident">multiError</a>); <label for="r66" class="ident">ok</label> &amp;&amp; !<label for="r65" class="ident">l</label>.<a href="#line-226" class="ident">copyNeeded</a>.<a href="../atomic/bool.go.html#line-71" class="ident">Swap</a>(<a href="../../../pkg/builtin.html#name-true" class="ident">true</a>) {</code></span>
-<span class="codeline" id="line-480"><code>			<span class="comment">// Common case where the error on the left is constantly being</span></code></span>
-<span class="codeline" id="line-481"><code><span class="comment">			// appended to.</span></code></span>
-<span class="codeline" id="line-482"><code>			<label for="r67" class="ident">errs</label> := <a href="../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r65" class="ident">l</label>.<a href="#line-227" class="ident">errors</a>, <label for="r62" class="ident">right</label>)</code></span>
-<span class="codeline" id="line-483"><code>			<span class="keyword">return</span> &amp;<a href="#line-225" class="ident">multiError</a>{<a href="#line-227" class="ident">errors</a>: <label for="r67" class="ident">errs</label>}</code></span>
-<span class="codeline" id="line-484"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> !<label for="r66" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-485"><code>			<span class="comment">// Both errors are single errors.</span></code></span>
-<span class="codeline" id="line-486"><code>			<span class="keyword">return</span> &amp;<a href="#line-225" class="ident">multiError</a>{<a href="#line-227" class="ident">errors</a>: []<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>{<label for="r61" class="ident">left</label>, <label for="r62" class="ident">right</label>}}</code></span>
-<span class="codeline" id="line-487"><code>		}</code></span>
-<span class="codeline" id="line-488"><code>	}</code></span>
-<span class="codeline" id="line-489"><code></code></span>
-<span class="codeline" id="line-490"><code>	<span class="comment">// Either right or both, left and right, are multiErrors. Rely on usual</span></code></span>
-<span class="codeline" id="line-491"><code><span class="comment">	// expensive logic.</span></code></span>
-<span class="codeline" id="line-492"><code>	<label for="r68" class="ident">errors</label> := [<span class="lit-number">2</span>]<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>{<label for="r61" class="ident">left</label>, <label for="r62" class="ident">right</label>}</code></span>
-<span class="codeline" id="line-493"><code>	<span class="keyword">return</span> <a href="#line-374" class="ident">fromSlice</a>(<label for="r68" class="ident">errors</label>[<span class="lit-number">0</span>:])</code></span>
-<span class="codeline" id="line-494"><code>}</code></span>
-<span class="codeline" id="line-495"><code></code></span>
-<span class="codeline" id="line-496"><code><span class="comment">// AppendInto appends an error into the destination of an error pointer and</span></code></span>
-<span class="codeline" id="line-497"><code><span class="comment">// returns whether the error being appended was non-nil.</span></code></span>
-<span class="codeline" id="line-498"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-499"><code><span class="comment">//	var err error</span></code></span>
-<span class="codeline" id="line-500"><code><span class="comment">//	multierr.AppendInto(&amp;err, r.Close())</span></code></span>
-<span class="codeline" id="line-501"><code><span class="comment">//	multierr.AppendInto(&amp;err, w.Close())</span></code></span>
-<span class="codeline" id="line-502"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-503"><code><span class="comment">// The above is equivalent to,</span></code></span>
-<span class="codeline" id="line-504"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-505"><code><span class="comment">//	err := multierr.Append(r.Close(), w.Close())</span></code></span>
-<span class="codeline" id="line-506"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-507"><code><span class="comment">// As AppendInto reports whether the provided error was non-nil, it may be</span></code></span>
-<span class="codeline" id="line-508"><code><span class="comment">// used to build a multierr error in a loop more ergonomically. For example:</span></code></span>
-<span class="codeline" id="line-509"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-510"><code><span class="comment">//	var err error</span></code></span>
-<span class="codeline" id="line-511"><code><span class="comment">//	for line := range lines {</span></code></span>
-<span class="codeline" id="line-512"><code><span class="comment">//		var item Item</span></code></span>
-<span class="codeline" id="line-513"><code><span class="comment">//		if multierr.AppendInto(&amp;err, parse(line, &amp;item)) {</span></code></span>
-<span class="codeline" id="line-514"><code><span class="comment">//			continue</span></code></span>
-<span class="codeline" id="line-515"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-516"><code><span class="comment">//		items = append(items, item)</span></code></span>
-<span class="codeline" id="line-517"><code><span class="comment">//	}</span></code></span>
-<span class="codeline" id="line-518"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-519"><code><span class="comment">// Compare this with a version that relies solely on Append:</span></code></span>
-<span class="codeline" id="line-520"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-521"><code><span class="comment">//	var err error</span></code></span>
-<span class="codeline" id="line-522"><code><span class="comment">//	for line := range lines {</span></code></span>
-<span class="codeline" id="line-523"><code><span class="comment">//		var item Item</span></code></span>
-<span class="codeline" id="line-524"><code><span class="comment">//		if parseErr := parse(line, &amp;item); parseErr != nil {</span></code></span>
-<span class="codeline" id="line-525"><code><span class="comment">//			err = multierr.Append(err, parseErr)</span></code></span>
-<span class="codeline" id="line-526"><code><span class="comment">//			continue</span></code></span>
-<span class="codeline" id="line-527"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-528"><code><span class="comment">//		items = append(items, item)</span></code></span>
-<span class="codeline" id="line-529"><code><span class="comment">//	}</span></code></span>
-<span class="codeline" id="line-530"><code><span class="keyword">func</span> <label for="r69" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendInto" class="ident">AppendInto</a></label>(<label for="r70" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r71" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) (<label for="r72" class="ident">errored</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
-<span class="codeline" id="line-531"><code>	<span class="keyword">if</span> <label for="r70" class="ident">into</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-532"><code>		<span class="comment">// We panic if 'into' is nil. This is not documented above</span></code></span>
-<span class="codeline" id="line-533"><code><span class="comment">		// because suggesting that the pointer must be non-nil may</span></code></span>
-<span class="codeline" id="line-534"><code><span class="comment">		// confuse users into thinking that the error that it points</span></code></span>
-<span class="codeline" id="line-535"><code><span class="comment">		// to must be non-nil.</span></code></span>
-<span class="codeline" id="line-536"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"misuse of multierr.AppendInto: into pointer must not be nil"</span>)</code></span>
-<span class="codeline" id="line-537"><code>	}</code></span>
-<span class="codeline" id="line-538"><code></code></span>
-<span class="codeline" id="line-539"><code>	<span class="keyword">if</span> <label for="r71" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-540"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-541"><code>	}</code></span>
-<span class="codeline" id="line-542"><code>	*<label for="r70" class="ident">into</label> = <a href="#line-470" class="ident">Append</a>(*<label for="r70" class="ident">into</label>, <label for="r71" class="ident">err</label>)</code></span>
-<span class="codeline" id="line-543"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-544"><code>}</code></span>
-<span class="codeline" id="line-545"><code></code></span>
-<span class="codeline" id="line-546"><code><span class="comment">// Invoker is an operation that may fail with an error. Use it with</span></code></span>
-<span class="codeline" id="line-547"><code><span class="comment">// AppendInvoke to append the result of calling the function into an error.</span></code></span>
-<span class="codeline" id="line-548"><code><span class="comment">// This allows you to conveniently defer capture of failing operations.</span></code></span>
+<span class="codeline" id="line-468"><code><span class="comment">// The above is equivalent to,</span></code></span>
+<span class="codeline" id="line-469"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-470"><code><span class="comment">//	err := multierr.Append(r.Close(), w.Close())</span></code></span>
+<span class="codeline" id="line-471"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-472"><code><span class="comment">// As AppendInto reports whether the provided error was non-nil, it may be</span></code></span>
+<span class="codeline" id="line-473"><code><span class="comment">// used to build a multierr error in a loop more ergonomically. For example:</span></code></span>
+<span class="codeline" id="line-474"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-475"><code><span class="comment">//	var err error</span></code></span>
+<span class="codeline" id="line-476"><code><span class="comment">//	for line := range lines {</span></code></span>
+<span class="codeline" id="line-477"><code><span class="comment">//		var item Item</span></code></span>
+<span class="codeline" id="line-478"><code><span class="comment">//		if multierr.AppendInto(&amp;err, parse(line, &amp;item)) {</span></code></span>
+<span class="codeline" id="line-479"><code><span class="comment">//			continue</span></code></span>
+<span class="codeline" id="line-480"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-481"><code><span class="comment">//		items = append(items, item)</span></code></span>
+<span class="codeline" id="line-482"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-483"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-484"><code><span class="comment">// Compare this with a version that relies solely on Append:</span></code></span>
+<span class="codeline" id="line-485"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-486"><code><span class="comment">//	var err error</span></code></span>
+<span class="codeline" id="line-487"><code><span class="comment">//	for line := range lines {</span></code></span>
+<span class="codeline" id="line-488"><code><span class="comment">//		var item Item</span></code></span>
+<span class="codeline" id="line-489"><code><span class="comment">//		if parseErr := parse(line, &amp;item); parseErr != nil {</span></code></span>
+<span class="codeline" id="line-490"><code><span class="comment">//			err = multierr.Append(err, parseErr)</span></code></span>
+<span class="codeline" id="line-491"><code><span class="comment">//			continue</span></code></span>
+<span class="codeline" id="line-492"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-493"><code><span class="comment">//		items = append(items, item)</span></code></span>
+<span class="codeline" id="line-494"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-495"><code><span class="keyword">func</span> <label for="r62" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendInto" class="ident">AppendInto</a></label>(<label for="r63" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r64" class="ident">err</label> <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) (<label for="r65" class="ident">errored</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-496"><code>	<span class="keyword">if</span> <label for="r63" class="ident">into</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-497"><code>		<span class="comment">// We panic if 'into' is nil. This is not documented above</span></code></span>
+<span class="codeline" id="line-498"><code><span class="comment">		// because suggesting that the pointer must be non-nil may</span></code></span>
+<span class="codeline" id="line-499"><code><span class="comment">		// confuse users into thinking that the error that it points</span></code></span>
+<span class="codeline" id="line-500"><code><span class="comment">		// to must be non-nil.</span></code></span>
+<span class="codeline" id="line-501"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"misuse of multierr.AppendInto: into pointer must not be nil"</span>)</code></span>
+<span class="codeline" id="line-502"><code>	}</code></span>
+<span class="codeline" id="line-503"><code></code></span>
+<span class="codeline" id="line-504"><code>	<span class="keyword">if</span> <label for="r64" class="ident">err</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-505"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-506"><code>	}</code></span>
+<span class="codeline" id="line-507"><code>	*<label for="r63" class="ident">into</label> = <a href="#line-435" class="ident">Append</a>(*<label for="r63" class="ident">into</label>, <label for="r64" class="ident">err</label>)</code></span>
+<span class="codeline" id="line-508"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-509"><code>}</code></span>
+<span class="codeline" id="line-510"><code></code></span>
+<span class="codeline" id="line-511"><code><span class="comment">// Invoker is an operation that may fail with an error. Use it with</span></code></span>
+<span class="codeline" id="line-512"><code><span class="comment">// AppendInvoke to append the result of calling the function into an error.</span></code></span>
+<span class="codeline" id="line-513"><code><span class="comment">// This allows you to conveniently defer capture of failing operations.</span></code></span>
+<span class="codeline" id="line-514"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-515"><code><span class="comment">// See also, [Close] and [Invoke].</span></code></span>
+<span class="codeline" id="line-516"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/multierr.html#name-Invoker" class="ident">Invoker</a> <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-517"><code>	<a href="../../../imp/go.uber.org/multierr.Invoker.html#name-Invoke" class="ident">Invoke</a>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-518"><code>}</code></span>
+<span class="codeline" id="line-519"><code></code></span>
+<span class="codeline" id="line-520"><code><span class="comment">// Invoke wraps a function which may fail with an error to match the Invoker</span></code></span>
+<span class="codeline" id="line-521"><code><span class="comment">// interface. Use it to supply functions matching this signature to</span></code></span>
+<span class="codeline" id="line-522"><code><span class="comment">// AppendInvoke.</span></code></span>
+<span class="codeline" id="line-523"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-524"><code><span class="comment">// For example,</span></code></span>
+<span class="codeline" id="line-525"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-526"><code><span class="comment">//	func processReader(r io.Reader) (err error) {</span></code></span>
+<span class="codeline" id="line-527"><code><span class="comment">//		scanner := bufio.NewScanner(r)</span></code></span>
+<span class="codeline" id="line-528"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
+<span class="codeline" id="line-529"><code><span class="comment">//		for scanner.Scan() {</span></code></span>
+<span class="codeline" id="line-530"><code><span class="comment">//			// ...</span></code></span>
+<span class="codeline" id="line-531"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-532"><code><span class="comment">//		// ...</span></code></span>
+<span class="codeline" id="line-533"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-534"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-535"><code><span class="comment">// In this example, the following line will construct the Invoker right away,</span></code></span>
+<span class="codeline" id="line-536"><code><span class="comment">// but defer the invocation of scanner.Err() until the function returns.</span></code></span>
+<span class="codeline" id="line-537"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-538"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
+<span class="codeline" id="line-539"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-540"><code><span class="comment">// Note that the error you're appending to from the defer statement MUST be a</span></code></span>
+<span class="codeline" id="line-541"><code><span class="comment">// named return.</span></code></span>
+<span class="codeline" id="line-542"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/multierr.html#name-Invoke" class="ident">Invoke</a> <span class="keyword">func</span>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-543"><code></code></span>
+<span class="codeline" id="line-544"><code><span class="comment">// Invoke calls the supplied function and returns its result.</span></code></span>
+<span class="codeline" id="line-545"><code><span class="keyword">func</span> (<label for="r66" class="ident">i</label> <a href="#line-542" class="ident">Invoke</a>) <label for="r67" class="ident">Invoke</label>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> { <span class="keyword">return</span> <label for="r66" class="ident">i</label>() }</code></span>
+<span class="codeline" id="line-546"><code></code></span>
+<span class="codeline" id="line-547"><code><span class="comment">// Close builds an Invoker that closes the provided io.Closer. Use it with</span></code></span>
+<span class="codeline" id="line-548"><code><span class="comment">// AppendInvoke to close io.Closers and append their results into an error.</span></code></span>
 <span class="codeline" id="line-549"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-550"><code><span class="comment">// See also, [Close] and [Invoke].</span></code></span>
-<span class="codeline" id="line-551"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/multierr.html#name-Invoker" class="ident">Invoker</a> <span class="keyword">interface</span> {</code></span>
-<span class="codeline" id="line-552"><code>	<a href="../../../imp/go.uber.org/multierr.Invoker.html#name-Invoke" class="ident">Invoke</a>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-553"><code>}</code></span>
-<span class="codeline" id="line-554"><code></code></span>
-<span class="codeline" id="line-555"><code><span class="comment">// Invoke wraps a function which may fail with an error to match the Invoker</span></code></span>
-<span class="codeline" id="line-556"><code><span class="comment">// interface. Use it to supply functions matching this signature to</span></code></span>
-<span class="codeline" id="line-557"><code><span class="comment">// AppendInvoke.</span></code></span>
-<span class="codeline" id="line-558"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-559"><code><span class="comment">// For example,</span></code></span>
+<span class="codeline" id="line-550"><code><span class="comment">// For example,</span></code></span>
+<span class="codeline" id="line-551"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-552"><code><span class="comment">//	func processFile(path string) (err error) {</span></code></span>
+<span class="codeline" id="line-553"><code><span class="comment">//		f, err := os.Open(path)</span></code></span>
+<span class="codeline" id="line-554"><code><span class="comment">//		if err != nil {</span></code></span>
+<span class="codeline" id="line-555"><code><span class="comment">//			return err</span></code></span>
+<span class="codeline" id="line-556"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-557"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
+<span class="codeline" id="line-558"><code><span class="comment">//		return processReader(f)</span></code></span>
+<span class="codeline" id="line-559"><code><span class="comment">//	}</span></code></span>
 <span class="codeline" id="line-560"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-561"><code><span class="comment">//	func processReader(r io.Reader) (err error) {</span></code></span>
-<span class="codeline" id="line-562"><code><span class="comment">//		scanner := bufio.NewScanner(r)</span></code></span>
-<span class="codeline" id="line-563"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
-<span class="codeline" id="line-564"><code><span class="comment">//		for scanner.Scan() {</span></code></span>
-<span class="codeline" id="line-565"><code><span class="comment">//			// ...</span></code></span>
-<span class="codeline" id="line-566"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-567"><code><span class="comment">//		// ...</span></code></span>
-<span class="codeline" id="line-568"><code><span class="comment">//	}</span></code></span>
-<span class="codeline" id="line-569"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-570"><code><span class="comment">// In this example, the following line will construct the Invoker right away,</span></code></span>
-<span class="codeline" id="line-571"><code><span class="comment">// but defer the invocation of scanner.Err() until the function returns.</span></code></span>
-<span class="codeline" id="line-572"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-573"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
-<span class="codeline" id="line-574"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-575"><code><span class="comment">// Note that the error you're appending to from the defer statement MUST be a</span></code></span>
-<span class="codeline" id="line-576"><code><span class="comment">// named return.</span></code></span>
-<span class="codeline" id="line-577"><code><span class="keyword">type</span> <a href="../../../pkg/go.uber.org/multierr.html#name-Invoke" class="ident">Invoke</a> <span class="keyword">func</span>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-578"><code></code></span>
-<span class="codeline" id="line-579"><code><span class="comment">// Invoke calls the supplied function and returns its result.</span></code></span>
-<span class="codeline" id="line-580"><code><span class="keyword">func</span> (<label for="r73" class="ident">i</label> <a href="#line-577" class="ident">Invoke</a>) <label for="r74" class="ident">Invoke</label>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> { <span class="keyword">return</span> <label for="r73" class="ident">i</label>() }</code></span>
-<span class="codeline" id="line-581"><code></code></span>
-<span class="codeline" id="line-582"><code><span class="comment">// Close builds an Invoker that closes the provided io.Closer. Use it with</span></code></span>
-<span class="codeline" id="line-583"><code><span class="comment">// AppendInvoke to close io.Closers and append their results into an error.</span></code></span>
-<span class="codeline" id="line-584"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-585"><code><span class="comment">// For example,</span></code></span>
-<span class="codeline" id="line-586"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-587"><code><span class="comment">//	func processFile(path string) (err error) {</span></code></span>
-<span class="codeline" id="line-588"><code><span class="comment">//		f, err := os.Open(path)</span></code></span>
-<span class="codeline" id="line-589"><code><span class="comment">//		if err != nil {</span></code></span>
-<span class="codeline" id="line-590"><code><span class="comment">//			return err</span></code></span>
-<span class="codeline" id="line-591"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-592"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
-<span class="codeline" id="line-593"><code><span class="comment">//		return processReader(f)</span></code></span>
-<span class="codeline" id="line-594"><code><span class="comment">//	}</span></code></span>
-<span class="codeline" id="line-595"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-596"><code><span class="comment">// In this example, multierr.Close will construct the Invoker right away, but</span></code></span>
-<span class="codeline" id="line-597"><code><span class="comment">// defer the invocation of f.Close until the function returns.</span></code></span>
-<span class="codeline" id="line-598"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-599"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
-<span class="codeline" id="line-600"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-601"><code><span class="comment">// Note that the error you're appending to from the defer statement MUST be a</span></code></span>
-<span class="codeline" id="line-602"><code><span class="comment">// named return.</span></code></span>
-<span class="codeline" id="line-603"><code><span class="keyword">func</span> <label for="r75" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Close" class="ident">Close</a></label>(<label for="r76" class="ident">closer</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-104" class="ident">Closer</a>) <a href="#line-551" class="ident">Invoker</a> {</code></span>
-<span class="codeline" id="line-604"><code>	<span class="keyword">return</span> <a href="#line-577" class="ident">Invoke</a>(<label for="r76" class="ident">closer</label>.<a href="../../io/io.go.html#line-105" class="ident">Close</a>)</code></span>
-<span class="codeline" id="line-605"><code>}</code></span>
-<span class="codeline" id="line-606"><code></code></span>
-<span class="codeline" id="line-607"><code><span class="comment">// AppendInvoke appends the result of calling the given Invoker into the</span></code></span>
-<span class="codeline" id="line-608"><code><span class="comment">// provided error pointer. Use it with named returns to safely defer</span></code></span>
-<span class="codeline" id="line-609"><code><span class="comment">// invocation of fallible operations until a function returns, and capture the</span></code></span>
-<span class="codeline" id="line-610"><code><span class="comment">// resulting errors.</span></code></span>
-<span class="codeline" id="line-611"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-612"><code><span class="comment">//	func doSomething(...) (err error) {</span></code></span>
-<span class="codeline" id="line-613"><code><span class="comment">//		// ...</span></code></span>
-<span class="codeline" id="line-614"><code><span class="comment">//		f, err := openFile(..)</span></code></span>
-<span class="codeline" id="line-615"><code><span class="comment">//		if err != nil {</span></code></span>
-<span class="codeline" id="line-616"><code><span class="comment">//			return err</span></code></span>
-<span class="codeline" id="line-617"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-618"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-619"><code><span class="comment">//		// multierr will call f.Close() when this function returns and</span></code></span>
-<span class="codeline" id="line-620"><code><span class="comment">//		// if the operation fails, its append its error into the</span></code></span>
-<span class="codeline" id="line-621"><code><span class="comment">//		// returned error.</span></code></span>
-<span class="codeline" id="line-622"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
-<span class="codeline" id="line-623"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-624"><code><span class="comment">//		scanner := bufio.NewScanner(f)</span></code></span>
-<span class="codeline" id="line-625"><code><span class="comment">//		// Similarly, this scheduled scanner.Err to be called and</span></code></span>
-<span class="codeline" id="line-626"><code><span class="comment">//		// inspected when the function returns and append its error</span></code></span>
-<span class="codeline" id="line-627"><code><span class="comment">//		// into the returned error.</span></code></span>
-<span class="codeline" id="line-628"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
-<span class="codeline" id="line-629"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-630"><code><span class="comment">//		// ...</span></code></span>
-<span class="codeline" id="line-631"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-561"><code><span class="comment">// In this example, multierr.Close will construct the Invoker right away, but</span></code></span>
+<span class="codeline" id="line-562"><code><span class="comment">// defer the invocation of f.Close until the function returns.</span></code></span>
+<span class="codeline" id="line-563"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-564"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
+<span class="codeline" id="line-565"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-566"><code><span class="comment">// Note that the error you're appending to from the defer statement MUST be a</span></code></span>
+<span class="codeline" id="line-567"><code><span class="comment">// named return.</span></code></span>
+<span class="codeline" id="line-568"><code><span class="keyword">func</span> <label for="r68" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-Close" class="ident">Close</a></label>(<label for="r69" class="ident">closer</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-107" class="ident">Closer</a>) <a href="#line-516" class="ident">Invoker</a> {</code></span>
+<span class="codeline" id="line-569"><code>	<span class="keyword">return</span> <a href="#line-542" class="ident">Invoke</a>(<label for="r69" class="ident">closer</label>.<a href="../../io/io.go.html#line-108" class="ident">Close</a>)</code></span>
+<span class="codeline" id="line-570"><code>}</code></span>
+<span class="codeline" id="line-571"><code></code></span>
+<span class="codeline" id="line-572"><code><span class="comment">// AppendInvoke appends the result of calling the given Invoker into the</span></code></span>
+<span class="codeline" id="line-573"><code><span class="comment">// provided error pointer. Use it with named returns to safely defer</span></code></span>
+<span class="codeline" id="line-574"><code><span class="comment">// invocation of fallible operations until a function returns, and capture the</span></code></span>
+<span class="codeline" id="line-575"><code><span class="comment">// resulting errors.</span></code></span>
+<span class="codeline" id="line-576"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-577"><code><span class="comment">//	func doSomething(...) (err error) {</span></code></span>
+<span class="codeline" id="line-578"><code><span class="comment">//		// ...</span></code></span>
+<span class="codeline" id="line-579"><code><span class="comment">//		f, err := openFile(..)</span></code></span>
+<span class="codeline" id="line-580"><code><span class="comment">//		if err != nil {</span></code></span>
+<span class="codeline" id="line-581"><code><span class="comment">//			return err</span></code></span>
+<span class="codeline" id="line-582"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-583"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-584"><code><span class="comment">//		// multierr will call f.Close() when this function returns and</span></code></span>
+<span class="codeline" id="line-585"><code><span class="comment">//		// if the operation fails, its append its error into the</span></code></span>
+<span class="codeline" id="line-586"><code><span class="comment">//		// returned error.</span></code></span>
+<span class="codeline" id="line-587"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Close(f))</span></code></span>
+<span class="codeline" id="line-588"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-589"><code><span class="comment">//		scanner := bufio.NewScanner(f)</span></code></span>
+<span class="codeline" id="line-590"><code><span class="comment">//		// Similarly, this scheduled scanner.Err to be called and</span></code></span>
+<span class="codeline" id="line-591"><code><span class="comment">//		// inspected when the function returns and append its error</span></code></span>
+<span class="codeline" id="line-592"><code><span class="comment">//		// into the returned error.</span></code></span>
+<span class="codeline" id="line-593"><code><span class="comment">//		defer multierr.AppendInvoke(&amp;err, multierr.Invoke(scanner.Err))</span></code></span>
+<span class="codeline" id="line-594"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-595"><code><span class="comment">//		// ...</span></code></span>
+<span class="codeline" id="line-596"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-597"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-598"><code><span class="comment">// NOTE: If used with a defer, the error variable MUST be a named return.</span></code></span>
+<span class="codeline" id="line-599"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-600"><code><span class="comment">// Without defer, AppendInvoke behaves exactly like AppendInto.</span></code></span>
+<span class="codeline" id="line-601"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-602"><code><span class="comment">//	err := // ...</span></code></span>
+<span class="codeline" id="line-603"><code><span class="comment">//	multierr.AppendInvoke(&amp;err, mutltierr.Invoke(foo))</span></code></span>
+<span class="codeline" id="line-604"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-605"><code><span class="comment">//	// ...is roughly equivalent to...</span></code></span>
+<span class="codeline" id="line-606"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-607"><code><span class="comment">//	err := // ...</span></code></span>
+<span class="codeline" id="line-608"><code><span class="comment">//	multierr.AppendInto(&amp;err, foo())</span></code></span>
+<span class="codeline" id="line-609"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-610"><code><span class="comment">// The advantage of the indirection introduced by Invoker is to make it easy</span></code></span>
+<span class="codeline" id="line-611"><code><span class="comment">// to defer the invocation of a function. Without this indirection, the</span></code></span>
+<span class="codeline" id="line-612"><code><span class="comment">// invoked function will be evaluated at the time of the defer block rather</span></code></span>
+<span class="codeline" id="line-613"><code><span class="comment">// than when the function returns.</span></code></span>
+<span class="codeline" id="line-614"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-615"><code><span class="comment">//	// BAD: This is likely not what the caller intended. This will evaluate</span></code></span>
+<span class="codeline" id="line-616"><code><span class="comment">//	// foo() right away and append its result into the error when the</span></code></span>
+<span class="codeline" id="line-617"><code><span class="comment">//	// function returns.</span></code></span>
+<span class="codeline" id="line-618"><code><span class="comment">//	defer multierr.AppendInto(&amp;err, foo())</span></code></span>
+<span class="codeline" id="line-619"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-620"><code><span class="comment">//	// GOOD: This will defer invocation of foo unutil the function returns.</span></code></span>
+<span class="codeline" id="line-621"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Invoke(foo))</span></code></span>
+<span class="codeline" id="line-622"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-623"><code><span class="comment">// multierr provides a few Invoker implementations out of the box for</span></code></span>
+<span class="codeline" id="line-624"><code><span class="comment">// convenience. See [Invoker] for more information.</span></code></span>
+<span class="codeline" id="line-625"><code><span class="keyword">func</span> <label for="r70" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendInvoke" class="ident">AppendInvoke</a></label>(<label for="r71" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r72" class="ident">invoker</label> <a href="#line-516" class="ident">Invoker</a>) {</code></span>
+<span class="codeline" id="line-626"><code>	<a href="#line-495" class="ident">AppendInto</a>(<label for="r71" class="ident">into</label>, <label for="r72" class="ident">invoker</label>.<a href="#line-517" class="ident">Invoke</a>())</code></span>
+<span class="codeline" id="line-627"><code>}</code></span>
+<span class="codeline" id="line-628"><code></code></span>
+<span class="codeline" id="line-629"><code><span class="comment">// AppendFunc is a shorthand for [AppendInvoke].</span></code></span>
+<span class="codeline" id="line-630"><code><span class="comment">// It allows using function or method value directly</span></code></span>
+<span class="codeline" id="line-631"><code><span class="comment">// without having to wrap it into an [Invoker] interface.</span></code></span>
 <span class="codeline" id="line-632"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-633"><code><span class="comment">// NOTE: If used with a defer, the error variable MUST be a named return.</span></code></span>
-<span class="codeline" id="line-634"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-635"><code><span class="comment">// Without defer, AppendInvoke behaves exactly like AppendInto.</span></code></span>
-<span class="codeline" id="line-636"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-637"><code><span class="comment">//	err := // ...</span></code></span>
-<span class="codeline" id="line-638"><code><span class="comment">//	multierr.AppendInvoke(&amp;err, mutltierr.Invoke(foo))</span></code></span>
-<span class="codeline" id="line-639"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-640"><code><span class="comment">//	// ...is roughly equivalent to...</span></code></span>
-<span class="codeline" id="line-641"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-642"><code><span class="comment">//	err := // ...</span></code></span>
-<span class="codeline" id="line-643"><code><span class="comment">//	multierr.AppendInto(&amp;err, foo())</span></code></span>
-<span class="codeline" id="line-644"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-645"><code><span class="comment">// The advantage of the indirection introduced by Invoker is to make it easy</span></code></span>
-<span class="codeline" id="line-646"><code><span class="comment">// to defer the invocation of a function. Without this indirection, the</span></code></span>
-<span class="codeline" id="line-647"><code><span class="comment">// invoked function will be evaluated at the time of the defer block rather</span></code></span>
-<span class="codeline" id="line-648"><code><span class="comment">// than when the function returns.</span></code></span>
-<span class="codeline" id="line-649"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-650"><code><span class="comment">//	// BAD: This is likely not what the caller intended. This will evaluate</span></code></span>
-<span class="codeline" id="line-651"><code><span class="comment">//	// foo() right away and append its result into the error when the</span></code></span>
-<span class="codeline" id="line-652"><code><span class="comment">//	// function returns.</span></code></span>
-<span class="codeline" id="line-653"><code><span class="comment">//	defer multierr.AppendInto(&amp;err, foo())</span></code></span>
-<span class="codeline" id="line-654"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-655"><code><span class="comment">//	// GOOD: This will defer invocation of foo unutil the function returns.</span></code></span>
-<span class="codeline" id="line-656"><code><span class="comment">//	defer multierr.AppendInvoke(&amp;err, multierr.Invoke(foo))</span></code></span>
-<span class="codeline" id="line-657"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-658"><code><span class="comment">// multierr provides a few Invoker implementations out of the box for</span></code></span>
-<span class="codeline" id="line-659"><code><span class="comment">// convenience. See [Invoker] for more information.</span></code></span>
-<span class="codeline" id="line-660"><code><span class="keyword">func</span> <label for="r77" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendInvoke" class="ident">AppendInvoke</a></label>(<label for="r78" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r79" class="ident">invoker</label> <a href="#line-551" class="ident">Invoker</a>) {</code></span>
-<span class="codeline" id="line-661"><code>	<a href="#line-530" class="ident">AppendInto</a>(<label for="r78" class="ident">into</label>, <label for="r79" class="ident">invoker</label>.<a href="#line-552" class="ident">Invoke</a>())</code></span>
-<span class="codeline" id="line-662"><code>}</code></span>
-<span class="codeline" id="line-663"><code></code></span>
-<span class="codeline" id="line-664"><code><span class="comment">// AppendFunc is a shorthand for [AppendInvoke].</span></code></span>
-<span class="codeline" id="line-665"><code><span class="comment">// It allows using function or method value directly</span></code></span>
-<span class="codeline" id="line-666"><code><span class="comment">// without having to wrap it into an [Invoker] interface.</span></code></span>
-<span class="codeline" id="line-667"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-668"><code><span class="comment">//	func doSomething(...) (err error) {</span></code></span>
-<span class="codeline" id="line-669"><code><span class="comment">//		w, err := startWorker(...)</span></code></span>
-<span class="codeline" id="line-670"><code><span class="comment">//		if err != nil {</span></code></span>
-<span class="codeline" id="line-671"><code><span class="comment">//			return err</span></code></span>
-<span class="codeline" id="line-672"><code><span class="comment">//		}</span></code></span>
-<span class="codeline" id="line-673"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-674"><code><span class="comment">//		// multierr will call w.Stop() when this function returns and</span></code></span>
-<span class="codeline" id="line-675"><code><span class="comment">//		// if the operation fails, it appends its error into the</span></code></span>
-<span class="codeline" id="line-676"><code><span class="comment">//		// returned error.</span></code></span>
-<span class="codeline" id="line-677"><code><span class="comment">//		defer multierr.AppendFunc(&amp;err, w.Stop)</span></code></span>
-<span class="codeline" id="line-678"><code><span class="comment">//	}</span></code></span>
-<span class="codeline" id="line-679"><code><span class="keyword">func</span> <label for="r80" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendFunc" class="ident">AppendFunc</a></label>(<label for="r81" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r82" class="ident">fn</label> <span class="keyword">func</span>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-680"><code>	<a href="#line-660" class="ident">AppendInvoke</a>(<label for="r81" class="ident">into</label>, <a href="#line-577" class="ident">Invoke</a>(<label for="r82" class="ident">fn</label>))</code></span>
-<span class="codeline" id="line-681"><code>}</code></span>
+<span class="codeline" id="line-633"><code><span class="comment">//	func doSomething(...) (err error) {</span></code></span>
+<span class="codeline" id="line-634"><code><span class="comment">//		w, err := startWorker(...)</span></code></span>
+<span class="codeline" id="line-635"><code><span class="comment">//		if err != nil {</span></code></span>
+<span class="codeline" id="line-636"><code><span class="comment">//			return err</span></code></span>
+<span class="codeline" id="line-637"><code><span class="comment">//		}</span></code></span>
+<span class="codeline" id="line-638"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-639"><code><span class="comment">//		// multierr will call w.Stop() when this function returns and</span></code></span>
+<span class="codeline" id="line-640"><code><span class="comment">//		// if the operation fails, it appends its error into the</span></code></span>
+<span class="codeline" id="line-641"><code><span class="comment">//		// returned error.</span></code></span>
+<span class="codeline" id="line-642"><code><span class="comment">//		defer multierr.AppendFunc(&amp;err, w.Stop)</span></code></span>
+<span class="codeline" id="line-643"><code><span class="comment">//	}</span></code></span>
+<span class="codeline" id="line-644"><code><span class="keyword">func</span> <label for="r73" class="ident"><a href="../../../pkg/go.uber.org/multierr.html#name-AppendFunc" class="ident">AppendFunc</a></label>(<label for="r74" class="ident">into</label> *<a href="../../../pkg/builtin.html#name-error" class="ident">error</a>, <label for="r75" class="ident">fn</label> <span class="keyword">func</span>() <a href="../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-645"><code>	<a href="#line-625" class="ident">AppendInvoke</a>(<label for="r74" class="ident">into</label>, <a href="#line-542" class="ident">Invoke</a>(<label for="r75" class="ident">fn</label>))</code></span>
+<span class="codeline" id="line-646"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

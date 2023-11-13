@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: natdiv.go in package math/big</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -119,7 +119,14 @@ input[id=r99]:checked ~pre label[for=r99],
 input[id=r100]:checked ~pre label[for=r100],
 input[id=r101]:checked ~pre label[for=r101],
 input[id=r102]:checked ~pre label[for=r102],
-input[id=r103]:checked ~pre label[for=r103]
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0
 {background: brown; color: #eed;}
@@ -227,6 +234,13 @@ input[id=i0]:checked ~pre .i0
 <input id="r101" type="radio" name="g"/>
 <input id="r102" type="radio" name="g"/>
 <input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 
 <pre class="line-numbers">
@@ -732,391 +746,404 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-500"><code></code></span>
 <span class="codeline" id="line-501"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"math/bits"</span></label></code></span>
 <span class="codeline" id="line-502"><code></code></span>
-<span class="codeline" id="line-503"><code><span class="comment">// div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.</span></code></span>
-<span class="codeline" id="line-504"><code><span class="comment">// It uses z and z2 as the storage for q and r.</span></code></span>
-<span class="codeline" id="line-505"><code><span class="keyword">func</span> (<label for="r0" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r1" class="ident">div</label>(<label for="r2" class="ident">z2</label>, <label for="r3" class="ident">u</label>, <label for="r4" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) (<label for="r5" class="ident">q</label>, <label for="r6" class="ident">r</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
-<span class="codeline" id="line-506"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">v</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-507"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"division by zero"</span>)</code></span>
+<span class="codeline" id="line-503"><code><span class="comment">// rem returns r such that r = u%v.</span></code></span>
+<span class="codeline" id="line-504"><code><span class="comment">// It uses z as the storage for r.</span></code></span>
+<span class="codeline" id="line-505"><code><span class="keyword">func</span> (<label for="r0" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r1" class="ident">rem</label>(<label for="r2" class="ident">u</label>, <label for="r3" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) (<label for="r4" class="ident">r</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-506"><code>	<span class="keyword">if</span> <a href="nat.go.html#line-374" class="ident">alias</a>(<label for="r0" class="ident">z</label>, <label for="r2" class="ident">u</label>) {</code></span>
+<span class="codeline" id="line-507"><code>		<label for="r0" class="ident">z</label> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
 <span class="codeline" id="line-508"><code>	}</code></span>
-<span class="codeline" id="line-509"><code></code></span>
-<span class="codeline" id="line-510"><code>	<span class="keyword">if</span> <label for="r3" class="ident">u</label>.<a href="nat.go.html#line-152" class="ident">cmp</a>(<label for="r4" class="ident">v</label>) &lt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-511"><code>		<label for="r5" class="ident">q</label> = <label for="r0" class="ident">z</label>[:<span class="lit-number">0</span>]</code></span>
-<span class="codeline" id="line-512"><code>		<label for="r6" class="ident">r</label> = <label for="r2" class="ident">z2</label>.<a href="nat.go.html#line-92" class="ident">set</a>(<label for="r3" class="ident">u</label>)</code></span>
-<span class="codeline" id="line-513"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-514"><code>	}</code></span>
+<span class="codeline" id="line-509"><code>	<label for="r5" class="ident">qp</label> := <a href="nat.go.html#line-640" class="ident">getNat</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-510"><code>	<label for="r6" class="ident">q</label>, <label for="r4" class="ident">r</label> := <label for="r5" class="ident">qp</label>.<a href="#line-518" class="ident">div</a>(<label for="r0" class="ident">z</label>, <label for="r2" class="ident">u</label>, <label for="r3" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-511"><code>	*<label for="r5" class="ident">qp</label> = <label for="r6" class="ident">q</label></code></span>
+<span class="codeline" id="line-512"><code>	<a href="nat.go.html#line-655" class="ident">putNat</a>(<label for="r5" class="ident">qp</label>)</code></span>
+<span class="codeline" id="line-513"><code>	<span class="keyword">return</span> <label for="r4" class="ident">r</label></code></span>
+<span class="codeline" id="line-514"><code>}</code></span>
 <span class="codeline" id="line-515"><code></code></span>
-<span class="codeline" id="line-516"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">v</label>) == <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-517"><code>		<span class="comment">// Short division: long optimized for a single-word divisor.</span></code></span>
-<span class="codeline" id="line-518"><code><span class="comment">		// In that case, the 2-by-1 guess is all we need at each step.</span></code></span>
-<span class="codeline" id="line-519"><code>		<span class="keyword">var</span> <label for="r7" class="ident">r2</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
-<span class="codeline" id="line-520"><code>		<label for="r5" class="ident">q</label>, <label for="r7" class="ident">r2</label> = <label for="r0" class="ident">z</label>.<a href="#line-532" class="ident">divW</a>(<label for="r3" class="ident">u</label>, <label for="r4" class="ident">v</label>[<span class="lit-number">0</span>])</code></span>
-<span class="codeline" id="line-521"><code>		<label for="r6" class="ident">r</label> = <label for="r2" class="ident">z2</label>.<a href="nat.go.html#line-71" class="ident">setWord</a>(<label for="r7" class="ident">r2</label>)</code></span>
-<span class="codeline" id="line-522"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-523"><code>	}</code></span>
-<span class="codeline" id="line-524"><code></code></span>
-<span class="codeline" id="line-525"><code>	<label for="r5" class="ident">q</label>, <label for="r6" class="ident">r</label> = <label for="r0" class="ident">z</label>.<a href="#line-579" class="ident">divLarge</a>(<label for="r2" class="ident">z2</label>, <label for="r3" class="ident">u</label>, <label for="r4" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-526"><code>	<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-527"><code>}</code></span>
+<span class="codeline" id="line-516"><code><span class="comment">// div returns q, r such that q = ⌊u/v⌋ and r = u%v = u - q·v.</span></code></span>
+<span class="codeline" id="line-517"><code><span class="comment">// It uses z and z2 as the storage for q and r.</span></code></span>
+<span class="codeline" id="line-518"><code><span class="keyword">func</span> (<label for="r7" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r8" class="ident">div</label>(<label for="r9" class="ident">z2</label>, <label for="r10" class="ident">u</label>, <label for="r11" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) (<label for="r12" class="ident">q</label>, <label for="r13" class="ident">r</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-519"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">v</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-520"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"division by zero"</span>)</code></span>
+<span class="codeline" id="line-521"><code>	}</code></span>
+<span class="codeline" id="line-522"><code></code></span>
+<span class="codeline" id="line-523"><code>	<span class="keyword">if</span> <label for="r10" class="ident">u</label>.<a href="nat.go.html#line-156" class="ident">cmp</a>(<label for="r11" class="ident">v</label>) &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-524"><code>		<label for="r12" class="ident">q</label> = <label for="r7" class="ident">z</label>[:<span class="lit-number">0</span>]</code></span>
+<span class="codeline" id="line-525"><code>		<label for="r13" class="ident">r</label> = <label for="r9" class="ident">z2</label>.<a href="nat.go.html#line-96" class="ident">set</a>(<label for="r10" class="ident">u</label>)</code></span>
+<span class="codeline" id="line-526"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-527"><code>	}</code></span>
 <span class="codeline" id="line-528"><code></code></span>
-<span class="codeline" id="line-529"><code><span class="comment">// divW returns q, r such that q = ⌊x/y⌋ and r = x%y = x - q·y.</span></code></span>
-<span class="codeline" id="line-530"><code><span class="comment">// It uses z as the storage for q.</span></code></span>
-<span class="codeline" id="line-531"><code><span class="comment">// Note that y is a single digit (Word), not a big number.</span></code></span>
-<span class="codeline" id="line-532"><code><span class="keyword">func</span> (<label for="r8" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r9" class="ident">divW</label>(<label for="r10" class="ident">x</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r11" class="ident">y</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r12" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r13" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
-<span class="codeline" id="line-533"><code>	<label for="r14" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r10" class="ident">x</label>)</code></span>
-<span class="codeline" id="line-534"><code>	<span class="keyword">switch</span> {</code></span>
-<span class="codeline" id="line-535"><code>	<span class="keyword">case</span> <label for="r11" class="ident">y</label> == <span class="lit-number">0</span>:</code></span>
-<span class="codeline" id="line-536"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"division by zero"</span>)</code></span>
-<span class="codeline" id="line-537"><code>	<span class="keyword">case</span> <label for="r11" class="ident">y</label> == <span class="lit-number">1</span>:</code></span>
-<span class="codeline" id="line-538"><code>		<label for="r12" class="ident">q</label> = <label for="r8" class="ident">z</label>.<a href="nat.go.html#line-92" class="ident">set</a>(<label for="r10" class="ident">x</label>) <span class="comment">// result is x</span></code></span>
-<span class="codeline" id="line-539"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-540"><code>	<span class="keyword">case</span> <label for="r14" class="ident">m</label> == <span class="lit-number">0</span>:</code></span>
-<span class="codeline" id="line-541"><code>		<label for="r12" class="ident">q</label> = <label for="r8" class="ident">z</label>[:<span class="lit-number">0</span>] <span class="comment">// result is 0</span></code></span>
-<span class="codeline" id="line-542"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-543"><code>	}</code></span>
-<span class="codeline" id="line-544"><code>	<span class="comment">// m &gt; 0</span></code></span>
-<span class="codeline" id="line-545"><code>	<label for="r8" class="ident">z</label> = <label for="r8" class="ident">z</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<label for="r14" class="ident">m</label>)</code></span>
-<span class="codeline" id="line-546"><code>	<label for="r13" class="ident">r</label> = <a href="#line-561" class="ident">divWVW</a>(<label for="r8" class="ident">z</label>, <span class="lit-number">0</span>, <label for="r10" class="ident">x</label>, <label for="r11" class="ident">y</label>)</code></span>
-<span class="codeline" id="line-547"><code>	<label for="r12" class="ident">q</label> = <label for="r8" class="ident">z</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-548"><code>	<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-549"><code>}</code></span>
-<span class="codeline" id="line-550"><code></code></span>
-<span class="codeline" id="line-551"><code><span class="comment">// modW returns x % d.</span></code></span>
-<span class="codeline" id="line-552"><code><span class="keyword">func</span> (<label for="r15" class="ident">x</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r16" class="ident">modW</label>(<label for="r17" class="ident">d</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r18" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
-<span class="codeline" id="line-553"><code>	<span class="comment">// TODO(agl): we don't actually need to store the q value.</span></code></span>
-<span class="codeline" id="line-554"><code>	<span class="keyword">var</span> <label for="r19" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a></code></span>
-<span class="codeline" id="line-555"><code>	<label for="r19" class="ident">q</label> = <label for="r19" class="ident">q</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r15" class="ident">x</label>))</code></span>
-<span class="codeline" id="line-556"><code>	<span class="keyword">return</span> <a href="#line-561" class="ident">divWVW</a>(<label for="r19" class="ident">q</label>, <span class="lit-number">0</span>, <label for="r15" class="ident">x</label>, <label for="r17" class="ident">d</label>)</code></span>
-<span class="codeline" id="line-557"><code>}</code></span>
-<span class="codeline" id="line-558"><code></code></span>
-<span class="codeline" id="line-559"><code><span class="comment">// divWVW overwrites z with ⌊x/y⌋, returning the remainder r.</span></code></span>
-<span class="codeline" id="line-560"><code><span class="comment">// The caller must ensure that len(z) = len(x).</span></code></span>
-<span class="codeline" id="line-561"><code><span class="keyword">func</span> divWVW(<label for="r21" class="ident">z</label> []<a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r22" class="ident">xn</label> <a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r23" class="ident">x</label> []<a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r24" class="ident">y</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r25" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
-<span class="codeline" id="line-562"><code>	<label for="r25" class="ident">r</label> = <label for="r22" class="ident">xn</label></code></span>
-<span class="codeline" id="line-563"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r23" class="ident">x</label>) == <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-564"><code>		<label for="r26" class="ident">qq</label>, <label for="r27" class="ident">rr</label> := <a href="../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../bits/bits.go.html#line-486" class="ident">Div</a>(<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r25" class="ident">r</label>), <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r23" class="ident">x</label>[<span class="lit-number">0</span>]), <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r24" class="ident">y</label>))</code></span>
-<span class="codeline" id="line-565"><code>		<label for="r21" class="ident">z</label>[<span class="lit-number">0</span>] = <a href="arith.go.html#line-16" class="ident">Word</a>(<label for="r26" class="ident">qq</label>)</code></span>
-<span class="codeline" id="line-566"><code>		<span class="keyword">return</span> <a href="arith.go.html#line-16" class="ident">Word</a>(<label for="r27" class="ident">rr</label>)</code></span>
-<span class="codeline" id="line-567"><code>	}</code></span>
-<span class="codeline" id="line-568"><code>	<label for="r28" class="ident">rec</label> := <a href="arith.go.html#line-271" class="ident">reciprocalWord</a>(<label for="r24" class="ident">y</label>)</code></span>
-<span class="codeline" id="line-569"><code>	<span class="keyword">for</span> <label for="r29" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r21" class="ident">z</label>) - <span class="lit-number">1</span>; <label for="r29" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r29" class="ident">i</label>-- {</code></span>
-<span class="codeline" id="line-570"><code>		<label for="r21" class="ident">z</label>[<label for="r29" class="ident">i</label>], <label for="r25" class="ident">r</label> = <a href="arith.go.html#line-211" class="ident">divWW</a>(<label for="r25" class="ident">r</label>, <label for="r23" class="ident">x</label>[<label for="r29" class="ident">i</label>], <label for="r24" class="ident">y</label>, <label for="r28" class="ident">rec</label>)</code></span>
-<span class="codeline" id="line-571"><code>	}</code></span>
-<span class="codeline" id="line-572"><code>	<span class="keyword">return</span> <label for="r25" class="ident">r</label></code></span>
-<span class="codeline" id="line-573"><code>}</code></span>
-<span class="codeline" id="line-574"><code></code></span>
-<span class="codeline" id="line-575"><code><span class="comment">// div returns q, r such that q = ⌊uIn/vIn⌋ and r = uIn%vIn = uIn - q·vIn.</span></code></span>
-<span class="codeline" id="line-576"><code><span class="comment">// It uses z and u as the storage for q and r.</span></code></span>
-<span class="codeline" id="line-577"><code><span class="comment">// The caller must ensure that len(vIn) ≥ 2 (use divW otherwise)</span></code></span>
-<span class="codeline" id="line-578"><code><span class="comment">// and that len(uIn) ≥ len(vIn) (the answer is 0, uIn otherwise).</span></code></span>
-<span class="codeline" id="line-579"><code><span class="keyword">func</span> (<label for="r30" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r31" class="ident">divLarge</label>(<label for="r32" class="ident">u</label>, <label for="r33" class="ident">uIn</label>, <label for="r34" class="ident">vIn</label> <a href="nat.go.html#line-34" class="ident">nat</a>) (<label for="r35" class="ident">q</label>, <label for="r36" class="ident">r</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
-<span class="codeline" id="line-580"><code>	<label for="r37" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r34" class="ident">vIn</label>)</code></span>
-<span class="codeline" id="line-581"><code>	<label for="r38" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r33" class="ident">uIn</label>) - <label for="r37" class="ident">n</label></code></span>
-<span class="codeline" id="line-582"><code></code></span>
-<span class="codeline" id="line-583"><code>	<span class="comment">// Scale the inputs so vIn's top bit is 1 (see “Scaling Inputs” above).</span></code></span>
-<span class="codeline" id="line-584"><code><span class="comment">	// vIn is treated as a read-only input (it may be in use by another</span></code></span>
-<span class="codeline" id="line-585"><code><span class="comment">	// goroutine), so we must make a copy.</span></code></span>
-<span class="codeline" id="line-586"><code><span class="comment">	// uIn is copied to u.</span></code></span>
-<span class="codeline" id="line-587"><code>	<label for="r39" class="ident">shift</label> := <a href="arith.go.html#line-59" class="ident">nlz</a>(<label for="r34" class="ident">vIn</label>[<label for="r37" class="ident">n</label>-<span class="lit-number">1</span>])</code></span>
-<span class="codeline" id="line-588"><code>	<label for="r40" class="ident">vp</label> := <a href="nat.go.html#line-636" class="ident">getNat</a>(<label for="r37" class="ident">n</label>)</code></span>
-<span class="codeline" id="line-589"><code>	<label for="r41" class="ident">v</label> := *<label for="r40" class="ident">vp</label></code></span>
-<span class="codeline" id="line-590"><code>	<a href="arith_decl.go.html#line-15" class="ident">shlVU</a>(<label for="r41" class="ident">v</label>, <label for="r34" class="ident">vIn</label>, <label for="r39" class="ident">shift</label>)</code></span>
-<span class="codeline" id="line-591"><code>	<label for="r32" class="ident">u</label> = <label for="r32" class="ident">u</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r33" class="ident">uIn</label>) + <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-592"><code>	<label for="r32" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r33" class="ident">uIn</label>)] = <a href="arith_decl.go.html#line-15" class="ident">shlVU</a>(<label for="r32" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r33" class="ident">uIn</label>)], <label for="r33" class="ident">uIn</label>, <label for="r39" class="ident">shift</label>)</code></span>
-<span class="codeline" id="line-593"><code></code></span>
-<span class="codeline" id="line-594"><code>	<span class="comment">// The caller should not pass aliased z and u, since those are</span></code></span>
-<span class="codeline" id="line-595"><code><span class="comment">	// the two different outputs, but correct just in case.</span></code></span>
-<span class="codeline" id="line-596"><code>	<span class="keyword">if</span> <a href="nat.go.html#line-370" class="ident">alias</a>(<label for="r30" class="ident">z</label>, <label for="r32" class="ident">u</label>) {</code></span>
-<span class="codeline" id="line-597"><code>		<label for="r30" class="ident">z</label> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-598"><code>	}</code></span>
-<span class="codeline" id="line-599"><code>	<label for="r35" class="ident">q</label> = <label for="r30" class="ident">z</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<label for="r38" class="ident">m</label> + <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-600"><code></code></span>
-<span class="codeline" id="line-601"><code>	<span class="comment">// Use basic or recursive long division depending on size.</span></code></span>
-<span class="codeline" id="line-602"><code>	<span class="keyword">if</span> <label for="r37" class="ident">n</label> &lt; <a href="#line-709" class="ident">divRecursiveThreshold</a> {</code></span>
-<span class="codeline" id="line-603"><code>		<label for="r35" class="ident">q</label>.<a href="#line-621" class="ident">divBasic</a>(<label for="r32" class="ident">u</label>, <label for="r41" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-604"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-605"><code>		<label for="r35" class="ident">q</label>.<a href="#line-716" class="ident">divRecursive</a>(<label for="r32" class="ident">u</label>, <label for="r41" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-606"><code>	}</code></span>
-<span class="codeline" id="line-607"><code>	<a href="nat.go.html#line-648" class="ident">putNat</a>(<label for="r40" class="ident">vp</label>)</code></span>
-<span class="codeline" id="line-608"><code></code></span>
-<span class="codeline" id="line-609"><code>	<label for="r35" class="ident">q</label> = <label for="r35" class="ident">q</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-610"><code></code></span>
-<span class="codeline" id="line-611"><code>	<span class="comment">// Undo scaling of remainder.</span></code></span>
-<span class="codeline" id="line-612"><code>	<a href="arith_decl.go.html#line-16" class="ident">shrVU</a>(<label for="r32" class="ident">u</label>, <label for="r32" class="ident">u</label>, <label for="r39" class="ident">shift</label>)</code></span>
-<span class="codeline" id="line-613"><code>	<label for="r36" class="ident">r</label> = <label for="r32" class="ident">u</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-614"><code></code></span>
-<span class="codeline" id="line-615"><code>	<span class="keyword">return</span> <label for="r35" class="ident">q</label>, <label for="r36" class="ident">r</label></code></span>
-<span class="codeline" id="line-616"><code>}</code></span>
-<span class="codeline" id="line-617"><code></code></span>
-<span class="codeline" id="line-618"><code><span class="comment">// divBasic implements long division as described above.</span></code></span>
-<span class="codeline" id="line-619"><code><span class="comment">// It overwrites q with ⌊u/v⌋ and overwrites u with the remainder r.</span></code></span>
-<span class="codeline" id="line-620"><code><span class="comment">// q must be large enough to hold ⌊u/v⌋.</span></code></span>
-<span class="codeline" id="line-621"><code><span class="keyword">func</span> (<label for="r42" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r43" class="ident">divBasic</label>(<label for="r44" class="ident">u</label>, <label for="r45" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
-<span class="codeline" id="line-622"><code>	<label for="r46" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r45" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-623"><code>	<label for="r47" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r44" class="ident">u</label>) - <label for="r46" class="ident">n</label></code></span>
-<span class="codeline" id="line-624"><code></code></span>
-<span class="codeline" id="line-625"><code>	<label for="r48" class="ident">qhatvp</label> := <a href="nat.go.html#line-636" class="ident">getNat</a>(<label for="r46" class="ident">n</label> + <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-626"><code>	<label for="r49" class="ident">qhatv</label> := *<label for="r48" class="ident">qhatvp</label></code></span>
+<span class="codeline" id="line-529"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">v</label>) == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-530"><code>		<span class="comment">// Short division: long optimized for a single-word divisor.</span></code></span>
+<span class="codeline" id="line-531"><code><span class="comment">		// In that case, the 2-by-1 guess is all we need at each step.</span></code></span>
+<span class="codeline" id="line-532"><code>		<span class="keyword">var</span> <label for="r14" class="ident">r2</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
+<span class="codeline" id="line-533"><code>		<label for="r12" class="ident">q</label>, <label for="r14" class="ident">r2</label> = <label for="r7" class="ident">z</label>.<a href="#line-545" class="ident">divW</a>(<label for="r10" class="ident">u</label>, <label for="r11" class="ident">v</label>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-534"><code>		<label for="r13" class="ident">r</label> = <label for="r9" class="ident">z2</label>.<a href="nat.go.html#line-75" class="ident">setWord</a>(<label for="r14" class="ident">r2</label>)</code></span>
+<span class="codeline" id="line-535"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-536"><code>	}</code></span>
+<span class="codeline" id="line-537"><code></code></span>
+<span class="codeline" id="line-538"><code>	<label for="r12" class="ident">q</label>, <label for="r13" class="ident">r</label> = <label for="r7" class="ident">z</label>.<a href="#line-592" class="ident">divLarge</a>(<label for="r9" class="ident">z2</label>, <label for="r10" class="ident">u</label>, <label for="r11" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-539"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-540"><code>}</code></span>
+<span class="codeline" id="line-541"><code></code></span>
+<span class="codeline" id="line-542"><code><span class="comment">// divW returns q, r such that q = ⌊x/y⌋ and r = x%y = x - q·y.</span></code></span>
+<span class="codeline" id="line-543"><code><span class="comment">// It uses z as the storage for q.</span></code></span>
+<span class="codeline" id="line-544"><code><span class="comment">// Note that y is a single digit (Word), not a big number.</span></code></span>
+<span class="codeline" id="line-545"><code><span class="keyword">func</span> (<label for="r15" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r16" class="ident">divW</label>(<label for="r17" class="ident">x</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r18" class="ident">y</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r19" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r20" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
+<span class="codeline" id="line-546"><code>	<label for="r21" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r17" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-547"><code>	<span class="keyword">switch</span> {</code></span>
+<span class="codeline" id="line-548"><code>	<span class="keyword">case</span> <label for="r18" class="ident">y</label> == <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-549"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"division by zero"</span>)</code></span>
+<span class="codeline" id="line-550"><code>	<span class="keyword">case</span> <label for="r18" class="ident">y</label> == <span class="lit-number">1</span>:</code></span>
+<span class="codeline" id="line-551"><code>		<label for="r19" class="ident">q</label> = <label for="r15" class="ident">z</label>.<a href="nat.go.html#line-96" class="ident">set</a>(<label for="r17" class="ident">x</label>) <span class="comment">// result is x</span></code></span>
+<span class="codeline" id="line-552"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-553"><code>	<span class="keyword">case</span> <label for="r21" class="ident">m</label> == <span class="lit-number">0</span>:</code></span>
+<span class="codeline" id="line-554"><code>		<label for="r19" class="ident">q</label> = <label for="r15" class="ident">z</label>[:<span class="lit-number">0</span>] <span class="comment">// result is 0</span></code></span>
+<span class="codeline" id="line-555"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-556"><code>	}</code></span>
+<span class="codeline" id="line-557"><code>	<span class="comment">// m &gt; 0</span></code></span>
+<span class="codeline" id="line-558"><code>	<label for="r15" class="ident">z</label> = <label for="r15" class="ident">z</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<label for="r21" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-559"><code>	<label for="r20" class="ident">r</label> = <a href="#line-574" class="ident">divWVW</a>(<label for="r15" class="ident">z</label>, <span class="lit-number">0</span>, <label for="r17" class="ident">x</label>, <label for="r18" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-560"><code>	<label for="r19" class="ident">q</label> = <label for="r15" class="ident">z</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-561"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-562"><code>}</code></span>
+<span class="codeline" id="line-563"><code></code></span>
+<span class="codeline" id="line-564"><code><span class="comment">// modW returns x % d.</span></code></span>
+<span class="codeline" id="line-565"><code><span class="keyword">func</span> (<label for="r22" class="ident">x</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r23" class="ident">modW</label>(<label for="r24" class="ident">d</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r25" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
+<span class="codeline" id="line-566"><code>	<span class="comment">// TODO(agl): we don't actually need to store the q value.</span></code></span>
+<span class="codeline" id="line-567"><code>	<span class="keyword">var</span> <label for="r26" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a></code></span>
+<span class="codeline" id="line-568"><code>	<label for="r26" class="ident">q</label> = <label for="r26" class="ident">q</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r22" class="ident">x</label>))</code></span>
+<span class="codeline" id="line-569"><code>	<span class="keyword">return</span> <a href="#line-574" class="ident">divWVW</a>(<label for="r26" class="ident">q</label>, <span class="lit-number">0</span>, <label for="r22" class="ident">x</label>, <label for="r24" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-570"><code>}</code></span>
+<span class="codeline" id="line-571"><code></code></span>
+<span class="codeline" id="line-572"><code><span class="comment">// divWVW overwrites z with ⌊x/y⌋, returning the remainder r.</span></code></span>
+<span class="codeline" id="line-573"><code><span class="comment">// The caller must ensure that len(z) = len(x).</span></code></span>
+<span class="codeline" id="line-574"><code><span class="keyword">func</span> divWVW(<label for="r28" class="ident">z</label> []<a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r29" class="ident">xn</label> <a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r30" class="ident">x</label> []<a href="arith.go.html#line-16" class="ident">Word</a>, <label for="r31" class="ident">y</label> <a href="arith.go.html#line-16" class="ident">Word</a>) (<label for="r32" class="ident">r</label> <a href="arith.go.html#line-16" class="ident">Word</a>) {</code></span>
+<span class="codeline" id="line-575"><code>	<label for="r32" class="ident">r</label> = <label for="r29" class="ident">xn</label></code></span>
+<span class="codeline" id="line-576"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r30" class="ident">x</label>) == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-577"><code>		<label for="r33" class="ident">qq</label>, <label for="r34" class="ident">rr</label> := <a href="../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../bits/bits.go.html#line-492" class="ident">Div</a>(<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r32" class="ident">r</label>), <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r30" class="ident">x</label>[<span class="lit-number">0</span>]), <a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r31" class="ident">y</label>))</code></span>
+<span class="codeline" id="line-578"><code>		<label for="r28" class="ident">z</label>[<span class="lit-number">0</span>] = <a href="arith.go.html#line-16" class="ident">Word</a>(<label for="r33" class="ident">qq</label>)</code></span>
+<span class="codeline" id="line-579"><code>		<span class="keyword">return</span> <a href="arith.go.html#line-16" class="ident">Word</a>(<label for="r34" class="ident">rr</label>)</code></span>
+<span class="codeline" id="line-580"><code>	}</code></span>
+<span class="codeline" id="line-581"><code>	<label for="r35" class="ident">rec</label> := <a href="arith.go.html#line-271" class="ident">reciprocalWord</a>(<label for="r31" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-582"><code>	<span class="keyword">for</span> <label for="r36" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r28" class="ident">z</label>) - <span class="lit-number">1</span>; <label for="r36" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r36" class="ident">i</label>-- {</code></span>
+<span class="codeline" id="line-583"><code>		<label for="r28" class="ident">z</label>[<label for="r36" class="ident">i</label>], <label for="r32" class="ident">r</label> = <a href="arith.go.html#line-211" class="ident">divWW</a>(<label for="r32" class="ident">r</label>, <label for="r30" class="ident">x</label>[<label for="r36" class="ident">i</label>], <label for="r31" class="ident">y</label>, <label for="r35" class="ident">rec</label>)</code></span>
+<span class="codeline" id="line-584"><code>	}</code></span>
+<span class="codeline" id="line-585"><code>	<span class="keyword">return</span> <label for="r32" class="ident">r</label></code></span>
+<span class="codeline" id="line-586"><code>}</code></span>
+<span class="codeline" id="line-587"><code></code></span>
+<span class="codeline" id="line-588"><code><span class="comment">// div returns q, r such that q = ⌊uIn/vIn⌋ and r = uIn%vIn = uIn - q·vIn.</span></code></span>
+<span class="codeline" id="line-589"><code><span class="comment">// It uses z and u as the storage for q and r.</span></code></span>
+<span class="codeline" id="line-590"><code><span class="comment">// The caller must ensure that len(vIn) ≥ 2 (use divW otherwise)</span></code></span>
+<span class="codeline" id="line-591"><code><span class="comment">// and that len(uIn) ≥ len(vIn) (the answer is 0, uIn otherwise).</span></code></span>
+<span class="codeline" id="line-592"><code><span class="keyword">func</span> (<label for="r37" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r38" class="ident">divLarge</label>(<label for="r39" class="ident">u</label>, <label for="r40" class="ident">uIn</label>, <label for="r41" class="ident">vIn</label> <a href="nat.go.html#line-34" class="ident">nat</a>) (<label for="r42" class="ident">q</label>, <label for="r43" class="ident">r</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-593"><code>	<label for="r44" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r41" class="ident">vIn</label>)</code></span>
+<span class="codeline" id="line-594"><code>	<label for="r45" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r40" class="ident">uIn</label>) - <label for="r44" class="ident">n</label></code></span>
+<span class="codeline" id="line-595"><code></code></span>
+<span class="codeline" id="line-596"><code>	<span class="comment">// Scale the inputs so vIn's top bit is 1 (see “Scaling Inputs” above).</span></code></span>
+<span class="codeline" id="line-597"><code><span class="comment">	// vIn is treated as a read-only input (it may be in use by another</span></code></span>
+<span class="codeline" id="line-598"><code><span class="comment">	// goroutine), so we must make a copy.</span></code></span>
+<span class="codeline" id="line-599"><code><span class="comment">	// uIn is copied to u.</span></code></span>
+<span class="codeline" id="line-600"><code>	<label for="r46" class="ident">shift</label> := <a href="arith.go.html#line-59" class="ident">nlz</a>(<label for="r41" class="ident">vIn</label>[<label for="r44" class="ident">n</label>-<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-601"><code>	<label for="r47" class="ident">vp</label> := <a href="nat.go.html#line-640" class="ident">getNat</a>(<label for="r44" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-602"><code>	<label for="r48" class="ident">v</label> := *<label for="r47" class="ident">vp</label></code></span>
+<span class="codeline" id="line-603"><code>	<a href="arith_decl.go.html#line-25" class="ident">shlVU</a>(<label for="r48" class="ident">v</label>, <label for="r41" class="ident">vIn</label>, <label for="r46" class="ident">shift</label>)</code></span>
+<span class="codeline" id="line-604"><code>	<label for="r39" class="ident">u</label> = <label for="r39" class="ident">u</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r40" class="ident">uIn</label>) + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-605"><code>	<label for="r39" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r40" class="ident">uIn</label>)] = <a href="arith_decl.go.html#line-25" class="ident">shlVU</a>(<label for="r39" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r40" class="ident">uIn</label>)], <label for="r40" class="ident">uIn</label>, <label for="r46" class="ident">shift</label>)</code></span>
+<span class="codeline" id="line-606"><code></code></span>
+<span class="codeline" id="line-607"><code>	<span class="comment">// The caller should not pass aliased z and u, since those are</span></code></span>
+<span class="codeline" id="line-608"><code><span class="comment">	// the two different outputs, but correct just in case.</span></code></span>
+<span class="codeline" id="line-609"><code>	<span class="keyword">if</span> <a href="nat.go.html#line-374" class="ident">alias</a>(<label for="r37" class="ident">z</label>, <label for="r39" class="ident">u</label>) {</code></span>
+<span class="codeline" id="line-610"><code>		<label for="r37" class="ident">z</label> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-611"><code>	}</code></span>
+<span class="codeline" id="line-612"><code>	<label for="r42" class="ident">q</label> = <label for="r37" class="ident">z</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<label for="r45" class="ident">m</label> + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-613"><code></code></span>
+<span class="codeline" id="line-614"><code>	<span class="comment">// Use basic or recursive long division depending on size.</span></code></span>
+<span class="codeline" id="line-615"><code>	<span class="keyword">if</span> <label for="r44" class="ident">n</label> &lt; <a href="#line-722" class="ident">divRecursiveThreshold</a> {</code></span>
+<span class="codeline" id="line-616"><code>		<label for="r42" class="ident">q</label>.<a href="#line-634" class="ident">divBasic</a>(<label for="r39" class="ident">u</label>, <label for="r48" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-617"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-618"><code>		<label for="r42" class="ident">q</label>.<a href="#line-729" class="ident">divRecursive</a>(<label for="r39" class="ident">u</label>, <label for="r48" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-619"><code>	}</code></span>
+<span class="codeline" id="line-620"><code>	<a href="nat.go.html#line-655" class="ident">putNat</a>(<label for="r47" class="ident">vp</label>)</code></span>
+<span class="codeline" id="line-621"><code></code></span>
+<span class="codeline" id="line-622"><code>	<label for="r42" class="ident">q</label> = <label for="r42" class="ident">q</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-623"><code></code></span>
+<span class="codeline" id="line-624"><code>	<span class="comment">// Undo scaling of remainder.</span></code></span>
+<span class="codeline" id="line-625"><code>	<a href="arith_decl.go.html#line-28" class="ident">shrVU</a>(<label for="r39" class="ident">u</label>, <label for="r39" class="ident">u</label>, <label for="r46" class="ident">shift</label>)</code></span>
+<span class="codeline" id="line-626"><code>	<label for="r43" class="ident">r</label> = <label for="r39" class="ident">u</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
 <span class="codeline" id="line-627"><code></code></span>
-<span class="codeline" id="line-628"><code>	<span class="comment">// Set up for divWW below, precomputing reciprocal argument.</span></code></span>
-<span class="codeline" id="line-629"><code>	<label for="r50" class="ident">vn1</label> := <label for="r45" class="ident">v</label>[<label for="r46" class="ident">n</label>-<span class="lit-number">1</span>]</code></span>
-<span class="codeline" id="line-630"><code>	<label for="r51" class="ident">rec</label> := <a href="arith.go.html#line-271" class="ident">reciprocalWord</a>(<label for="r50" class="ident">vn1</label>)</code></span>
-<span class="codeline" id="line-631"><code></code></span>
-<span class="codeline" id="line-632"><code>	<span class="comment">// Compute each digit of quotient.</span></code></span>
-<span class="codeline" id="line-633"><code>	<span class="keyword">for</span> <label for="r52" class="ident">j</label> := <label for="r47" class="ident">m</label>; <label for="r52" class="ident">j</label> &gt;= <span class="lit-number">0</span>; <label for="r52" class="ident">j</label>-- {</code></span>
-<span class="codeline" id="line-634"><code>		<span class="comment">// Compute the 2-by-1 guess q̂.</span></code></span>
-<span class="codeline" id="line-635"><code><span class="comment">		// The first iteration must invent a leading 0 for u.</span></code></span>
-<span class="codeline" id="line-636"><code>		<label for="r53" class="ident">qhat</label> := <a href="arith.go.html#line-16" class="ident">Word</a>(<a href="arith.go.html#line-23" class="ident">_M</a>)</code></span>
-<span class="codeline" id="line-637"><code>		<span class="keyword">var</span> <label for="r54" class="ident">ujn</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
-<span class="codeline" id="line-638"><code>		<span class="keyword">if</span> <label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r44" class="ident">u</label>) {</code></span>
-<span class="codeline" id="line-639"><code>			<label for="r54" class="ident">ujn</label> = <label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label>]</code></span>
-<span class="codeline" id="line-640"><code>		}</code></span>
-<span class="codeline" id="line-641"><code></code></span>
-<span class="codeline" id="line-642"><code>		<span class="comment">// ujn ≤ vn1, or else q̂ would be more than one digit.</span></code></span>
-<span class="codeline" id="line-643"><code><span class="comment">		// For ujn == vn1, we set q̂ to the max digit M above.</span></code></span>
-<span class="codeline" id="line-644"><code><span class="comment">		// Otherwise, we compute the 2-by-1 guess.</span></code></span>
-<span class="codeline" id="line-645"><code>		<span class="keyword">if</span> <label for="r54" class="ident">ujn</label> != <label for="r50" class="ident">vn1</label> {</code></span>
-<span class="codeline" id="line-646"><code>			<span class="keyword">var</span> <label for="r55" class="ident">rhat</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
-<span class="codeline" id="line-647"><code>			<label for="r53" class="ident">qhat</label>, <label for="r55" class="ident">rhat</label> = <a href="arith.go.html#line-211" class="ident">divWW</a>(<label for="r54" class="ident">ujn</label>, <label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label>-<span class="lit-number">1</span>], <label for="r50" class="ident">vn1</label>, <label for="r51" class="ident">rec</label>)</code></span>
-<span class="codeline" id="line-648"><code></code></span>
-<span class="codeline" id="line-649"><code>			<span class="comment">// Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.</span></code></span>
-<span class="codeline" id="line-650"><code>			<label for="r56" class="ident">vn2</label> := <label for="r45" class="ident">v</label>[<label for="r46" class="ident">n</label>-<span class="lit-number">2</span>]</code></span>
-<span class="codeline" id="line-651"><code>			<label for="r57" class="ident">x1</label>, <label for="r58" class="ident">x2</label> := <a href="arith.go.html#line-44" class="ident">mulWW</a>(<label for="r53" class="ident">qhat</label>, <label for="r56" class="ident">vn2</label>)</code></span>
-<span class="codeline" id="line-652"><code>			<label for="r59" class="ident">ujn2</label> := <label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label>-<span class="lit-number">2</span>]</code></span>
-<span class="codeline" id="line-653"><code>			<span class="keyword">for</span> <a href="#line-703" class="ident">greaterThan</a>(<label for="r57" class="ident">x1</label>, <label for="r58" class="ident">x2</label>, <label for="r55" class="ident">rhat</label>, <label for="r59" class="ident">ujn2</label>) { <span class="comment">// x1x2 &gt; r̂ u[j+n-2]</span></code></span>
-<span class="codeline" id="line-654"><code>				<label for="r53" class="ident">qhat</label>--</code></span>
-<span class="codeline" id="line-655"><code>				<label for="r60" class="ident">prevRhat</label> := <label for="r55" class="ident">rhat</label></code></span>
-<span class="codeline" id="line-656"><code>				<label for="r55" class="ident">rhat</label> += <label for="r50" class="ident">vn1</label></code></span>
-<span class="codeline" id="line-657"><code>				<span class="comment">// If r̂  overflows, then</span></code></span>
-<span class="codeline" id="line-658"><code><span class="comment">				// r̂ u[j+n-2]v[n-1] is now definitely &gt; x1 x2.</span></code></span>
-<span class="codeline" id="line-659"><code>				<span class="keyword">if</span> <label for="r55" class="ident">rhat</label> &lt; <label for="r60" class="ident">prevRhat</label> {</code></span>
-<span class="codeline" id="line-660"><code>					<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-661"><code>				}</code></span>
-<span class="codeline" id="line-662"><code>				<span class="comment">// TODO(rsc): No need for a full mulWW.</span></code></span>
-<span class="codeline" id="line-663"><code><span class="comment">				// x2 += vn2; if x2 overflows, x1++</span></code></span>
-<span class="codeline" id="line-664"><code>				<label for="r57" class="ident">x1</label>, <label for="r58" class="ident">x2</label> = <a href="arith.go.html#line-44" class="ident">mulWW</a>(<label for="r53" class="ident">qhat</label>, <label for="r56" class="ident">vn2</label>)</code></span>
-<span class="codeline" id="line-665"><code>			}</code></span>
-<span class="codeline" id="line-666"><code>		}</code></span>
-<span class="codeline" id="line-667"><code></code></span>
-<span class="codeline" id="line-668"><code>		<span class="comment">// Compute q̂·v.</span></code></span>
-<span class="codeline" id="line-669"><code>		<label for="r49" class="ident">qhatv</label>[<label for="r46" class="ident">n</label>] = <a href="arith_decl.go.html#line-17" class="ident">mulAddVWW</a>(<label for="r49" class="ident">qhatv</label>[<span class="lit-number">0</span>:<label for="r46" class="ident">n</label>], <label for="r45" class="ident">v</label>, <label for="r53" class="ident">qhat</label>, <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-670"><code>		<label for="r61" class="ident">qhl</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r49" class="ident">qhatv</label>)</code></span>
-<span class="codeline" id="line-671"><code>		<span class="keyword">if</span> <label for="r52" class="ident">j</label>+<label for="r61" class="ident">qhl</label> &gt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r44" class="ident">u</label>) &amp;&amp; <label for="r49" class="ident">qhatv</label>[<label for="r46" class="ident">n</label>] == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-672"><code>			<label for="r61" class="ident">qhl</label>--</code></span>
-<span class="codeline" id="line-673"><code>		}</code></span>
-<span class="codeline" id="line-674"><code></code></span>
-<span class="codeline" id="line-675"><code>		<span class="comment">// Subtract q̂·v from the current section of u.</span></code></span>
-<span class="codeline" id="line-676"><code><span class="comment">		// If it underflows, q̂·v &gt; u, which we fix up</span></code></span>
-<span class="codeline" id="line-677"><code><span class="comment">		// by decrementing q̂ and adding v back.</span></code></span>
-<span class="codeline" id="line-678"><code>		<label for="r62" class="ident">c</label> := <a href="arith_decl.go.html#line-12" class="ident">subVV</a>(<label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>:<label for="r52" class="ident">j</label>+<label for="r61" class="ident">qhl</label>], <label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>:], <label for="r49" class="ident">qhatv</label>)</code></span>
-<span class="codeline" id="line-679"><code>		<span class="keyword">if</span> <label for="r62" class="ident">c</label> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-680"><code>			<label for="r63" class="ident">c</label> := <a href="arith_decl.go.html#line-11" class="ident">addVV</a>(<label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>:<label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label>], <label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>:], <label for="r45" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-681"><code>			<span class="comment">// If n == qhl, the carry from subVV and the carry from addVV</span></code></span>
-<span class="codeline" id="line-682"><code><span class="comment">			// cancel out and don't affect u[j+n].</span></code></span>
-<span class="codeline" id="line-683"><code>			<span class="keyword">if</span> <label for="r46" class="ident">n</label> &lt; <label for="r61" class="ident">qhl</label> {</code></span>
-<span class="codeline" id="line-684"><code>				<label for="r44" class="ident">u</label>[<label for="r52" class="ident">j</label>+<label for="r46" class="ident">n</label>] += <label for="r63" class="ident">c</label></code></span>
-<span class="codeline" id="line-685"><code>			}</code></span>
-<span class="codeline" id="line-686"><code>			<label for="r53" class="ident">qhat</label>--</code></span>
-<span class="codeline" id="line-687"><code>		}</code></span>
-<span class="codeline" id="line-688"><code></code></span>
-<span class="codeline" id="line-689"><code>		<span class="comment">// Save quotient digit.</span></code></span>
-<span class="codeline" id="line-690"><code><span class="comment">		// Caller may know the top digit is zero and not leave room for it.</span></code></span>
-<span class="codeline" id="line-691"><code>		<span class="keyword">if</span> <label for="r52" class="ident">j</label> == <label for="r47" class="ident">m</label> &amp;&amp; <label for="r47" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r42" class="ident">q</label>) &amp;&amp; <label for="r53" class="ident">qhat</label> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-692"><code>			<span class="keyword">continue</span></code></span>
-<span class="codeline" id="line-693"><code>		}</code></span>
-<span class="codeline" id="line-694"><code>		<label for="r42" class="ident">q</label>[<label for="r52" class="ident">j</label>] = <label for="r53" class="ident">qhat</label></code></span>
-<span class="codeline" id="line-695"><code>	}</code></span>
-<span class="codeline" id="line-696"><code></code></span>
-<span class="codeline" id="line-697"><code>	<a href="nat.go.html#line-648" class="ident">putNat</a>(<label for="r48" class="ident">qhatvp</label>)</code></span>
-<span class="codeline" id="line-698"><code>}</code></span>
-<span class="codeline" id="line-699"><code></code></span>
-<span class="codeline" id="line-700"><code><span class="comment">// greaterThan reports whether the two digit numbers x1 x2 &gt; y1 y2.</span></code></span>
-<span class="codeline" id="line-701"><code><span class="comment">// TODO(rsc): In contradiction to most of this file, x1 is the high</span></code></span>
-<span class="codeline" id="line-702"><code><span class="comment">// digit and x2 is the low digit. This should be fixed.</span></code></span>
-<span class="codeline" id="line-703"><code><span class="keyword">func</span> greaterThan(<label for="r65" class="ident">x1</label>, <label for="r66" class="ident">x2</label>, <label for="r67" class="ident">y1</label>, <label for="r68" class="ident">y2</label> <a href="arith.go.html#line-16" class="ident">Word</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-704"><code>	<span class="keyword">return</span> <label for="r65" class="ident">x1</label> &gt; <label for="r67" class="ident">y1</label> || <label for="r65" class="ident">x1</label> == <label for="r67" class="ident">y1</label> &amp;&amp; <label for="r66" class="ident">x2</label> &gt; <label for="r68" class="ident">y2</label></code></span>
-<span class="codeline" id="line-705"><code>}</code></span>
-<span class="codeline" id="line-706"><code></code></span>
-<span class="codeline" id="line-707"><code><span class="comment">// divRecursiveThreshold is the number of divisor digits</span></code></span>
-<span class="codeline" id="line-708"><code><span class="comment">// at which point divRecursive is faster than divBasic.</span></code></span>
-<span class="codeline" id="line-709"><code><span class="keyword">const</span> divRecursiveThreshold = <span class="lit-number">100</span></code></span>
-<span class="codeline" id="line-710"><code></code></span>
-<span class="codeline" id="line-711"><code><span class="comment">// divRecursive implements recursive division as described above.</span></code></span>
-<span class="codeline" id="line-712"><code><span class="comment">// It overwrites z with ⌊u/v⌋ and overwrites u with the remainder r.</span></code></span>
-<span class="codeline" id="line-713"><code><span class="comment">// z must be large enough to hold ⌊u/v⌋.</span></code></span>
-<span class="codeline" id="line-714"><code><span class="comment">// This function is just for allocating and freeing temporaries</span></code></span>
-<span class="codeline" id="line-715"><code><span class="comment">// around divRecursiveStep, the real implementation.</span></code></span>
-<span class="codeline" id="line-716"><code><span class="keyword">func</span> (<label for="r69" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r70" class="ident">divRecursive</label>(<label for="r71" class="ident">u</label>, <label for="r72" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
-<span class="codeline" id="line-717"><code>	<span class="comment">// Recursion depth is (much) less than 2 log₂(len(v)).</span></code></span>
-<span class="codeline" id="line-718"><code><span class="comment">	// Allocate a slice of temporaries to be reused across recursion,</span></code></span>
-<span class="codeline" id="line-719"><code><span class="comment">	// plus one extra temporary not live across the recursion.</span></code></span>
-<span class="codeline" id="line-720"><code>	<label for="r73" class="ident">recDepth</label> := <span class="lit-number">2</span> * <a href="../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../bits/bits.go.html#line-296" class="ident">Len</a>(<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r72" class="ident">v</label>)))</code></span>
-<span class="codeline" id="line-721"><code>	<label for="r74" class="ident">tmp</label> := <a href="nat.go.html#line-636" class="ident">getNat</a>(<span class="lit-number">3</span> * <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r72" class="ident">v</label>))</code></span>
-<span class="codeline" id="line-722"><code>	<label for="r75" class="ident">temps</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]*<a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r73" class="ident">recDepth</label>)</code></span>
+<span class="codeline" id="line-628"><code>	<span class="keyword">return</span> <label for="r42" class="ident">q</label>, <label for="r43" class="ident">r</label></code></span>
+<span class="codeline" id="line-629"><code>}</code></span>
+<span class="codeline" id="line-630"><code></code></span>
+<span class="codeline" id="line-631"><code><span class="comment">// divBasic implements long division as described above.</span></code></span>
+<span class="codeline" id="line-632"><code><span class="comment">// It overwrites q with ⌊u/v⌋ and overwrites u with the remainder r.</span></code></span>
+<span class="codeline" id="line-633"><code><span class="comment">// q must be large enough to hold ⌊u/v⌋.</span></code></span>
+<span class="codeline" id="line-634"><code><span class="keyword">func</span> (<label for="r49" class="ident">q</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r50" class="ident">divBasic</label>(<label for="r51" class="ident">u</label>, <label for="r52" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-635"><code>	<label for="r53" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r52" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-636"><code>	<label for="r54" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r51" class="ident">u</label>) - <label for="r53" class="ident">n</label></code></span>
+<span class="codeline" id="line-637"><code></code></span>
+<span class="codeline" id="line-638"><code>	<label for="r55" class="ident">qhatvp</label> := <a href="nat.go.html#line-640" class="ident">getNat</a>(<label for="r53" class="ident">n</label> + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-639"><code>	<label for="r56" class="ident">qhatv</label> := *<label for="r55" class="ident">qhatvp</label></code></span>
+<span class="codeline" id="line-640"><code></code></span>
+<span class="codeline" id="line-641"><code>	<span class="comment">// Set up for divWW below, precomputing reciprocal argument.</span></code></span>
+<span class="codeline" id="line-642"><code>	<label for="r57" class="ident">vn1</label> := <label for="r52" class="ident">v</label>[<label for="r53" class="ident">n</label>-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-643"><code>	<label for="r58" class="ident">rec</label> := <a href="arith.go.html#line-271" class="ident">reciprocalWord</a>(<label for="r57" class="ident">vn1</label>)</code></span>
+<span class="codeline" id="line-644"><code></code></span>
+<span class="codeline" id="line-645"><code>	<span class="comment">// Compute each digit of quotient.</span></code></span>
+<span class="codeline" id="line-646"><code>	<span class="keyword">for</span> <label for="r59" class="ident">j</label> := <label for="r54" class="ident">m</label>; <label for="r59" class="ident">j</label> &gt;= <span class="lit-number">0</span>; <label for="r59" class="ident">j</label>-- {</code></span>
+<span class="codeline" id="line-647"><code>		<span class="comment">// Compute the 2-by-1 guess q̂.</span></code></span>
+<span class="codeline" id="line-648"><code><span class="comment">		// The first iteration must invent a leading 0 for u.</span></code></span>
+<span class="codeline" id="line-649"><code>		<label for="r60" class="ident">qhat</label> := <a href="arith.go.html#line-16" class="ident">Word</a>(<a href="arith.go.html#line-23" class="ident">_M</a>)</code></span>
+<span class="codeline" id="line-650"><code>		<span class="keyword">var</span> <label for="r61" class="ident">ujn</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
+<span class="codeline" id="line-651"><code>		<span class="keyword">if</span> <label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label> &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r51" class="ident">u</label>) {</code></span>
+<span class="codeline" id="line-652"><code>			<label for="r61" class="ident">ujn</label> = <label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-653"><code>		}</code></span>
+<span class="codeline" id="line-654"><code></code></span>
+<span class="codeline" id="line-655"><code>		<span class="comment">// ujn ≤ vn1, or else q̂ would be more than one digit.</span></code></span>
+<span class="codeline" id="line-656"><code><span class="comment">		// For ujn == vn1, we set q̂ to the max digit M above.</span></code></span>
+<span class="codeline" id="line-657"><code><span class="comment">		// Otherwise, we compute the 2-by-1 guess.</span></code></span>
+<span class="codeline" id="line-658"><code>		<span class="keyword">if</span> <label for="r61" class="ident">ujn</label> != <label for="r57" class="ident">vn1</label> {</code></span>
+<span class="codeline" id="line-659"><code>			<span class="keyword">var</span> <label for="r62" class="ident">rhat</label> <a href="arith.go.html#line-16" class="ident">Word</a></code></span>
+<span class="codeline" id="line-660"><code>			<label for="r60" class="ident">qhat</label>, <label for="r62" class="ident">rhat</label> = <a href="arith.go.html#line-211" class="ident">divWW</a>(<label for="r61" class="ident">ujn</label>, <label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label>-<span class="lit-number">1</span>], <label for="r57" class="ident">vn1</label>, <label for="r58" class="ident">rec</label>)</code></span>
+<span class="codeline" id="line-661"><code></code></span>
+<span class="codeline" id="line-662"><code>			<span class="comment">// Refine q̂ to a 3-by-2 guess. See “Refining Guesses” above.</span></code></span>
+<span class="codeline" id="line-663"><code>			<label for="r63" class="ident">vn2</label> := <label for="r52" class="ident">v</label>[<label for="r53" class="ident">n</label>-<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-664"><code>			<label for="r64" class="ident">x1</label>, <label for="r65" class="ident">x2</label> := <a href="arith.go.html#line-44" class="ident">mulWW</a>(<label for="r60" class="ident">qhat</label>, <label for="r63" class="ident">vn2</label>)</code></span>
+<span class="codeline" id="line-665"><code>			<label for="r66" class="ident">ujn2</label> := <label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label>-<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-666"><code>			<span class="keyword">for</span> <a href="#line-716" class="ident">greaterThan</a>(<label for="r64" class="ident">x1</label>, <label for="r65" class="ident">x2</label>, <label for="r62" class="ident">rhat</label>, <label for="r66" class="ident">ujn2</label>) { <span class="comment">// x1x2 &gt; r̂ u[j+n-2]</span></code></span>
+<span class="codeline" id="line-667"><code>				<label for="r60" class="ident">qhat</label>--</code></span>
+<span class="codeline" id="line-668"><code>				<label for="r67" class="ident">prevRhat</label> := <label for="r62" class="ident">rhat</label></code></span>
+<span class="codeline" id="line-669"><code>				<label for="r62" class="ident">rhat</label> += <label for="r57" class="ident">vn1</label></code></span>
+<span class="codeline" id="line-670"><code>				<span class="comment">// If r̂  overflows, then</span></code></span>
+<span class="codeline" id="line-671"><code><span class="comment">				// r̂ u[j+n-2]v[n-1] is now definitely &gt; x1 x2.</span></code></span>
+<span class="codeline" id="line-672"><code>				<span class="keyword">if</span> <label for="r62" class="ident">rhat</label> &lt; <label for="r67" class="ident">prevRhat</label> {</code></span>
+<span class="codeline" id="line-673"><code>					<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-674"><code>				}</code></span>
+<span class="codeline" id="line-675"><code>				<span class="comment">// TODO(rsc): No need for a full mulWW.</span></code></span>
+<span class="codeline" id="line-676"><code><span class="comment">				// x2 += vn2; if x2 overflows, x1++</span></code></span>
+<span class="codeline" id="line-677"><code>				<label for="r64" class="ident">x1</label>, <label for="r65" class="ident">x2</label> = <a href="arith.go.html#line-44" class="ident">mulWW</a>(<label for="r60" class="ident">qhat</label>, <label for="r63" class="ident">vn2</label>)</code></span>
+<span class="codeline" id="line-678"><code>			}</code></span>
+<span class="codeline" id="line-679"><code>		}</code></span>
+<span class="codeline" id="line-680"><code></code></span>
+<span class="codeline" id="line-681"><code>		<span class="comment">// Compute q̂·v.</span></code></span>
+<span class="codeline" id="line-682"><code>		<label for="r56" class="ident">qhatv</label>[<label for="r53" class="ident">n</label>] = <a href="arith_decl.go.html#line-31" class="ident">mulAddVWW</a>(<label for="r56" class="ident">qhatv</label>[<span class="lit-number">0</span>:<label for="r53" class="ident">n</label>], <label for="r52" class="ident">v</label>, <label for="r60" class="ident">qhat</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-683"><code>		<label for="r68" class="ident">qhl</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r56" class="ident">qhatv</label>)</code></span>
+<span class="codeline" id="line-684"><code>		<span class="keyword">if</span> <label for="r59" class="ident">j</label>+<label for="r68" class="ident">qhl</label> &gt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r51" class="ident">u</label>) &amp;&amp; <label for="r56" class="ident">qhatv</label>[<label for="r53" class="ident">n</label>] == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-685"><code>			<label for="r68" class="ident">qhl</label>--</code></span>
+<span class="codeline" id="line-686"><code>		}</code></span>
+<span class="codeline" id="line-687"><code></code></span>
+<span class="codeline" id="line-688"><code>		<span class="comment">// Subtract q̂·v from the current section of u.</span></code></span>
+<span class="codeline" id="line-689"><code><span class="comment">		// If it underflows, q̂·v &gt; u, which we fix up</span></code></span>
+<span class="codeline" id="line-690"><code><span class="comment">		// by decrementing q̂ and adding v back.</span></code></span>
+<span class="codeline" id="line-691"><code>		<label for="r69" class="ident">c</label> := <a href="arith_decl.go.html#line-16" class="ident">subVV</a>(<label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>:<label for="r59" class="ident">j</label>+<label for="r68" class="ident">qhl</label>], <label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>:], <label for="r56" class="ident">qhatv</label>)</code></span>
+<span class="codeline" id="line-692"><code>		<span class="keyword">if</span> <label for="r69" class="ident">c</label> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-693"><code>			<label for="r70" class="ident">c</label> := <a href="arith_decl.go.html#line-13" class="ident">addVV</a>(<label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>:<label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label>], <label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>:], <label for="r52" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-694"><code>			<span class="comment">// If n == qhl, the carry from subVV and the carry from addVV</span></code></span>
+<span class="codeline" id="line-695"><code><span class="comment">			// cancel out and don't affect u[j+n].</span></code></span>
+<span class="codeline" id="line-696"><code>			<span class="keyword">if</span> <label for="r53" class="ident">n</label> &lt; <label for="r68" class="ident">qhl</label> {</code></span>
+<span class="codeline" id="line-697"><code>				<label for="r51" class="ident">u</label>[<label for="r59" class="ident">j</label>+<label for="r53" class="ident">n</label>] += <label for="r70" class="ident">c</label></code></span>
+<span class="codeline" id="line-698"><code>			}</code></span>
+<span class="codeline" id="line-699"><code>			<label for="r60" class="ident">qhat</label>--</code></span>
+<span class="codeline" id="line-700"><code>		}</code></span>
+<span class="codeline" id="line-701"><code></code></span>
+<span class="codeline" id="line-702"><code>		<span class="comment">// Save quotient digit.</span></code></span>
+<span class="codeline" id="line-703"><code><span class="comment">		// Caller may know the top digit is zero and not leave room for it.</span></code></span>
+<span class="codeline" id="line-704"><code>		<span class="keyword">if</span> <label for="r59" class="ident">j</label> == <label for="r54" class="ident">m</label> &amp;&amp; <label for="r54" class="ident">m</label> == <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r49" class="ident">q</label>) &amp;&amp; <label for="r60" class="ident">qhat</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-705"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-706"><code>		}</code></span>
+<span class="codeline" id="line-707"><code>		<label for="r49" class="ident">q</label>[<label for="r59" class="ident">j</label>] = <label for="r60" class="ident">qhat</label></code></span>
+<span class="codeline" id="line-708"><code>	}</code></span>
+<span class="codeline" id="line-709"><code></code></span>
+<span class="codeline" id="line-710"><code>	<a href="nat.go.html#line-655" class="ident">putNat</a>(<label for="r55" class="ident">qhatvp</label>)</code></span>
+<span class="codeline" id="line-711"><code>}</code></span>
+<span class="codeline" id="line-712"><code></code></span>
+<span class="codeline" id="line-713"><code><span class="comment">// greaterThan reports whether the two digit numbers x1 x2 &gt; y1 y2.</span></code></span>
+<span class="codeline" id="line-714"><code><span class="comment">// TODO(rsc): In contradiction to most of this file, x1 is the high</span></code></span>
+<span class="codeline" id="line-715"><code><span class="comment">// digit and x2 is the low digit. This should be fixed.</span></code></span>
+<span class="codeline" id="line-716"><code><span class="keyword">func</span> greaterThan(<label for="r72" class="ident">x1</label>, <label for="r73" class="ident">x2</label>, <label for="r74" class="ident">y1</label>, <label for="r75" class="ident">y2</label> <a href="arith.go.html#line-16" class="ident">Word</a>) <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-717"><code>	<span class="keyword">return</span> <label for="r72" class="ident">x1</label> &gt; <label for="r74" class="ident">y1</label> || <label for="r72" class="ident">x1</label> == <label for="r74" class="ident">y1</label> &amp;&amp; <label for="r73" class="ident">x2</label> &gt; <label for="r75" class="ident">y2</label></code></span>
+<span class="codeline" id="line-718"><code>}</code></span>
+<span class="codeline" id="line-719"><code></code></span>
+<span class="codeline" id="line-720"><code><span class="comment">// divRecursiveThreshold is the number of divisor digits</span></code></span>
+<span class="codeline" id="line-721"><code><span class="comment">// at which point divRecursive is faster than divBasic.</span></code></span>
+<span class="codeline" id="line-722"><code><span class="keyword">const</span> divRecursiveThreshold = <span class="lit-number">100</span></code></span>
 <span class="codeline" id="line-723"><code></code></span>
-<span class="codeline" id="line-724"><code>	<label for="r69" class="ident">z</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-725"><code>	<label for="r69" class="ident">z</label>.<a href="#line-741" class="ident">divRecursiveStep</a>(<label for="r71" class="ident">u</label>, <label for="r72" class="ident">v</label>, <span class="lit-number">0</span>, <label for="r74" class="ident">tmp</label>, <label for="r75" class="ident">temps</label>)</code></span>
-<span class="codeline" id="line-726"><code></code></span>
-<span class="codeline" id="line-727"><code>	<span class="comment">// Free temporaries.</span></code></span>
-<span class="codeline" id="line-728"><code>	<span class="keyword">for</span> <label for="r76" class="ident">_</label>, <label for="r77" class="ident">n</label> := <span class="keyword">range</span> <label for="r75" class="ident">temps</label> {</code></span>
-<span class="codeline" id="line-729"><code>		<span class="keyword">if</span> <label for="r77" class="ident">n</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-730"><code>			<a href="nat.go.html#line-648" class="ident">putNat</a>(<label for="r77" class="ident">n</label>)</code></span>
-<span class="codeline" id="line-731"><code>		}</code></span>
-<span class="codeline" id="line-732"><code>	}</code></span>
-<span class="codeline" id="line-733"><code>	<a href="nat.go.html#line-648" class="ident">putNat</a>(<label for="r74" class="ident">tmp</label>)</code></span>
-<span class="codeline" id="line-734"><code>}</code></span>
-<span class="codeline" id="line-735"><code></code></span>
-<span class="codeline" id="line-736"><code><span class="comment">// divRecursiveStep is the actual implementation of recursive division.</span></code></span>
-<span class="codeline" id="line-737"><code><span class="comment">// It adds ⌊u/v⌋ to z and overwrites u with the remainder r.</span></code></span>
-<span class="codeline" id="line-738"><code><span class="comment">// z must be large enough to hold ⌊u/v⌋.</span></code></span>
-<span class="codeline" id="line-739"><code><span class="comment">// It uses temps[depth] (allocating if needed) as a temporary live across</span></code></span>
-<span class="codeline" id="line-740"><code><span class="comment">// the recursive call. It also uses tmp, but not live across the recursion.</span></code></span>
-<span class="codeline" id="line-741"><code><span class="keyword">func</span> (<label for="r78" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r79" class="ident">divRecursiveStep</label>(<label for="r80" class="ident">u</label>, <label for="r81" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r82" class="ident">depth</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r83" class="ident">tmp</label> *<a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r84" class="ident">temps</label> []*<a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
-<span class="codeline" id="line-742"><code>	<span class="comment">// u is a subsection of the original and may have leading zeros.</span></code></span>
-<span class="codeline" id="line-743"><code><span class="comment">	// TODO(rsc): The v = v.norm() is useless and should be removed.</span></code></span>
-<span class="codeline" id="line-744"><code><span class="comment">	// We know (and require) that v's top digit is ≥ B/2.</span></code></span>
-<span class="codeline" id="line-745"><code>	<label for="r80" class="ident">u</label> = <label for="r80" class="ident">u</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-746"><code>	<label for="r81" class="ident">v</label> = <label for="r81" class="ident">v</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-747"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r80" class="ident">u</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-748"><code>		<label for="r78" class="ident">z</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-749"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-750"><code>	}</code></span>
-<span class="codeline" id="line-751"><code></code></span>
-<span class="codeline" id="line-752"><code>	<span class="comment">// Fall back to basic division if the problem is now small enough.</span></code></span>
-<span class="codeline" id="line-753"><code>	<label for="r85" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r81" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-754"><code>	<span class="keyword">if</span> <label for="r85" class="ident">n</label> &lt; <a href="#line-709" class="ident">divRecursiveThreshold</a> {</code></span>
-<span class="codeline" id="line-755"><code>		<label for="r78" class="ident">z</label>.<a href="#line-621" class="ident">divBasic</a>(<label for="r80" class="ident">u</label>, <label for="r81" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-756"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-757"><code>	}</code></span>
-<span class="codeline" id="line-758"><code></code></span>
-<span class="codeline" id="line-759"><code>	<span class="comment">// Nothing to do if u is shorter than v (implies u &lt; v).</span></code></span>
-<span class="codeline" id="line-760"><code>	<label for="r86" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r80" class="ident">u</label>) - <label for="r85" class="ident">n</label></code></span>
-<span class="codeline" id="line-761"><code>	<span class="keyword">if</span> <label for="r86" class="ident">m</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-724"><code><span class="comment">// divRecursive implements recursive division as described above.</span></code></span>
+<span class="codeline" id="line-725"><code><span class="comment">// It overwrites z with ⌊u/v⌋ and overwrites u with the remainder r.</span></code></span>
+<span class="codeline" id="line-726"><code><span class="comment">// z must be large enough to hold ⌊u/v⌋.</span></code></span>
+<span class="codeline" id="line-727"><code><span class="comment">// This function is just for allocating and freeing temporaries</span></code></span>
+<span class="codeline" id="line-728"><code><span class="comment">// around divRecursiveStep, the real implementation.</span></code></span>
+<span class="codeline" id="line-729"><code><span class="keyword">func</span> (<label for="r76" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r77" class="ident">divRecursive</label>(<label for="r78" class="ident">u</label>, <label for="r79" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-730"><code>	<span class="comment">// Recursion depth is (much) less than 2 log₂(len(v)).</span></code></span>
+<span class="codeline" id="line-731"><code><span class="comment">	// Allocate a slice of temporaries to be reused across recursion,</span></code></span>
+<span class="codeline" id="line-732"><code><span class="comment">	// plus one extra temporary not live across the recursion.</span></code></span>
+<span class="codeline" id="line-733"><code>	<label for="r80" class="ident">recDepth</label> := <span class="lit-number">2</span> * <a href="../../../pkg/math/bits.html" class="ident i0">bits</a>.<a href="../bits/bits.go.html#line-302" class="ident">Len</a>(<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r79" class="ident">v</label>)))</code></span>
+<span class="codeline" id="line-734"><code>	<label for="r81" class="ident">tmp</label> := <a href="nat.go.html#line-640" class="ident">getNat</a>(<span class="lit-number">3</span> * <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r79" class="ident">v</label>))</code></span>
+<span class="codeline" id="line-735"><code>	<label for="r82" class="ident">temps</label> := <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]*<a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r80" class="ident">recDepth</label>)</code></span>
+<span class="codeline" id="line-736"><code></code></span>
+<span class="codeline" id="line-737"><code>	<label for="r76" class="ident">z</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
+<span class="codeline" id="line-738"><code>	<label for="r76" class="ident">z</label>.<a href="#line-754" class="ident">divRecursiveStep</a>(<label for="r78" class="ident">u</label>, <label for="r79" class="ident">v</label>, <span class="lit-number">0</span>, <label for="r81" class="ident">tmp</label>, <label for="r82" class="ident">temps</label>)</code></span>
+<span class="codeline" id="line-739"><code></code></span>
+<span class="codeline" id="line-740"><code>	<span class="comment">// Free temporaries.</span></code></span>
+<span class="codeline" id="line-741"><code>	<span class="keyword">for</span> <label for="r83" class="ident">_</label>, <label for="r84" class="ident">n</label> := <span class="keyword">range</span> <label for="r82" class="ident">temps</label> {</code></span>
+<span class="codeline" id="line-742"><code>		<span class="keyword">if</span> <label for="r84" class="ident">n</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-743"><code>			<a href="nat.go.html#line-655" class="ident">putNat</a>(<label for="r84" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-744"><code>		}</code></span>
+<span class="codeline" id="line-745"><code>	}</code></span>
+<span class="codeline" id="line-746"><code>	<a href="nat.go.html#line-655" class="ident">putNat</a>(<label for="r81" class="ident">tmp</label>)</code></span>
+<span class="codeline" id="line-747"><code>}</code></span>
+<span class="codeline" id="line-748"><code></code></span>
+<span class="codeline" id="line-749"><code><span class="comment">// divRecursiveStep is the actual implementation of recursive division.</span></code></span>
+<span class="codeline" id="line-750"><code><span class="comment">// It adds ⌊u/v⌋ to z and overwrites u with the remainder r.</span></code></span>
+<span class="codeline" id="line-751"><code><span class="comment">// z must be large enough to hold ⌊u/v⌋.</span></code></span>
+<span class="codeline" id="line-752"><code><span class="comment">// It uses temps[depth] (allocating if needed) as a temporary live across</span></code></span>
+<span class="codeline" id="line-753"><code><span class="comment">// the recursive call. It also uses tmp, but not live across the recursion.</span></code></span>
+<span class="codeline" id="line-754"><code><span class="keyword">func</span> (<label for="r85" class="ident">z</label> <a href="nat.go.html#line-34" class="ident">nat</a>) <label for="r86" class="ident">divRecursiveStep</label>(<label for="r87" class="ident">u</label>, <label for="r88" class="ident">v</label> <a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r89" class="ident">depth</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r90" class="ident">tmp</label> *<a href="nat.go.html#line-34" class="ident">nat</a>, <label for="r91" class="ident">temps</label> []*<a href="nat.go.html#line-34" class="ident">nat</a>) {</code></span>
+<span class="codeline" id="line-755"><code>	<span class="comment">// u is a subsection of the original and may have leading zeros.</span></code></span>
+<span class="codeline" id="line-756"><code><span class="comment">	// TODO(rsc): The v = v.norm() is useless and should be removed.</span></code></span>
+<span class="codeline" id="line-757"><code><span class="comment">	// We know (and require) that v's top digit is ≥ B/2.</span></code></span>
+<span class="codeline" id="line-758"><code>	<label for="r87" class="ident">u</label> = <label for="r87" class="ident">u</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-759"><code>	<label for="r88" class="ident">v</label> = <label for="r88" class="ident">v</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-760"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r87" class="ident">u</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-761"><code>		<label for="r85" class="ident">z</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
 <span class="codeline" id="line-762"><code>		<span class="keyword">return</span></code></span>
 <span class="codeline" id="line-763"><code>	}</code></span>
 <span class="codeline" id="line-764"><code></code></span>
-<span class="codeline" id="line-765"><code>	<span class="comment">// We consider B digits in a row as a single wide digit.</span></code></span>
-<span class="codeline" id="line-766"><code><span class="comment">	// (See “Recursive Division” above.)</span></code></span>
-<span class="codeline" id="line-767"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-768"><code><span class="comment">	// TODO(rsc): rename B to Wide, to avoid confusion with _B,</span></code></span>
-<span class="codeline" id="line-769"><code><span class="comment">	// which is something entirely different.</span></code></span>
-<span class="codeline" id="line-770"><code><span class="comment">	// TODO(rsc): Look into whether using ⌈n/2⌉ is better than ⌊n/2⌋.</span></code></span>
-<span class="codeline" id="line-771"><code>	<label for="r87" class="ident">B</label> := <label for="r85" class="ident">n</label> / <span class="lit-number">2</span></code></span>
-<span class="codeline" id="line-772"><code></code></span>
-<span class="codeline" id="line-773"><code>	<span class="comment">// Allocate a nat for qhat below.</span></code></span>
-<span class="codeline" id="line-774"><code>	<span class="keyword">if</span> <label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>] == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-775"><code>		<label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>] = <a href="nat.go.html#line-636" class="ident">getNat</a>(<label for="r85" class="ident">n</label>) <span class="comment">// TODO(rsc): Can be just B+1.</span></code></span>
-<span class="codeline" id="line-776"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-777"><code>		*<label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>] = <label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>].<a href="nat.go.html#line-57" class="ident">make</a>(<label for="r87" class="ident">B</label> + <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-778"><code>	}</code></span>
-<span class="codeline" id="line-779"><code></code></span>
-<span class="codeline" id="line-780"><code>	<span class="comment">// Compute each wide digit of the quotient.</span></code></span>
-<span class="codeline" id="line-781"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-782"><code><span class="comment">	// TODO(rsc): Change the loop to be</span></code></span>
-<span class="codeline" id="line-783"><code><span class="comment">	//	for j := (m+B-1)/B*B; j &gt; 0; j -= B {</span></code></span>
-<span class="codeline" id="line-784"><code><span class="comment">	// which will make the final step a regular step, letting us</span></code></span>
-<span class="codeline" id="line-785"><code><span class="comment">	// delete what amounts to an extra copy of the loop body below.</span></code></span>
-<span class="codeline" id="line-786"><code>	<label for="r88" class="ident">j</label> := <label for="r86" class="ident">m</label></code></span>
-<span class="codeline" id="line-787"><code>	<span class="keyword">for</span> <label for="r88" class="ident">j</label> &gt; <label for="r87" class="ident">B</label> {</code></span>
-<span class="codeline" id="line-788"><code>		<span class="comment">// Divide u[j-B:j+n] (3 wide digits) by v (2 wide digits).</span></code></span>
-<span class="codeline" id="line-789"><code><span class="comment">		// First make the 2-by-1-wide-digit guess using a recursive call.</span></code></span>
-<span class="codeline" id="line-790"><code><span class="comment">		// Then extend the guess to the full 3-by-2 (see “Refining Guesses”).</span></code></span>
-<span class="codeline" id="line-791"><code><span class="comment">		//</span></code></span>
-<span class="codeline" id="line-792"><code><span class="comment">		// For the 2-by-1-wide-digit guess, instead of doing 2B-by-B-digit,</span></code></span>
-<span class="codeline" id="line-793"><code><span class="comment">		// we use a (2B+1)-by-(B+1) digit, which handles the possibility that</span></code></span>
-<span class="codeline" id="line-794"><code><span class="comment">		// the result has an extra leading 1 digit as well as guaranteeing</span></code></span>
-<span class="codeline" id="line-795"><code><span class="comment">		// that the computed q̂ will be off by at most 1 instead of 2.</span></code></span>
-<span class="codeline" id="line-796"><code></code></span>
-<span class="codeline" id="line-797"><code>		<span class="comment">// s is the number of digits to drop from the 3B- and 2B-digit chunks.</span></code></span>
-<span class="codeline" id="line-798"><code><span class="comment">		// We drop B-1 to be left with 2B+1 and B+1.</span></code></span>
-<span class="codeline" id="line-799"><code>		<label for="r89" class="ident">s</label> := (<label for="r87" class="ident">B</label> - <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-800"><code></code></span>
-<span class="codeline" id="line-801"><code>		<span class="comment">// uu is the up-to-3B-digit section of u we are working on.</span></code></span>
-<span class="codeline" id="line-802"><code>		<label for="r90" class="ident">uu</label> := <label for="r80" class="ident">u</label>[<label for="r88" class="ident">j</label>-<label for="r87" class="ident">B</label>:]</code></span>
-<span class="codeline" id="line-803"><code></code></span>
-<span class="codeline" id="line-804"><code>		<span class="comment">// Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].</span></code></span>
-<span class="codeline" id="line-805"><code>		<label for="r91" class="ident">qhat</label> := *<label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>]</code></span>
-<span class="codeline" id="line-806"><code>		<label for="r91" class="ident">qhat</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-807"><code>		<label for="r91" class="ident">qhat</label>.<label for="r79" class="ident">divRecursiveStep</label>(<label for="r90" class="ident">uu</label>[<label for="r89" class="ident">s</label>:<label for="r87" class="ident">B</label>+<label for="r85" class="ident">n</label>], <label for="r81" class="ident">v</label>[<label for="r89" class="ident">s</label>:], <label for="r82" class="ident">depth</label>+<span class="lit-number">1</span>, <label for="r83" class="ident">tmp</label>, <label for="r84" class="ident">temps</label>)</code></span>
-<span class="codeline" id="line-808"><code>		<label for="r91" class="ident">qhat</label> = <label for="r91" class="ident">qhat</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-765"><code>	<span class="comment">// Fall back to basic division if the problem is now small enough.</span></code></span>
+<span class="codeline" id="line-766"><code>	<label for="r92" class="ident">n</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r88" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-767"><code>	<span class="keyword">if</span> <label for="r92" class="ident">n</label> &lt; <a href="#line-722" class="ident">divRecursiveThreshold</a> {</code></span>
+<span class="codeline" id="line-768"><code>		<label for="r85" class="ident">z</label>.<a href="#line-634" class="ident">divBasic</a>(<label for="r87" class="ident">u</label>, <label for="r88" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-769"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-770"><code>	}</code></span>
+<span class="codeline" id="line-771"><code></code></span>
+<span class="codeline" id="line-772"><code>	<span class="comment">// Nothing to do if u is shorter than v (implies u &lt; v).</span></code></span>
+<span class="codeline" id="line-773"><code>	<label for="r93" class="ident">m</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r87" class="ident">u</label>) - <label for="r92" class="ident">n</label></code></span>
+<span class="codeline" id="line-774"><code>	<span class="keyword">if</span> <label for="r93" class="ident">m</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-775"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-776"><code>	}</code></span>
+<span class="codeline" id="line-777"><code></code></span>
+<span class="codeline" id="line-778"><code>	<span class="comment">// We consider B digits in a row as a single wide digit.</span></code></span>
+<span class="codeline" id="line-779"><code><span class="comment">	// (See “Recursive Division” above.)</span></code></span>
+<span class="codeline" id="line-780"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-781"><code><span class="comment">	// TODO(rsc): rename B to Wide, to avoid confusion with _B,</span></code></span>
+<span class="codeline" id="line-782"><code><span class="comment">	// which is something entirely different.</span></code></span>
+<span class="codeline" id="line-783"><code><span class="comment">	// TODO(rsc): Look into whether using ⌈n/2⌉ is better than ⌊n/2⌋.</span></code></span>
+<span class="codeline" id="line-784"><code>	<label for="r94" class="ident">B</label> := <label for="r92" class="ident">n</label> / <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-785"><code></code></span>
+<span class="codeline" id="line-786"><code>	<span class="comment">// Allocate a nat for qhat below.</span></code></span>
+<span class="codeline" id="line-787"><code>	<span class="keyword">if</span> <label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>] == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-788"><code>		<label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>] = <a href="nat.go.html#line-640" class="ident">getNat</a>(<label for="r92" class="ident">n</label>) <span class="comment">// TODO(rsc): Can be just B+1.</span></code></span>
+<span class="codeline" id="line-789"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-790"><code>		*<label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>] = <label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>].<a href="nat.go.html#line-61" class="ident">make</a>(<label for="r94" class="ident">B</label> + <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-791"><code>	}</code></span>
+<span class="codeline" id="line-792"><code></code></span>
+<span class="codeline" id="line-793"><code>	<span class="comment">// Compute each wide digit of the quotient.</span></code></span>
+<span class="codeline" id="line-794"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-795"><code><span class="comment">	// TODO(rsc): Change the loop to be</span></code></span>
+<span class="codeline" id="line-796"><code><span class="comment">	//	for j := (m+B-1)/B*B; j &gt; 0; j -= B {</span></code></span>
+<span class="codeline" id="line-797"><code><span class="comment">	// which will make the final step a regular step, letting us</span></code></span>
+<span class="codeline" id="line-798"><code><span class="comment">	// delete what amounts to an extra copy of the loop body below.</span></code></span>
+<span class="codeline" id="line-799"><code>	<label for="r95" class="ident">j</label> := <label for="r93" class="ident">m</label></code></span>
+<span class="codeline" id="line-800"><code>	<span class="keyword">for</span> <label for="r95" class="ident">j</label> &gt; <label for="r94" class="ident">B</label> {</code></span>
+<span class="codeline" id="line-801"><code>		<span class="comment">// Divide u[j-B:j+n] (3 wide digits) by v (2 wide digits).</span></code></span>
+<span class="codeline" id="line-802"><code><span class="comment">		// First make the 2-by-1-wide-digit guess using a recursive call.</span></code></span>
+<span class="codeline" id="line-803"><code><span class="comment">		// Then extend the guess to the full 3-by-2 (see “Refining Guesses”).</span></code></span>
+<span class="codeline" id="line-804"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-805"><code><span class="comment">		// For the 2-by-1-wide-digit guess, instead of doing 2B-by-B-digit,</span></code></span>
+<span class="codeline" id="line-806"><code><span class="comment">		// we use a (2B+1)-by-(B+1) digit, which handles the possibility that</span></code></span>
+<span class="codeline" id="line-807"><code><span class="comment">		// the result has an extra leading 1 digit as well as guaranteeing</span></code></span>
+<span class="codeline" id="line-808"><code><span class="comment">		// that the computed q̂ will be off by at most 1 instead of 2.</span></code></span>
 <span class="codeline" id="line-809"><code></code></span>
-<span class="codeline" id="line-810"><code>		<span class="comment">// Extend to a 3-by-2 quotient and remainder.</span></code></span>
-<span class="codeline" id="line-811"><code><span class="comment">		// Because divRecursiveStep overwrote the top part of uu with</span></code></span>
-<span class="codeline" id="line-812"><code><span class="comment">		// the remainder r̂, the full uu already contains the equivalent</span></code></span>
-<span class="codeline" id="line-813"><code><span class="comment">		// of r̂·B + uₙ₋₂ from the “Refining Guesses” discussion.</span></code></span>
-<span class="codeline" id="line-814"><code><span class="comment">		// Subtracting q̂·vₙ₋₂ from it will compute the full-length remainder.</span></code></span>
-<span class="codeline" id="line-815"><code><span class="comment">		// If that subtraction underflows, q̂·v &gt; u, which we fix up</span></code></span>
-<span class="codeline" id="line-816"><code><span class="comment">		// by decrementing q̂ and adding v back, same as in long division.</span></code></span>
-<span class="codeline" id="line-817"><code></code></span>
-<span class="codeline" id="line-818"><code>		<span class="comment">// TODO(rsc): Instead of subtract and fix-up, this code is computing</span></code></span>
-<span class="codeline" id="line-819"><code><span class="comment">		// q̂·vₙ₋₂ and decrementing q̂ until that product is ≤ u.</span></code></span>
-<span class="codeline" id="line-820"><code><span class="comment">		// But we can do the subtraction directly, as in the comment above</span></code></span>
-<span class="codeline" id="line-821"><code><span class="comment">		// and in long division, because we know that q̂ is wrong by at most one.</span></code></span>
-<span class="codeline" id="line-822"><code>		<label for="r92" class="ident">qhatv</label> := <label for="r83" class="ident">tmp</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<span class="lit-number">3</span> * <label for="r85" class="ident">n</label>)</code></span>
-<span class="codeline" id="line-823"><code>		<label for="r92" class="ident">qhatv</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-824"><code>		<label for="r92" class="ident">qhatv</label> = <label for="r92" class="ident">qhatv</label>.<a href="nat.go.html#line-408" class="ident">mul</a>(<label for="r91" class="ident">qhat</label>, <label for="r81" class="ident">v</label>[:<label for="r89" class="ident">s</label>])</code></span>
-<span class="codeline" id="line-825"><code>		<span class="keyword">for</span> <label for="r93" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r93" class="ident">i</label> &lt; <span class="lit-number">2</span>; <label for="r93" class="ident">i</label>++ {</code></span>
-<span class="codeline" id="line-826"><code>			<label for="r94" class="ident">e</label> := <label for="r92" class="ident">qhatv</label>.<a href="nat.go.html#line-152" class="ident">cmp</a>(<label for="r90" class="ident">uu</label>.<a href="nat.go.html#line-49" class="ident">norm</a>())</code></span>
-<span class="codeline" id="line-827"><code>			<span class="keyword">if</span> <label for="r94" class="ident">e</label> &lt;= <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-828"><code>				<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-829"><code>			}</code></span>
-<span class="codeline" id="line-830"><code>			<a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r91" class="ident">qhat</label>, <label for="r91" class="ident">qhat</label>, <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-831"><code>			<label for="r95" class="ident">c</label> := <a href="arith_decl.go.html#line-12" class="ident">subVV</a>(<label for="r92" class="ident">qhatv</label>[:<label for="r89" class="ident">s</label>], <label for="r92" class="ident">qhatv</label>[:<label for="r89" class="ident">s</label>], <label for="r81" class="ident">v</label>[:<label for="r89" class="ident">s</label>])</code></span>
-<span class="codeline" id="line-832"><code>			<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r92" class="ident">qhatv</label>) &gt; <label for="r89" class="ident">s</label> {</code></span>
-<span class="codeline" id="line-833"><code>				<a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r92" class="ident">qhatv</label>[<label for="r89" class="ident">s</label>:], <label for="r92" class="ident">qhatv</label>[<label for="r89" class="ident">s</label>:], <label for="r95" class="ident">c</label>)</code></span>
-<span class="codeline" id="line-834"><code>			}</code></span>
-<span class="codeline" id="line-835"><code>			<a href="nat.go.html#line-377" class="ident">addAt</a>(<label for="r90" class="ident">uu</label>[<label for="r89" class="ident">s</label>:], <label for="r81" class="ident">v</label>[<label for="r89" class="ident">s</label>:], <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-836"><code>		}</code></span>
-<span class="codeline" id="line-837"><code>		<span class="keyword">if</span> <label for="r92" class="ident">qhatv</label>.<a href="nat.go.html#line-152" class="ident">cmp</a>(<label for="r90" class="ident">uu</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()) &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-838"><code>			<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
-<span class="codeline" id="line-839"><code>		}</code></span>
-<span class="codeline" id="line-840"><code>		<label for="r96" class="ident">c</label> := <a href="arith_decl.go.html#line-12" class="ident">subVV</a>(<label for="r90" class="ident">uu</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r92" class="ident">qhatv</label>)], <label for="r90" class="ident">uu</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r92" class="ident">qhatv</label>)], <label for="r92" class="ident">qhatv</label>)</code></span>
-<span class="codeline" id="line-841"><code>		<span class="keyword">if</span> <label for="r96" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-842"><code>			<a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r90" class="ident">uu</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r92" class="ident">qhatv</label>):], <label for="r90" class="ident">uu</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r92" class="ident">qhatv</label>):], <label for="r96" class="ident">c</label>)</code></span>
-<span class="codeline" id="line-843"><code>		}</code></span>
-<span class="codeline" id="line-844"><code>		<a href="nat.go.html#line-377" class="ident">addAt</a>(<label for="r78" class="ident">z</label>, <label for="r91" class="ident">qhat</label>, <label for="r88" class="ident">j</label>-<label for="r87" class="ident">B</label>)</code></span>
-<span class="codeline" id="line-845"><code>		<label for="r88" class="ident">j</label> -= <label for="r87" class="ident">B</label></code></span>
-<span class="codeline" id="line-846"><code>	}</code></span>
-<span class="codeline" id="line-847"><code></code></span>
-<span class="codeline" id="line-848"><code>	<span class="comment">// TODO(rsc): Rewrite loop as described above and delete all this code.</span></code></span>
-<span class="codeline" id="line-849"><code></code></span>
-<span class="codeline" id="line-850"><code>	<span class="comment">// Now u &lt; (v&lt;&lt;B), compute lower bits in the same way.</span></code></span>
-<span class="codeline" id="line-851"><code><span class="comment">	// Choose shift = B-1 again.</span></code></span>
-<span class="codeline" id="line-852"><code>	<label for="r97" class="ident">s</label> := <label for="r87" class="ident">B</label> - <span class="lit-number">1</span></code></span>
-<span class="codeline" id="line-853"><code>	<label for="r98" class="ident">qhat</label> := *<label for="r84" class="ident">temps</label>[<label for="r82" class="ident">depth</label>]</code></span>
-<span class="codeline" id="line-854"><code>	<label for="r98" class="ident">qhat</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-855"><code>	<label for="r98" class="ident">qhat</label>.<label for="r79" class="ident">divRecursiveStep</label>(<label for="r80" class="ident">u</label>[<label for="r97" class="ident">s</label>:].<a href="nat.go.html#line-49" class="ident">norm</a>(), <label for="r81" class="ident">v</label>[<label for="r97" class="ident">s</label>:], <label for="r82" class="ident">depth</label>+<span class="lit-number">1</span>, <label for="r83" class="ident">tmp</label>, <label for="r84" class="ident">temps</label>)</code></span>
-<span class="codeline" id="line-856"><code>	<label for="r98" class="ident">qhat</label> = <label for="r98" class="ident">qhat</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()</code></span>
-<span class="codeline" id="line-857"><code>	<label for="r99" class="ident">qhatv</label> := <label for="r83" class="ident">tmp</label>.<a href="nat.go.html#line-57" class="ident">make</a>(<span class="lit-number">3</span> * <label for="r85" class="ident">n</label>)</code></span>
-<span class="codeline" id="line-858"><code>	<label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-43" class="ident">clear</a>()</code></span>
-<span class="codeline" id="line-859"><code>	<label for="r99" class="ident">qhatv</label> = <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-408" class="ident">mul</a>(<label for="r98" class="ident">qhat</label>, <label for="r81" class="ident">v</label>[:<label for="r97" class="ident">s</label>])</code></span>
-<span class="codeline" id="line-860"><code>	<span class="comment">// Set the correct remainder as before.</span></code></span>
-<span class="codeline" id="line-861"><code>	<span class="keyword">for</span> <label for="r100" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r100" class="ident">i</label> &lt; <span class="lit-number">2</span>; <label for="r100" class="ident">i</label>++ {</code></span>
-<span class="codeline" id="line-862"><code>		<span class="keyword">if</span> <label for="r101" class="ident">e</label> := <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-152" class="ident">cmp</a>(<label for="r80" class="ident">u</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()); <label for="r101" class="ident">e</label> &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-863"><code>			<a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r98" class="ident">qhat</label>, <label for="r98" class="ident">qhat</label>, <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-864"><code>			<label for="r102" class="ident">c</label> := <a href="arith_decl.go.html#line-12" class="ident">subVV</a>(<label for="r99" class="ident">qhatv</label>[:<label for="r97" class="ident">s</label>], <label for="r99" class="ident">qhatv</label>[:<label for="r97" class="ident">s</label>], <label for="r81" class="ident">v</label>[:<label for="r97" class="ident">s</label>])</code></span>
-<span class="codeline" id="line-865"><code>			<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>) &gt; <label for="r97" class="ident">s</label> {</code></span>
-<span class="codeline" id="line-866"><code>				<a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r99" class="ident">qhatv</label>[<label for="r97" class="ident">s</label>:], <label for="r99" class="ident">qhatv</label>[<label for="r97" class="ident">s</label>:], <label for="r102" class="ident">c</label>)</code></span>
-<span class="codeline" id="line-867"><code>			}</code></span>
-<span class="codeline" id="line-868"><code>			<a href="nat.go.html#line-377" class="ident">addAt</a>(<label for="r80" class="ident">u</label>[<label for="r97" class="ident">s</label>:], <label for="r81" class="ident">v</label>[<label for="r97" class="ident">s</label>:], <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-869"><code>		}</code></span>
-<span class="codeline" id="line-870"><code>	}</code></span>
-<span class="codeline" id="line-871"><code>	<span class="keyword">if</span> <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-152" class="ident">cmp</a>(<label for="r80" class="ident">u</label>.<a href="nat.go.html#line-49" class="ident">norm</a>()) &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-872"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
-<span class="codeline" id="line-873"><code>	}</code></span>
-<span class="codeline" id="line-874"><code>	<label for="r103" class="ident">c</label> := <a href="arith_decl.go.html#line-12" class="ident">subVV</a>(<label for="r80" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>)], <label for="r80" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>)], <label for="r99" class="ident">qhatv</label>)</code></span>
-<span class="codeline" id="line-875"><code>	<span class="keyword">if</span> <label for="r103" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-876"><code>		<label for="r103" class="ident">c</label> = <a href="arith_decl.go.html#line-14" class="ident">subVW</a>(<label for="r80" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>):], <label for="r80" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>):], <label for="r103" class="ident">c</label>)</code></span>
-<span class="codeline" id="line-877"><code>	}</code></span>
-<span class="codeline" id="line-878"><code>	<span class="keyword">if</span> <label for="r103" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-879"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
-<span class="codeline" id="line-880"><code>	}</code></span>
-<span class="codeline" id="line-881"><code></code></span>
-<span class="codeline" id="line-882"><code>	<span class="comment">// Done!</span></code></span>
-<span class="codeline" id="line-883"><code>	<a href="nat.go.html#line-377" class="ident">addAt</a>(<label for="r78" class="ident">z</label>, <label for="r98" class="ident">qhat</label>.<a href="nat.go.html#line-49" class="ident">norm</a>(), <span class="lit-number">0</span>)</code></span>
-<span class="codeline" id="line-884"><code>}</code></span>
+<span class="codeline" id="line-810"><code>		<span class="comment">// s is the number of digits to drop from the 3B- and 2B-digit chunks.</span></code></span>
+<span class="codeline" id="line-811"><code><span class="comment">		// We drop B-1 to be left with 2B+1 and B+1.</span></code></span>
+<span class="codeline" id="line-812"><code>		<label for="r96" class="ident">s</label> := (<label for="r94" class="ident">B</label> - <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-813"><code></code></span>
+<span class="codeline" id="line-814"><code>		<span class="comment">// uu is the up-to-3B-digit section of u we are working on.</span></code></span>
+<span class="codeline" id="line-815"><code>		<label for="r97" class="ident">uu</label> := <label for="r87" class="ident">u</label>[<label for="r95" class="ident">j</label>-<label for="r94" class="ident">B</label>:]</code></span>
+<span class="codeline" id="line-816"><code></code></span>
+<span class="codeline" id="line-817"><code>		<span class="comment">// Compute the 2-by-1 guess q̂, leaving r̂ in uu[s:B+n].</span></code></span>
+<span class="codeline" id="line-818"><code>		<label for="r98" class="ident">qhat</label> := *<label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>]</code></span>
+<span class="codeline" id="line-819"><code>		<label for="r98" class="ident">qhat</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
+<span class="codeline" id="line-820"><code>		<label for="r98" class="ident">qhat</label>.<label for="r86" class="ident">divRecursiveStep</label>(<label for="r97" class="ident">uu</label>[<label for="r96" class="ident">s</label>:<label for="r94" class="ident">B</label>+<label for="r92" class="ident">n</label>], <label for="r88" class="ident">v</label>[<label for="r96" class="ident">s</label>:], <label for="r89" class="ident">depth</label>+<span class="lit-number">1</span>, <label for="r90" class="ident">tmp</label>, <label for="r91" class="ident">temps</label>)</code></span>
+<span class="codeline" id="line-821"><code>		<label for="r98" class="ident">qhat</label> = <label for="r98" class="ident">qhat</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-822"><code></code></span>
+<span class="codeline" id="line-823"><code>		<span class="comment">// Extend to a 3-by-2 quotient and remainder.</span></code></span>
+<span class="codeline" id="line-824"><code><span class="comment">		// Because divRecursiveStep overwrote the top part of uu with</span></code></span>
+<span class="codeline" id="line-825"><code><span class="comment">		// the remainder r̂, the full uu already contains the equivalent</span></code></span>
+<span class="codeline" id="line-826"><code><span class="comment">		// of r̂·B + uₙ₋₂ from the “Refining Guesses” discussion.</span></code></span>
+<span class="codeline" id="line-827"><code><span class="comment">		// Subtracting q̂·vₙ₋₂ from it will compute the full-length remainder.</span></code></span>
+<span class="codeline" id="line-828"><code><span class="comment">		// If that subtraction underflows, q̂·v &gt; u, which we fix up</span></code></span>
+<span class="codeline" id="line-829"><code><span class="comment">		// by decrementing q̂ and adding v back, same as in long division.</span></code></span>
+<span class="codeline" id="line-830"><code></code></span>
+<span class="codeline" id="line-831"><code>		<span class="comment">// TODO(rsc): Instead of subtract and fix-up, this code is computing</span></code></span>
+<span class="codeline" id="line-832"><code><span class="comment">		// q̂·vₙ₋₂ and decrementing q̂ until that product is ≤ u.</span></code></span>
+<span class="codeline" id="line-833"><code><span class="comment">		// But we can do the subtraction directly, as in the comment above</span></code></span>
+<span class="codeline" id="line-834"><code><span class="comment">		// and in long division, because we know that q̂ is wrong by at most one.</span></code></span>
+<span class="codeline" id="line-835"><code>		<label for="r99" class="ident">qhatv</label> := <label for="r90" class="ident">tmp</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<span class="lit-number">3</span> * <label for="r92" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-836"><code>		<label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
+<span class="codeline" id="line-837"><code>		<label for="r99" class="ident">qhatv</label> = <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-412" class="ident">mul</a>(<label for="r98" class="ident">qhat</label>, <label for="r88" class="ident">v</label>[:<label for="r96" class="ident">s</label>])</code></span>
+<span class="codeline" id="line-838"><code>		<span class="keyword">for</span> <label for="r100" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r100" class="ident">i</label> &lt; <span class="lit-number">2</span>; <label for="r100" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-839"><code>			<label for="r101" class="ident">e</label> := <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-156" class="ident">cmp</a>(<label for="r97" class="ident">uu</label>.<a href="nat.go.html#line-53" class="ident">norm</a>())</code></span>
+<span class="codeline" id="line-840"><code>			<span class="keyword">if</span> <label for="r101" class="ident">e</label> &lt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-841"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-842"><code>			}</code></span>
+<span class="codeline" id="line-843"><code>			<a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r98" class="ident">qhat</label>, <label for="r98" class="ident">qhat</label>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-844"><code>			<label for="r102" class="ident">c</label> := <a href="arith_decl.go.html#line-16" class="ident">subVV</a>(<label for="r99" class="ident">qhatv</label>[:<label for="r96" class="ident">s</label>], <label for="r99" class="ident">qhatv</label>[:<label for="r96" class="ident">s</label>], <label for="r88" class="ident">v</label>[:<label for="r96" class="ident">s</label>])</code></span>
+<span class="codeline" id="line-845"><code>			<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>) &gt; <label for="r96" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-846"><code>				<a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r99" class="ident">qhatv</label>[<label for="r96" class="ident">s</label>:], <label for="r99" class="ident">qhatv</label>[<label for="r96" class="ident">s</label>:], <label for="r102" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-847"><code>			}</code></span>
+<span class="codeline" id="line-848"><code>			<a href="nat.go.html#line-381" class="ident">addAt</a>(<label for="r97" class="ident">uu</label>[<label for="r96" class="ident">s</label>:], <label for="r88" class="ident">v</label>[<label for="r96" class="ident">s</label>:], <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-849"><code>		}</code></span>
+<span class="codeline" id="line-850"><code>		<span class="keyword">if</span> <label for="r99" class="ident">qhatv</label>.<a href="nat.go.html#line-156" class="ident">cmp</a>(<label for="r97" class="ident">uu</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-851"><code>			<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
+<span class="codeline" id="line-852"><code>		}</code></span>
+<span class="codeline" id="line-853"><code>		<label for="r103" class="ident">c</label> := <a href="arith_decl.go.html#line-16" class="ident">subVV</a>(<label for="r97" class="ident">uu</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>)], <label for="r97" class="ident">uu</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>)], <label for="r99" class="ident">qhatv</label>)</code></span>
+<span class="codeline" id="line-854"><code>		<span class="keyword">if</span> <label for="r103" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-855"><code>			<a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r97" class="ident">uu</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>):], <label for="r97" class="ident">uu</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r99" class="ident">qhatv</label>):], <label for="r103" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-856"><code>		}</code></span>
+<span class="codeline" id="line-857"><code>		<a href="nat.go.html#line-381" class="ident">addAt</a>(<label for="r85" class="ident">z</label>, <label for="r98" class="ident">qhat</label>, <label for="r95" class="ident">j</label>-<label for="r94" class="ident">B</label>)</code></span>
+<span class="codeline" id="line-858"><code>		<label for="r95" class="ident">j</label> -= <label for="r94" class="ident">B</label></code></span>
+<span class="codeline" id="line-859"><code>	}</code></span>
+<span class="codeline" id="line-860"><code></code></span>
+<span class="codeline" id="line-861"><code>	<span class="comment">// TODO(rsc): Rewrite loop as described above and delete all this code.</span></code></span>
+<span class="codeline" id="line-862"><code></code></span>
+<span class="codeline" id="line-863"><code>	<span class="comment">// Now u &lt; (v&lt;&lt;B), compute lower bits in the same way.</span></code></span>
+<span class="codeline" id="line-864"><code><span class="comment">	// Choose shift = B-1 again.</span></code></span>
+<span class="codeline" id="line-865"><code>	<label for="r104" class="ident">s</label> := <label for="r94" class="ident">B</label> - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-866"><code>	<label for="r105" class="ident">qhat</label> := *<label for="r91" class="ident">temps</label>[<label for="r89" class="ident">depth</label>]</code></span>
+<span class="codeline" id="line-867"><code>	<label for="r105" class="ident">qhat</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
+<span class="codeline" id="line-868"><code>	<label for="r105" class="ident">qhat</label>.<label for="r86" class="ident">divRecursiveStep</label>(<label for="r87" class="ident">u</label>[<label for="r104" class="ident">s</label>:].<a href="nat.go.html#line-53" class="ident">norm</a>(), <label for="r88" class="ident">v</label>[<label for="r104" class="ident">s</label>:], <label for="r89" class="ident">depth</label>+<span class="lit-number">1</span>, <label for="r90" class="ident">tmp</label>, <label for="r91" class="ident">temps</label>)</code></span>
+<span class="codeline" id="line-869"><code>	<label for="r105" class="ident">qhat</label> = <label for="r105" class="ident">qhat</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()</code></span>
+<span class="codeline" id="line-870"><code>	<label for="r106" class="ident">qhatv</label> := <label for="r90" class="ident">tmp</label>.<a href="nat.go.html#line-61" class="ident">make</a>(<span class="lit-number">3</span> * <label for="r92" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-871"><code>	<label for="r106" class="ident">qhatv</label>.<a href="nat.go.html#line-47" class="ident">clear</a>()</code></span>
+<span class="codeline" id="line-872"><code>	<label for="r106" class="ident">qhatv</label> = <label for="r106" class="ident">qhatv</label>.<a href="nat.go.html#line-412" class="ident">mul</a>(<label for="r105" class="ident">qhat</label>, <label for="r88" class="ident">v</label>[:<label for="r104" class="ident">s</label>])</code></span>
+<span class="codeline" id="line-873"><code>	<span class="comment">// Set the correct remainder as before.</span></code></span>
+<span class="codeline" id="line-874"><code>	<span class="keyword">for</span> <label for="r107" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r107" class="ident">i</label> &lt; <span class="lit-number">2</span>; <label for="r107" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-875"><code>		<span class="keyword">if</span> <label for="r108" class="ident">e</label> := <label for="r106" class="ident">qhatv</label>.<a href="nat.go.html#line-156" class="ident">cmp</a>(<label for="r87" class="ident">u</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()); <label for="r108" class="ident">e</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-876"><code>			<a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r105" class="ident">qhat</label>, <label for="r105" class="ident">qhat</label>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-877"><code>			<label for="r109" class="ident">c</label> := <a href="arith_decl.go.html#line-16" class="ident">subVV</a>(<label for="r106" class="ident">qhatv</label>[:<label for="r104" class="ident">s</label>], <label for="r106" class="ident">qhatv</label>[:<label for="r104" class="ident">s</label>], <label for="r88" class="ident">v</label>[:<label for="r104" class="ident">s</label>])</code></span>
+<span class="codeline" id="line-878"><code>			<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r106" class="ident">qhatv</label>) &gt; <label for="r104" class="ident">s</label> {</code></span>
+<span class="codeline" id="line-879"><code>				<a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r106" class="ident">qhatv</label>[<label for="r104" class="ident">s</label>:], <label for="r106" class="ident">qhatv</label>[<label for="r104" class="ident">s</label>:], <label for="r109" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-880"><code>			}</code></span>
+<span class="codeline" id="line-881"><code>			<a href="nat.go.html#line-381" class="ident">addAt</a>(<label for="r87" class="ident">u</label>[<label for="r104" class="ident">s</label>:], <label for="r88" class="ident">v</label>[<label for="r104" class="ident">s</label>:], <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-882"><code>		}</code></span>
+<span class="codeline" id="line-883"><code>	}</code></span>
+<span class="codeline" id="line-884"><code>	<span class="keyword">if</span> <label for="r106" class="ident">qhatv</label>.<a href="nat.go.html#line-156" class="ident">cmp</a>(<label for="r87" class="ident">u</label>.<a href="nat.go.html#line-53" class="ident">norm</a>()) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-885"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
+<span class="codeline" id="line-886"><code>	}</code></span>
+<span class="codeline" id="line-887"><code>	<label for="r110" class="ident">c</label> := <a href="arith_decl.go.html#line-16" class="ident">subVV</a>(<label for="r87" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r106" class="ident">qhatv</label>)], <label for="r87" class="ident">u</label>[<span class="lit-number">0</span>:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r106" class="ident">qhatv</label>)], <label for="r106" class="ident">qhatv</label>)</code></span>
+<span class="codeline" id="line-888"><code>	<span class="keyword">if</span> <label for="r110" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-889"><code>		<label for="r110" class="ident">c</label> = <a href="arith_decl.go.html#line-22" class="ident">subVW</a>(<label for="r87" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r106" class="ident">qhatv</label>):], <label for="r87" class="ident">u</label>[<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r106" class="ident">qhatv</label>):], <label for="r110" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-890"><code>	}</code></span>
+<span class="codeline" id="line-891"><code>	<span class="keyword">if</span> <label for="r110" class="ident">c</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-892"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"impossible"</span>)</code></span>
+<span class="codeline" id="line-893"><code>	}</code></span>
+<span class="codeline" id="line-894"><code></code></span>
+<span class="codeline" id="line-895"><code>	<span class="comment">// Done!</span></code></span>
+<span class="codeline" id="line-896"><code>	<a href="nat.go.html#line-381" class="ident">addAt</a>(<label for="r85" class="ident">z</label>, <label for="r105" class="ident">qhat</label>.<a href="nat.go.html#line-53" class="ident">norm</a>(), <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-897"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

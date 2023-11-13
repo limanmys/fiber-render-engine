@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: cond.go in package sync</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -105,7 +105,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-53"><code><span class="comment">// Wait locks c.L before returning. Unlike in other systems,</span></code></span>
 <span class="codeline" id="line-54"><code><span class="comment">// Wait cannot return unless awoken by Broadcast or Signal.</span></code></span>
 <span class="codeline" id="line-55"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-56"><code><span class="comment">// Because c.L is not locked when Wait first resumes, the caller</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// Because c.L is not locked while Wait is waiting, the caller</span></code></span>
 <span class="codeline" id="line-57"><code><span class="comment">// typically cannot assume that the condition is true when</span></code></span>
 <span class="codeline" id="line-58"><code><span class="comment">// Wait returns. Instead, the caller should Wait in a loop:</span></code></span>
 <span class="codeline" id="line-59"><code><span class="comment">//</span></code></span>
@@ -117,9 +117,9 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-65"><code><span class="comment">//	c.L.Unlock()</span></code></span>
 <span class="codeline" id="line-66"><code><span class="keyword">func</span> (<label for="r2" class="ident">c</label> *<a href="#line-36" class="ident">Cond</a>) <label for="r3" class="ident">Wait</label>() {</code></span>
 <span class="codeline" id="line-67"><code>	<label for="r2" class="ident">c</label>.<a href="#line-43" class="ident">checker</a>.<a href="#line-98" class="ident">check</a>()</code></span>
-<span class="codeline" id="line-68"><code>	<label for="r4" class="ident">t</label> := <a href="runtime.go.html#line-32" class="ident">runtime_notifyListAdd</a>(&amp;<label for="r2" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
+<span class="codeline" id="line-68"><code>	<label for="r4" class="ident">t</label> := <a href="runtime.go.html#line-38" class="ident">runtime_notifyListAdd</a>(&amp;<label for="r2" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
 <span class="codeline" id="line-69"><code>	<label for="r2" class="ident">c</label>.<a href="#line-40" class="ident">L</a>.<a href="mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-70"><code>	<a href="runtime.go.html#line-35" class="ident">runtime_notifyListWait</a>(&amp;<label for="r2" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>, <label for="r4" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-70"><code>	<a href="runtime.go.html#line-41" class="ident">runtime_notifyListWait</a>(&amp;<label for="r2" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>, <label for="r4" class="ident">t</label>)</code></span>
 <span class="codeline" id="line-71"><code>	<label for="r2" class="ident">c</label>.<a href="#line-40" class="ident">L</a>.<a href="mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
 <span class="codeline" id="line-72"><code>}</code></span>
 <span class="codeline" id="line-73"><code></code></span>
@@ -132,7 +132,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-80"><code><span class="comment">// are attempting to lock c.L, they may be awoken before a "waiting" goroutine.</span></code></span>
 <span class="codeline" id="line-81"><code><span class="keyword">func</span> (<label for="r5" class="ident">c</label> *<a href="#line-36" class="ident">Cond</a>) <label for="r6" class="ident">Signal</label>() {</code></span>
 <span class="codeline" id="line-82"><code>	<label for="r5" class="ident">c</label>.<a href="#line-43" class="ident">checker</a>.<a href="#line-98" class="ident">check</a>()</code></span>
-<span class="codeline" id="line-83"><code>	<a href="runtime.go.html#line-41" class="ident">runtime_notifyListNotifyOne</a>(&amp;<label for="r5" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
+<span class="codeline" id="line-83"><code>	<a href="runtime.go.html#line-47" class="ident">runtime_notifyListNotifyOne</a>(&amp;<label for="r5" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
 <span class="codeline" id="line-84"><code>}</code></span>
 <span class="codeline" id="line-85"><code></code></span>
 <span class="codeline" id="line-86"><code><span class="comment">// Broadcast wakes all goroutines waiting on c.</span></code></span>
@@ -141,7 +141,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-89"><code><span class="comment">// during the call.</span></code></span>
 <span class="codeline" id="line-90"><code><span class="keyword">func</span> (<label for="r7" class="ident">c</label> *<a href="#line-36" class="ident">Cond</a>) <label for="r8" class="ident">Broadcast</label>() {</code></span>
 <span class="codeline" id="line-91"><code>	<label for="r7" class="ident">c</label>.<a href="#line-43" class="ident">checker</a>.<a href="#line-98" class="ident">check</a>()</code></span>
-<span class="codeline" id="line-92"><code>	<a href="runtime.go.html#line-38" class="ident">runtime_notifyListNotifyAll</a>(&amp;<label for="r7" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
+<span class="codeline" id="line-92"><code>	<a href="runtime.go.html#line-44" class="ident">runtime_notifyListNotifyAll</a>(&amp;<label for="r7" class="ident">c</label>.<a href="#line-42" class="ident">notify</a>)</code></span>
 <span class="codeline" id="line-93"><code>}</code></span>
 <span class="codeline" id="line-94"><code></code></span>
 <span class="codeline" id="line-95"><code><span class="comment">// copyChecker holds back pointer to itself to detect object copying.</span></code></span>
@@ -149,7 +149,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-97"><code></code></span>
 <span class="codeline" id="line-98"><code><span class="keyword">func</span> (<label for="r9" class="ident">c</label> *<a href="#line-96" class="ident">copyChecker</a>) <label for="r10" class="ident">check</label>() {</code></span>
 <span class="codeline" id="line-99"><code>	<span class="keyword">if</span> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(*<label for="r9" class="ident">c</label>) != <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r9" class="ident">c</label>)) &amp;&amp;</code></span>
-<span class="codeline" id="line-100"><code>		!<a href="../../pkg/sync/atomic.html" class="ident i0">atomic</a>.<a href="atomic/doc.go.html#line-95" class="ident">CompareAndSwapUintptr</a>((*<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>)(<label for="r9" class="ident">c</label>), <span class="lit-number">0</span>, <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r9" class="ident">c</label>))) &amp;&amp;</code></span>
+<span class="codeline" id="line-100"><code>		!<a href="../../pkg/sync/atomic.html" class="ident i0">atomic</a>.<a href="atomic/doc.go.html#line-110" class="ident">CompareAndSwapUintptr</a>((*<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>)(<label for="r9" class="ident">c</label>), <span class="lit-number">0</span>, <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r9" class="ident">c</label>))) &amp;&amp;</code></span>
 <span class="codeline" id="line-101"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(*<label for="r9" class="ident">c</label>) != <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r9" class="ident">c</label>)) {</code></span>
 <span class="codeline" id="line-102"><code>		<a href="../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"sync.Cond is copied"</span>)</code></span>
 <span class="codeline" id="line-103"><code>	}</code></span>
@@ -169,7 +169,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-117"><code><span class="keyword">func</span> (*<a href="#line-113" class="ident">noCopy</a>) <label for="r12" class="ident">Unlock</label>() {}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

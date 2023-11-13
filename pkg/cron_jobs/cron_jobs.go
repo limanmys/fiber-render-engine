@@ -15,6 +15,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/linux"
 )
 
+// RegisterAndRun registers and runs new cron job
 func RegisterAndRun(cj *models.CronJob) error {
 	_, err := constants.GLOBAL_SCHEDULER.Tag(cj.ID.String()).Every(1).Week().Weekday(time.Weekday(cj.Day)).At(cj.Time).Do(func() {
 		// Update cronjob as processing
@@ -103,6 +104,7 @@ func RegisterAndRun(cj *models.CronJob) error {
 	return nil
 }
 
+// Delete deletes specified job from scheduler
 func Delete(id *uuid.UUID) error {
 	// Remove cronjob from global scheduler
 	if err := constants.GLOBAL_SCHEDULER.RemoveByTag(id.String()); err != nil {
@@ -112,6 +114,7 @@ func Delete(id *uuid.UUID) error {
 	return nil
 }
 
+// InitCronJobs inits all cronjobs
 func InitCronJobs() error {
 	var cronjobs []*models.CronJob
 	if err := database.Connection().Find(&cronjobs).Error; err != nil {

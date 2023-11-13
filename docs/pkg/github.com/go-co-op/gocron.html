@@ -1,0 +1,2701 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/go-co-op/gocron</title>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>gocron</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/go-co-op/gocron">github.com/go-co-op/gocron</a><i> (on <a href="https://pkg.go.dev/github.com/go-co-op/gocron" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/go-co-op/gocron.html">14 packages</a>, and imported by <a href="../../../dep/github.com/go-co-op/gocron.html#imported-by">one package</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<span class="nodocs">    <a href="../../../src/github.com/go-co-op/gocron/executor.go.html">executor.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-1-fold-content"><label for="file-1-fold-content">  <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#doc">d</a> <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html">gocron.go</a></label><span id='file-1-fold-content-items' class="fold-items">
+<span class="md-text">		Package gocron : A Golang Job Scheduling Package.
+		
+		An in-process scheduler for periodic jobs that uses the builder pattern
+		for configuration. gocron lets you run Golang functions periodically
+		at pre-determined intervals using a simple, human-friendly syntax.</span>
+</span>
+	<span class="nodocs">    <a href="../../../src/github.com/go-co-op/gocron/job.go.html">job.go</a></span>
+	<span class="nodocs">    <a href="../../../src/github.com/go-co-op/gocron/locker.go.html">locker.go</a></span>
+	<span class="nodocs">    <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html">scheduler.go</a></span>
+	<span class="nodocs">    <a href="../../../src/github.com/go-co-op/gocron/time_helper.go.html">time_helper.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Job_Error</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, err := s.Every(1).Day().At("bad time").Do(func() {})
+			fmt.Println(err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">Job_FinishedRunCount</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			go func() {
+				for {
+					fmt.Println("Count of finished job runs", job.FinishedRunCount())
+					time.Sleep(time.Second)
+				}
+			}()
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">Job_GetName</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Second().Name("job_name").Do(task)
+			fmt.Println(j.GetName())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">Job_IsRunning</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(10).Seconds().Do(func() { time.Sleep(2 * time.Second) })
+		
+			fmt.Println(j.IsRunning())
+		
+			s.StartAsync()
+		
+			time.Sleep(time.Second)
+			fmt.Println(j.IsRunning())
+		
+			time.Sleep(time.Second)
+			s.Stop()
+		
+			time.Sleep(1 * time.Second)
+			fmt.Println(j.IsRunning())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-4-fold-content"><label for="example-4-fold-content">Job_LastRun</label><span id='example-4-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			s.StartAsync()
+		
+			fmt.Println("Last run:", job.LastRun())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-5-fold-content"><label for="example-5-fold-content">Job_LimitRunsTo</label><span id='example-5-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			job.LimitRunsTo(2)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-6-fold-content"><label for="example-6-fold-content">Job_Name</label><span id='example-6-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.Every(1).Second().Name("job_name").Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-7-fold-content"><label for="example-7-fold-content">Job_NextRun</label><span id='example-7-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			go func() {
+				for {
+					fmt.Println("Next run", job.NextRun())
+					time.Sleep(time.Second)
+				}
+			}()
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-8-fold-content"><label for="example-8-fold-content">Job_PreviousRun</label><span id='example-8-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			s.StartAsync()
+		
+			fmt.Println("Previous run:", job.PreviousRun())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-9-fold-content"><label for="example-9-fold-content">Job_RegisterEventListeners</label><span id='example-9-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			job, _ := s.Every("1s").Name("my_func").Do(func() error { return fmt.Errorf("error") })
+			job.RegisterEventListeners(
+				gocron.AfterJobRuns(func(jobName string) {
+					fmt.Printf("afterJobRuns: %s\n", jobName)
+				}),
+				gocron.BeforeJobRuns(func(jobName string) {
+					fmt.Printf("beforeJobRuns: %s\n", jobName)
+				}),
+				gocron.WhenJobReturnsError(func(jobName string, err error) {
+					fmt.Printf("whenJobReturnsError: %s, %v\n", jobName, err)
+				}),
+				gocron.WhenJobReturnsNoError(func(jobName string) {
+					fmt.Printf("whenJobReturnsNoError: %s\n", jobName)
+				}),
+			)
+			s.StartAsync()
+			time.Sleep(100 * time.Millisecond)
+			s.Stop()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-10-fold-content"><label for="example-10-fold-content">Job_RunCount</label><span id='example-10-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			go func() {
+				for {
+					fmt.Println("Run count", job.RunCount())
+					time.Sleep(time.Second)
+				}
+			}()
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-11-fold-content"><label for="example-11-fold-content">Job_ScheduledAtTime</label><span id='example-11-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Day().At("10:30").Do(task)
+			s.StartAsync()
+			fmt.Println(job.ScheduledAtTime())
+		
+			// if multiple times are set, the earliest time will be returned
+			job1, _ := s.Every(1).Day().At("10:30;08:00").Do(task)
+			fmt.Println(job1.ScheduledAtTime())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-12-fold-content"><label for="example-12-fold-content">Job_ScheduledAtTimes</label><span id='example-12-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Day().At("10:30;08:00").Do(task)
+			s.StartAsync()
+			fmt.Println(job.ScheduledAtTimes())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-13-fold-content"><label for="example-13-fold-content">Job_ScheduledTime</label><span id='example-13-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Day().At("10:30").Do(task)
+			s.StartAsync()
+			fmt.Println(job.ScheduledTime())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-14-fold-content"><label for="example-14-fold-content">Job_SetEventListeners</label><span id='example-14-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Week().Do(task)
+			job.SetEventListeners(func() {}, func() {})
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-15-fold-content"><label for="example-15-fold-content">Job_SingletonMode</label><span id='example-15-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every(1).Second().Do(task)
+			job.SingletonMode()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-16-fold-content"><label for="example-16-fold-content">Job_Tag</label><span id='example-16-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every("1s").Do(task)
+		
+			job.Tag("tag1", "tag2", "tag3")
+			s.StartAsync()
+			fmt.Println(job.Tags())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-17-fold-content"><label for="example-17-fold-content">Job_Tags</label><span id='example-17-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every("1s").Do(task)
+		
+			job.Tag("tag1", "tag2", "tag3")
+			s.StartAsync()
+			fmt.Println(job.Tags())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-18-fold-content"><label for="example-18-fold-content">Job_Untag</label><span id='example-18-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			job, _ := s.Every("1s").Do(task)
+		
+			job.Tag("tag1", "tag2", "tag3")
+			s.StartAsync()
+			fmt.Println(job.Tags())
+			job.Untag("tag2")
+			fmt.Println(job.Tags())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-19-fold-content"><label for="example-19-fold-content">Job_Weekday</label><span id='example-19-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			weeklyJob, _ := s.Every(1).Week().Monday().Do(task)
+			weekday, _ := weeklyJob.Weekday()
+			fmt.Println(weekday)
+		
+			dailyJob, _ := s.Every(1).Day().Do(task)
+			_, err := dailyJob.Weekday()
+			fmt.Println(err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-20-fold-content"><label for="example-20-fold-content">Job_Weekdays</label><span id='example-20-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Week().Monday().Wednesday().Friday().Do(task)
+			fmt.Println(j.Weekdays())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-21-fold-content"><label for="example-21-fold-content">Scheduler_At</label><span id='example-21-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().At("10:30").Do(task)
+			_, _ = s.Every(1).Monday().At("10:30:01").Do(task)
+			// multiple
+			_, _ = s.Every(1).Monday().At("10:30;18:00").Do(task)
+			_, _ = s.Every(1).Monday().At("10:30").At("18:00").Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-22-fold-content"><label for="example-22-fold-content">Scheduler_ChangeLocation</label><span id='example-22-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			fmt.Println(s.Location())
+		
+			location, err := time.LoadLocation("America/Los_Angeles")
+			if err != nil {
+				log.Fatalf("Error loading location: %s", err)
+			}
+			s.ChangeLocation(location)
+			fmt.Println(s.Location())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-23-fold-content"><label for="example-23-fold-content">Scheduler_Clear</label><span id='example-23-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Second().Do(task)
+			_, _ = s.Every(1).Minute().Do(task)
+			_, _ = s.Every(1).Month(1).Do(task)
+			fmt.Println(len(s.Jobs())) // Print the number of jobs before clearing
+			s.Clear()                  // Clear all the jobs
+			fmt.Println(len(s.Jobs())) // Print the number of jobs after clearing
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-24-fold-content"><label for="example-24-fold-content">Scheduler_Cron</label><span id='example-24-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// parsing handled by https://pkg.go.dev/github.com/robfig/cron/v3
+			// which follows https://en.wikipedia.org/wiki/Cron
+			_, _ = s.Cron("*/1 * * * *").Do(task) // every minute
+			_, _ = s.Cron("0 1 * * *").Do(task)   // every day at 1 am
+			_, _ = s.Cron("0 0 * * 6,0").Do(task) // weekends only
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-25-fold-content"><label for="example-25-fold-content">Scheduler_CronWithSeconds</label><span id='example-25-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// parsing handled by https://pkg.go.dev/github.com/robfig/cron/v3
+			// which follows https://en.wikipedia.org/wiki/Cron
+			_, _ = s.CronWithSeconds("*/1 * * * * *").Do(task)  // every second
+			_, _ = s.CronWithSeconds("0-30 * * * * *").Do(task) // every second 0-30
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-26-fold-content"><label for="example-26-fold-content">Scheduler_CustomTime</label><span id='example-26-fold-content-items' class="fold-items">
+		package main
+		
+		import ()
+		
+		func main() {
+			// Implement your own custom time struct
+			//
+			// type myCustomTime struct{}
+			//
+			// var _ gocron.TimeWrapper = (*myCustomTime)(nil)
+			//
+			// func (m myCustomTime) Now(loc *time.Location) time.Time {
+			//	 panic("implement me")
+			// }
+			//
+			// func (m myCustomTime) Sleep(duration time.Duration) {
+			//	 panic("implement me")
+			// }
+			//
+			// func (m myCustomTime) Unix(sec int64, nsec int64) time.Time {
+			//	 panic("implement me")
+			// }
+			//
+			// mct := myCustomTime{}
+			//
+			// s := gocron.NewScheduler(time.UTC)
+			// s.CustomTime(mct)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-27-fold-content"><label for="example-27-fold-content">Scheduler_CustomTimer</label><span id='example-27-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.CustomTimer(func(d time.Duration, f func()) *time.Timer {
+				// force jobs with 1 minute interval to run every second
+				if d == time.Minute {
+					d = time.Second
+				}
+				return time.AfterFunc(d, f)
+			})
+			// this job will run every 1 second
+			_, _ = s.Every("1m").Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-28-fold-content"><label for="example-28-fold-content">Scheduler_Day</label><span id='example-28-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("24h").Do(task)
+			_, _ = s.Every(1).Day().Do(task)
+			_, _ = s.Every(1).Days().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-29-fold-content"><label for="example-29-fold-content">Scheduler_Days</label><span id='example-29-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("24h").Do(task)
+			_, _ = s.Every(1).Day().Do(task)
+			_, _ = s.Every(1).Days().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-30-fold-content"><label for="example-30-fold-content">Scheduler_Do</label><span id='example-30-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j1, err := s.Every(1).Second().Do(task)
+			fmt.Printf("Job: %v, Error: %v", j1, err)
+		
+			taskWithParameters := func(param1, param2 string) {}
+			j2, err := s.Every(1).Second().Do(taskWithParameters, "param1", "param2")
+			fmt.Printf("Job: %v, Error: %v", j2, err)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-31-fold-content"><label for="example-31-fold-content">Scheduler_DoWithJobDetails</label><span id='example-31-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"log"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			task := func(in string, job gocron.Job) {
+				fmt.Printf("this job's last run: %s this job's next run: %s\n", job.LastRun(), job.NextRun())
+				fmt.Printf("in argument is %s\n", in)
+		
+				ticker := time.NewTicker(100 * time.Millisecond)
+				defer ticker.Stop()
+		
+				for {
+					select {
+					case &lt;-job.Context().Done():
+						fmt.Printf("function has been canceled, performing cleanup and exiting gracefully\n")
+						return
+					case &lt;-ticker.C:
+						fmt.Printf("performing a hard job that takes a long time that I want to kill whenever I want\n")
+					}
+				}
+			}
+		
+			var err error
+			s := gocron.NewScheduler(time.UTC)
+			s.SingletonModeAll()
+			j, err := s.Every(1).Hour().Tag("myJob").DoWithJobDetails(task, "foo")
+			if err != nil {
+				log.Fatalln("error scheduling job", err)
+			}
+		
+			s.StartAsync()
+		
+			// Simulate some more work
+			time.Sleep(time.Second)
+		
+			// I want to stop the job, together with the underlying goroutine
+			fmt.Printf("now I want to kill the job\n")
+			err = s.RemoveByTag("myJob")
+			if err != nil {
+				log.Fatalln("error removing job by tag", err)
+			}
+		
+			// Wait a bit so that we can see that the job is exiting gracefully
+			time.Sleep(time.Second)
+			fmt.Printf("Job: %#v, Error: %#v", j, err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-32-fold-content"><label for="example-32-fold-content">Scheduler_Every</label><span id='example-32-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Second().Do(task)
+			_, _ = s.Every(1 * time.Second).Do(task)
+			_, _ = s.Every("1s").Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-33-fold-content"><label for="example-33-fold-content">Scheduler_EveryRandom</label><span id='example-33-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// every 1 - 5 seconds randomly
+			_, _ = s.EveryRandom(1, 5).Seconds().Do(task)
+		
+			// every 5 - 10 hours randomly
+			_, _ = s.EveryRandom(5, 10).Hours().Do(task)
+		
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-34-fold-content"><label for="example-34-fold-content">Scheduler_Friday</label><span id='example-34-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Friday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-35-fold-content"><label for="example-35-fold-content">Scheduler_GetAllTags</label><span id='example-35-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Second().Tag("tag1").Do(task)
+			_, _ = s.Every(1).Second().Tag("tag2").Do(task)
+			fmt.Println(s.GetAllTags())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-36-fold-content"><label for="example-36-fold-content">Scheduler_Hour</label><span id='example-36-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1h").Do(task)
+			_, _ = s.Every(1).Hour().Do(task)
+			_, _ = s.Every(1).Hours().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-37-fold-content"><label for="example-37-fold-content">Scheduler_Hours</label><span id='example-37-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1h").Do(task)
+			_, _ = s.Every(1).Hour().Do(task)
+			_, _ = s.Every(1).Hours().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-38-fold-content"><label for="example-38-fold-content">Scheduler_IsRunning</label><span id='example-38-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1s").Do(task)
+			fmt.Println(s.IsRunning())
+			s.StartAsync()
+			fmt.Println(s.IsRunning())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-39-fold-content"><label for="example-39-fold-content">Scheduler_Job</label><span id='example-39-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every("1s").Do(func() {})
+			s.StartAsync()
+		
+			time.Sleep(10 * time.Second)
+			_, _ = s.Job(j).Every("10m").Update()
+		
+			time.Sleep(30 * time.Minute)
+			_, _ = s.Job(j).Every(1).Day().At("02:00").Update()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-40-fold-content"><label for="example-40-fold-content">Scheduler_Jobs</label><span id='example-40-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			fmt.Println(len(s.Jobs()))
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-41-fold-content"><label for="example-41-fold-content">Scheduler_JobsMap</label><span id='example-41-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			fmt.Printf("map of job uuid to job: %+v", s.JobsMap())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-42-fold-content"><label for="example-42-fold-content">Scheduler_Len</label><span id='example-42-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			_, _ = s.Every("1s").Do(task)
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-43-fold-content"><label for="example-43-fold-content">Scheduler_LimitRunsTo</label><span id='example-43-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			j, _ := s.Every(1).Second().LimitRunsTo(1).Do(task)
+			s.StartAsync()
+		
+			time.Sleep(time.Millisecond * 100)
+			fmt.Println(j.RunCount())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-44-fold-content"><label for="example-44-fold-content">Scheduler_Location</label><span id='example-44-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			fmt.Println(s.Location())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-45-fold-content"><label for="example-45-fold-content">Scheduler_Midday</label><span id='example-45-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().Midday().Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-46-fold-content"><label for="example-46-fold-content">Scheduler_Millisecond</label><span id='example-46-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Millisecond().Do(task)
+			_, _ = s.Every(1).Milliseconds().Do(task)
+			_, _ = s.Every("1ms").Seconds().Do(task)
+			_, _ = s.Every(time.Millisecond).Seconds().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-47-fold-content"><label for="example-47-fold-content">Scheduler_Milliseconds</label><span id='example-47-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Millisecond().Do(task)
+			_, _ = s.Every(1).Milliseconds().Do(task)
+			_, _ = s.Every("1ms").Seconds().Do(task)
+			_, _ = s.Every(time.Millisecond).Seconds().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-48-fold-content"><label for="example-48-fold-content">Scheduler_Minute</label><span id='example-48-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1m").Do(task)
+			_, _ = s.Every(1).Minute().Do(task)
+			_, _ = s.Every(1).Minutes().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-49-fold-content"><label for="example-49-fold-content">Scheduler_Minutes</label><span id='example-49-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every("1m").Do(task)
+			_, _ = s.Every(1).Minute().Do(task)
+			_, _ = s.Every(1).Minutes().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-50-fold-content"><label for="example-50-fold-content">Scheduler_Monday</label><span id='example-50-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Monday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-51-fold-content"><label for="example-51-fold-content">Scheduler_Month</label><span id='example-51-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Month().Do(task)
+			_, _ = s.Every(1).Month(1).Do(task)
+			_, _ = s.Every(1).Months(1).Do(task)
+			_, _ = s.Every(1).Month(1, 2).Do(task)
+			_, _ = s.Month(1, 2).Every(1).Do(task)
+			_, _ = s.Every(1).Month(-1).Do(task)
+			_, _ = s.Every(1).Month(-2).Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-52-fold-content"><label for="example-52-fold-content">Scheduler_MonthFirstWeekday</label><span id='example-52-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.MonthFirstWeekday(time.Monday).Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-53-fold-content"><label for="example-53-fold-content">Scheduler_MonthLastDay</label><span id='example-53-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).MonthLastDay().Do(task)
+			_, _ = s.Every(2).MonthLastDay().Do(task)
+			_, _ = s.Every(1).MonthLastDay(-1).Do(task)
+			_, _ = s.Every(1).MonthLastDay(-2).Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-54-fold-content"><label for="example-54-fold-content">Scheduler_Months</label><span id='example-54-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Month(1).Do(task)
+			_, _ = s.Every(1).Months(1).Do(task)
+			_, _ = s.Every(1).Months(-1).Do(task)
+			_, _ = s.Every(1).Months(-2).Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-55-fold-content"><label for="example-55-fold-content">Scheduler_NextRun</label><span id='example-55-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().At("10:30").Do(task)
+			s.StartAsync()
+			s.NextRun()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-56-fold-content"><label for="example-56-fold-content">Scheduler_PauseJobExecution</label><span id='example-56-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every("1s").Do(task)
+			s.StartAsync()
+			s.PauseJobExecution(true)
+			// jobs don't run
+			s.PauseJobExecution(false)
+			// jobs run again
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-57-fold-content"><label for="example-57-fold-content">Scheduler_RegisterEventListeners</label><span id='example-57-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			s.Every("1s").Name("my_func_1").Do(func() error { return fmt.Errorf("error_1") })
+			s.Every("1s").Name("my_func_2").
+				StartAt(time.Now().UTC().Add(50 * time.Millisecond)).
+				Do(func() error { return fmt.Errorf("error_2") })
+		
+			s.RegisterEventListeners(
+				gocron.AfterJobRuns(func(jobName string) {
+					fmt.Printf("afterJobRuns: %s\n", jobName)
+				}),
+				gocron.BeforeJobRuns(func(jobName string) {
+					fmt.Printf("beforeJobRuns: %s\n", jobName)
+				}),
+				gocron.WhenJobReturnsError(func(jobName string, err error) {
+					fmt.Printf("whenJobReturnsError: %s, %v\n", jobName, err)
+				}),
+				gocron.WhenJobReturnsNoError(func(jobName string) {
+					fmt.Printf("whenJobReturnsNoError: %s\n", jobName)
+				}),
+			)
+			s.StartAsync()
+			time.Sleep(120 * time.Millisecond)
+			s.Stop()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-58-fold-content"><label for="example-58-fold-content">Scheduler_Remove</label><span id='example-58-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Week().Do(task)
+			s.StartAsync()
+			s.Remove(task)
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-59-fold-content"><label for="example-59-fold-content">Scheduler_RemoveByID</label><span id='example-59-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			j, _ := s.Every(1).Week().Do(task)
+			_, _ = s.Every(1).Week().Do(task)
+			s.StartAsync()
+			s.RemoveByID(j)
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-60-fold-content"><label for="example-60-fold-content">Scheduler_RemoveByReference</label><span id='example-60-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			j, _ := s.Every(1).Week().Do(task)
+			_, _ = s.Every(1).Week().Do(task)
+			s.StartAsync()
+			s.RemoveByReference(j)
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-61-fold-content"><label for="example-61-fold-content">Scheduler_RemoveByTag</label><span id='example-61-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Week().Tag("tag1").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag2").Do(task)
+			s.StartAsync()
+			_ = s.RemoveByTag("tag1")
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-62-fold-content"><label for="example-62-fold-content">Scheduler_RemoveByTags</label><span id='example-62-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Week().Tag("tag1", "tag2", "tag3").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag1", "tag2").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag1").Do(task)
+			s.StartAsync()
+			_ = s.RemoveByTags("tag1", "tag2")
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-63-fold-content"><label for="example-63-fold-content">Scheduler_RemoveByTagsAny</label><span id='example-63-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Week().Tag("tag1", "tag2", "tag3").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag1").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag2").Do(task)
+			_, _ = s.Every(1).Week().Tag("tag3").Do(task)
+			s.StartAsync()
+			_ = s.RemoveByTagsAny("tag1", "tag3")
+			fmt.Println(s.Len())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-64-fold-content"><label for="example-64-fold-content">Scheduler_RunAll</label><span id='example-64-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().At("10:00").Do(task)
+			_, _ = s.Every(2).Day().At("10:00").Do(task)
+			_, _ = s.Every(3).Day().At("10:00").Do(task)
+			s.StartAsync()
+			s.RunAll()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-65-fold-content"><label for="example-65-fold-content">Scheduler_RunAllWithDelay</label><span id='example-65-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().At("10:00").Do(task)
+			_, _ = s.Every(2).Day().At("10:00").Do(task)
+			_, _ = s.Every(3).Day().At("10:00").Do(task)
+			s.StartAsync()
+			s.RunAllWithDelay(10 * time.Second)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-66-fold-content"><label for="example-66-fold-content">Scheduler_RunByTag</label><span id='example-66-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().At("10:00").Do(task)
+			_, _ = s.Every(2).Day().Tag("tag").At("10:00").Do(task)
+			s.StartAsync()
+			_ = s.RunByTag("tag")
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-67-fold-content"><label for="example-67-fold-content">Scheduler_RunByTagWithDelay</label><span id='example-67-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Day().Tag("tag").At("10:00").Do(task)
+			_, _ = s.Every(2).Day().Tag("tag").At("10:00").Do(task)
+			s.StartAsync()
+			_ = s.RunByTagWithDelay("tag", 2*time.Second)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-68-fold-content"><label for="example-68-fold-content">Scheduler_Saturday</label><span id='example-68-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Saturday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-69-fold-content"><label for="example-69-fold-content">Scheduler_Second</label><span id='example-69-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// the default unit is seconds
+			// these are all the same
+			_, _ = s.Every(1).Do(task)
+			_, _ = s.Every(1).Second().Do(task)
+			_, _ = s.Every(1).Seconds().Do(task)
+			_, _ = s.Every("1s").Seconds().Do(task)
+			_, _ = s.Every(time.Second).Seconds().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-70-fold-content"><label for="example-70-fold-content">Scheduler_Seconds</label><span id='example-70-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// the default unit is seconds
+			// these are all the same
+			_, _ = s.Every(1).Do(task)
+			_, _ = s.Every(1).Second().Do(task)
+			_, _ = s.Every(1).Seconds().Do(task)
+			_, _ = s.Every("1s").Seconds().Do(task)
+			_, _ = s.Every(time.Second).Seconds().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-71-fold-content"><label for="example-71-fold-content">Scheduler_SetMaxConcurrentJobs</label><span id='example-71-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.SetMaxConcurrentJobs(1, gocron.RescheduleMode)
+			_, _ = s.Every(1).Seconds().Do(func() {
+				fmt.Println("This will run once every 5 seconds even though it is scheduled every second because maximum concurrent job limit is set.")
+				time.Sleep(5 * time.Second)
+			})
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-72-fold-content"><label for="example-72-fold-content">Scheduler_SingletonMode</label><span id='example-72-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Second().SingletonMode().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-73-fold-content"><label for="example-73-fold-content">Scheduler_SingletonModeAll</label><span id='example-73-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.SingletonModeAll()
+		
+			_, _ = s.Every(1).Second().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-74-fold-content"><label for="example-74-fold-content">Scheduler_StartAsync</label><span id='example-74-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(3).Seconds().Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-75-fold-content"><label for="example-75-fold-content">Scheduler_StartAt</label><span id='example-75-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			specificTime := time.Date(2019, time.November, 10, 15, 0, 0, 0, time.UTC)
+			_, _ = s.Every(1).Hour().StartAt(specificTime).Do(task)
+			s.StartBlocking()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-76-fold-content"><label for="example-76-fold-content">Scheduler_StartBlocking</label><span id='example-76-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(3).Seconds().Do(task)
+			s.StartBlocking()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-77-fold-content"><label for="example-77-fold-content">Scheduler_StartImmediately</label><span id='example-77-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Cron("0 0 * * 6,0").StartImmediately().Do(task)
+			s.StartBlocking()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-78-fold-content"><label for="example-78-fold-content">Scheduler_Stop</label><span id='example-78-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			_, _ = s.Every(1).Second().Do(task)
+			s.StartAsync()
+			s.Stop()
+			fmt.Println(s.IsRunning())
+		
+			s = gocron.NewScheduler(time.UTC)
+		
+			go func() {
+				time.Sleep(1 * time.Second)
+				s.Stop()
+			}()
+		
+			s.StartBlocking()
+			fmt.Println(".Stop() stops the blocking start")
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-79-fold-content"><label for="example-79-fold-content">Scheduler_Sunday</label><span id='example-79-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Sunday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-80-fold-content"><label for="example-80-fold-content">Scheduler_Tag</label><span id='example-80-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			j, _ := s.Every(1).Week().Tag("tag").Do(task)
+			fmt.Println(j.Tags())
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-81-fold-content"><label for="example-81-fold-content">Scheduler_TagsUnique</label><span id='example-81-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.TagsUnique()
+		
+			_, _ = s.Every(1).Week().Tag("foo").Do(task)
+			_, err := s.Every(1).Week().Tag("foo").Do(task)
+		
+			fmt.Println(err)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-82-fold-content"><label for="example-82-fold-content">Scheduler_TaskPresent</label><span id='example-82-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Do(task)
+			fmt.Println(s.TaskPresent(task))
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-83-fold-content"><label for="example-83-fold-content">Scheduler_Thursday</label><span id='example-83-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Thursday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-84-fold-content"><label for="example-84-fold-content">Scheduler_Tuesday</label><span id='example-84-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Tuesday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-85-fold-content"><label for="example-85-fold-content">Scheduler_Update</label><span id='example-85-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every("1s").Do(task)
+			s.StartAsync()
+		
+			time.Sleep(10 * time.Second)
+			_, _ = s.Job(j).Every("10m").Update()
+		
+			time.Sleep(30 * time.Minute)
+			_, _ = s.Job(j).Every(1).Day().At("02:00").Update()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-86-fold-content"><label for="example-86-fold-content">Scheduler_WaitForSchedule</label><span id='example-86-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			// job will run 5 minutes from the scheduler starting
+			_, _ = s.Every("5m").WaitForSchedule().Do(task)
+		
+			// job will run immediately and 5 minutes from the scheduler starting
+			_, _ = s.Every("5m").Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-87-fold-content"><label for="example-87-fold-content">Scheduler_WaitForScheduleAll</label><span id='example-87-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			s.WaitForScheduleAll()
+		
+			// all jobs will run 5 minutes from the scheduler starting
+			_, _ = s.Every("5m").Do(task)
+			_, _ = s.Every("5m").Do(task)
+			s.StartAsync()
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-88-fold-content"><label for="example-88-fold-content">Scheduler_Wednesday</label><span id='example-88-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+			j, _ := s.Every(1).Day().Wednesday().Do(task)
+			s.StartAsync()
+			wd, _ := j.Weekday()
+			fmt.Println(wd)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-89-fold-content"><label for="example-89-fold-content">Scheduler_Week</label><span id='example-89-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Week().Do(task)
+			_, _ = s.Every(1).Weeks().Do(task)
+		
+			_, _ = s.Every(1).Week().Monday().Wednesday().Friday().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-90-fold-content"><label for="example-90-fold-content">Scheduler_Weekday</label><span id='example-90-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Week().Weekday(time.Monday).Do(task)
+			_, _ = s.Every(1).Weeks().Weekday(time.Tuesday).Weekday(time.Friday).Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-91-fold-content"><label for="example-91-fold-content">Scheduler_Weeks</label><span id='example-91-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"time"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		var task = func() {}
+		
+		func main() {
+			s := gocron.NewScheduler(time.UTC)
+		
+			_, _ = s.Every(1).Week().Do(task)
+			_, _ = s.Every(1).Weeks().Do(task)
+		
+			_, _ = s.Every(2).Weeks().Monday().Wednesday().Friday().Do(task)
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-92-fold-content"><label for="example-92-fold-content">Scheduler_WithDistributedLocker</label><span id='example-92-fold-content-items' class="fold-items">
+		package main
+		
+		import ()
+		
+		func main() {
+			//redisOptions := &amp;redis.Options{
+			//	Addr: "localhost:6379",
+			//}
+			//redisClient := redis.NewClient(redisOptions)
+			//locker, err := redislock.NewRedisLocker(redisClient)
+			//if err != nil {
+			//	// handle the error
+			//}
+			//
+			//s := gocron.NewScheduler(time.UTC)
+			//s.WithDistributedLocker(locker)
+			//_, err = s.Every("500ms").Do(task)
+			//if err != nil {
+			//	// handle the error
+			//}
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-93-fold-content"><label for="example-93-fold-content">SetPanicHandler</label><span id='example-93-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/go-co-op/gocron"
+		)
+		
+		func main() {
+			gocron.SetPanicHandler(func(jobName string, _ interface{}) {
+				fmt.Printf("Panic in job: %s", jobName)
+				fmt.Println("do something to handle the panic")
+			})
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 8)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Elector" data-popularity="85">	<input type='checkbox' class="fold" id="Elector-fold-content"><label for="Elector-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-27">Elector</a> <b><i>(interface)</i></b></label><span id='Elector-fold-content-docs' class="fold-docs">
+<span class="md-text">		Elector determines the leader from instances asking to be the leader. Only
+		the leader runs jobs. If the leader goes down, a new leader will be elected.</span>
+
+		<input type='checkbox' class="fold" id="Elector-fold-methods"><label for="Elector-fold-methods">Methods (<i>only one</i>)</label><span id='Elector-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Elector-fold-method-IsLeader"><label for="Elector-fold-method-IsLeader">( Elector) <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-29">IsLeader</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Elector-fold-method-IsLeader-docs' class="fold-docs">
+<span class="md-text">				IsLeader should return an error if the job should not be scheduled and nil if the job should be scheduled.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Elector-fold-params"><label for="Elector-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Elector-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1513">WithDistributedElector</a>(e <b>Elector</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-EventListener" data-popularity="370">	<input type='checkbox' class="fold" id="EventListener-fold-content"><label for="EventListener-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-386">EventListener</a> <i>(func)</i></label><span id='EventListener-fold-content-docs' class="fold-docs">
+<span class="md-text">		EventListener functions utilize the job's name and are triggered
+		by or in the condition that the name suggests</span>
+
+		<input type='checkbox' class="fold" id="EventListener-fold-results"><label for="EventListener-fold-results">As Outputs Of (<i>at least 4</i>)</label><span id='EventListener-fold-results-items' class="fold-items"><span>
+			func <a href="#name-AfterJobRuns">AfterJobRuns</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <b>EventListener</b></span><span>
+			func <a href="#name-BeforeJobRuns">BeforeJobRuns</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <b>EventListener</b></span><span>
+			func <a href="#name-WhenJobReturnsError">WhenJobReturnsError</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>, err <a href="../../builtin.html#name-error">error</a>)) <b>EventListener</b></span><span>
+			func <a href="#name-WhenJobReturnsNoError">WhenJobReturnsNoError</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <b>EventListener</b></span></span>
+		<input type='checkbox' class="fold" id="EventListener-fold-params"><label for="EventListener-fold-params">As Inputs Of (<i>at least 2</i>)</label><span id='EventListener-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Job">Job</a>).<a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-428">RegisterEventListeners</a>(eventListeners ...<b>EventListener</b>)</span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1522">RegisterEventListeners</a>(eventListeners ...<b>EventListener</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Job" data-popularity="1730">	<input type='checkbox' class="fold" id="Job-fold-content"><label for="Job-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-17">Job</a> <i>(struct)</i></label><span id='Job-fold-content-docs' class="fold-docs">
+<span class="md-text">		Job struct stores the information necessary to run a Job</span>
+
+		<input type='checkbox' class="fold" id="Job-fold-methods"><label for="Job-fold-methods">Methods (<i>total 22</i>)</label><span id='Job-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Context"><label for="Job-fold-method-Context">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-357">Context</a>() <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a></label><span id='Job-fold-method-Context-docs' class="fold-docs">
+<span class="md-text">				Context returns the job's context. The context controls cancellation.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Error"><label for="Job-fold-method-Error">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-352">Error</a>() <a href="../../builtin.html#name-error">error</a></label><span id='Job-fold-method-Error-docs' class="fold-docs">
+<span class="md-text">				Error returns an error if one occurred while creating the Job.
+				If multiple errors occurred, they will be wrapped and can be
+				checked using the standard unwrap options.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-FinishedRunCount"><label for="Job-fold-method-FinishedRunCount">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-578">FinishedRunCount</a>() <a href="../../builtin.html#name-int">int</a></label><span id='Job-fold-method-FinishedRunCount-docs' class="fold-docs">
+<span class="md-text">				FinishedRunCount returns the number of times the job has finished running</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-GetName"><label for="Job-fold-method-GetName">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-183">GetName</a>() <a href="../../builtin.html#name-string">string</a></label><span id='Job-fold-method-GetName-docs' class="fold-docs">
+<span class="md-text">				GetName returns the name of the current job.
+				The name is either the name set using Job.Name() / Scheduler.Name() or
+				the name of the funcion as Go sees it, for example `main.func1`</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-IsRunning"><label for="Job-fold-method-IsRunning">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-598">IsRunning</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Job-fold-method-IsRunning-docs' class="fold-docs">
+<span class="md-text">				IsRunning reports whether any instances of the job function are currently running</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-LastRun"><label for="Job-fold-method-LastRun">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-538">LastRun</a>() <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></label><span id='Job-fold-method-LastRun-docs' class="fold-docs">
+<span class="md-text">				LastRun returns the time the job was run last</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-LimitRunsTo"><label for="Job-fold-method-LimitRunsTo">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-500">LimitRunsTo</a>(n <a href="../../builtin.html#name-int">int</a>)</label><span id='Job-fold-method-LimitRunsTo-docs' class="fold-docs">
+<span class="md-text">				LimitRunsTo limits the number of executions of this job to n.
+				Upon reaching the limit, the job is removed from the scheduler.
+				
+				Note: If a job is added to a running scheduler and this method is then used
+				you may see the job run more than the set limit as job is scheduled immediately
+				by default upon being added to the scheduler. It is recommended to use the
+				LimitRunsTo() func on the scheduler chain when scheduling the job.
+				For example: scheduler.LimitRunsTo(1).Do()</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Name"><label for="Job-fold-method-Name">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-174">Name</a>(name <a href="../../builtin.html#name-string">string</a>)</label><span id='Job-fold-method-Name-docs' class="fold-docs">
+<span class="md-text">				Name sets the name of the current job.
+				
+				If the scheduler is running using WithDistributedLocker(),
+				the job name is used as the distributed lock key.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-NextRun"><label for="Job-fold-method-NextRun">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-550">NextRun</a>() <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></label><span id='Job-fold-method-NextRun-docs' class="fold-docs">
+<span class="md-text">				NextRun returns the time the job will run next</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-PreviousRun"><label for="Job-fold-method-PreviousRun">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-564">PreviousRun</a>() <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></label><span id='Job-fold-method-PreviousRun-docs' class="fold-docs">
+<span class="md-text">				PreviousRun returns the job run time previous to LastRun</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-RegisterEventListeners"><label for="Job-fold-method-RegisterEventListeners">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-428">RegisterEventListeners</a>(eventListeners ...<a href="#name-EventListener">EventListener</a>)</label><span id='Job-fold-method-RegisterEventListeners-docs' class="fold-docs">
+<span class="md-text">				RegisterEventListeners accepts EventListeners and registers them for the job
+				The event listeners are then called at the times described by each listener.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-RunCount"><label for="Job-fold-method-RunCount">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-571">RunCount</a>() <a href="../../builtin.html#name-int">int</a></label><span id='Job-fold-method-RunCount-docs' class="fold-docs">
+<span class="md-text">				RunCount returns the number of times the job has been started</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-ScheduledAtTime"><label for="Job-fold-method-ScheduledAtTime">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-451">ScheduledAtTime</a>() <a href="../../builtin.html#name-string">string</a></label><span id='Job-fold-method-ScheduledAtTime-docs' class="fold-docs">
+<span class="md-text">				ScheduledAtTime returns the specific time of day the Job will run at.
+				If multiple times are set, the earliest time will be returned.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-ScheduledAtTimes"><label for="Job-fold-method-ScheduledAtTimes">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-460">ScheduledAtTimes</a>() []<a href="../../builtin.html#name-string">string</a></label><span id='Job-fold-method-ScheduledAtTimes-docs' class="fold-docs">
+<span class="md-text">				ScheduledAtTimes returns the specific times of day the Job will run at</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-ScheduledTime"><label for="Job-fold-method-ScheduledTime">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-443">ScheduledTime</a>() <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></label><span id='Job-fold-method-ScheduledTime-docs' class="fold-docs">
+<span class="md-text">				ScheduledTime returns the time of the Job's next scheduled run</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-SetEventListeners"><label for="Job-fold-method-SetEventListeners">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-435">SetEventListeners</a>(onBeforeJobExecution interface{}, onAfterJobExecution interface{})</label><span id='Job-fold-method-SetEventListeners-docs' class="fold-docs">
+<span class="md-text">				Deprecated: SetEventListeners accepts two functions that will be called, one before and one after the job is run</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-SingletonMode"><label for="Job-fold-method-SingletonMode">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-513">SingletonMode</a>()</label><span id='Job-fold-method-SingletonMode-docs' class="fold-docs">
+<span class="md-text">				SingletonMode prevents a new job from starting if the prior job has not yet
+				completed it's run
+				Note: If a job is added to a running scheduler and this method is then used
+				you may see the job run overrun itself as job is scheduled immediately
+				by default upon being added to the scheduler. It is recommended to use the
+				SingletonMode() func on the scheduler chain when scheduling the job.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Tag"><label for="Job-fold-method-Tag">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-363">Tag</a>(tags ...<a href="../../builtin.html#name-string">string</a>)</label><span id='Job-fold-method-Tag-docs' class="fold-docs">
+<span class="md-text">				Tag allows you to add arbitrary labels to a Job that do not
+				impact the functionality of the Job</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Tags"><label for="Job-fold-method-Tags">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-380">Tags</a>() []<a href="../../builtin.html#name-string">string</a></label><span id='Job-fold-method-Tags-docs' class="fold-docs">
+<span class="md-text">				Tags returns the tags attached to the Job</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Untag"><label for="Job-fold-method-Untag">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-368">Untag</a>(t <a href="../../builtin.html#name-string">string</a>)</label><span id='Job-fold-method-Untag-docs' class="fold-docs">
+<span class="md-text">				Untag removes a tag from a Job</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Weekday"><label for="Job-fold-method-Weekday">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-471">Weekday</a>() (<a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Job-fold-method-Weekday-docs' class="fold-docs">
+<span class="md-text">				Weekday returns which day of the week the Job will run on and
+				will return an error if the Job is not scheduled weekly</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Job-fold-method-Weekdays"><label for="Job-fold-method-Weekdays">(*Job) <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-480">Weekdays</a>() []<a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a></label><span id='Job-fold-method-Weekdays-docs' class="fold-docs">
+<span class="md-text">				Weekdays returns a slice of time.Weekday that the Job will run in a week and
+				will return an error if the Job is not scheduled weekly</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Job-fold-results"><label for="Job-fold-results">As Outputs Of (<i>at least 7</i>)</label><span id='Job-fold-results-items' class="fold-items"><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1019">Do</a>(jobFun interface{}, params ...interface{}) (*<b>Job</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1027">DoWithJobDetails</a>(jobFun interface{}, params ...interface{}) (*<b>Job</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-804">FindJobsByTag</a>(tags ...<a href="../../builtin.html#name-string">string</a>) ([]*<b>Job</b>, <a href="../../builtin.html#name-error">error</a>)</span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-133">Jobs</a>() []*<b>Job</b></span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-146">JobsMap</a>() map[<a href="../google/uuid.html">uuid</a>.<a href="../google/uuid.html#name-UUID">UUID</a>]*<b>Job</b></span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-506">NextRun</a>() (*<b>Job</b>, <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>)</span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1360">Update</a>() (*<b>Job</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+		<input type='checkbox' class="fold" id="Job-fold-params"><label for="Job-fold-params">As Inputs Of (<i>at least 3</i>)</label><span id='Job-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1346">Job</a>(j *<b>Job</b>) *<a href="#name-Scheduler">Scheduler</a></span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-791">RemoveByID</a>(job *<b>Job</b>) <a href="../../builtin.html#name-error">error</a></span><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-705">RemoveByReference</a>(job *<b>Job</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Lock" data-popularity="125">	<input type='checkbox' class="fold" id="Lock-fold-content"><label for="Lock-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-21">Lock</a> <b><i>(interface)</i></b></label><span id='Lock-fold-content-docs' class="fold-docs">
+<span class="md-text">		Lock represents an obtained lock</span>
+
+		<input type='checkbox' class="fold" id="Lock-fold-methods"><label for="Lock-fold-methods">Methods (<i>only one</i>)</label><span id='Lock-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( Lock) <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-22">Unlock</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>) <a href="../../builtin.html#name-error">error</a></span></span></span>
+		<input type='checkbox' class="fold" id="Lock-fold-results"><label for="Lock-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='Lock-fold-results-items' class="fold-items"><span>
+			func <a href="#name-Locker">Locker</a>.<a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-17">Lock</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>, key <a href="../../builtin.html#name-string">string</a>) (<b>Lock</b>, <a href="../../builtin.html#name-error">error</a>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Locker" data-popularity="85">	<input type='checkbox' class="fold" id="Locker-fold-content"><label for="Locker-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-15">Locker</a> <b><i>(interface)</i></b></label><span id='Locker-fold-content-docs' class="fold-docs">
+<span class="md-text">		Locker represents the required interface to lock jobs when running multiple schedulers.</span>
+
+		<input type='checkbox' class="fold" id="Locker-fold-methods"><label for="Locker-fold-methods">Methods (<i>only one</i>)</label><span id='Locker-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Locker-fold-method-Lock"><label for="Locker-fold-method-Lock">( Locker) <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-17">Lock</a>(ctx <a href="../../context.html">context</a>.<a href="../../context.html#name-Context">Context</a>, key <a href="../../builtin.html#name-string">string</a>) (<a href="#name-Lock">Lock</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Locker-fold-method-Lock-docs' class="fold-docs">
+<span class="md-text">				Lock if an error is returned by lock, the job will not be scheduled.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Locker-fold-params"><label for="Locker-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='Locker-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1501">WithDistributedLocker</a>(l <b>Locker</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-PanicHandlerFunc" data-popularity="35">	<input type='checkbox' class="fold" id="PanicHandlerFunc-fold-content"><label for="PanicHandlerFunc-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-20">PanicHandlerFunc</a> <i>(func)</i></label><span id='PanicHandlerFunc-fold-content-docs' class="fold-docs">
+<span class="md-text">		PanicHandlerFunc represents a type that can be set to handle panics occurring
+		during job execution.</span>
+
+		<input type='checkbox' class="fold" id="PanicHandlerFunc-fold-params"><label for="PanicHandlerFunc-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='PanicHandlerFunc-fold-params-items' class="fold-items"><span>
+			func <a href="#name-SetPanicHandler">SetPanicHandler</a>(handler <b>PanicHandlerFunc</b>)</span></span>
+
+</span></div><div class="anchor type-res" id="name-Scheduler" data-popularity="6730">	<input type='checkbox' class="fold" id="Scheduler-fold-content"><label for="Scheduler-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-20">Scheduler</a> <i>(struct)</i></label><span id='Scheduler-fold-content-docs' class="fold-docs">
+<span class="md-text">		Scheduler struct stores a list of Jobs and the location of time used by the Scheduler</span>
+
+		<input type='checkbox' class="fold" id="Scheduler-fold-methods"><label for="Scheduler-fold-methods">Methods (<i>total 76</i>)</label><span id='Scheduler-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-At"><label for="Scheduler-fold-method-At">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1041">At</a>(i interface{}) *<b>Scheduler</b></label><span id='Scheduler-fold-method-At-docs' class="fold-docs">
+<span class="md-text">				At schedules the Job at a specific time of day in the form "HH:MM:SS" or "HH:MM"
+				or time.Time (note that only the hours, minutes, seconds and nanos are used).
+				When the At time(s) occur on the same day on which the scheduler is started
+				the Job will be run at the first available At time.
+				For example: a schedule for every 2 days at 9am and 11am
+				- currently 7am -&gt; Job runs at 9am and 11am on the day the scheduler was started
+				- currently 12 noon -&gt; Job runs at 9am and 11am two days after the scheduler started</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-ChangeLocation"><label for="Scheduler-fold-method-ChangeLocation">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-174">ChangeLocation</a>(newLocation *<a href="../../time.html">time</a>.<a href="../../time.html#name-Location">Location</a>)</label><span id='Scheduler-fold-method-ChangeLocation-docs' class="fold-docs">
+<span class="md-text">				ChangeLocation changes the default time location</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Clear"><label for="Scheduler-fold-method-Clear">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-901">Clear</a>()</label><span id='Scheduler-fold-method-Clear-docs' class="fold-docs">
+<span class="md-text">				Clear clears all Jobs from this scheduler</span>
+</span></span><span>
+			<span class="nodocs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1385">Cron</a>(cronExpression <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span></span><span>
+			<span class="nodocs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1389">CronWithSeconds</a>(cronExpression <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-CustomTime"><label for="Scheduler-fold-method-CustomTime">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1464">CustomTime</a>(customTimeWrapper <a href="#name-TimeWrapper">TimeWrapper</a>)</label><span id='Scheduler-fold-method-CustomTime-docs' class="fold-docs">
+<span class="md-text">				CustomTime takes an in a struct that implements the TimeWrapper interface
+				allowing the caller to mock the time used by the scheduler. This is useful
+				for tests relying on gocron.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-CustomTimer"><label for="Scheduler-fold-method-CustomTimer">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1471">CustomTimer</a>(customTimer func(d <a href="../../time.html">time</a>.<a href="../../time.html#name-Duration">Duration</a>, f func()) *<a href="../../time.html">time</a>.<a href="../../time.html#name-Timer">Timer</a>)</label><span id='Scheduler-fold-method-CustomTimer-docs' class="fold-docs">
+<span class="md-text">				CustomTimer takes in a function that mirrors the time.AfterFunc
+				This is used to mock the time.AfterFunc function used by the scheduler
+				for testing long intervals in a short amount of time.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Day"><label for="Scheduler-fold-method-Day">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1158">Day</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Day-docs' class="fold-docs">
+<span class="md-text">				Day sets the unit with days</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Days"><label for="Scheduler-fold-method-Days">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1163">Days</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Days-docs' class="fold-docs">
+<span class="md-text">				Days set the unit with days</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Do"><label for="Scheduler-fold-method-Do">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1019">Do</a>(jobFun interface{}, params ...interface{}) (*<a href="#name-Job">Job</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Scheduler-fold-method-Do-docs' class="fold-docs">
+<span class="md-text">				Do specifies the jobFunc that should be called every time the Job runs</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-DoWithJobDetails"><label for="Scheduler-fold-method-DoWithJobDetails">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1027">DoWithJobDetails</a>(jobFun interface{}, params ...interface{}) (*<a href="#name-Job">Job</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Scheduler-fold-method-DoWithJobDetails-docs' class="fold-docs">
+<span class="md-text">				DoWithJobDetails specifies the jobFunc that should be called every time the Job runs
+				and additionally passes the details of the current job to the jobFunc.
+				The last argument of the function must be a gocron.Job that will be passed by
+				the scheduler when the function is called.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Every"><label for="Scheduler-fold-method-Every">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-547">Every</a>(interval interface{}) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Every-docs' class="fold-docs">
+<span class="md-text">				Every schedules a new periodic Job with an interval.
+				Interval can be an int, time.Duration or a string that
+				parses with time.ParseDuration().
+				Negative intervals will return an error.
+				Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+				
+				The job is run immediately, unless:
+				* StartAt or At is set on the job,
+				* WaitForSchedule is set on the job,
+				* or WaitForScheduleAll is set on the scheduler.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-EveryRandom"><label for="Scheduler-fold-method-EveryRandom">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-530">EveryRandom</a>(lower, upper <a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-EveryRandom-docs' class="fold-docs">
+<span class="md-text">				EveryRandom schedules a new period Job that runs at random intervals
+				between the provided lower (inclusive) and upper (inclusive) bounds.
+				The default unit is Seconds(). Call a different unit in the chain
+				if you would like to change that. For example, Minutes(), Hours(), etc.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-FindJobsByTag"><label for="Scheduler-fold-method-FindJobsByTag">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-804">FindJobsByTag</a>(tags ...<a href="../../builtin.html#name-string">string</a>) ([]*<a href="#name-Job">Job</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Scheduler-fold-method-FindJobsByTag-docs' class="fold-docs">
+<span class="md-text">				FindJobsByTag will return a slice of jobs that match all given tags</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Friday"><label for="Scheduler-fold-method-Friday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1301">Friday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Friday-docs' class="fold-docs">
+<span class="md-text">				Friday sets the start day as Friday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-GetAllTags"><label for="Scheduler-fold-method-GetAllTags">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1083">GetAllTags</a>() []<a href="../../builtin.html#name-string">string</a></label><span id='Scheduler-fold-method-GetAllTags-docs' class="fold-docs">
+<span class="md-text">				GetAllTags returns all tags.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Hour"><label for="Scheduler-fold-method-Hour">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1147">Hour</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Hour-docs' class="fold-docs">
+<span class="md-text">				Hour sets the unit with hours</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Hours"><label for="Scheduler-fold-method-Hours">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1152">Hours</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Hours-docs' class="fold-docs">
+<span class="md-text">				Hours sets the unit with hours</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-IsRunning"><label for="Scheduler-fold-method-IsRunning">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-128">IsRunning</a>() <a href="../../builtin.html#name-bool">bool</a></label><span id='Scheduler-fold-method-IsRunning-docs' class="fold-docs">
+<span class="md-text">				IsRunning returns true if the scheduler is running</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Job"><label for="Scheduler-fold-method-Job">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1346">Job</a>(j *<a href="#name-Job">Job</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Job-docs' class="fold-docs">
+<span class="md-text">				Job puts the provided job in focus for the purpose
+				of making changes to the job with the scheduler chain
+				and finalized by calling Update()</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Jobs"><label for="Scheduler-fold-method-Jobs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-133">Jobs</a>() []*<a href="#name-Job">Job</a></label><span id='Scheduler-fold-method-Jobs-docs' class="fold-docs">
+<span class="md-text">				Jobs returns the list of Jobs from the scheduler</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-JobsMap"><label for="Scheduler-fold-method-JobsMap">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-146">JobsMap</a>() map[<a href="../google/uuid.html">uuid</a>.<a href="../google/uuid.html#name-UUID">UUID</a>]*<a href="#name-Job">Job</a></label><span id='Scheduler-fold-method-JobsMap-docs' class="fold-docs">
+<span class="md-text">				JobsMap returns a map of job uuid to job</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Len"><label for="Scheduler-fold-method-Len">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-167">Len</a>() <a href="../../builtin.html#name-int">int</a></label><span id='Scheduler-fold-method-Len-docs' class="fold-docs">
+<span class="md-text">				Len returns the number of Jobs in the Scheduler</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-LimitRunsTo"><label for="Scheduler-fold-method-LimitRunsTo">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-836">LimitRunsTo</a>(i <a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-LimitRunsTo-docs' class="fold-docs">
+<span class="md-text">				LimitRunsTo limits the number of executions of this job to n.
+				Upon reaching the limit, the job is removed from the scheduler.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Location"><label for="Scheduler-fold-method-Location">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-181">Location</a>() *<a href="../../time.html">time</a>.<a href="../../time.html#name-Location">Location</a></label><span id='Scheduler-fold-method-Location-docs' class="fold-docs">
+<span class="md-text">				Location provides the current location set on the scheduler</span>
+</span></span><span>
+			<span class="nodocs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1276">Midday</a>() *<b>Scheduler</b></span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Millisecond"><label for="Scheduler-fold-method-Millisecond">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1114">Millisecond</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Millisecond-docs' class="fold-docs">
+<span class="md-text">				Millisecond sets the unit with milliseconds</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Milliseconds"><label for="Scheduler-fold-method-Milliseconds">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1119">Milliseconds</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Milliseconds-docs' class="fold-docs">
+<span class="md-text">				Milliseconds sets the unit with milliseconds</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Minute"><label for="Scheduler-fold-method-Minute">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1136">Minute</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Minute-docs' class="fold-docs">
+<span class="md-text">				Minute sets the unit with minutes</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Minutes"><label for="Scheduler-fold-method-Minutes">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1141">Minutes</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Minutes-docs' class="fold-docs">
+<span class="md-text">				Minutes sets the unit with minutes</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Monday"><label for="Scheduler-fold-method-Monday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1281">Monday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Monday-docs' class="fold-docs">
+<span class="md-text">				Monday sets the start day as Monday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Month"><label for="Scheduler-fold-method-Month">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1185">Month</a>(daysOfMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Month-docs' class="fold-docs">
+<span class="md-text">				Month sets the unit with months
+				Note: Only days 1 through 28 are allowed for monthly schedules
+				Note: Multiple of the same day of month is not allowed
+				Note: Negative numbers are special values and can only occur as single argument
+				and count backwards from the end of the month -1 == last day of the month, -2 == penultimate day of the month</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-MonthFirstWeekday"><label for="Scheduler-fold-method-MonthFirstWeekday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-824">MonthFirstWeekday</a>(weekday <a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-MonthFirstWeekday-docs' class="fold-docs">
+<span class="md-text">				MonthFirstWeekday sets the job to run the first specified weekday of the month</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-MonthLastDay"><label for="Scheduler-fold-method-MonthLastDay">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1193">MonthLastDay</a>(dayCountBeforeLastDayOfMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-MonthLastDay-docs' class="fold-docs">
+<span class="md-text">				MonthLastDay sets the unit with months at every last day of the month
+				The optional parameter is a negative integer denoting days previous to the
+				last day of the month. E.g. -1 == the penultimate day of the month,
+				-2 == two days for the last day of the month</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Months"><label for="Scheduler-fold-method-Months">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1217">Months</a>(daysOfTheMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Months-docs' class="fold-docs">
+<span class="md-text">				Months sets the unit with months
+				Note: Only days 1 through 28 are allowed for monthly schedules
+				Note: Multiple of the same day of month is not allowed
+				Note: Negative numbers are special values and can only occur as single argument
+				and count backwards from the end of the month -1 == last day of the month, -2 == penultimate day of the month</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Name"><label for="Scheduler-fold-method-Name">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-160">Name</a>(name <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Name-docs' class="fold-docs">
+<span class="md-text">				Name sets the name of the current job.
+				
+				If the scheduler is running using WithDistributedLocker(), the job name is used
+				as the distributed lock key. If the job name is not set, the function name is used as the distributed lock key.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-NextRun"><label for="Scheduler-fold-method-NextRun">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-506">NextRun</a>() (*<a href="#name-Job">Job</a>, <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>)</label><span id='Scheduler-fold-method-NextRun-docs' class="fold-docs">
+<span class="md-text">				NextRun datetime when the next Job should run.</span>
+</span></span><span>
+			<span class="nodocs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1530">PauseJobExecution</a>(shouldPause <a href="../../builtin.html#name-bool">bool</a>)</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RegisterEventListeners"><label for="Scheduler-fold-method-RegisterEventListeners">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1522">RegisterEventListeners</a>(eventListeners ...<a href="#name-EventListener">EventListener</a>)</label><span id='Scheduler-fold-method-RegisterEventListeners-docs' class="fold-docs">
+<span class="md-text">				RegisterEventListeners accepts EventListeners and registers them for all jobs
+				in the scheduler at the time this function is called.
+				The event listeners are then called at the times described by each listener.
+				If a new job is added, an additional call to this method, or the job specific
+				version must be executed in order for the new job to trigger event listeners.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Remove"><label for="Scheduler-fold-method-Remove">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-695">Remove</a>(job interface{})</label><span id='Scheduler-fold-method-Remove-docs' class="fold-docs">
+<span class="md-text">				Remove specific Job by function
+				
+				Removing a job stops that job's timer. However, if a job has already
+				been started by the job's timer before being removed, the only way to stop
+				it through gocron is to use DoWithJobDetails and access the job's Context which
+				informs you when the job has been canceled.
+				
+				Alternatively, the job function would need to have implemented a means of
+				stopping, e.g. using a context.WithCancel() passed as params to Do method.
+				
+				The above are based on what the underlying library suggests https://pkg.go.dev/time#Timer.Stop.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RemoveByID"><label for="Scheduler-fold-method-RemoveByID">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-791">RemoveByID</a>(job *<a href="#name-Job">Job</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RemoveByID-docs' class="fold-docs">
+<span class="md-text">				RemoveByID removes the job from the scheduler looking up by id</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RemoveByReference"><label for="Scheduler-fold-method-RemoveByReference">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-705">RemoveByReference</a>(job *<a href="#name-Job">Job</a>)</label><span id='Scheduler-fold-method-RemoveByReference-docs' class="fold-docs">
+<span class="md-text">				RemoveByReference removes specific Job by reference</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RemoveByTag"><label for="Scheduler-fold-method-RemoveByTag">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-752">RemoveByTag</a>(tag <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RemoveByTag-docs' class="fold-docs">
+<span class="md-text">				RemoveByTag will remove jobs that match the given tag.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RemoveByTags"><label for="Scheduler-fold-method-RemoveByTags">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-757">RemoveByTags</a>(tags ...<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RemoveByTags-docs' class="fold-docs">
+<span class="md-text">				RemoveByTags will remove jobs that match all given tags.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RemoveByTagsAny"><label for="Scheduler-fold-method-RemoveByTagsAny">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-770">RemoveByTagsAny</a>(tags ...<a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RemoveByTagsAny-docs' class="fold-docs">
+<span class="md-text">				RemoveByTagsAny will remove jobs that match any one of the given tags.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RunAll"><label for="Scheduler-fold-method-RunAll">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-650">RunAll</a>()</label><span id='Scheduler-fold-method-RunAll-docs' class="fold-docs">
+<span class="md-text">				RunAll run all Jobs regardless if they are scheduled to run or not</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RunAllWithDelay"><label for="Scheduler-fold-method-RunAllWithDelay">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-655">RunAllWithDelay</a>(d <a href="../../time.html">time</a>.<a href="../../time.html#name-Duration">Duration</a>)</label><span id='Scheduler-fold-method-RunAllWithDelay-docs' class="fold-docs">
+<span class="md-text">				RunAllWithDelay runs all Jobs with the provided delay in between each Job</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RunByTag"><label for="Scheduler-fold-method-RunByTag">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-666">RunByTag</a>(tag <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RunByTag-docs' class="fold-docs">
+<span class="md-text">				RunByTag runs all the Jobs containing a specific tag
+				regardless of whether they are scheduled to run or not</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-RunByTagWithDelay"><label for="Scheduler-fold-method-RunByTagWithDelay">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-672">RunByTagWithDelay</a>(tag <a href="../../builtin.html#name-string">string</a>, d <a href="../../time.html">time</a>.<a href="../../time.html#name-Duration">Duration</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Scheduler-fold-method-RunByTagWithDelay-docs' class="fold-docs">
+<span class="md-text">				RunByTagWithDelay is same as RunByTag but introduces a delay between
+				each Job execution</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Saturday"><label for="Scheduler-fold-method-Saturday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1306">Saturday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Saturday-docs' class="fold-docs">
+<span class="md-text">				Saturday sets the start day as Saturday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Second"><label for="Scheduler-fold-method-Second">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1125">Second</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Second-docs' class="fold-docs">
+<span class="md-text">				Second sets the unit with seconds</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Seconds"><label for="Scheduler-fold-method-Seconds">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1130">Seconds</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Seconds-docs' class="fold-docs">
+<span class="md-text">				Seconds sets the unit with seconds</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-SetMaxConcurrentJobs"><label for="Scheduler-fold-method-SetMaxConcurrentJobs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-76">SetMaxConcurrentJobs</a>(n <a href="../../builtin.html#name-int">int</a>, mode <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-17">limitMode</a>)</label><span id='Scheduler-fold-method-SetMaxConcurrentJobs-docs' class="fold-docs">
+<span class="md-text">				SetMaxConcurrentJobs limits how many jobs can be running at the same time.
+				This is useful when running resource intensive jobs and a precise start time is not critical.
+				
+				Note: WaitMode and RescheduleMode provide details on usage and potential risks.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-SingletonMode"><label for="Scheduler-fold-method-SingletonMode">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-854">SingletonMode</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-SingletonMode-docs' class="fold-docs">
+<span class="md-text">				SingletonMode prevents a new job from starting if the prior job has not yet
+				completed its run
+				
+				Warning: do not use this mode if your jobs will continue to stack
+				up beyond the ability of the limit workers to keep up. An example of
+				what NOT to do:
+				
+					 s.Every("1s").SingletonMode().Do(func() {
+					     // this will result in an ever-growing number of goroutines
+						   // blocked trying to send to the buffered channel
+					     time.Sleep(10 * time.Minute)
+					 })</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-SingletonModeAll"><label for="Scheduler-fold-method-SingletonModeAll">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-875">SingletonModeAll</a>()</label><span id='Scheduler-fold-method-SingletonModeAll-docs' class="fold-docs">
+<span class="md-text">				SingletonModeAll prevents new jobs from starting if the prior instance of the
+				particular job has not yet completed its run
+				
+				Warning: do not use this mode if your jobs will continue to stack
+				up beyond the ability of the limit workers to keep up. An example of
+				what NOT to do:
+				
+					 s := gocron.NewScheduler(time.UTC)
+					 s.SingletonModeAll()
+				
+					 s.Every("1s").Do(func() {
+					     // this will result in an ever-growing number of goroutines
+						   // blocked trying to send to the buffered channel
+					     time.Sleep(10 * time.Minute)
+					 })</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-StartAsync"><label for="Scheduler-fold-method-StartAsync">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-97">StartAsync</a>()</label><span id='Scheduler-fold-method-StartAsync-docs' class="fold-docs">
+<span class="md-text">				StartAsync starts all jobs without blocking the current thread</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-StartAt"><label for="Scheduler-fold-method-StartAt">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1095">StartAt</a>(t <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-StartAt-docs' class="fold-docs">
+<span class="md-text">				StartAt schedules the next run of the Job. If this time is in the past, the configured interval will be used
+				to calculate the next future time</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-StartBlocking"><label for="Scheduler-fold-method-StartBlocking">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-83">StartBlocking</a>()</label><span id='Scheduler-fold-method-StartBlocking-docs' class="fold-docs">
+<span class="md-text">				StartBlocking starts all jobs and blocks the current thread.
+				This blocking method can be stopped with Stop() from a separate goroutine.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-StartImmediately"><label for="Scheduler-fold-method-StartImmediately">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1455">StartImmediately</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-StartImmediately-docs' class="fold-docs">
+<span class="md-text">				StartImmediately sets the job to run immediately upon
+				starting the scheduler or adding the job to a running
+				scheduler. This overrides the jobs start status of any
+				previously called methods in the chain.
+				
+				Note: This is the default behavior of the scheduler
+				for most jobs, but is useful for overriding the default
+				behavior of Cron scheduled jobs which default to
+				WaitForSchedule.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Stop"><label for="Scheduler-fold-method-Stop">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-917">Stop</a>()</label><span id='Scheduler-fold-method-Stop-docs' class="fold-docs">
+<span class="md-text">				Stop stops the scheduler. This is a no-op if the scheduler is already stopped.
+				It waits for all running jobs to finish before returning, so it is safe to assume that running jobs will finish when calling this.</span>
+</span></span><span>
+			<span class="nodocs">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1475">StopBlockingChan</a>()</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Sunday"><label for="Scheduler-fold-method-Sunday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1311">Sunday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Sunday-docs' class="fold-docs">
+<span class="md-text">				Sunday sets the start day as Sunday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Tag"><label for="Scheduler-fold-method-Tag">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1065">Tag</a>(t ...<a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Tag-docs' class="fold-docs">
+<span class="md-text">				Tag will add a tag when creating a job.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-TagsUnique"><label for="Scheduler-fold-method-TagsUnique">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1339">TagsUnique</a>()</label><span id='Scheduler-fold-method-TagsUnique-docs' class="fold-docs">
+<span class="md-text">				TagsUnique forces job tags to be unique across the scheduler
+				when adding tags with (s *Scheduler) Tag().
+				This does not enforce uniqueness on tags added via
+				(j *Job) Tag()</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-TaskPresent"><label for="Scheduler-fold-method-TaskPresent">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-880">TaskPresent</a>(j interface{}) <a href="../../builtin.html#name-bool">bool</a></label><span id='Scheduler-fold-method-TaskPresent-docs' class="fold-docs">
+<span class="md-text">				TaskPresent checks if specific job's function was added to the scheduler.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Thursday"><label for="Scheduler-fold-method-Thursday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1296">Thursday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Thursday-docs' class="fold-docs">
+<span class="md-text">				Thursday sets the start day as Thursday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Tuesday"><label for="Scheduler-fold-method-Tuesday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1286">Tuesday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Tuesday-docs' class="fold-docs">
+<span class="md-text">				Tuesday sets the start day as Tuesday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Update"><label for="Scheduler-fold-method-Update">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1360">Update</a>() (*<a href="#name-Job">Job</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Scheduler-fold-method-Update-docs' class="fold-docs">
+<span class="md-text">				Update stops the job (if running) and starts it with any updates
+				that were made to the job in the scheduler chain. Job() must be
+				called first to put the given job in focus.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-WaitForSchedule"><label for="Scheduler-fold-method-WaitForSchedule">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1440">WaitForSchedule</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-WaitForSchedule-docs' class="fold-docs">
+<span class="md-text">				WaitForSchedule sets the job to not start immediately
+				but rather wait until the first scheduled interval.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-WaitForScheduleAll"><label for="Scheduler-fold-method-WaitForScheduleAll">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1434">WaitForScheduleAll</a>()</label><span id='Scheduler-fold-method-WaitForScheduleAll-docs' class="fold-docs">
+<span class="md-text">				WaitForScheduleAll defaults the scheduler to create all
+				new jobs with the WaitForSchedule option as true.
+				The jobs will not start immediately but rather will
+				wait until their first scheduled interval.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Wednesday"><label for="Scheduler-fold-method-Wednesday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1291">Wednesday</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Wednesday-docs' class="fold-docs">
+<span class="md-text">				Wednesday sets the start day as Wednesday</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Week"><label for="Scheduler-fold-method-Week">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1169">Week</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Week-docs' class="fold-docs">
+<span class="md-text">				Week sets the unit with weeks</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Weekday"><label for="Scheduler-fold-method-Weekday">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1264">Weekday</a>(weekDay <a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a>) *<b>Scheduler</b></label><span id='Scheduler-fold-method-Weekday-docs' class="fold-docs">
+<span class="md-text">				Weekday sets the scheduledWeekdays with a specifics weekdays</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-Weeks"><label for="Scheduler-fold-method-Weeks">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1175">Weeks</a>() *<b>Scheduler</b></label><span id='Scheduler-fold-method-Weeks-docs' class="fold-docs">
+<span class="md-text">				Weeks sets the unit with weeks</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-WithDistributedElector"><label for="Scheduler-fold-method-WithDistributedElector">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1513">WithDistributedElector</a>(e <a href="#name-Elector">Elector</a>)</label><span id='Scheduler-fold-method-WithDistributedElector-docs' class="fold-docs">
+<span class="md-text">				WithDistributedElector prevents the same job from being run more than once
+				when multiple schedulers are trying to schedule the same job, by allowing only
+				the leader to run jobs. Non-leaders wait until the leader instance goes down
+				and then a new leader is elected.
+				
+				Compared with the distributed lock, the election is the same as leader/follower framework.
+				All jobs are only scheduled and execute on the leader scheduler instance. Only when the leader scheduler goes down
+				and one of the scheduler instances is successfully elected, then the new leader scheduler instance can schedule jobs.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Scheduler-fold-method-WithDistributedLocker"><label for="Scheduler-fold-method-WithDistributedLocker">(*Scheduler) <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1501">WithDistributedLocker</a>(l <a href="#name-Locker">Locker</a>)</label><span id='Scheduler-fold-method-WithDistributedLocker-docs' class="fold-docs">
+<span class="md-text">				WithDistributedLocker prevents the same job from being run more than once
+				when multiple schedulers are trying to schedule the same job.
+				
+				One strategy to reduce splay in the job execution times when using
+				intervals (e.g. 1s, 1m, 1h), on each scheduler instance, is to use
+				StartAt with time.Now().Round(interval) to start the job at the
+				next interval boundary.
+				
+				Another strategy is to use the Cron or CronWithSeconds methods as they
+				use the same behavior described above using StartAt.
+				
+				NOTE - the Locker will NOT lock jobs using the singleton options:
+				SingletonMode, or SingletonModeAll
+				
+				NOTE - beware of potential race conditions when running the Locker
+				with SetMaxConcurrentJobs and WaitMode as jobs are not guaranteed
+				to be locked when each scheduler's is below its limit and able
+				to run the job.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Scheduler-fold-results"><label for="Scheduler-fold-results">As Outputs Of (<i>at least 39</i>)</label><span id='Scheduler-fold-results-items' class="fold-items"><span>
+			func <a href="#name-NewScheduler">NewScheduler</a>(loc *<a href="../../time.html">time</a>.<a href="../../time.html#name-Location">Location</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1041">At</a>(i interface{}) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1385">Cron</a>(cronExpression <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1389">CronWithSeconds</a>(cronExpression <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1158">Day</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1163">Days</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-547">Every</a>(interval interface{}) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-530">EveryRandom</a>(lower, upper <a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1301">Friday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1147">Hour</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1152">Hours</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1346">Job</a>(j *<a href="#name-Job">Job</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-836">LimitRunsTo</a>(i <a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1276">Midday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1114">Millisecond</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1119">Milliseconds</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1136">Minute</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1141">Minutes</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1281">Monday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1185">Month</a>(daysOfMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-824">MonthFirstWeekday</a>(weekday <a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1193">MonthLastDay</a>(dayCountBeforeLastDayOfMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1217">Months</a>(daysOfTheMonth ...<a href="../../builtin.html#name-int">int</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-160">Name</a>(name <a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1306">Saturday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1125">Second</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1130">Seconds</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-854">SingletonMode</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1095">StartAt</a>(t <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1455">StartImmediately</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1311">Sunday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1065">Tag</a>(t ...<a href="../../builtin.html#name-string">string</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1296">Thursday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1286">Tuesday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1440">WaitForSchedule</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1291">Wednesday</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1169">Week</a>() *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1264">Weekday</a>(weekDay <a href="../../time.html">time</a>.<a href="../../time.html#name-Weekday">Weekday</a>) *<b>Scheduler</b></span><span>
+			func (*Scheduler).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1175">Weeks</a>() *<b>Scheduler</b></span></span>
+		<input type='checkbox' class="fold" id="Scheduler-fold-values"><label for="Scheduler-fold-values">As Types Of (<i>only one</i>)</label><span id='Scheduler-fold-values-items' class="fold-items"><span>
+			  var github.com/limanmys/render-engine/internal/constants.<a href="../limanmys/render-engine/internal/constants.html#name-GLOBAL_SCHEDULER">GLOBAL_SCHEDULER</a> *Scheduler</span></span>
+
+</span></div><div class="anchor type-res" id="name-TimeWrapper" data-popularity="185">	<input type='checkbox' class="fold" id="TimeWrapper-fold-content"><label for="TimeWrapper-fold-content"> type <a href="../../../src/github.com/go-co-op/gocron/time_helper.go.html#line-9">TimeWrapper</a> <b><i>(interface)</i></b></label><span id='TimeWrapper-fold-content-docs' class="fold-docs">
+<span class="md-text">		TimeWrapper is an interface that wraps the Now, Sleep, and Unix methods of the time package.
+		This allows the library and users to mock the time package for testing.</span>
+
+		<input type='checkbox' class="fold" id="TimeWrapper-fold-methods"><label for="TimeWrapper-fold-methods">Methods (<i>total 3</i>)</label><span id='TimeWrapper-fold-methods-items' class="fold-items"><span>
+			<span class="nodocs">( TimeWrapper) <a href="../../../src/github.com/go-co-op/gocron/time_helper.go.html#line-10">Now</a>(*<a href="../../time.html">time</a>.<a href="../../time.html#name-Location">Location</a>) <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></span></span><span>
+			<span class="nodocs">( TimeWrapper) <a href="../../../src/github.com/go-co-op/gocron/time_helper.go.html#line-12">Sleep</a>(<a href="../../time.html">time</a>.<a href="../../time.html#name-Duration">Duration</a>)</span></span><span>
+			<span class="nodocs">( TimeWrapper) <a href="../../../src/github.com/go-co-op/gocron/time_helper.go.html#line-11">Unix</a>(<a href="../../builtin.html#name-int64">int64</a>, <a href="../../builtin.html#name-int64">int64</a>) <a href="../../time.html">time</a>.<a href="../../time.html#name-Time">Time</a></span></span></span>
+		<input type='checkbox' class="fold" id="TimeWrapper-fold-params"><label for="TimeWrapper-fold-params">As Inputs Of (<i>at least one exported</i>)</label><span id='TimeWrapper-fold-params-items' class="fold-items"><span>
+			func (*<a href="#name-Scheduler">Scheduler</a>).<a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-1464">CustomTime</a>(customTimeWrapper <b>TimeWrapper</b>)</span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 6)</i></span></span>
+
+<div class="anchor value-res" id="name-AfterJobRuns">	<input type='checkbox' class="fold" id="AfterJobRuns-fold-content"><label for="AfterJobRuns-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-399">AfterJobRuns</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <a href="#name-EventListener">EventListener</a></label><span id='AfterJobRuns-fold-content-docs' class="fold-docs">
+<span class="md-text">		AfterJobRuns is called after the job is run
+		This is called even when an error is returned</span>
+
+</span></div><div class="anchor value-res" id="name-BeforeJobRuns">	<input type='checkbox' class="fold" id="BeforeJobRuns-fold-content"><label for="BeforeJobRuns-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-389">BeforeJobRuns</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <a href="#name-EventListener">EventListener</a></label><span id='BeforeJobRuns-fold-content-docs' class="fold-docs">
+<span class="md-text">		BeforeJobRuns is called before the job is run</span>
+
+</span></div><div class="anchor value-res" id="name-NewScheduler">	<input type='checkbox' class="fold" id="NewScheduler-fold-content"><label for="NewScheduler-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-55">NewScheduler</a>(loc *<a href="../../time.html">time</a>.<a href="../../time.html#name-Location">Location</a>) *<a href="#name-Scheduler">Scheduler</a></label><span id='NewScheduler-fold-content-docs' class="fold-docs">
+<span class="md-text">		NewScheduler creates a new Scheduler</span>
+
+</span></div><div class="anchor value-res" id="name-SetPanicHandler">	<input type='checkbox' class="fold" id="SetPanicHandler-fold-content"><label for="SetPanicHandler-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-32">SetPanicHandler</a>(handler <a href="#name-PanicHandlerFunc">PanicHandlerFunc</a>)</label><span id='SetPanicHandler-fold-content-docs' class="fold-docs">
+<span class="md-text">		SetPanicHandler sets the global panicHandler to the given function.
+		Leaving it nil or setting it to nil disables automatic panic handling.
+		If the panicHandler is not nil, any panic that occurs during executing a job will be recovered
+		and the panicHandlerFunc will be called with the job's funcName and the recover data.</span>
+
+</span></div><div class="anchor value-res" id="name-WhenJobReturnsError">	<input type='checkbox' class="fold" id="WhenJobReturnsError-fold-content"><label for="WhenJobReturnsError-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-408">WhenJobReturnsError</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>, err <a href="../../builtin.html#name-error">error</a>)) <a href="#name-EventListener">EventListener</a></label><span id='WhenJobReturnsError-fold-content-docs' class="fold-docs">
+<span class="md-text">		WhenJobReturnsError is called when the job returns an error</span>
+
+</span></div><div class="anchor value-res" id="name-WhenJobReturnsNoError">	<input type='checkbox' class="fold" id="WhenJobReturnsNoError-fold-content"><label for="WhenJobReturnsNoError-fold-content"> func <a href="../../../src/github.com/go-co-op/gocron/job.go.html#line-418">WhenJobReturnsNoError</a>(eventListenerFunc func(jobName <a href="../../builtin.html#name-string">string</a>)) <a href="#name-EventListener">EventListener</a></label><span id='WhenJobReturnsNoError-fold-content-docs' class="fold-docs">
+<span class="md-text">		WhenJobReturnsNoError is called when the job does not return an error
+		the function must accept a single parameter, which is an error</span>
+
+</span></div></div>
+<div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 22)</i></span></span>
+
+<div class="anchor value-res" id="name-ErrAtTimeNotSupported">	<input type='checkbox' class="fold" id="ErrAtTimeNotSupported-fold-content"><label for="ErrAtTimeNotSupported-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-50">ErrAtTimeNotSupported</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrAtTimeNotSupported-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrCronParseFailure">	<input type='checkbox' class="fold" id="ErrCronParseFailure-fold-content"><label for="ErrCronParseFailure-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-58">ErrCronParseFailure</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrCronParseFailure-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrDoWithJobDetails">	<input type='checkbox' class="fold" id="ErrDoWithJobDetails-fold-content"><label for="ErrDoWithJobDetails-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-56">ErrDoWithJobDetails</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrDoWithJobDetails-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrFailedToConnectToRedis">	<span class="nodocs">  var <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-9">ErrFailedToConnectToRedis</a> <a href="../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrFailedToObtainLock">	<span class="nodocs">  var <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-10">ErrFailedToObtainLock</a> <a href="../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrFailedToReleaseLock">	<span class="nodocs">  var <a href="../../../src/github.com/go-co-op/gocron/locker.go.html#line-11">ErrFailedToReleaseLock</a> <a href="../../builtin.html#name-error">error</a></span></div><div class="anchor value-res" id="name-ErrInvalidDayOfMonthEntry">	<input type='checkbox' class="fold" id="ErrInvalidDayOfMonthEntry-fold-content"><label for="ErrInvalidDayOfMonthEntry-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-52">ErrInvalidDayOfMonthEntry</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidDayOfMonthEntry-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidDaysOfMonthDuplicateValue">	<input type='checkbox' class="fold" id="ErrInvalidDaysOfMonthDuplicateValue-fold-content"><label for="ErrInvalidDaysOfMonthDuplicateValue-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-59">ErrInvalidDaysOfMonthDuplicateValue</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidDaysOfMonthDuplicateValue-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidFunctionParameters">	<input type='checkbox' class="fold" id="ErrInvalidFunctionParameters-fold-content"><label for="ErrInvalidFunctionParameters-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-48">ErrInvalidFunctionParameters</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidFunctionParameters-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidInterval">	<input type='checkbox' class="fold" id="ErrInvalidInterval-fold-content"><label for="ErrInvalidInterval-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-45">ErrInvalidInterval</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidInterval-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidIntervalType">	<input type='checkbox' class="fold" id="ErrInvalidIntervalType-fold-content"><label for="ErrInvalidIntervalType-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-46">ErrInvalidIntervalType</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidIntervalType-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidIntervalUnitsSelection">	<input type='checkbox' class="fold" id="ErrInvalidIntervalUnitsSelection-fold-content"><label for="ErrInvalidIntervalUnitsSelection-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-47">ErrInvalidIntervalUnitsSelection</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidIntervalUnitsSelection-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrInvalidMonthLastDayEntry">	<input type='checkbox' class="fold" id="ErrInvalidMonthLastDayEntry-fold-content"><label for="ErrInvalidMonthLastDayEntry-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-53">ErrInvalidMonthLastDayEntry</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrInvalidMonthLastDayEntry-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrJobNotFound">	<input type='checkbox' class="fold" id="ErrJobNotFound-fold-content"><label for="ErrJobNotFound-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-43">ErrJobNotFound</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrJobNotFound-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrJobNotFoundWithTag">	<input type='checkbox' class="fold" id="ErrJobNotFoundWithTag-fold-content"><label for="ErrJobNotFoundWithTag-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-42">ErrJobNotFoundWithTag</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrJobNotFoundWithTag-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrNotAFunction">	<input type='checkbox' class="fold" id="ErrNotAFunction-fold-content"><label for="ErrNotAFunction-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-40">ErrNotAFunction</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrNotAFunction-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrNotScheduledWeekday">	<input type='checkbox' class="fold" id="ErrNotScheduledWeekday-fold-content"><label for="ErrNotScheduledWeekday-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-41">ErrNotScheduledWeekday</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrNotScheduledWeekday-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrTagsUnique">	<input type='checkbox' class="fold" id="ErrTagsUnique-fold-content"><label for="ErrTagsUnique-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-54">ErrTagsUnique</a> func(tag <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='ErrTagsUnique-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrUnsupportedTimeFormat">	<input type='checkbox' class="fold" id="ErrUnsupportedTimeFormat-fold-content"><label for="ErrUnsupportedTimeFormat-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-44">ErrUnsupportedTimeFormat</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrUnsupportedTimeFormat-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrUpdateCalledWithoutJob">	<input type='checkbox' class="fold" id="ErrUpdateCalledWithoutJob-fold-content"><label for="ErrUpdateCalledWithoutJob-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-57">ErrUpdateCalledWithoutJob</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrUpdateCalledWithoutJob-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrWeekdayNotSupported">	<input type='checkbox' class="fold" id="ErrWeekdayNotSupported-fold-content"><label for="ErrWeekdayNotSupported-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-51">ErrWeekdayNotSupported</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrWeekdayNotSupported-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div><div class="anchor value-res" id="name-ErrWrongParams">	<input type='checkbox' class="fold" id="ErrWrongParams-fold-content"><label for="ErrWrongParams-fold-content">  var <a href="../../../src/github.com/go-co-op/gocron/gocron.go.html#line-55">ErrWrongParams</a> <a href="../../builtin.html#name-error">error</a></label><span id='ErrWrongParams-fold-content-docs' class="fold-docs">
+<span class="md-text">		Error declarations for gocron related errors</span>
+
+</span></div></div>
+<div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div class="anchor value-res" id="name-RescheduleMode">	<input type='checkbox' class="fold" id="RescheduleMode-fold-content"><label for="RescheduleMode-fold-content">const <a href="../../../src/github.com/go-co-op/gocron/executor.go.html#line-15">RescheduleMode</a> <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-17">limitMode</a> = 0</label><span id='RescheduleMode-fold-content-docs' class="fold-docs">
+<span class="md-text">		RescheduleMode - the default is that if a limit on maximum
+		concurrent jobs is set and the limit is reached, a job will
+		skip it's run and try again on the next occurrence in the schedule</span>
+
+</span></div><div class="anchor value-res" id="name-WaitMode">	<input type='checkbox' class="fold" id="WaitMode-fold-content"><label for="WaitMode-fold-content">const <a href="../../../src/github.com/go-co-op/gocron/executor.go.html#line-35">WaitMode</a> <a href="../../../src/github.com/go-co-op/gocron/scheduler.go.html#line-17">limitMode</a> = 1</label><span id='WaitMode-fold-content-docs' class="fold-docs">
+<span class="md-text">		WaitMode - if a limit on maximum concurrent jobs is set
+		and the limit is reached, a job will wait to try and run
+		until a spot in the limit is freed up.
+		
+		Note: this mode can produce unpredictable results as
+		job execution order isn't guaranteed. For example, a job that
+		executes frequently may pile up in the wait queue and be executed
+		many times back to back when the queue opens.
+		
+		Warning: do not use this mode if your jobs will continue to stack
+		up beyond the ability of the limit workers to keep up. An example of
+		what NOT to do:
+		
+		    s.Every("1s").Do(func() {
+		        // this will result in an ever-growing number of goroutines
+		   	   // blocked trying to send to the buffered channel
+		        time.Sleep(10 * time.Minute)
+		    })</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: exithook.go in package runtime</title>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	exithook.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/runtime.html">runtime</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2022 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> runtime</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// addExitHook registers the specified function 'f' to be run at</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">// program termination (e.g. when someone invokes os.Exit(), or when</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// main.main returns). Hooks are run in reverse order of registration:</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// first hook added is the last one run.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// CAREFUL: the expectation is that addExitHook should only be called</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// from a safe context (e.g. not an error/panic path or signal</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// handler, preemption enabled, allocation allowed, write barriers</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// allowed, etc), and that the exit function 'f' will be invoked under</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// similar circumstances. That is the say, we are expecting that 'f'</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// uses normal / high-level Go code as opposed to one of the more</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// restricted dialects used for the trickier parts of the runtime.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">func</span> addExitHook(<label for="r1" class="ident">f</label> <span class="keyword">func</span>(), <label for="r2" class="ident">runOnNonZeroExit</label> <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-20"><code>	<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a> = <a href="../../pkg/builtin.html#name-append" class="ident">append</a>(<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a>, <a href="#line-25" class="ident">exitHook</a>{<a href="#line-26" class="ident">f</a>: <label for="r1" class="ident">f</label>, <a href="#line-27" class="ident">runOnNonZeroExit</a>: <label for="r2" class="ident">runOnNonZeroExit</label>})</code></span>
+<span class="codeline" id="line-21"><code>}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// exitHook stores a function to be run on program exit, registered</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// by the utility runtime.addExitHook.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">type</span> exitHook <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-26"><code>	f                <span class="keyword">func</span>() <span class="comment">// func to run</span></code></span>
+<span class="codeline" id="line-27"><code>	runOnNonZeroExit <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>   <span class="comment">// whether to run on non-zero exit code</span></code></span>
+<span class="codeline" id="line-28"><code>}</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// exitHooks stores state related to hook functions registered to</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// run when program execution terminates.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">var</span> exitHooks <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-33"><code>	hooks            []<a href="#line-25" class="ident">exitHook</a></code></span>
+<span class="codeline" id="line-34"><code>	runningExitHooks <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// runExitHooks runs any registered exit hook functions (funcs</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// previously registered using runtime.addExitHook). Here 'exitCode'</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// is the status code being passed to os.Exit, or zero if the program</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// is terminating normally without calling os.Exit.</span></code></span>
+<span class="codeline" id="line-41"><code><span class="keyword">func</span> runExitHooks(<label for="r4" class="ident">exitCode</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-42"><code>	<span class="keyword">if</span> <a href="#line-32" class="ident">exitHooks</a>.<a href="#line-34" class="ident">runningExitHooks</a> {</code></span>
+<span class="codeline" id="line-43"><code>		<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"internal error: exit hook invoked exit"</span>)</code></span>
+<span class="codeline" id="line-44"><code>	}</code></span>
+<span class="codeline" id="line-45"><code>	<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-34" class="ident">runningExitHooks</a> = <a href="../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-46"><code></code></span>
+<span class="codeline" id="line-47"><code>	<label for="r5" class="ident">runExitHook</label> := <span class="keyword">func</span>(<label for="r6" class="ident">f</label> <span class="keyword">func</span>()) (<label for="r7" class="ident">caughtPanic</label> <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-48"><code>		<span class="keyword">defer</span> <span class="keyword">func</span>() {</code></span>
+<span class="codeline" id="line-49"><code>			<span class="keyword">if</span> <label for="r8" class="ident">x</label> := <a href="../../pkg/builtin.html#name-recover" class="ident">recover</a>(); <label for="r8" class="ident">x</label> != <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-50"><code>				<label for="r7" class="ident">caughtPanic</label> = <a href="../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-51"><code>			}</code></span>
+<span class="codeline" id="line-52"><code>		}()</code></span>
+<span class="codeline" id="line-53"><code>		<label for="r6" class="ident">f</label>()</code></span>
+<span class="codeline" id="line-54"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code></code></span>
+<span class="codeline" id="line-57"><code>	<a href="pagetrace_off.go.html#line-27" class="ident">finishPageTrace</a>()</code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">for</span> <label for="r9" class="ident">i</label> := <span class="keyword">range</span> <a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a> {</code></span>
+<span class="codeline" id="line-59"><code>		<label for="r10" class="ident">h</label> := <a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a>[<a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a>)-<label for="r9" class="ident">i</label>-<span class="lit-number">1</span>]</code></span>
+<span class="codeline" id="line-60"><code>		<span class="keyword">if</span> <label for="r4" class="ident">exitCode</label> != <span class="lit-number">0</span> &amp;&amp; !<label for="r10" class="ident">h</label>.<a href="#line-27" class="ident">runOnNonZeroExit</a> {</code></span>
+<span class="codeline" id="line-61"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-62"><code>		}</code></span>
+<span class="codeline" id="line-63"><code>		<span class="keyword">if</span> <label for="r11" class="ident">caughtPanic</label> := <label for="r5" class="ident">runExitHook</label>(<label for="r10" class="ident">h</label>.<a href="#line-26" class="ident">f</a>); <label for="r11" class="ident">caughtPanic</label> {</code></span>
+<span class="codeline" id="line-64"><code>			<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"internal error: exit hook invoked panic"</span>)</code></span>
+<span class="codeline" id="line-65"><code>		}</code></span>
+<span class="codeline" id="line-66"><code>	}</code></span>
+<span class="codeline" id="line-67"><code>	<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-33" class="ident">hooks</a> = <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-68"><code>	<a href="#line-32" class="ident">exitHooks</a>.<a href="#line-34" class="ident">runningExitHooks</a> = <a href="../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-69"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

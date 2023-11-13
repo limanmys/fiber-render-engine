@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: dnsconfig.go in package net</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -51,7 +51,7 @@ input[id=i2]:checked ~pre .i2
 <span class="codeline" id="line-19"><code>	servers       []<a href="../../pkg/builtin.html#name-string" class="ident">string</a>      <span class="comment">// server addresses (in host:port form) to use</span></code></span>
 <span class="codeline" id="line-20"><code>	search        []<a href="../../pkg/builtin.html#name-string" class="ident">string</a>      <span class="comment">// rooted suffixes to append to local name</span></code></span>
 <span class="codeline" id="line-21"><code>	ndots         <a href="../../pkg/builtin.html#name-int" class="ident">int</a>           <span class="comment">// number of dots in name to trigger absolute lookup</span></code></span>
-<span class="codeline" id="line-22"><code>	timeout       <a href="../../pkg/time.html" class="ident i2">time</a>.<a href="../time/time.go.html#line-591" class="ident">Duration</a> <span class="comment">// wait before giving up on a query, including retries</span></code></span>
+<span class="codeline" id="line-22"><code>	timeout       <a href="../../pkg/time.html" class="ident i2">time</a>.<a href="../time/time.go.html#line-612" class="ident">Duration</a> <span class="comment">// wait before giving up on a query, including retries</span></code></span>
 <span class="codeline" id="line-23"><code>	attempts      <a href="../../pkg/builtin.html#name-int" class="ident">int</a>           <span class="comment">// lost packets before giving up on server</span></code></span>
 <span class="codeline" id="line-24"><code>	rotate        <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// round robin among servers</span></code></span>
 <span class="codeline" id="line-25"><code>	unknownOpt    <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// anything unknown was encountered</span></code></span>
@@ -61,21 +61,23 @@ input[id=i2]:checked ~pre .i2
 <span class="codeline" id="line-29"><code>	soffset       <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a>        <span class="comment">// used by serverOffset</span></code></span>
 <span class="codeline" id="line-30"><code>	singleRequest <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// use sequential A and AAAA queries instead of parallel queries</span></code></span>
 <span class="codeline" id="line-31"><code>	useTCP        <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// force usage of TCP for DNS resolutions</span></code></span>
-<span class="codeline" id="line-32"><code>}</code></span>
-<span class="codeline" id="line-33"><code></code></span>
-<span class="codeline" id="line-34"><code><span class="comment">// serverOffset returns an offset that can be used to determine</span></code></span>
-<span class="codeline" id="line-35"><code><span class="comment">// indices of servers in c.servers when making queries.</span></code></span>
-<span class="codeline" id="line-36"><code><span class="comment">// When the rotate option is enabled, this offset increases.</span></code></span>
-<span class="codeline" id="line-37"><code><span class="comment">// Otherwise it is always 0.</span></code></span>
-<span class="codeline" id="line-38"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="#line-18" class="ident">dnsConfig</a>) <label for="r1" class="ident">serverOffset</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
-<span class="codeline" id="line-39"><code>	<span class="keyword">if</span> <label for="r0" class="ident">c</label>.<a href="#line-24" class="ident">rotate</a> {</code></span>
-<span class="codeline" id="line-40"><code>		<span class="keyword">return</span> <a href="../../pkg/sync/atomic.html" class="ident i1">atomic</a>.<a href="../sync/atomic/doc.go.html#line-106" class="ident">AddUint32</a>(&amp;<label for="r0" class="ident">c</label>.<a href="#line-29" class="ident">soffset</a>, <span class="lit-number">1</span>) - <span class="lit-number">1</span> <span class="comment">// return 0 to start</span></code></span>
-<span class="codeline" id="line-41"><code>	}</code></span>
-<span class="codeline" id="line-42"><code>	<span class="keyword">return</span> <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-32"><code>	trustAD       <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// add AD flag to queries</span></code></span>
+<span class="codeline" id="line-33"><code>	noReload      <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>          <span class="comment">// do not check for config file updates</span></code></span>
+<span class="codeline" id="line-34"><code>}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// serverOffset returns an offset that can be used to determine</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// indices of servers in c.servers when making queries.</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// When the rotate option is enabled, this offset increases.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// Otherwise it is always 0.</span></code></span>
+<span class="codeline" id="line-40"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> *<a href="#line-18" class="ident">dnsConfig</a>) <label for="r1" class="ident">serverOffset</label>() <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a> {</code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">if</span> <label for="r0" class="ident">c</label>.<a href="#line-24" class="ident">rotate</a> {</code></span>
+<span class="codeline" id="line-42"><code>		<span class="keyword">return</span> <a href="../../pkg/sync/atomic.html" class="ident i1">atomic</a>.<a href="../sync/atomic/doc.go.html#line-124" class="ident">AddUint32</a>(&amp;<label for="r0" class="ident">c</label>.<a href="#line-29" class="ident">soffset</a>, <span class="lit-number">1</span>) - <span class="lit-number">1</span> <span class="comment">// return 0 to start</span></code></span>
+<span class="codeline" id="line-43"><code>	}</code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">return</span> <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-45"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

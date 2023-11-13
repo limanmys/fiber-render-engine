@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: streaming.go in package github.com/valyala/fasthttp</title>
-<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -81,107 +81,111 @@ input[id=i4]:checked ~pre .i4
 <span class="codeline" id="line-9"><code>	<label for="i4"><span class="lit-string i4">"github.com/valyala/bytebufferpool"</span></label></code></span>
 <span class="codeline" id="line-10"><code>)</code></span>
 <span class="codeline" id="line-11"><code></code></span>
-<span class="codeline" id="line-12"><code><span class="keyword">type</span> requestStream <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-13"><code>	header          *<a href="header.go.html#line-61" class="ident">RequestHeader</a></code></span>
-<span class="codeline" id="line-14"><code>	prefetchedBytes *<a href="../../../../pkg/bytes.html" class="ident i1">bytes</a>.<a href="../../../bytes/reader.go.html#line-18" class="ident">Reader</a></code></span>
-<span class="codeline" id="line-15"><code>	reader          *<a href="../../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../../bufio/bufio.go.html#line-32" class="ident">Reader</a></code></span>
-<span class="codeline" id="line-16"><code>	totalBytesRead  <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-17"><code>	chunkLeft       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-18"><code>}</code></span>
-<span class="codeline" id="line-19"><code></code></span>
-<span class="codeline" id="line-20"><code><span class="keyword">func</span> (<label for="r0" class="ident">rs</label> *<a href="#line-12" class="ident">requestStream</a>) <label for="r1" class="ident">Read</label>(<label for="r2" class="ident">p</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-21"><code>	<span class="keyword">var</span> (</code></span>
-<span class="codeline" id="line-22"><code>		<label for="r3" class="ident">n</label>   <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-23"><code>		<label for="r4" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-24"><code>	)</code></span>
-<span class="codeline" id="line-25"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-73" class="ident">contentLength</a> == -<span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-26"><code>		<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-27"><code>			<label for="r5" class="ident">chunkSize</label>, <label for="r6" class="ident">err</label> := <a href="http.go.html#line-2227" class="ident">parseChunkSize</a>(<label for="r0" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a>)</code></span>
-<span class="codeline" id="line-28"><code>			<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-29"><code>				<span class="keyword">return</span> <span class="lit-number">0</span>, <label for="r6" class="ident">err</label></code></span>
-<span class="codeline" id="line-30"><code>			}</code></span>
-<span class="codeline" id="line-31"><code>			<span class="keyword">if</span> <label for="r5" class="ident">chunkSize</label> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-32"><code>				<label for="r6" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-2130" class="ident">ReadTrailer</a>(<label for="r0" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a>)</code></span>
-<span class="codeline" id="line-33"><code>				<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r6" class="ident">err</label> != <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
-<span class="codeline" id="line-34"><code>					<span class="keyword">return</span> <span class="lit-number">0</span>, <label for="r6" class="ident">err</label></code></span>
-<span class="codeline" id="line-35"><code>				}</code></span>
-<span class="codeline" id="line-36"><code>				<span class="keyword">return</span> <span class="lit-number">0</span>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
-<span class="codeline" id="line-37"><code>			}</code></span>
-<span class="codeline" id="line-38"><code>			<label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> = <label for="r5" class="ident">chunkSize</label></code></span>
-<span class="codeline" id="line-39"><code>		}</code></span>
-<span class="codeline" id="line-40"><code>		<label for="r7" class="ident">bytesToRead</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>)</code></span>
-<span class="codeline" id="line-41"><code>		<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> &lt; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) {</code></span>
-<span class="codeline" id="line-42"><code>			<label for="r7" class="ident">bytesToRead</label> = <label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a></code></span>
-<span class="codeline" id="line-43"><code>		}</code></span>
-<span class="codeline" id="line-44"><code>		<label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a>.<a href="../../../bufio/bufio.go.html#line-208" class="ident">Read</a>(<label for="r2" class="ident">p</label>[:<label for="r7" class="ident">bytesToRead</label>])</code></span>
-<span class="codeline" id="line-45"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> += <label for="r3" class="ident">n</label></code></span>
-<span class="codeline" id="line-46"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> -= <label for="r3" class="ident">n</label></code></span>
-<span class="codeline" id="line-47"><code>		<span class="keyword">if</span> <label for="r4" class="ident">err</label> == <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
-<span class="codeline" id="line-48"><code>			<label for="r4" class="ident">err</label> = <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
-<span class="codeline" id="line-49"><code>		}</code></span>
-<span class="codeline" id="line-50"><code>		<span class="keyword">if</span> <label for="r4" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r0" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-51"><code>			<label for="r4" class="ident">err</label> = <a href="http.go.html#line-2258" class="ident">readCrLf</a>(<label for="r0" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a>)</code></span>
-<span class="codeline" id="line-52"><code>		}</code></span>
-<span class="codeline" id="line-53"><code>		<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
-<span class="codeline" id="line-54"><code>	}</code></span>
-<span class="codeline" id="line-55"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> == <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-73" class="ident">contentLength</a> {</code></span>
-<span class="codeline" id="line-56"><code>		<span class="keyword">return</span> <span class="lit-number">0</span>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
-<span class="codeline" id="line-57"><code>	}</code></span>
-<span class="codeline" id="line-58"><code>	<label for="r8" class="ident">prefetchedSize</label> := <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r0" class="ident">rs</label>.<a href="#line-14" class="ident">prefetchedBytes</a>.<a href="../../../bytes/reader.go.html#line-36" class="ident">Size</a>())</code></span>
-<span class="codeline" id="line-59"><code>	<span class="keyword">if</span> <label for="r8" class="ident">prefetchedSize</label> &gt; <label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> {</code></span>
-<span class="codeline" id="line-60"><code>		<label for="r9" class="ident">left</label> := <label for="r8" class="ident">prefetchedSize</label> - <label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a></code></span>
-<span class="codeline" id="line-61"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) &gt; <label for="r9" class="ident">left</label> {</code></span>
-<span class="codeline" id="line-62"><code>			<label for="r2" class="ident">p</label> = <label for="r2" class="ident">p</label>[:<label for="r9" class="ident">left</label>]</code></span>
-<span class="codeline" id="line-63"><code>		}</code></span>
-<span class="codeline" id="line-64"><code>		<label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label> := <label for="r0" class="ident">rs</label>.<a href="#line-14" class="ident">prefetchedBytes</a>.<a href="../../../bytes/reader.go.html#line-39" class="ident">Read</a>(<label for="r2" class="ident">p</label>)</code></span>
-<span class="codeline" id="line-65"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> += <label for="r10" class="ident">n</label></code></span>
-<span class="codeline" id="line-66"><code>		<span class="keyword">if</span> <label for="r10" class="ident">n</label> == <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-73" class="ident">contentLength</a> {</code></span>
-<span class="codeline" id="line-67"><code>			<span class="keyword">return</span> <label for="r10" class="ident">n</label>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">type</span> headerInterface <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-13"><code>	ContentLength() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-14"><code>	ReadTrailer(r *<a href="../../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../../bufio/bufio.go.html#line-32" class="ident">Reader</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-15"><code>}</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">type</span> requestStream <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-18"><code>	header          <a href="#line-12" class="ident">headerInterface</a></code></span>
+<span class="codeline" id="line-19"><code>	prefetchedBytes *<a href="../../../../pkg/bytes.html" class="ident i1">bytes</a>.<a href="../../../bytes/reader.go.html#line-18" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-20"><code>	reader          *<a href="../../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../../bufio/bufio.go.html#line-32" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-21"><code>	totalBytesRead  <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-22"><code>	chunkLeft       <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-23"><code>}</code></span>
+<span class="codeline" id="line-24"><code></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">func</span> (<label for="r0" class="ident">rs</label> *<a href="#line-17" class="ident">requestStream</a>) <label for="r1" class="ident">Read</label>(<label for="r2" class="ident">p</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-27"><code>		<label for="r3" class="ident">n</label>   <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-28"><code>		<label for="r4" class="ident">err</label> <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-29"><code>	)</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-13" class="ident">ContentLength</a>() == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-31"><code>		<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-32"><code>			<label for="r5" class="ident">chunkSize</label>, <label for="r6" class="ident">err</label> := <a href="http.go.html#line-2297" class="ident">parseChunkSize</a>(<label for="r0" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a>)</code></span>
+<span class="codeline" id="line-33"><code>			<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-34"><code>				<span class="keyword">return</span> <span class="lit-number">0</span>, <label for="r6" class="ident">err</label></code></span>
+<span class="codeline" id="line-35"><code>			}</code></span>
+<span class="codeline" id="line-36"><code>			<span class="keyword">if</span> <label for="r5" class="ident">chunkSize</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-37"><code>				<label for="r6" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-14" class="ident">ReadTrailer</a>(<label for="r0" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a>)</code></span>
+<span class="codeline" id="line-38"><code>				<span class="keyword">if</span> <label for="r6" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r6" class="ident">err</label> != <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-39"><code>					<span class="keyword">return</span> <span class="lit-number">0</span>, <label for="r6" class="ident">err</label></code></span>
+<span class="codeline" id="line-40"><code>				}</code></span>
+<span class="codeline" id="line-41"><code>				<span class="keyword">return</span> <span class="lit-number">0</span>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-42"><code>			}</code></span>
+<span class="codeline" id="line-43"><code>			<label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> = <label for="r5" class="ident">chunkSize</label></code></span>
+<span class="codeline" id="line-44"><code>		}</code></span>
+<span class="codeline" id="line-45"><code>		<label for="r7" class="ident">bytesToRead</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-46"><code>		<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> &lt; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) {</code></span>
+<span class="codeline" id="line-47"><code>			<label for="r7" class="ident">bytesToRead</label> = <label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a></code></span>
+<span class="codeline" id="line-48"><code>		}</code></span>
+<span class="codeline" id="line-49"><code>		<label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a>.<a href="../../../bufio/bufio.go.html#line-215" class="ident">Read</a>(<label for="r2" class="ident">p</label>[:<label for="r7" class="ident">bytesToRead</label>])</code></span>
+<span class="codeline" id="line-50"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> += <label for="r3" class="ident">n</label></code></span>
+<span class="codeline" id="line-51"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> -= <label for="r3" class="ident">n</label></code></span>
+<span class="codeline" id="line-52"><code>		<span class="keyword">if</span> <label for="r4" class="ident">err</label> == <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-53"><code>			<label for="r4" class="ident">err</label> = <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
+<span class="codeline" id="line-54"><code>		}</code></span>
+<span class="codeline" id="line-55"><code>		<span class="keyword">if</span> <label for="r4" class="ident">err</label> == <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r0" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-56"><code>			<label for="r4" class="ident">err</label> = <a href="http.go.html#line-2328" class="ident">readCrLf</a>(<label for="r0" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a>)</code></span>
+<span class="codeline" id="line-57"><code>		}</code></span>
+<span class="codeline" id="line-58"><code>		<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> == <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-13" class="ident">ContentLength</a>() {</code></span>
+<span class="codeline" id="line-61"><code>		<span class="keyword">return</span> <span class="lit-number">0</span>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-62"><code>	}</code></span>
+<span class="codeline" id="line-63"><code>	<label for="r8" class="ident">prefetchedSize</label> := <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r0" class="ident">rs</label>.<a href="#line-19" class="ident">prefetchedBytes</a>.<a href="../../../bytes/reader.go.html#line-36" class="ident">Size</a>())</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">if</span> <label for="r8" class="ident">prefetchedSize</label> &gt; <label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> {</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r9" class="ident">left</label> := <label for="r8" class="ident">prefetchedSize</label> - <label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a></code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) &gt; <label for="r9" class="ident">left</label> {</code></span>
+<span class="codeline" id="line-67"><code>			<label for="r2" class="ident">p</label> = <label for="r2" class="ident">p</label>[:<label for="r9" class="ident">left</label>]</code></span>
 <span class="codeline" id="line-68"><code>		}</code></span>
-<span class="codeline" id="line-69"><code>		<span class="keyword">return</span> <label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label></code></span>
-<span class="codeline" id="line-70"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-71"><code>		<label for="r12" class="ident">left</label> := <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-73" class="ident">contentLength</a> - <label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a></code></span>
-<span class="codeline" id="line-72"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) &gt; <label for="r12" class="ident">left</label> {</code></span>
-<span class="codeline" id="line-73"><code>			<label for="r2" class="ident">p</label> = <label for="r2" class="ident">p</label>[:<label for="r12" class="ident">left</label>]</code></span>
-<span class="codeline" id="line-74"><code>		}</code></span>
-<span class="codeline" id="line-75"><code>		<label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a>.<a href="../../../bufio/bufio.go.html#line-208" class="ident">Read</a>(<label for="r2" class="ident">p</label>)</code></span>
-<span class="codeline" id="line-76"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> += <label for="r3" class="ident">n</label></code></span>
-<span class="codeline" id="line-77"><code>		<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-78"><code>			<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
-<span class="codeline" id="line-79"><code>		}</code></span>
-<span class="codeline" id="line-80"><code>	}</code></span>
-<span class="codeline" id="line-81"><code></code></span>
-<span class="codeline" id="line-82"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> == <label for="r0" class="ident">rs</label>.<a href="#line-13" class="ident">header</a>.<a href="header.go.html#line-73" class="ident">contentLength</a> {</code></span>
-<span class="codeline" id="line-83"><code>		<label for="r4" class="ident">err</label> = <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-69"><code>		<label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label> := <label for="r0" class="ident">rs</label>.<a href="#line-19" class="ident">prefetchedBytes</a>.<a href="../../../bytes/reader.go.html#line-39" class="ident">Read</a>(<label for="r2" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-70"><code>		<label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> += <label for="r10" class="ident">n</label></code></span>
+<span class="codeline" id="line-71"><code>		<span class="keyword">if</span> <label for="r10" class="ident">n</label> == <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-13" class="ident">ContentLength</a>() {</code></span>
+<span class="codeline" id="line-72"><code>			<span class="keyword">return</span> <label for="r10" class="ident">n</label>, <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-73"><code>		}</code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">return</span> <label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label></code></span>
+<span class="codeline" id="line-75"><code>	}</code></span>
+<span class="codeline" id="line-76"><code>	<label for="r12" class="ident">left</label> := <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-13" class="ident">ContentLength</a>() - <label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a></code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">p</label>) &gt; <label for="r12" class="ident">left</label> {</code></span>
+<span class="codeline" id="line-78"><code>		<label for="r2" class="ident">p</label> = <label for="r2" class="ident">p</label>[:<label for="r12" class="ident">left</label>]</code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code>	<label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label> = <label for="r0" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a>.<a href="../../../bufio/bufio.go.html#line-215" class="ident">Read</a>(<label for="r2" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-81"><code>	<label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> += <label for="r3" class="ident">n</label></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">if</span> <label for="r4" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-83"><code>		<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
 <span class="codeline" id="line-84"><code>	}</code></span>
-<span class="codeline" id="line-85"><code>	<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
-<span class="codeline" id="line-86"><code>}</code></span>
-<span class="codeline" id="line-87"><code></code></span>
-<span class="codeline" id="line-88"><code><span class="keyword">func</span> acquireRequestStream(<label for="r14" class="ident">b</label> *<a href="../../../../pkg/github.com/valyala/bytebufferpool.html" class="ident i4">bytebufferpool</a>.<a href="../bytebufferpool/bytebuffer.go.html#line-12" class="ident">ByteBuffer</a>, <label for="r15" class="ident">r</label> *<a href="../../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../../bufio/bufio.go.html#line-32" class="ident">Reader</a>, <label for="r16" class="ident">h</label> *<a href="header.go.html#line-61" class="ident">RequestHeader</a>) *<a href="#line-12" class="ident">requestStream</a> {</code></span>
-<span class="codeline" id="line-89"><code>	<label for="r17" class="ident">rs</label> := <a href="#line-105" class="ident">requestStreamPool</a>.<a href="../../../sync/pool.go.html#line-127" class="ident">Get</a>().(*<a href="#line-12" class="ident">requestStream</a>)</code></span>
-<span class="codeline" id="line-90"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-14" class="ident">prefetchedBytes</a> = <a href="../../../../pkg/bytes.html" class="ident i1">bytes</a>.<a href="../../../bytes/reader.go.html#line-159" class="ident">NewReader</a>(<label for="r14" class="ident">b</label>.<a href="../bytebufferpool/bytebuffer.go.html#line-16" class="ident">B</a>)</code></span>
-<span class="codeline" id="line-91"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a> = <label for="r15" class="ident">r</label></code></span>
-<span class="codeline" id="line-92"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-13" class="ident">header</a> = <label for="r16" class="ident">h</label></code></span>
-<span class="codeline" id="line-93"><code>	<span class="keyword">return</span> <label for="r17" class="ident">rs</label></code></span>
-<span class="codeline" id="line-94"><code>}</code></span>
-<span class="codeline" id="line-95"><code></code></span>
-<span class="codeline" id="line-96"><code><span class="keyword">func</span> releaseRequestStream(<label for="r19" class="ident">rs</label> *<a href="#line-12" class="ident">requestStream</a>) {</code></span>
-<span class="codeline" id="line-97"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-14" class="ident">prefetchedBytes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-98"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-16" class="ident">totalBytesRead</a> = <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-99"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-17" class="ident">chunkLeft</a> = <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-100"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-15" class="ident">reader</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-101"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-13" class="ident">header</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-102"><code>	<a href="#line-105" class="ident">requestStreamPool</a>.<a href="../../../sync/pool.go.html#line-95" class="ident">Put</a>(<label for="r19" class="ident">rs</label>)</code></span>
-<span class="codeline" id="line-103"><code>}</code></span>
-<span class="codeline" id="line-104"><code></code></span>
-<span class="codeline" id="line-105"><code><span class="keyword">var</span> requestStreamPool = <a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/pool.go.html#line-49" class="ident">Pool</a>{</code></span>
-<span class="codeline" id="line-106"><code>	<a href="../../../sync/pool.go.html#line-61" class="ident">New</a>: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {</code></span>
-<span class="codeline" id="line-107"><code>		<span class="keyword">return</span> &amp;<a href="#line-12" class="ident">requestStream</a>{}</code></span>
-<span class="codeline" id="line-108"><code>	},</code></span>
-<span class="codeline" id="line-109"><code>}</code></span>
+<span class="codeline" id="line-85"><code></code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">if</span> <label for="r0" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> == <label for="r0" class="ident">rs</label>.<a href="#line-18" class="ident">header</a>.<a href="#line-13" class="ident">ContentLength</a>() {</code></span>
+<span class="codeline" id="line-87"><code>		<label for="r4" class="ident">err</label> = <a href="../../../../pkg/io.html" class="ident i2">io</a>.<a href="../../../io/io.go.html#line-44" class="ident">EOF</a></code></span>
+<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">return</span> <label for="r3" class="ident">n</label>, <label for="r4" class="ident">err</label></code></span>
+<span class="codeline" id="line-90"><code>}</code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code><span class="keyword">func</span> acquireRequestStream(<label for="r14" class="ident">b</label> *<a href="../../../../pkg/github.com/valyala/bytebufferpool.html" class="ident i4">bytebufferpool</a>.<a href="../bytebufferpool/bytebuffer.go.html#line-12" class="ident">ByteBuffer</a>, <label for="r15" class="ident">r</label> *<a href="../../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../../bufio/bufio.go.html#line-32" class="ident">Reader</a>, <label for="r16" class="ident">h</label> <a href="#line-12" class="ident">headerInterface</a>) *<a href="#line-17" class="ident">requestStream</a> {</code></span>
+<span class="codeline" id="line-93"><code>	<label for="r17" class="ident">rs</label> := <a href="#line-109" class="ident">requestStreamPool</a>.<a href="../../../sync/pool.go.html#line-127" class="ident">Get</a>().(*<a href="#line-17" class="ident">requestStream</a>)</code></span>
+<span class="codeline" id="line-94"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-19" class="ident">prefetchedBytes</a> = <a href="../../../../pkg/bytes.html" class="ident i1">bytes</a>.<a href="../../../bytes/reader.go.html#line-159" class="ident">NewReader</a>(<label for="r14" class="ident">b</label>.<a href="../bytebufferpool/bytebuffer.go.html#line-16" class="ident">B</a>)</code></span>
+<span class="codeline" id="line-95"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a> = <label for="r15" class="ident">r</label></code></span>
+<span class="codeline" id="line-96"><code>	<label for="r17" class="ident">rs</label>.<a href="#line-18" class="ident">header</a> = <label for="r16" class="ident">h</label></code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">return</span> <label for="r17" class="ident">rs</label></code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="keyword">func</span> releaseRequestStream(<label for="r19" class="ident">rs</label> *<a href="#line-17" class="ident">requestStream</a>) {</code></span>
+<span class="codeline" id="line-101"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-19" class="ident">prefetchedBytes</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-102"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-21" class="ident">totalBytesRead</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-103"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-22" class="ident">chunkLeft</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-104"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-20" class="ident">reader</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-105"><code>	<label for="r19" class="ident">rs</label>.<a href="#line-18" class="ident">header</a> = <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-106"><code>	<a href="#line-109" class="ident">requestStreamPool</a>.<a href="../../../sync/pool.go.html#line-95" class="ident">Put</a>(<label for="r19" class="ident">rs</label>)</code></span>
+<span class="codeline" id="line-107"><code>}</code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code><span class="keyword">var</span> requestStreamPool = <a href="../../../../pkg/sync.html" class="ident i3">sync</a>.<a href="../../../sync/pool.go.html#line-49" class="ident">Pool</a>{</code></span>
+<span class="codeline" id="line-110"><code>	<a href="../../../sync/pool.go.html#line-61" class="ident">New</a>: <span class="keyword">func</span>() <span class="keyword">interface</span>{} {</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> &amp;<a href="#line-17" class="ident">requestStream</a>{}</code></span>
+<span class="codeline" id="line-112"><code>	},</code></span>
+<span class="codeline" id="line-113"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

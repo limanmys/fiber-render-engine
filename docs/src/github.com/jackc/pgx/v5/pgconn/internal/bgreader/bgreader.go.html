@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: bgreader.go in package github.com/jackc/pgx/v5/pgconn/internal/bgreader</title>
+<link href="../../../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	bgreader.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html">github.com/jackc/pgx/v5/pgconn/internal/bgreader</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<div class="anchor" id="doc"><span class="codeline" id="line-1"><code><span class="comment">// Package bgreader provides a io.Reader that can optionally buffer reads in the background.</span></code></span></div><span class="codeline" id="line-2"><code><span class="keyword">package</span> bgreader</code></span>
+<span class="codeline" id="line-3"><code></code></span>
+<span class="codeline" id="line-4"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-5"><code>	<label for="i0"><span class="lit-string i0">"io"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i1"><span class="lit-string i1">"sync"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i2"><span class="lit-string i2">"github.com/jackc/pgx/v5/internal/iobufpool"</span></label></code></span>
+<span class="codeline" id="line-9"><code>)</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-12"><code>	<a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html#name-StatusStopped" class="ident">StatusStopped</a> = <a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a></code></span>
+<span class="codeline" id="line-13"><code>	<a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html#name-StatusRunning" class="ident">StatusRunning</a></code></span>
+<span class="codeline" id="line-14"><code>	<a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html#name-StatusStopping" class="ident">StatusStopping</a></code></span>
+<span class="codeline" id="line-15"><code>)</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// BGReader is an io.Reader that can optionally buffer reads in the background. It is safe for concurrent use.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">type</span> <a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html#name-BGReader" class="ident">BGReader</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-19"><code>	r <a href="../../../../../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../../../../../io/io.go.html#line-86" class="ident">Reader</a></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code>	cond        *<a href="../../../../../../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../../../../../../sync/cond.go.html#line-36" class="ident">Cond</a></code></span>
+<span class="codeline" id="line-22"><code>	status      <a href="../../../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a></code></span>
+<span class="codeline" id="line-23"><code>	readResults []<a href="#line-26" class="ident">readResult</a></code></span>
+<span class="codeline" id="line-24"><code>}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">type</span> readResult <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-27"><code>	buf *[]<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-28"><code>	err <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// Start starts the backgrounder reader. If the background reader is already running this is a no-op. The background</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// reader will stop automatically when the underlying reader returns an error.</span></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">func</span> (<label for="r0" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r1" class="ident">Start</label>() {</code></span>
+<span class="codeline" id="line-34"><code>	<label for="r0" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">defer</span> <label for="r0" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">switch</span> <label for="r0" class="ident">r</label>.<a href="#line-22" class="ident">status</a> {</code></span>
+<span class="codeline" id="line-38"><code>	<span class="keyword">case</span> <a href="#line-12" class="ident">StatusStopped</a>:</code></span>
+<span class="codeline" id="line-39"><code>		<label for="r0" class="ident">r</label>.<a href="#line-22" class="ident">status</a> = <a href="#line-13" class="ident">StatusRunning</a></code></span>
+<span class="codeline" id="line-40"><code>		<span class="keyword">go</span> <label for="r0" class="ident">r</label>.<a href="#line-71" class="ident">bgRead</a>()</code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">case</span> <a href="#line-13" class="ident">StatusRunning</a>:</code></span>
+<span class="codeline" id="line-42"><code>		<span class="comment">// no-op</span></code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">StatusStopping</a>:</code></span>
+<span class="codeline" id="line-44"><code>		<label for="r0" class="ident">r</label>.<a href="#line-22" class="ident">status</a> = <a href="#line-13" class="ident">StatusRunning</a></code></span>
+<span class="codeline" id="line-45"><code>	}</code></span>
+<span class="codeline" id="line-46"><code>}</code></span>
+<span class="codeline" id="line-47"><code></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// Stop tells the background reader to stop after the in progress Read returns. It is safe to call Stop when the</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// background reader is not running.</span></code></span>
+<span class="codeline" id="line-50"><code><span class="keyword">func</span> (<label for="r2" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r3" class="ident">Stop</label>() {</code></span>
+<span class="codeline" id="line-51"><code>	<label for="r2" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">defer</span> <label for="r2" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-53"><code></code></span>
+<span class="codeline" id="line-54"><code>	<span class="keyword">switch</span> <label for="r2" class="ident">r</label>.<a href="#line-22" class="ident">status</a> {</code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">case</span> <a href="#line-12" class="ident">StatusStopped</a>:</code></span>
+<span class="codeline" id="line-56"><code>		<span class="comment">// no-op</span></code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">case</span> <a href="#line-13" class="ident">StatusRunning</a>:</code></span>
+<span class="codeline" id="line-58"><code>		<label for="r2" class="ident">r</label>.<a href="#line-22" class="ident">status</a> = <a href="#line-14" class="ident">StatusStopping</a></code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">case</span> <a href="#line-14" class="ident">StatusStopping</a>:</code></span>
+<span class="codeline" id="line-60"><code>		<span class="comment">// no-op</span></code></span>
+<span class="codeline" id="line-61"><code>	}</code></span>
+<span class="codeline" id="line-62"><code>}</code></span>
+<span class="codeline" id="line-63"><code></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">// Status returns the current status of the background reader.</span></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">func</span> (<label for="r4" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r5" class="ident">Status</label>() <a href="../../../../../../../../pkg/builtin.html#name-int32" class="ident">int32</a> {</code></span>
+<span class="codeline" id="line-66"><code>	<label for="r4" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">defer</span> <label for="r4" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">return</span> <label for="r4" class="ident">r</label>.<a href="#line-22" class="ident">status</a></code></span>
+<span class="codeline" id="line-69"><code>}</code></span>
+<span class="codeline" id="line-70"><code></code></span>
+<span class="codeline" id="line-71"><code><span class="keyword">func</span> (<label for="r6" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r7" class="ident">bgRead</label>() {</code></span>
+<span class="codeline" id="line-72"><code>	<label for="r8" class="ident">keepReading</label> := <a href="../../../../../../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-73"><code>	<span class="keyword">for</span> <label for="r8" class="ident">keepReading</label> {</code></span>
+<span class="codeline" id="line-74"><code>		<label for="r9" class="ident">buf</label> := <a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/internal/iobufpool.html" class="ident i2">iobufpool</a>.<a href="../../../internal/iobufpool/iobufpool.go.html#line-26" class="ident">Get</a>(<span class="lit-number">8192</span>)</code></span>
+<span class="codeline" id="line-75"><code>		<label for="r10" class="ident">n</label>, <label for="r11" class="ident">err</label> := <label for="r6" class="ident">r</label>.<a href="#line-19" class="ident">r</a>.<a href="../../../../../../../io/io.go.html#line-87" class="ident">Read</a>(*<label for="r9" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-76"><code>		*<label for="r9" class="ident">buf</label> = (*<label for="r9" class="ident">buf</label>)[:<label for="r10" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code>		<label for="r6" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-79"><code>		<label for="r6" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a> = <a href="../../../../../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r6" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>, <a href="#line-26" class="ident">readResult</a>{<a href="#line-27" class="ident">buf</a>: <label for="r9" class="ident">buf</label>, <a href="#line-28" class="ident">err</a>: <label for="r11" class="ident">err</label>})</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">if</span> <label for="r6" class="ident">r</label>.<a href="#line-22" class="ident">status</a> == <a href="#line-14" class="ident">StatusStopping</a> || <label for="r11" class="ident">err</label> != <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-81"><code>			<label for="r6" class="ident">r</label>.<a href="#line-22" class="ident">status</a> = <a href="#line-12" class="ident">StatusStopped</a></code></span>
+<span class="codeline" id="line-82"><code>			<label for="r8" class="ident">keepReading</label> = <a href="../../../../../../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-83"><code>		}</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r6" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-85"><code>		<label for="r6" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-90" class="ident">Broadcast</a>()</code></span>
+<span class="codeline" id="line-86"><code>	}</code></span>
+<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">// Read implements the io.Reader interface.</span></code></span>
+<span class="codeline" id="line-90"><code><span class="keyword">func</span> (<label for="r12" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r13" class="ident">Read</label>(<label for="r14" class="ident">p</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="../../../../../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-91"><code>	<label for="r12" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-41" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-92"><code>	<span class="keyword">defer</span> <label for="r12" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>.<a href="../../../../../../../sync/mutex.go.html#line-42" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <a href="../../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="keyword">return</span> <label for="r12" class="ident">r</label>.<a href="#line-111" class="ident">readFromReadResults</a>(<label for="r14" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-96"><code>	}</code></span>
+<span class="codeline" id="line-97"><code></code></span>
+<span class="codeline" id="line-98"><code>	<span class="comment">// There are no unread background read results and the background reader is stopped.</span></code></span>
+<span class="codeline" id="line-99"><code>	<span class="keyword">if</span> <label for="r12" class="ident">r</label>.<a href="#line-22" class="ident">status</a> == <a href="#line-12" class="ident">StatusStopped</a> {</code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">return</span> <label for="r12" class="ident">r</label>.<a href="#line-19" class="ident">r</a>.<a href="../../../../../../../io/io.go.html#line-87" class="ident">Read</a>(<label for="r14" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-101"><code>	}</code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code>	<span class="comment">// Wait for results from the background reader</span></code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">for</span> <a href="../../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-105"><code>		<label for="r12" class="ident">r</label>.<a href="#line-21" class="ident">cond</a>.<a href="../../../../../../../sync/cond.go.html#line-66" class="ident">Wait</a>()</code></span>
+<span class="codeline" id="line-106"><code>	}</code></span>
+<span class="codeline" id="line-107"><code>	<span class="keyword">return</span> <label for="r12" class="ident">r</label>.<a href="#line-111" class="ident">readFromReadResults</a>(<label for="r14" class="ident">p</label>)</code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// readBackgroundResults reads a result previously read by the background reader. r.cond.L must be held.</span></code></span>
+<span class="codeline" id="line-111"><code><span class="keyword">func</span> (<label for="r15" class="ident">r</label> *<a href="#line-18" class="ident">BGReader</a>) <label for="r16" class="ident">readFromReadResults</label>(<label for="r17" class="ident">p</label> []<a href="../../../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) (<a href="../../../../../../../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-112"><code>	<label for="r18" class="ident">buf</label> := <label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>[<span class="lit-number">0</span>].<a href="#line-27" class="ident">buf</a></code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">var</span> <label for="r19" class="ident">err</label> <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-114"><code></code></span>
+<span class="codeline" id="line-115"><code>	<label for="r20" class="ident">n</label> := <a href="../../../../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r17" class="ident">p</label>, *<label for="r18" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">if</span> <label for="r20" class="ident">n</label> == <a href="../../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(*<label for="r18" class="ident">buf</label>) {</code></span>
+<span class="codeline" id="line-117"><code>		<label for="r19" class="ident">err</label> = <label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>[<span class="lit-number">0</span>].<a href="#line-28" class="ident">err</a></code></span>
+<span class="codeline" id="line-118"><code>		<a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/internal/iobufpool.html" class="ident i2">iobufpool</a>.<a href="../../../internal/iobufpool/iobufpool.go.html#line-52" class="ident">Put</a>(<label for="r18" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-119"><code>		<span class="keyword">if</span> <a href="../../../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>) == <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-120"><code>			<label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a> = <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-121"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-122"><code>			<label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a> = <label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>[<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-123"><code>		}</code></span>
+<span class="codeline" id="line-124"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-125"><code>		*<label for="r18" class="ident">buf</label> = (*<label for="r18" class="ident">buf</label>)[<label for="r20" class="ident">n</label>:]</code></span>
+<span class="codeline" id="line-126"><code>		<label for="r15" class="ident">r</label>.<a href="#line-23" class="ident">readResults</a>[<span class="lit-number">0</span>].<a href="#line-27" class="ident">buf</a> = <label for="r18" class="ident">buf</label></code></span>
+<span class="codeline" id="line-127"><code>	}</code></span>
+<span class="codeline" id="line-128"><code></code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">return</span> <label for="r20" class="ident">n</label>, <label for="r19" class="ident">err</label></code></span>
+<span class="codeline" id="line-130"><code>}</code></span>
+<span class="codeline" id="line-131"><code></code></span>
+<span class="codeline" id="line-132"><code><span class="keyword">func</span> <label for="r21" class="ident"><a href="../../../../../../../../pkg/github.com/jackc/pgx/v5/pgconn/internal/bgreader.html#name-New" class="ident">New</a></label>(<label for="r22" class="ident">r</label> <a href="../../../../../../../../pkg/io.html" class="ident i0">io</a>.<a href="../../../../../../../io/io.go.html#line-86" class="ident">Reader</a>) *<a href="#line-18" class="ident">BGReader</a> {</code></span>
+<span class="codeline" id="line-133"><code>	<span class="keyword">return</span> &amp;<a href="#line-18" class="ident">BGReader</a>{</code></span>
+<span class="codeline" id="line-134"><code>		<a href="#line-19" class="ident">r</a>: <label for="r22" class="ident">r</label>,</code></span>
+<span class="codeline" id="line-135"><code>		<a href="#line-21" class="ident">cond</a>: &amp;<a href="../../../../../../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../../../../../../sync/cond.go.html#line-36" class="ident">Cond</a>{</code></span>
+<span class="codeline" id="line-136"><code>			<a href="../../../../../../../sync/cond.go.html#line-40" class="ident">L</a>: &amp;<a href="../../../../../../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../../../../../../sync/mutex.go.html#line-34" class="ident">Mutex</a>{},</code></span>
+<span class="codeline" id="line-137"><code>		},</code></span>
+<span class="codeline" id="line-138"><code>	}</code></span>
+<span class="codeline" id="line-139"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

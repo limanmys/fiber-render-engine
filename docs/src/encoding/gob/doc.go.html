@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: doc.go in package encoding/gob</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -25,7 +25,7 @@
 <span class="codeline" id="line-6"><code><span class="comment">Package gob manages streams of gobs - binary values exchanged between an</span></code></span>
 <span class="codeline" id="line-7"><code><span class="comment">Encoder (transmitter) and a Decoder (receiver). A typical use is transporting</span></code></span>
 <span class="codeline" id="line-8"><code><span class="comment">arguments and results of remote procedure calls (RPCs) such as those provided by</span></code></span>
-<span class="codeline" id="line-9"><code><span class="comment">package "net/rpc".</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">[net/rpc].</span></code></span>
 <span class="codeline" id="line-10"><code></code></span>
 <span class="codeline" id="line-11"><code><span class="comment">The implementation compiles a custom codec for each data type in the stream and</span></code></span>
 <span class="codeline" id="line-12"><code><span class="comment">is most efficient when a single Encoder is used to transmit a stream of values,</span></code></span>
@@ -295,145 +295,153 @@
 <span class="codeline" id="line-276"><code></code></span>
 <span class="codeline" id="line-277"><code><span class="comment">See "Gobs of data" for a design discussion of the gob wire format:</span></code></span>
 <span class="codeline" id="line-278"><code><span class="comment">https://blog.golang.org/gobs-of-data</span></code></span>
-<span class="codeline" id="line-279"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-280"><code><span class="keyword">package</span> gob</code></span>
+<span class="codeline" id="line-279"><code></code></span>
+<span class="codeline" id="line-280"><code><span class="comment"># Security</span></code></span>
 <span class="codeline" id="line-281"><code></code></span>
-<span class="codeline" id="line-282"><code><span class="comment">/*</span></code></span>
-<span class="codeline" id="line-283"><code><span class="comment">Grammar:</span></code></span>
-<span class="codeline" id="line-284"><code></code></span>
-<span class="codeline" id="line-285"><code><span class="comment">Tokens starting with a lower case letter are terminals; int(n)</span></code></span>
-<span class="codeline" id="line-286"><code><span class="comment">and uint(n) represent the signed/unsigned encodings of the value n.</span></code></span>
-<span class="codeline" id="line-287"><code></code></span>
-<span class="codeline" id="line-288"><code><span class="comment">GobStream:</span></code></span>
-<span class="codeline" id="line-289"><code><span class="comment">	DelimitedMessage*</span></code></span>
-<span class="codeline" id="line-290"><code><span class="comment">DelimitedMessage:</span></code></span>
-<span class="codeline" id="line-291"><code><span class="comment">	uint(lengthOfMessage) Message</span></code></span>
-<span class="codeline" id="line-292"><code><span class="comment">Message:</span></code></span>
-<span class="codeline" id="line-293"><code><span class="comment">	TypeSequence TypedValue</span></code></span>
-<span class="codeline" id="line-294"><code><span class="comment">TypeSequence</span></code></span>
-<span class="codeline" id="line-295"><code><span class="comment">	(TypeDefinition DelimitedTypeDefinition*)?</span></code></span>
-<span class="codeline" id="line-296"><code><span class="comment">DelimitedTypeDefinition:</span></code></span>
-<span class="codeline" id="line-297"><code><span class="comment">	uint(lengthOfTypeDefinition) TypeDefinition</span></code></span>
-<span class="codeline" id="line-298"><code><span class="comment">TypedValue:</span></code></span>
-<span class="codeline" id="line-299"><code><span class="comment">	int(typeId) Value</span></code></span>
-<span class="codeline" id="line-300"><code><span class="comment">TypeDefinition:</span></code></span>
-<span class="codeline" id="line-301"><code><span class="comment">	int(-typeId) encodingOfWireType</span></code></span>
-<span class="codeline" id="line-302"><code><span class="comment">Value:</span></code></span>
-<span class="codeline" id="line-303"><code><span class="comment">	SingletonValue | StructValue</span></code></span>
-<span class="codeline" id="line-304"><code><span class="comment">SingletonValue:</span></code></span>
-<span class="codeline" id="line-305"><code><span class="comment">	uint(0) FieldValue</span></code></span>
-<span class="codeline" id="line-306"><code><span class="comment">FieldValue:</span></code></span>
-<span class="codeline" id="line-307"><code><span class="comment">	builtinValue | ArrayValue | MapValue | SliceValue | StructValue | InterfaceValue</span></code></span>
-<span class="codeline" id="line-308"><code><span class="comment">InterfaceValue:</span></code></span>
-<span class="codeline" id="line-309"><code><span class="comment">	NilInterfaceValue | NonNilInterfaceValue</span></code></span>
-<span class="codeline" id="line-310"><code><span class="comment">NilInterfaceValue:</span></code></span>
-<span class="codeline" id="line-311"><code><span class="comment">	uint(0)</span></code></span>
-<span class="codeline" id="line-312"><code><span class="comment">NonNilInterfaceValue:</span></code></span>
-<span class="codeline" id="line-313"><code><span class="comment">	ConcreteTypeName TypeSequence InterfaceContents</span></code></span>
-<span class="codeline" id="line-314"><code><span class="comment">ConcreteTypeName:</span></code></span>
-<span class="codeline" id="line-315"><code><span class="comment">	uint(lengthOfName) [already read=n] name</span></code></span>
-<span class="codeline" id="line-316"><code><span class="comment">InterfaceContents:</span></code></span>
-<span class="codeline" id="line-317"><code><span class="comment">	int(concreteTypeId) DelimitedValue</span></code></span>
-<span class="codeline" id="line-318"><code><span class="comment">DelimitedValue:</span></code></span>
-<span class="codeline" id="line-319"><code><span class="comment">	uint(length) Value</span></code></span>
-<span class="codeline" id="line-320"><code><span class="comment">ArrayValue:</span></code></span>
-<span class="codeline" id="line-321"><code><span class="comment">	uint(n) FieldValue*n [n elements]</span></code></span>
-<span class="codeline" id="line-322"><code><span class="comment">MapValue:</span></code></span>
-<span class="codeline" id="line-323"><code><span class="comment">	uint(n) (FieldValue FieldValue)*n  [n (key, value) pairs]</span></code></span>
-<span class="codeline" id="line-324"><code><span class="comment">SliceValue:</span></code></span>
-<span class="codeline" id="line-325"><code><span class="comment">	uint(n) FieldValue*n [n elements]</span></code></span>
-<span class="codeline" id="line-326"><code><span class="comment">StructValue:</span></code></span>
-<span class="codeline" id="line-327"><code><span class="comment">	(uint(fieldDelta) FieldValue)*</span></code></span>
-<span class="codeline" id="line-328"><code><span class="comment">*/</span></code></span>
-<span class="codeline" id="line-329"><code></code></span>
-<span class="codeline" id="line-330"><code><span class="comment">/*</span></code></span>
-<span class="codeline" id="line-331"><code><span class="comment">For implementers and the curious, here is an encoded example. Given</span></code></span>
-<span class="codeline" id="line-332"><code><span class="comment">	type Point struct {X, Y int}</span></code></span>
-<span class="codeline" id="line-333"><code><span class="comment">and the value</span></code></span>
-<span class="codeline" id="line-334"><code><span class="comment">	p := Point{22, 33}</span></code></span>
-<span class="codeline" id="line-335"><code><span class="comment">the bytes transmitted that encode p will be:</span></code></span>
-<span class="codeline" id="line-336"><code><span class="comment">	1f ff 81 03 01 01 05 50 6f 69 6e 74 01 ff 82 00</span></code></span>
-<span class="codeline" id="line-337"><code><span class="comment">	01 02 01 01 58 01 04 00 01 01 59 01 04 00 00 00</span></code></span>
-<span class="codeline" id="line-338"><code><span class="comment">	07 ff 82 01 2c 01 42 00</span></code></span>
-<span class="codeline" id="line-339"><code><span class="comment">They are determined as follows.</span></code></span>
-<span class="codeline" id="line-340"><code></code></span>
-<span class="codeline" id="line-341"><code><span class="comment">Since this is the first transmission of type Point, the type descriptor</span></code></span>
-<span class="codeline" id="line-342"><code><span class="comment">for Point itself must be sent before the value. This is the first type</span></code></span>
-<span class="codeline" id="line-343"><code><span class="comment">we've sent on this Encoder, so it has type id 65 (0 through 64 are</span></code></span>
-<span class="codeline" id="line-344"><code><span class="comment">reserved).</span></code></span>
-<span class="codeline" id="line-345"><code></code></span>
-<span class="codeline" id="line-346"><code><span class="comment">	1f	// This item (a type descriptor) is 31 bytes long.</span></code></span>
-<span class="codeline" id="line-347"><code><span class="comment">	ff 81	// The negative of the id for the type we're defining, -65.</span></code></span>
-<span class="codeline" id="line-348"><code><span class="comment">		// This is one byte (indicated by FF = -1) followed by</span></code></span>
-<span class="codeline" id="line-349"><code><span class="comment">		// ^-65&lt;&lt;1 | 1. The low 1 bit signals to complement the</span></code></span>
-<span class="codeline" id="line-350"><code><span class="comment">		// rest upon receipt.</span></code></span>
-<span class="codeline" id="line-351"><code></code></span>
-<span class="codeline" id="line-352"><code><span class="comment">	// Now we send a type descriptor, which is itself a struct (wireType).</span></code></span>
-<span class="codeline" id="line-353"><code><span class="comment">	// The type of wireType itself is known (it's built in, as is the type of</span></code></span>
-<span class="codeline" id="line-354"><code><span class="comment">	// all its components), so we just need to send a *value* of type wireType</span></code></span>
-<span class="codeline" id="line-355"><code><span class="comment">	// that represents type "Point".</span></code></span>
-<span class="codeline" id="line-356"><code><span class="comment">	// Here starts the encoding of that value.</span></code></span>
-<span class="codeline" id="line-357"><code><span class="comment">	// Set the field number implicitly to -1; this is done at the beginning</span></code></span>
-<span class="codeline" id="line-358"><code><span class="comment">	// of every struct, including nested structs.</span></code></span>
-<span class="codeline" id="line-359"><code><span class="comment">	03	// Add 3 to field number; now 2 (wireType.structType; this is a struct).</span></code></span>
-<span class="codeline" id="line-360"><code><span class="comment">		// structType starts with an embedded CommonType, which appears</span></code></span>
-<span class="codeline" id="line-361"><code><span class="comment">		// as a regular structure here too.</span></code></span>
-<span class="codeline" id="line-362"><code><span class="comment">	01	// add 1 to field number (now 0); start of embedded CommonType.</span></code></span>
-<span class="codeline" id="line-363"><code><span class="comment">	01	// add 1 to field number (now 0, the name of the type)</span></code></span>
-<span class="codeline" id="line-364"><code><span class="comment">	05	// string is (unsigned) 5 bytes long</span></code></span>
-<span class="codeline" id="line-365"><code><span class="comment">	50 6f 69 6e 74	// wireType.structType.CommonType.name = "Point"</span></code></span>
-<span class="codeline" id="line-366"><code><span class="comment">	01	// add 1 to field number (now 1, the id of the type)</span></code></span>
-<span class="codeline" id="line-367"><code><span class="comment">	ff 82	// wireType.structType.CommonType._id = 65</span></code></span>
-<span class="codeline" id="line-368"><code><span class="comment">	00	// end of embedded wiretype.structType.CommonType struct</span></code></span>
-<span class="codeline" id="line-369"><code><span class="comment">	01	// add 1 to field number (now 1, the field array in wireType.structType)</span></code></span>
-<span class="codeline" id="line-370"><code><span class="comment">	02	// There are two fields in the type (len(structType.field))</span></code></span>
-<span class="codeline" id="line-371"><code><span class="comment">	01	// Start of first field structure; add 1 to get field number 0: field[0].name</span></code></span>
-<span class="codeline" id="line-372"><code><span class="comment">	01	// 1 byte</span></code></span>
-<span class="codeline" id="line-373"><code><span class="comment">	58	// structType.field[0].name = "X"</span></code></span>
-<span class="codeline" id="line-374"><code><span class="comment">	01	// Add 1 to get field number 1: field[0].id</span></code></span>
-<span class="codeline" id="line-375"><code><span class="comment">	04	// structType.field[0].typeId is 2 (signed int).</span></code></span>
-<span class="codeline" id="line-376"><code><span class="comment">	00	// End of structType.field[0]; start structType.field[1]; set field number to -1.</span></code></span>
-<span class="codeline" id="line-377"><code><span class="comment">	01	// Add 1 to get field number 0: field[1].name</span></code></span>
-<span class="codeline" id="line-378"><code><span class="comment">	01	// 1 byte</span></code></span>
-<span class="codeline" id="line-379"><code><span class="comment">	59	// structType.field[1].name = "Y"</span></code></span>
-<span class="codeline" id="line-380"><code><span class="comment">	01	// Add 1 to get field number 1: field[1].id</span></code></span>
-<span class="codeline" id="line-381"><code><span class="comment">	04	// struct.Type.field[1].typeId is 2 (signed int).</span></code></span>
-<span class="codeline" id="line-382"><code><span class="comment">	00	// End of structType.field[1]; end of structType.field.</span></code></span>
-<span class="codeline" id="line-383"><code><span class="comment">	00	// end of wireType.structType structure</span></code></span>
-<span class="codeline" id="line-384"><code><span class="comment">	00	// end of wireType structure</span></code></span>
-<span class="codeline" id="line-385"><code></code></span>
-<span class="codeline" id="line-386"><code><span class="comment">Now we can send the Point value. Again the field number resets to -1:</span></code></span>
-<span class="codeline" id="line-387"><code></code></span>
-<span class="codeline" id="line-388"><code><span class="comment">	07	// this value is 7 bytes long</span></code></span>
-<span class="codeline" id="line-389"><code><span class="comment">	ff 82	// the type number, 65 (1 byte (-FF) followed by 65&lt;&lt;1)</span></code></span>
-<span class="codeline" id="line-390"><code><span class="comment">	01	// add one to field number, yielding field 0</span></code></span>
-<span class="codeline" id="line-391"><code><span class="comment">	2c	// encoding of signed "22" (0x2c = 44 = 22&lt;&lt;1); Point.x = 22</span></code></span>
-<span class="codeline" id="line-392"><code><span class="comment">	01	// add one to field number, yielding field 1</span></code></span>
-<span class="codeline" id="line-393"><code><span class="comment">	42	// encoding of signed "33" (0x42 = 66 = 33&lt;&lt;1); Point.y = 33</span></code></span>
-<span class="codeline" id="line-394"><code><span class="comment">	00	// end of structure</span></code></span>
+<span class="codeline" id="line-282"><code><span class="comment">This package is not designed to be hardened against adversarial inputs, and is</span></code></span>
+<span class="codeline" id="line-283"><code><span class="comment">outside the scope of https://go.dev/security/policy. In particular, the Decoder</span></code></span>
+<span class="codeline" id="line-284"><code><span class="comment">does only basic sanity checking on decoded input sizes, and its limits are not</span></code></span>
+<span class="codeline" id="line-285"><code><span class="comment">configurable. Care should be taken when decoding gob data from untrusted</span></code></span>
+<span class="codeline" id="line-286"><code><span class="comment">sources, which may consume significant resources.</span></code></span>
+<span class="codeline" id="line-287"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-288"><code><span class="keyword">package</span> gob</code></span>
+<span class="codeline" id="line-289"><code></code></span>
+<span class="codeline" id="line-290"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-291"><code><span class="comment">Grammar:</span></code></span>
+<span class="codeline" id="line-292"><code></code></span>
+<span class="codeline" id="line-293"><code><span class="comment">Tokens starting with a lower case letter are terminals; int(n)</span></code></span>
+<span class="codeline" id="line-294"><code><span class="comment">and uint(n) represent the signed/unsigned encodings of the value n.</span></code></span>
+<span class="codeline" id="line-295"><code></code></span>
+<span class="codeline" id="line-296"><code><span class="comment">GobStream:</span></code></span>
+<span class="codeline" id="line-297"><code><span class="comment">	DelimitedMessage*</span></code></span>
+<span class="codeline" id="line-298"><code><span class="comment">DelimitedMessage:</span></code></span>
+<span class="codeline" id="line-299"><code><span class="comment">	uint(lengthOfMessage) Message</span></code></span>
+<span class="codeline" id="line-300"><code><span class="comment">Message:</span></code></span>
+<span class="codeline" id="line-301"><code><span class="comment">	TypeSequence TypedValue</span></code></span>
+<span class="codeline" id="line-302"><code><span class="comment">TypeSequence</span></code></span>
+<span class="codeline" id="line-303"><code><span class="comment">	(TypeDefinition DelimitedTypeDefinition*)?</span></code></span>
+<span class="codeline" id="line-304"><code><span class="comment">DelimitedTypeDefinition:</span></code></span>
+<span class="codeline" id="line-305"><code><span class="comment">	uint(lengthOfTypeDefinition) TypeDefinition</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">TypedValue:</span></code></span>
+<span class="codeline" id="line-307"><code><span class="comment">	int(typeId) Value</span></code></span>
+<span class="codeline" id="line-308"><code><span class="comment">TypeDefinition:</span></code></span>
+<span class="codeline" id="line-309"><code><span class="comment">	int(-typeId) encodingOfWireType</span></code></span>
+<span class="codeline" id="line-310"><code><span class="comment">Value:</span></code></span>
+<span class="codeline" id="line-311"><code><span class="comment">	SingletonValue | StructValue</span></code></span>
+<span class="codeline" id="line-312"><code><span class="comment">SingletonValue:</span></code></span>
+<span class="codeline" id="line-313"><code><span class="comment">	uint(0) FieldValue</span></code></span>
+<span class="codeline" id="line-314"><code><span class="comment">FieldValue:</span></code></span>
+<span class="codeline" id="line-315"><code><span class="comment">	builtinValue | ArrayValue | MapValue | SliceValue | StructValue | InterfaceValue</span></code></span>
+<span class="codeline" id="line-316"><code><span class="comment">InterfaceValue:</span></code></span>
+<span class="codeline" id="line-317"><code><span class="comment">	NilInterfaceValue | NonNilInterfaceValue</span></code></span>
+<span class="codeline" id="line-318"><code><span class="comment">NilInterfaceValue:</span></code></span>
+<span class="codeline" id="line-319"><code><span class="comment">	uint(0)</span></code></span>
+<span class="codeline" id="line-320"><code><span class="comment">NonNilInterfaceValue:</span></code></span>
+<span class="codeline" id="line-321"><code><span class="comment">	ConcreteTypeName TypeSequence InterfaceContents</span></code></span>
+<span class="codeline" id="line-322"><code><span class="comment">ConcreteTypeName:</span></code></span>
+<span class="codeline" id="line-323"><code><span class="comment">	uint(lengthOfName) [already read=n] name</span></code></span>
+<span class="codeline" id="line-324"><code><span class="comment">InterfaceContents:</span></code></span>
+<span class="codeline" id="line-325"><code><span class="comment">	int(concreteTypeId) DelimitedValue</span></code></span>
+<span class="codeline" id="line-326"><code><span class="comment">DelimitedValue:</span></code></span>
+<span class="codeline" id="line-327"><code><span class="comment">	uint(length) Value</span></code></span>
+<span class="codeline" id="line-328"><code><span class="comment">ArrayValue:</span></code></span>
+<span class="codeline" id="line-329"><code><span class="comment">	uint(n) FieldValue*n [n elements]</span></code></span>
+<span class="codeline" id="line-330"><code><span class="comment">MapValue:</span></code></span>
+<span class="codeline" id="line-331"><code><span class="comment">	uint(n) (FieldValue FieldValue)*n  [n (key, value) pairs]</span></code></span>
+<span class="codeline" id="line-332"><code><span class="comment">SliceValue:</span></code></span>
+<span class="codeline" id="line-333"><code><span class="comment">	uint(n) FieldValue*n [n elements]</span></code></span>
+<span class="codeline" id="line-334"><code><span class="comment">StructValue:</span></code></span>
+<span class="codeline" id="line-335"><code><span class="comment">	(uint(fieldDelta) FieldValue)*</span></code></span>
+<span class="codeline" id="line-336"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-337"><code></code></span>
+<span class="codeline" id="line-338"><code><span class="comment">/*</span></code></span>
+<span class="codeline" id="line-339"><code><span class="comment">For implementers and the curious, here is an encoded example. Given</span></code></span>
+<span class="codeline" id="line-340"><code><span class="comment">	type Point struct {X, Y int}</span></code></span>
+<span class="codeline" id="line-341"><code><span class="comment">and the value</span></code></span>
+<span class="codeline" id="line-342"><code><span class="comment">	p := Point{22, 33}</span></code></span>
+<span class="codeline" id="line-343"><code><span class="comment">the bytes transmitted that encode p will be:</span></code></span>
+<span class="codeline" id="line-344"><code><span class="comment">	1f ff 81 03 01 01 05 50 6f 69 6e 74 01 ff 82 00</span></code></span>
+<span class="codeline" id="line-345"><code><span class="comment">	01 02 01 01 58 01 04 00 01 01 59 01 04 00 00 00</span></code></span>
+<span class="codeline" id="line-346"><code><span class="comment">	07 ff 82 01 2c 01 42 00</span></code></span>
+<span class="codeline" id="line-347"><code><span class="comment">They are determined as follows.</span></code></span>
+<span class="codeline" id="line-348"><code></code></span>
+<span class="codeline" id="line-349"><code><span class="comment">Since this is the first transmission of type Point, the type descriptor</span></code></span>
+<span class="codeline" id="line-350"><code><span class="comment">for Point itself must be sent before the value. This is the first type</span></code></span>
+<span class="codeline" id="line-351"><code><span class="comment">we've sent on this Encoder, so it has type id 65 (0 through 64 are</span></code></span>
+<span class="codeline" id="line-352"><code><span class="comment">reserved).</span></code></span>
+<span class="codeline" id="line-353"><code></code></span>
+<span class="codeline" id="line-354"><code><span class="comment">	1f	// This item (a type descriptor) is 31 bytes long.</span></code></span>
+<span class="codeline" id="line-355"><code><span class="comment">	ff 81	// The negative of the id for the type we're defining, -65.</span></code></span>
+<span class="codeline" id="line-356"><code><span class="comment">		// This is one byte (indicated by FF = -1) followed by</span></code></span>
+<span class="codeline" id="line-357"><code><span class="comment">		// ^-65&lt;&lt;1 | 1. The low 1 bit signals to complement the</span></code></span>
+<span class="codeline" id="line-358"><code><span class="comment">		// rest upon receipt.</span></code></span>
+<span class="codeline" id="line-359"><code></code></span>
+<span class="codeline" id="line-360"><code><span class="comment">	// Now we send a type descriptor, which is itself a struct (wireType).</span></code></span>
+<span class="codeline" id="line-361"><code><span class="comment">	// The type of wireType itself is known (it's built in, as is the type of</span></code></span>
+<span class="codeline" id="line-362"><code><span class="comment">	// all its components), so we just need to send a *value* of type wireType</span></code></span>
+<span class="codeline" id="line-363"><code><span class="comment">	// that represents type "Point".</span></code></span>
+<span class="codeline" id="line-364"><code><span class="comment">	// Here starts the encoding of that value.</span></code></span>
+<span class="codeline" id="line-365"><code><span class="comment">	// Set the field number implicitly to -1; this is done at the beginning</span></code></span>
+<span class="codeline" id="line-366"><code><span class="comment">	// of every struct, including nested structs.</span></code></span>
+<span class="codeline" id="line-367"><code><span class="comment">	03	// Add 3 to field number; now 2 (wireType.structType; this is a struct).</span></code></span>
+<span class="codeline" id="line-368"><code><span class="comment">		// structType starts with an embedded CommonType, which appears</span></code></span>
+<span class="codeline" id="line-369"><code><span class="comment">		// as a regular structure here too.</span></code></span>
+<span class="codeline" id="line-370"><code><span class="comment">	01	// add 1 to field number (now 0); start of embedded CommonType.</span></code></span>
+<span class="codeline" id="line-371"><code><span class="comment">	01	// add 1 to field number (now 0, the name of the type)</span></code></span>
+<span class="codeline" id="line-372"><code><span class="comment">	05	// string is (unsigned) 5 bytes long</span></code></span>
+<span class="codeline" id="line-373"><code><span class="comment">	50 6f 69 6e 74	// wireType.structType.CommonType.name = "Point"</span></code></span>
+<span class="codeline" id="line-374"><code><span class="comment">	01	// add 1 to field number (now 1, the id of the type)</span></code></span>
+<span class="codeline" id="line-375"><code><span class="comment">	ff 82	// wireType.structType.CommonType._id = 65</span></code></span>
+<span class="codeline" id="line-376"><code><span class="comment">	00	// end of embedded wiretype.structType.CommonType struct</span></code></span>
+<span class="codeline" id="line-377"><code><span class="comment">	01	// add 1 to field number (now 1, the field array in wireType.structType)</span></code></span>
+<span class="codeline" id="line-378"><code><span class="comment">	02	// There are two fields in the type (len(structType.field))</span></code></span>
+<span class="codeline" id="line-379"><code><span class="comment">	01	// Start of first field structure; add 1 to get field number 0: field[0].name</span></code></span>
+<span class="codeline" id="line-380"><code><span class="comment">	01	// 1 byte</span></code></span>
+<span class="codeline" id="line-381"><code><span class="comment">	58	// structType.field[0].name = "X"</span></code></span>
+<span class="codeline" id="line-382"><code><span class="comment">	01	// Add 1 to get field number 1: field[0].id</span></code></span>
+<span class="codeline" id="line-383"><code><span class="comment">	04	// structType.field[0].typeId is 2 (signed int).</span></code></span>
+<span class="codeline" id="line-384"><code><span class="comment">	00	// End of structType.field[0]; start structType.field[1]; set field number to -1.</span></code></span>
+<span class="codeline" id="line-385"><code><span class="comment">	01	// Add 1 to get field number 0: field[1].name</span></code></span>
+<span class="codeline" id="line-386"><code><span class="comment">	01	// 1 byte</span></code></span>
+<span class="codeline" id="line-387"><code><span class="comment">	59	// structType.field[1].name = "Y"</span></code></span>
+<span class="codeline" id="line-388"><code><span class="comment">	01	// Add 1 to get field number 1: field[1].id</span></code></span>
+<span class="codeline" id="line-389"><code><span class="comment">	04	// struct.Type.field[1].typeId is 2 (signed int).</span></code></span>
+<span class="codeline" id="line-390"><code><span class="comment">	00	// End of structType.field[1]; end of structType.field.</span></code></span>
+<span class="codeline" id="line-391"><code><span class="comment">	00	// end of wireType.structType structure</span></code></span>
+<span class="codeline" id="line-392"><code><span class="comment">	00	// end of wireType structure</span></code></span>
+<span class="codeline" id="line-393"><code></code></span>
+<span class="codeline" id="line-394"><code><span class="comment">Now we can send the Point value. Again the field number resets to -1:</span></code></span>
 <span class="codeline" id="line-395"><code></code></span>
-<span class="codeline" id="line-396"><code><span class="comment">The type encoding is long and fairly intricate but we send it only once.</span></code></span>
-<span class="codeline" id="line-397"><code><span class="comment">If p is transmitted a second time, the type is already known so the</span></code></span>
-<span class="codeline" id="line-398"><code><span class="comment">output will be just:</span></code></span>
-<span class="codeline" id="line-399"><code></code></span>
-<span class="codeline" id="line-400"><code><span class="comment">	07 ff 82 01 2c 01 42 00</span></code></span>
-<span class="codeline" id="line-401"><code></code></span>
-<span class="codeline" id="line-402"><code><span class="comment">A single non-struct value at top level is transmitted like a field with</span></code></span>
-<span class="codeline" id="line-403"><code><span class="comment">delta tag 0. For instance, a signed integer with value 3 presented as</span></code></span>
-<span class="codeline" id="line-404"><code><span class="comment">the argument to Encode will emit:</span></code></span>
-<span class="codeline" id="line-405"><code></code></span>
-<span class="codeline" id="line-406"><code><span class="comment">	03 04 00 06</span></code></span>
+<span class="codeline" id="line-396"><code><span class="comment">	07	// this value is 7 bytes long</span></code></span>
+<span class="codeline" id="line-397"><code><span class="comment">	ff 82	// the type number, 65 (1 byte (-FF) followed by 65&lt;&lt;1)</span></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">	01	// add one to field number, yielding field 0</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">	2c	// encoding of signed "22" (0x2c = 44 = 22&lt;&lt;1); Point.x = 22</span></code></span>
+<span class="codeline" id="line-400"><code><span class="comment">	01	// add one to field number, yielding field 1</span></code></span>
+<span class="codeline" id="line-401"><code><span class="comment">	42	// encoding of signed "33" (0x42 = 66 = 33&lt;&lt;1); Point.y = 33</span></code></span>
+<span class="codeline" id="line-402"><code><span class="comment">	00	// end of structure</span></code></span>
+<span class="codeline" id="line-403"><code></code></span>
+<span class="codeline" id="line-404"><code><span class="comment">The type encoding is long and fairly intricate but we send it only once.</span></code></span>
+<span class="codeline" id="line-405"><code><span class="comment">If p is transmitted a second time, the type is already known so the</span></code></span>
+<span class="codeline" id="line-406"><code><span class="comment">output will be just:</span></code></span>
 <span class="codeline" id="line-407"><code></code></span>
-<span class="codeline" id="line-408"><code><span class="comment">Which represents:</span></code></span>
+<span class="codeline" id="line-408"><code><span class="comment">	07 ff 82 01 2c 01 42 00</span></code></span>
 <span class="codeline" id="line-409"><code></code></span>
-<span class="codeline" id="line-410"><code><span class="comment">	03	// this value is 3 bytes long</span></code></span>
-<span class="codeline" id="line-411"><code><span class="comment">	04	// the type number, 2, represents an integer</span></code></span>
-<span class="codeline" id="line-412"><code><span class="comment">	00	// tag delta 0</span></code></span>
-<span class="codeline" id="line-413"><code><span class="comment">	06	// value 3</span></code></span>
-<span class="codeline" id="line-414"><code></code></span>
-<span class="codeline" id="line-415"><code><span class="comment">*/</span></code></span>
+<span class="codeline" id="line-410"><code><span class="comment">A single non-struct value at top level is transmitted like a field with</span></code></span>
+<span class="codeline" id="line-411"><code><span class="comment">delta tag 0. For instance, a signed integer with value 3 presented as</span></code></span>
+<span class="codeline" id="line-412"><code><span class="comment">the argument to Encode will emit:</span></code></span>
+<span class="codeline" id="line-413"><code></code></span>
+<span class="codeline" id="line-414"><code><span class="comment">	03 04 00 06</span></code></span>
+<span class="codeline" id="line-415"><code></code></span>
+<span class="codeline" id="line-416"><code><span class="comment">Which represents:</span></code></span>
+<span class="codeline" id="line-417"><code></code></span>
+<span class="codeline" id="line-418"><code><span class="comment">	03	// this value is 3 bytes long</span></code></span>
+<span class="codeline" id="line-419"><code><span class="comment">	04	// the type number, 2, represents an integer</span></code></span>
+<span class="codeline" id="line-420"><code><span class="comment">	00	// tag delta 0</span></code></span>
+<span class="codeline" id="line-421"><code><span class="comment">	06	// value 3</span></code></span>
+<span class="codeline" id="line-422"><code></code></span>
+<span class="codeline" id="line-423"><code><span class="comment">*/</span></code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

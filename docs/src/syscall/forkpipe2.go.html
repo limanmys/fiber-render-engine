@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: forkpipe2.go in package syscall</title>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	forkpipe2.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/syscall.html">syscall</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2017 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//go:build dragonfly || freebsd || linux || netbsd || openbsd || solaris</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">package</span> syscall</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"sync"</span></label></code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// forkExecPipe atomically opens a pipe with O_CLOEXEC set on both file</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// descriptors.</span></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">func</span> forkExecPipe(<label for="r1" class="ident">p</label> []<a href="../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-14"><code>	<span class="keyword">return</span> <a href="syscall_linux.go.html#line-287" class="ident">Pipe2</a>(<label for="r1" class="ident">p</label>, <a href="zerrors_linux_amd64.go.html#line-625" class="ident">O_CLOEXEC</a>)</code></span>
+<span class="codeline" id="line-15"><code>}</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-18"><code>	<span class="comment">// Guard the forking variable.</span></code></span>
+<span class="codeline" id="line-19"><code>	forkingLock <a href="../../pkg/sync.html" class="ident i0">sync</a>.<a href="../sync/mutex.go.html#line-34" class="ident">Mutex</a></code></span>
+<span class="codeline" id="line-20"><code>	<span class="comment">// Number of goroutines currently forking, and thus the</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">	// number of goroutines holding a conceptual write lock</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">	// on ForkLock.</span></code></span>
+<span class="codeline" id="line-23"><code>	forking <a href="../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-24"><code>)</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// hasWaitingReaders reports whether any goroutine is waiting</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// to acquire a read lock on rw. It is defined in the sync package.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">func</span> hasWaitingReaders(<label for="r3" class="ident">rw</label> *<a href="../../pkg/sync.html" class="ident i0">sync</a>.<a href="../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a>) <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// acquireForkLock acquires a write lock on ForkLock.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// ForkLock is exported and we've promised that during a fork</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// we will call ForkLock.Lock, so that no other threads create</span></code></span>
+<span class="codeline" id="line-33"><code><span class="comment">// new fds that are not yet close-on-exec before we fork.</span></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// But that forces all fork calls to be serialized, which is bad.</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// But we haven't promised that serialization, and it is essentially</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// undetectable by other users of ForkLock, which is good.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// Avoid the serialization by ensuring that ForkLock is locked</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// at the first fork and unlocked when there are no more forks.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">func</span> acquireForkLock() {</code></span>
+<span class="codeline" id="line-40"><code>	<a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">defer</span> <a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">if</span> <a href="#line-23" class="ident">forking</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-44"><code>		<span class="comment">// There is no current write lock on ForkLock.</span></code></span>
+<span class="codeline" id="line-45"><code>		<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>.<a href="../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-46"><code>		<a href="#line-23" class="ident">forking</a>++</code></span>
+<span class="codeline" id="line-47"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-48"><code>	}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<span class="comment">// ForkLock is currently locked for writing.</span></code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">if</span> <a href="#line-28" class="ident">hasWaitingReaders</a>(&amp;<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>) {</code></span>
+<span class="codeline" id="line-53"><code>		<span class="comment">// ForkLock is locked for writing, and at least one</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">		// goroutine is waiting to read from it.</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">		// To avoid lock starvation, allow readers to proceed.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">		// The simple way to do this is for us to acquire a</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">		// read lock. That will block us until all current</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">		// conceptual write locks are released.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">		// Note that this case is unusual on modern systems</span></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">		// with O_CLOEXEC and SOCK_CLOEXEC. On those systems</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">		// the standard library should never take a read</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">		// lock on ForkLock.</span></code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code>		<a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code>		<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>.<a href="../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-68"><code>		<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>.<a href="../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-69"><code></code></span>
+<span class="codeline" id="line-70"><code>		<a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-71"><code></code></span>
+<span class="codeline" id="line-72"><code>		<span class="comment">// Readers got a chance, so now take the write lock.</span></code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code>		<span class="keyword">if</span> <a href="#line-23" class="ident">forking</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-75"><code>			<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>.<a href="../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-76"><code>		}</code></span>
+<span class="codeline" id="line-77"><code>	}</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code>	<a href="#line-23" class="ident">forking</a>++</code></span>
+<span class="codeline" id="line-80"><code>}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// releaseForkLock releases the conceptual write lock on ForkLock</span></code></span>
+<span class="codeline" id="line-83"><code><span class="comment">// acquired by acquireForkLock.</span></code></span>
+<span class="codeline" id="line-84"><code><span class="keyword">func</span> releaseForkLock() {</code></span>
+<span class="codeline" id="line-85"><code>	<a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">defer</span> <a href="#line-19" class="ident">forkingLock</a>.<a href="../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-87"><code></code></span>
+<span class="codeline" id="line-88"><code>	<span class="keyword">if</span> <a href="#line-23" class="ident">forking</a> &lt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-89"><code>		<a href="../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"syscall.releaseForkLock: negative count"</span>)</code></span>
+<span class="codeline" id="line-90"><code>	}</code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code>	<a href="#line-23" class="ident">forking</a>--</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">if</span> <a href="#line-23" class="ident">forking</a> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-95"><code>		<span class="comment">// No more conceptual write locks.</span></code></span>
+<span class="codeline" id="line-96"><code>		<a href="exec_unix.go.html#line-65" class="ident">ForkLock</a>.<a href="../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-97"><code>	}</code></span>
+<span class="codeline" id="line-98"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: ctr.go in package crypto/cipher</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -33,7 +33,9 @@ input[id=r13]:checked ~pre label[for=r13],
 input[id=r14]:checked ~pre label[for=r14],
 input[id=r15]:checked ~pre label[for=r15]
 {background: #226; color: #ff8;}
-input[id=i0]:checked ~pre .i0
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -52,6 +54,8 @@ input[id=i0]:checked ~pre .i0
 <input id="r14" type="radio" name="g"/>
 <input id="r15" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
@@ -68,86 +72,90 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-12"><code></code></span>
 <span class="codeline" id="line-13"><code><span class="keyword">package</span> cipher</code></span>
 <span class="codeline" id="line-14"><code></code></span>
-<span class="codeline" id="line-15"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"crypto/internal/subtle"</span></label></code></span>
-<span class="codeline" id="line-16"><code></code></span>
-<span class="codeline" id="line-17"><code><span class="keyword">type</span> ctr <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-18"><code>	b       <a href="cipher.go.html#line-15" class="ident">Block</a></code></span>
-<span class="codeline" id="line-19"><code>	ctr     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-20"><code>	out     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-21"><code>	outUsed <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
-<span class="codeline" id="line-22"><code>}</code></span>
-<span class="codeline" id="line-23"><code></code></span>
-<span class="codeline" id="line-24"><code><span class="keyword">const</span> streamBufferSize = <span class="lit-number">512</span></code></span>
-<span class="codeline" id="line-25"><code></code></span>
-<span class="codeline" id="line-26"><code><span class="comment">// ctrAble is an interface implemented by ciphers that have a specific optimized</span></code></span>
-<span class="codeline" id="line-27"><code><span class="comment">// implementation of CTR, like crypto/aes. NewCTR will check for this interface</span></code></span>
-<span class="codeline" id="line-28"><code><span class="comment">// and return the specific Stream if found.</span></code></span>
-<span class="codeline" id="line-29"><code><span class="keyword">type</span> ctrAble <span class="keyword">interface</span> {</code></span>
-<span class="codeline" id="line-30"><code>	NewCTR(iv []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="cipher.go.html#line-29" class="ident">Stream</a></code></span>
-<span class="codeline" id="line-31"><code>}</code></span>
-<span class="codeline" id="line-32"><code></code></span>
-<span class="codeline" id="line-33"><code><span class="comment">// NewCTR returns a Stream which encrypts/decrypts using the given Block in</span></code></span>
-<span class="codeline" id="line-34"><code><span class="comment">// counter mode. The length of iv must be the same as the Block's block size.</span></code></span>
-<span class="codeline" id="line-35"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/crypto/cipher.html#name-NewCTR" class="ident">NewCTR</a></label>(<label for="r1" class="ident">block</label> <a href="cipher.go.html#line-15" class="ident">Block</a>, <label for="r2" class="ident">iv</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="cipher.go.html#line-29" class="ident">Stream</a> {</code></span>
-<span class="codeline" id="line-36"><code>	<span class="keyword">if</span> <label for="r3" class="ident">ctr</label>, <label for="r4" class="ident">ok</label> := <label for="r1" class="ident">block</label>.(<a href="#line-29" class="ident">ctrAble</a>); <label for="r4" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-37"><code>		<span class="keyword">return</span> <label for="r3" class="ident">ctr</label>.<a href="#line-30" class="ident">NewCTR</a>(<label for="r2" class="ident">iv</label>)</code></span>
-<span class="codeline" id="line-38"><code>	}</code></span>
-<span class="codeline" id="line-39"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">iv</label>) != <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
-<span class="codeline" id="line-40"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"cipher.NewCTR: IV length must equal block size"</span>)</code></span>
-<span class="codeline" id="line-41"><code>	}</code></span>
-<span class="codeline" id="line-42"><code>	<label for="r5" class="ident">bufSize</label> := <a href="#line-24" class="ident">streamBufferSize</a></code></span>
-<span class="codeline" id="line-43"><code>	<span class="keyword">if</span> <label for="r5" class="ident">bufSize</label> &lt; <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
-<span class="codeline" id="line-44"><code>		<label for="r5" class="ident">bufSize</label> = <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>()</code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-16"><code>	<label for="i0"><span class="lit-string i0">"bytes"</span></label></code></span>
+<span class="codeline" id="line-17"><code>	<label for="i1"><span class="lit-string i1">"crypto/internal/alias"</span></label></code></span>
+<span class="codeline" id="line-18"><code>	<label for="i2"><span class="lit-string i2">"crypto/subtle"</span></label></code></span>
+<span class="codeline" id="line-19"><code>)</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">type</span> ctr <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-22"><code>	b       <a href="cipher.go.html#line-15" class="ident">Block</a></code></span>
+<span class="codeline" id="line-23"><code>	ctr     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-24"><code>	out     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-25"><code>	outUsed <a href="../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-26"><code>}</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">const</span> streamBufferSize = <span class="lit-number">512</span></code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// ctrAble is an interface implemented by ciphers that have a specific optimized</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// implementation of CTR, like crypto/aes. NewCTR will check for this interface</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// and return the specific Stream if found.</span></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">type</span> ctrAble <span class="keyword">interface</span> {</code></span>
+<span class="codeline" id="line-34"><code>	NewCTR(iv []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="cipher.go.html#line-29" class="ident">Stream</a></code></span>
+<span class="codeline" id="line-35"><code>}</code></span>
+<span class="codeline" id="line-36"><code></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">// NewCTR returns a Stream which encrypts/decrypts using the given Block in</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// counter mode. The length of iv must be the same as the Block's block size.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/crypto/cipher.html#name-NewCTR" class="ident">NewCTR</a></label>(<label for="r1" class="ident">block</label> <a href="cipher.go.html#line-15" class="ident">Block</a>, <label for="r2" class="ident">iv</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="cipher.go.html#line-29" class="ident">Stream</a> {</code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">if</span> <label for="r3" class="ident">ctr</label>, <label for="r4" class="ident">ok</label> := <label for="r1" class="ident">block</label>.(<a href="#line-33" class="ident">ctrAble</a>); <label for="r4" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-41"><code>		<span class="keyword">return</span> <label for="r3" class="ident">ctr</label>.<a href="#line-34" class="ident">NewCTR</a>(<label for="r2" class="ident">iv</label>)</code></span>
+<span class="codeline" id="line-42"><code>	}</code></span>
+<span class="codeline" id="line-43"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">iv</label>) != <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
+<span class="codeline" id="line-44"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"cipher.NewCTR: IV length must equal block size"</span>)</code></span>
 <span class="codeline" id="line-45"><code>	}</code></span>
-<span class="codeline" id="line-46"><code>	<span class="keyword">return</span> &amp;<a href="#line-17" class="ident">ctr</a>{</code></span>
-<span class="codeline" id="line-47"><code>		<a href="#line-18" class="ident">b</a>:       <label for="r1" class="ident">block</label>,</code></span>
-<span class="codeline" id="line-48"><code>		<a href="#line-19" class="ident">ctr</a>:     <a href="cipher.go.html#line-65" class="ident">dup</a>(<label for="r2" class="ident">iv</label>),</code></span>
-<span class="codeline" id="line-49"><code>		<a href="#line-20" class="ident">out</a>:     <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <label for="r5" class="ident">bufSize</label>),</code></span>
-<span class="codeline" id="line-50"><code>		<a href="#line-21" class="ident">outUsed</a>: <span class="lit-number">0</span>,</code></span>
-<span class="codeline" id="line-51"><code>	}</code></span>
-<span class="codeline" id="line-52"><code>}</code></span>
-<span class="codeline" id="line-53"><code></code></span>
-<span class="codeline" id="line-54"><code><span class="keyword">func</span> (<label for="r6" class="ident">x</label> *<a href="#line-17" class="ident">ctr</a>) <label for="r7" class="ident">refill</label>() {</code></span>
-<span class="codeline" id="line-55"><code>	<label for="r8" class="ident">remain</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>) - <label for="r6" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a></code></span>
-<span class="codeline" id="line-56"><code>	<a href="../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>, <label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>[<label for="r6" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a>:])</code></span>
-<span class="codeline" id="line-57"><code>	<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a> = <label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>[:<a href="../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>)]</code></span>
-<span class="codeline" id="line-58"><code>	<label for="r9" class="ident">bs</label> := <label for="r6" class="ident">x</label>.<a href="#line-18" class="ident">b</a>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>()</code></span>
-<span class="codeline" id="line-59"><code>	<span class="keyword">for</span> <label for="r8" class="ident">remain</label> &lt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>)-<label for="r9" class="ident">bs</label> {</code></span>
-<span class="codeline" id="line-60"><code>		<label for="r6" class="ident">x</label>.<a href="#line-18" class="ident">b</a>.<a href="cipher.go.html#line-21" class="ident">Encrypt</a>(<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>[<label for="r8" class="ident">remain</label>:], <label for="r6" class="ident">x</label>.<a href="#line-19" class="ident">ctr</a>)</code></span>
-<span class="codeline" id="line-61"><code>		<label for="r8" class="ident">remain</label> += <label for="r9" class="ident">bs</label></code></span>
-<span class="codeline" id="line-62"><code></code></span>
-<span class="codeline" id="line-63"><code>		<span class="comment">// Increment counter</span></code></span>
-<span class="codeline" id="line-64"><code>		<span class="keyword">for</span> <label for="r10" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-19" class="ident">ctr</a>) - <span class="lit-number">1</span>; <label for="r10" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r10" class="ident">i</label>-- {</code></span>
-<span class="codeline" id="line-65"><code>			<label for="r6" class="ident">x</label>.<a href="#line-19" class="ident">ctr</a>[<label for="r10" class="ident">i</label>]++</code></span>
-<span class="codeline" id="line-66"><code>			<span class="keyword">if</span> <label for="r6" class="ident">x</label>.<a href="#line-19" class="ident">ctr</a>[<label for="r10" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-67"><code>				<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-68"><code>			}</code></span>
-<span class="codeline" id="line-69"><code>		}</code></span>
-<span class="codeline" id="line-70"><code>	}</code></span>
-<span class="codeline" id="line-71"><code>	<label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a> = <label for="r6" class="ident">x</label>.<a href="#line-20" class="ident">out</a>[:<label for="r8" class="ident">remain</label>]</code></span>
-<span class="codeline" id="line-72"><code>	<label for="r6" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a> = <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-73"><code>}</code></span>
-<span class="codeline" id="line-74"><code></code></span>
-<span class="codeline" id="line-75"><code><span class="keyword">func</span> (<label for="r11" class="ident">x</label> *<a href="#line-17" class="ident">ctr</a>) <label for="r12" class="ident">XORKeyStream</label>(<label for="r13" class="ident">dst</label>, <label for="r14" class="ident">src</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
-<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">dst</label>) &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>) {</code></span>
-<span class="codeline" id="line-77"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"crypto/cipher: output smaller than input"</span>)</code></span>
-<span class="codeline" id="line-78"><code>	}</code></span>
-<span class="codeline" id="line-79"><code>	<span class="keyword">if</span> <a href="../../../pkg/crypto/internal/subtle.html" class="ident i0">subtle</a>.<a href="../internal/subtle/aliasing.go.html#line-29" class="ident">InexactOverlap</a>(<label for="r13" class="ident">dst</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>)], <label for="r14" class="ident">src</label>) {</code></span>
-<span class="codeline" id="line-80"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"crypto/cipher: invalid buffer overlap"</span>)</code></span>
-<span class="codeline" id="line-81"><code>	}</code></span>
-<span class="codeline" id="line-82"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>) &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-83"><code>		<span class="keyword">if</span> <label for="r11" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a> &gt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">x</label>.<a href="#line-20" class="ident">out</a>)-<label for="r11" class="ident">x</label>.<a href="#line-18" class="ident">b</a>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
-<span class="codeline" id="line-84"><code>			<label for="r11" class="ident">x</label>.<a href="#line-54" class="ident">refill</a>()</code></span>
-<span class="codeline" id="line-85"><code>		}</code></span>
-<span class="codeline" id="line-86"><code>		<label for="r15" class="ident">n</label> := <a href="xor_amd64.go.html#line-9" class="ident">xorBytes</a>(<label for="r13" class="ident">dst</label>, <label for="r14" class="ident">src</label>, <label for="r11" class="ident">x</label>.<a href="#line-20" class="ident">out</a>[<label for="r11" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a>:])</code></span>
-<span class="codeline" id="line-87"><code>		<label for="r13" class="ident">dst</label> = <label for="r13" class="ident">dst</label>[<label for="r15" class="ident">n</label>:]</code></span>
-<span class="codeline" id="line-88"><code>		<label for="r14" class="ident">src</label> = <label for="r14" class="ident">src</label>[<label for="r15" class="ident">n</label>:]</code></span>
-<span class="codeline" id="line-89"><code>		<label for="r11" class="ident">x</label>.<a href="#line-21" class="ident">outUsed</a> += <label for="r15" class="ident">n</label></code></span>
-<span class="codeline" id="line-90"><code>	}</code></span>
-<span class="codeline" id="line-91"><code>}</code></span>
+<span class="codeline" id="line-46"><code>	<label for="r5" class="ident">bufSize</label> := <a href="#line-28" class="ident">streamBufferSize</a></code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">if</span> <label for="r5" class="ident">bufSize</label> &lt; <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
+<span class="codeline" id="line-48"><code>		<label for="r5" class="ident">bufSize</label> = <label for="r1" class="ident">block</label>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>()</code></span>
+<span class="codeline" id="line-49"><code>	}</code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">return</span> &amp;<a href="#line-21" class="ident">ctr</a>{</code></span>
+<span class="codeline" id="line-51"><code>		<a href="#line-22" class="ident">b</a>:       <label for="r1" class="ident">block</label>,</code></span>
+<span class="codeline" id="line-52"><code>		<a href="#line-23" class="ident">ctr</a>:     <a href="../../../pkg/bytes.html" class="ident i0">bytes</a>.<a href="../../bytes/bytes.go.html#line-1365" class="ident">Clone</a>(<label for="r2" class="ident">iv</label>),</code></span>
+<span class="codeline" id="line-53"><code>		<a href="#line-24" class="ident">out</a>:     <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">0</span>, <label for="r5" class="ident">bufSize</label>),</code></span>
+<span class="codeline" id="line-54"><code>		<a href="#line-25" class="ident">outUsed</a>: <span class="lit-number">0</span>,</code></span>
+<span class="codeline" id="line-55"><code>	}</code></span>
+<span class="codeline" id="line-56"><code>}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code><span class="keyword">func</span> (<label for="r6" class="ident">x</label> *<a href="#line-21" class="ident">ctr</a>) <label for="r7" class="ident">refill</label>() {</code></span>
+<span class="codeline" id="line-59"><code>	<label for="r8" class="ident">remain</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>) - <label for="r6" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a></code></span>
+<span class="codeline" id="line-60"><code>	<a href="../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>, <label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>[<label for="r6" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a>:])</code></span>
+<span class="codeline" id="line-61"><code>	<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a> = <label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>[:<a href="../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>)]</code></span>
+<span class="codeline" id="line-62"><code>	<label for="r9" class="ident">bs</label> := <label for="r6" class="ident">x</label>.<a href="#line-22" class="ident">b</a>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>()</code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">for</span> <label for="r8" class="ident">remain</label> &lt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>)-<label for="r9" class="ident">bs</label> {</code></span>
+<span class="codeline" id="line-64"><code>		<label for="r6" class="ident">x</label>.<a href="#line-22" class="ident">b</a>.<a href="cipher.go.html#line-21" class="ident">Encrypt</a>(<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>[<label for="r8" class="ident">remain</label>:], <label for="r6" class="ident">x</label>.<a href="#line-23" class="ident">ctr</a>)</code></span>
+<span class="codeline" id="line-65"><code>		<label for="r8" class="ident">remain</label> += <label for="r9" class="ident">bs</label></code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code>		<span class="comment">// Increment counter</span></code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">for</span> <label for="r10" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r6" class="ident">x</label>.<a href="#line-23" class="ident">ctr</a>) - <span class="lit-number">1</span>; <label for="r10" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r10" class="ident">i</label>-- {</code></span>
+<span class="codeline" id="line-69"><code>			<label for="r6" class="ident">x</label>.<a href="#line-23" class="ident">ctr</a>[<label for="r10" class="ident">i</label>]++</code></span>
+<span class="codeline" id="line-70"><code>			<span class="keyword">if</span> <label for="r6" class="ident">x</label>.<a href="#line-23" class="ident">ctr</a>[<label for="r10" class="ident">i</label>] != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-71"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-72"><code>			}</code></span>
+<span class="codeline" id="line-73"><code>		}</code></span>
+<span class="codeline" id="line-74"><code>	}</code></span>
+<span class="codeline" id="line-75"><code>	<label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a> = <label for="r6" class="ident">x</label>.<a href="#line-24" class="ident">out</a>[:<label for="r8" class="ident">remain</label>]</code></span>
+<span class="codeline" id="line-76"><code>	<label for="r6" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a> = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-77"><code>}</code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code><span class="keyword">func</span> (<label for="r11" class="ident">x</label> *<a href="#line-21" class="ident">ctr</a>) <label for="r12" class="ident">XORKeyStream</label>(<label for="r13" class="ident">dst</label>, <label for="r14" class="ident">src</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r13" class="ident">dst</label>) &lt; <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>) {</code></span>
+<span class="codeline" id="line-81"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"crypto/cipher: output smaller than input"</span>)</code></span>
+<span class="codeline" id="line-82"><code>	}</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <a href="../../../pkg/crypto/internal/alias.html" class="ident i1">alias</a>.<a href="../internal/alias/alias.go.html#line-25" class="ident">InexactOverlap</a>(<label for="r13" class="ident">dst</label>[:<a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>)], <label for="r14" class="ident">src</label>) {</code></span>
+<span class="codeline" id="line-84"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"crypto/cipher: invalid buffer overlap"</span>)</code></span>
+<span class="codeline" id="line-85"><code>	}</code></span>
+<span class="codeline" id="line-86"><code>	<span class="keyword">for</span> <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r14" class="ident">src</label>) &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-87"><code>		<span class="keyword">if</span> <label for="r11" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a> &gt;= <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">x</label>.<a href="#line-24" class="ident">out</a>)-<label for="r11" class="ident">x</label>.<a href="#line-22" class="ident">b</a>.<a href="cipher.go.html#line-17" class="ident">BlockSize</a>() {</code></span>
+<span class="codeline" id="line-88"><code>			<label for="r11" class="ident">x</label>.<a href="#line-58" class="ident">refill</a>()</code></span>
+<span class="codeline" id="line-89"><code>		}</code></span>
+<span class="codeline" id="line-90"><code>		<label for="r15" class="ident">n</label> := <a href="../../../pkg/crypto/subtle.html" class="ident i2">subtle</a>.<a href="../subtle/xor.go.html#line-11" class="ident">XORBytes</a>(<label for="r13" class="ident">dst</label>, <label for="r14" class="ident">src</label>, <label for="r11" class="ident">x</label>.<a href="#line-24" class="ident">out</a>[<label for="r11" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a>:])</code></span>
+<span class="codeline" id="line-91"><code>		<label for="r13" class="ident">dst</label> = <label for="r13" class="ident">dst</label>[<label for="r15" class="ident">n</label>:]</code></span>
+<span class="codeline" id="line-92"><code>		<label for="r14" class="ident">src</label> = <label for="r14" class="ident">src</label>[<label for="r15" class="ident">n</label>:]</code></span>
+<span class="codeline" id="line-93"><code>		<label for="r11" class="ident">x</label>.<a href="#line-25" class="ident">outUsed</a> += <label for="r15" class="ident">n</label></code></span>
+<span class="codeline" id="line-94"><code>	}</code></span>
+<span class="codeline" id="line-95"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

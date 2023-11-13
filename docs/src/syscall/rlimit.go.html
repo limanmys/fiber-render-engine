@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: rlimit.go in package syscall</title>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	rlimit.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../pkg/syscall.html">syscall</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2022 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">//go:build unix</span></code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">package</span> syscall</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-10"><code>	<label for="i0"><span class="lit-string i0">"sync/atomic"</span></label></code></span>
+<span class="codeline" id="line-11"><code>)</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// origRlimitNofile, if not {0, 0}, is the original soft RLIMIT_NOFILE.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// When we can assume that we are bootstrapping with Go 1.19,</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// this can be atomic.Pointer[Rlimit].</span></code></span>
+<span class="codeline" id="line-16"><code><span class="keyword">var</span> origRlimitNofile <a href="../../pkg/sync/atomic.html" class="ident i0">atomic</a>.<a href="../sync/atomic/value.go.html#line-16" class="ident">Value</a> <span class="comment">// of Rlimit</span></code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// Some systems set an artificially low soft limit on open file count, for compatibility</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// with code that uses select and its hard-coded maximum file descriptor</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// (limited by the size of fd_set).</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// Go does not use select, so it should not be subject to these limits.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// On some systems the limit is 256, which is very easy to run into,</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// even in simple programs like gofmt when they parallelize walking</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// a file tree.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// After a long discussion on go.dev/issue/46279, we decided the</span></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// best approach was for Go to raise the limit unconditionally for itself,</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// and then leave old software to set the limit back as needed.</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// Code that really wants Go to leave the limit alone can set the hard limit,</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// which Go of course has no choice but to respect.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> init() {</code></span>
+<span class="codeline" id="line-33"><code>	<span class="keyword">var</span> <label for="r1" class="ident">lim</label> <a href="ztypes_linux_amd64.go.html#line-94" class="ident">Rlimit</a></code></span>
+<span class="codeline" id="line-34"><code>	<span class="keyword">if</span> <label for="r2" class="ident">err</label> := <a href="zsyscall_linux_amd64.go.html#line-1159" class="ident">Getrlimit</a>(<a href="zerrors_linux_amd64.go.html#line-778" class="ident">RLIMIT_NOFILE</a>, &amp;<label for="r1" class="ident">lim</label>); <label for="r2" class="ident">err</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r1" class="ident">lim</label>.<a href="ztypes_linux_amd64.go.html#line-95" class="ident">Cur</a> != <label for="r1" class="ident">lim</label>.<a href="ztypes_linux_amd64.go.html#line-96" class="ident">Max</a> {</code></span>
+<span class="codeline" id="line-35"><code>		<a href="#line-16" class="ident">origRlimitNofile</a>.<a href="../sync/atomic/value.go.html#line-47" class="ident">Store</a>(<label for="r1" class="ident">lim</label>)</code></span>
+<span class="codeline" id="line-36"><code>		<label for="r1" class="ident">lim</label>.<a href="ztypes_linux_amd64.go.html#line-95" class="ident">Cur</a> = <label for="r1" class="ident">lim</label>.<a href="ztypes_linux_amd64.go.html#line-96" class="ident">Max</a></code></span>
+<span class="codeline" id="line-37"><code>		<a href="rlimit_stub.go.html#line-10" class="ident">adjustFileLimit</a>(&amp;<label for="r1" class="ident">lim</label>)</code></span>
+<span class="codeline" id="line-38"><code>		<a href="zsyscall_linux_amd64.go.html#line-1335" class="ident">setrlimit</a>(<a href="zerrors_linux_amd64.go.html#line-778" class="ident">RLIMIT_NOFILE</a>, &amp;<label for="r1" class="ident">lim</label>)</code></span>
+<span class="codeline" id="line-39"><code>	}</code></span>
+<span class="codeline" id="line-40"><code>}</code></span>
+<span class="codeline" id="line-41"><code></code></span>
+<span class="codeline" id="line-42"><code><span class="keyword">func</span> <label for="r3" class="ident"><a href="../../pkg/syscall.html#name-Setrlimit" class="ident">Setrlimit</a></label>(<label for="r4" class="ident">resource</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r5" class="ident">rlim</label> *<a href="ztypes_linux_amd64.go.html#line-94" class="ident">Rlimit</a>) <a href="../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-43"><code>	<label for="r6" class="ident">err</label> := <a href="zsyscall_linux_amd64.go.html#line-1335" class="ident">setrlimit</a>(<label for="r4" class="ident">resource</label>, <label for="r5" class="ident">rlim</label>)</code></span>
+<span class="codeline" id="line-44"><code>	<span class="keyword">if</span> <label for="r6" class="ident">err</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; <label for="r4" class="ident">resource</label> == <a href="zerrors_linux_amd64.go.html#line-778" class="ident">RLIMIT_NOFILE</a> {</code></span>
+<span class="codeline" id="line-45"><code>		<span class="comment">// Store zeroes in origRlimitNofile to tell StartProcess</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">		// to not adjust the rlimit in the child process.</span></code></span>
+<span class="codeline" id="line-47"><code>		<a href="#line-16" class="ident">origRlimitNofile</a>.<a href="../sync/atomic/value.go.html#line-47" class="ident">Store</a>(<a href="ztypes_linux_amd64.go.html#line-94" class="ident">Rlimit</a>{<span class="lit-number">0</span>, <span class="lit-number">0</span>})</code></span>
+<span class="codeline" id="line-48"><code>	}</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">return</span> <label for="r6" class="ident">err</label></code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

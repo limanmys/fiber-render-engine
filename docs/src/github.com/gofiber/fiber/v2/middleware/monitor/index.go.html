@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: index.go in package github.com/gofiber/fiber/v2/middleware/monitor</title>
+<link href="../../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	index.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../../pkg/github.com/gofiber/fiber/v2/middleware/monitor.html">github.com/gofiber/fiber/v2/middleware/monitor</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> monitor</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"strconv"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"strings"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"time"</span></label></code></span>
+<span class="codeline" id="line-7"><code>)</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="keyword">type</span> viewBag <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-10"><code>	title      <a href="../../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-11"><code>	refresh    <a href="../../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../../time/time.go.html#line-612" class="ident">Duration</a></code></span>
+<span class="codeline" id="line-12"><code>	fontURL    <a href="../../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-13"><code>	chartJSURL <a href="../../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-14"><code>	customHead <a href="../../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-15"><code>}</code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// returns index with new title/refresh</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">func</span> newIndex(<label for="r1" class="ident">dat</label> <a href="#line-9" class="ident">viewBag</a>) <a href="../../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-19"><code>	<label for="r2" class="ident">timeout</label> := <label for="r1" class="ident">dat</label>.<a href="#line-11" class="ident">refresh</a>.<a href="../../../../../../time/time.go.html#line-765" class="ident">Milliseconds</a>() - <a href="#line-34" class="ident">timeoutDiff</a></code></span>
+<span class="codeline" id="line-20"><code>	<span class="keyword">if</span> <label for="r2" class="ident">timeout</label> &lt; <a href="#line-34" class="ident">timeoutDiff</a> {</code></span>
+<span class="codeline" id="line-21"><code>		<label for="r2" class="ident">timeout</label> = <a href="#line-34" class="ident">timeoutDiff</a></code></span>
+<span class="codeline" id="line-22"><code>	}</code></span>
+<span class="codeline" id="line-23"><code>	<label for="r3" class="ident">ts</label> := <a href="../../../../../../../pkg/strconv.html" class="ident i0">strconv</a>.<a href="../../../../../../strconv/itoa.go.html#line-25" class="ident">FormatInt</a>(<label for="r2" class="ident">timeout</label>, <span class="lit-number">10</span>)</code></span>
+<span class="codeline" id="line-24"><code>	<label for="r4" class="ident">replacer</label> := <a href="../../../../../../../pkg/strings.html" class="ident i1">strings</a>.<a href="../../../../../../strings/replace.go.html#line-32" class="ident">NewReplacer</a>(<span class="lit-string">"$TITLE"</span>, <label for="r1" class="ident">dat</label>.<a href="#line-10" class="ident">title</a>, <span class="lit-string">"$TIMEOUT"</span>, <label for="r3" class="ident">ts</label>,</code></span>
+<span class="codeline" id="line-25"><code>		<span class="lit-string">"$FONT_URL"</span>, <label for="r1" class="ident">dat</label>.<a href="#line-12" class="ident">fontURL</a>, <span class="lit-string">"$CHART_JS_URL"</span>, <label for="r1" class="ident">dat</label>.<a href="#line-13" class="ident">chartJSURL</a>, <span class="lit-string">"$CUSTOM_HEAD"</span>, <label for="r1" class="ident">dat</label>.<a href="#line-14" class="ident">customHead</a>,</code></span>
+<span class="codeline" id="line-26"><code>	)</code></span>
+<span class="codeline" id="line-27"><code>	<span class="keyword">return</span> <label for="r4" class="ident">replacer</label>.<a href="../../../../../../strings/replace.go.html#line-95" class="ident">Replace</a>(<a href="#line-41" class="ident">indexHTML</a>)</code></span>
+<span class="codeline" id="line-28"><code>}</code></span>
+<span class="codeline" id="line-29"><code></code></span>
+<span class="codeline" id="line-30"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-31"><code>	defaultTitle = <span class="lit-string">"Fiber Monitor"</span></code></span>
+<span class="codeline" id="line-32"><code></code></span>
+<span class="codeline" id="line-33"><code>	defaultRefresh    = <span class="lit-number">3</span> * <a href="../../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../../time/time.go.html#line-635" class="ident">Second</a></code></span>
+<span class="codeline" id="line-34"><code>	timeoutDiff       = <span class="lit-number">200</span> <span class="comment">// timeout will be Refresh (in milliseconds) - timeoutDiff</span></code></span>
+<span class="codeline" id="line-35"><code>	minRefresh        = <a href="#line-34" class="ident">timeoutDiff</a> * <a href="../../../../../../../pkg/time.html" class="ident i2">time</a>.<a href="../../../../../../time/time.go.html#line-634" class="ident">Millisecond</a></code></span>
+<span class="codeline" id="line-36"><code>	defaultFontURL    = <span class="lit-string">`https://fonts.googleapis.com/css2?family=Roboto:wght@400;900&amp;display=swap`</span></code></span>
+<span class="codeline" id="line-37"><code>	defaultChartJSURL = <span class="lit-string">`https://cdn.jsdelivr.net/npm/chart.js@2.9/dist/Chart.bundle.min.js`</span></code></span>
+<span class="codeline" id="line-38"><code>	defaultCustomHead = <span class="lit-string">``</span></code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code>	<span class="comment">// parametrized by $TITLE and $TIMEOUT</span></code></span>
+<span class="codeline" id="line-41"><code>	indexHTML = <span class="lit-string">`&lt;!DOCTYPE html&gt;</span></code></span>
+<span class="codeline" id="line-42"><code><span class="lit-string">&lt;html lang="en"&gt;</span></code></span>
+<span class="codeline" id="line-43"><code><span class="lit-string">&lt;head&gt;</span></code></span>
+<span class="codeline" id="line-44"><code><span class="lit-string">	&lt;meta charset="UTF-8"&gt;</span></code></span>
+<span class="codeline" id="line-45"><code><span class="lit-string">	&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></code></span>
+<span class="codeline" id="line-46"><code><span class="lit-string">	&lt;link href="$FONT_URL" rel="stylesheet"&gt;</span></code></span>
+<span class="codeline" id="line-47"><code><span class="lit-string">	&lt;script src="$CHART_JS_URL"&gt;&lt;/script&gt;</span></code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code><span class="lit-string">	&lt;title&gt;$TITLE&lt;/title&gt;</span></code></span>
+<span class="codeline" id="line-50"><code><span class="lit-string">&lt;style&gt;</span></code></span>
+<span class="codeline" id="line-51"><code><span class="lit-string">	body {</span></code></span>
+<span class="codeline" id="line-52"><code><span class="lit-string">		margin: 0;</span></code></span>
+<span class="codeline" id="line-53"><code><span class="lit-string">		font: 16px / 1.6 'Roboto', sans-serif;</span></code></span>
+<span class="codeline" id="line-54"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-55"><code><span class="lit-string">	.wrapper {</span></code></span>
+<span class="codeline" id="line-56"><code><span class="lit-string">		max-width: 900px;</span></code></span>
+<span class="codeline" id="line-57"><code><span class="lit-string">		margin: 0 auto;</span></code></span>
+<span class="codeline" id="line-58"><code><span class="lit-string">		padding: 30px 0;</span></code></span>
+<span class="codeline" id="line-59"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-60"><code><span class="lit-string">	.title {</span></code></span>
+<span class="codeline" id="line-61"><code><span class="lit-string">		text-align: center;</span></code></span>
+<span class="codeline" id="line-62"><code><span class="lit-string">		margin-bottom: 2em;</span></code></span>
+<span class="codeline" id="line-63"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-64"><code><span class="lit-string">	.title h1 {</span></code></span>
+<span class="codeline" id="line-65"><code><span class="lit-string">		font-size: 1.8em;</span></code></span>
+<span class="codeline" id="line-66"><code><span class="lit-string">		padding: 0;</span></code></span>
+<span class="codeline" id="line-67"><code><span class="lit-string">		margin: 0;</span></code></span>
+<span class="codeline" id="line-68"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-69"><code><span class="lit-string">	.row {</span></code></span>
+<span class="codeline" id="line-70"><code><span class="lit-string">		display: flex;</span></code></span>
+<span class="codeline" id="line-71"><code><span class="lit-string">		margin-bottom: 20px;</span></code></span>
+<span class="codeline" id="line-72"><code><span class="lit-string">		align-items: center;</span></code></span>
+<span class="codeline" id="line-73"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-74"><code><span class="lit-string">	.row .column:first-child { width: 35%; }</span></code></span>
+<span class="codeline" id="line-75"><code><span class="lit-string">	.row .column:last-child { width: 65%; }</span></code></span>
+<span class="codeline" id="line-76"><code><span class="lit-string">	.metric {</span></code></span>
+<span class="codeline" id="line-77"><code><span class="lit-string">		color: #777;</span></code></span>
+<span class="codeline" id="line-78"><code><span class="lit-string">		font-weight: 900;</span></code></span>
+<span class="codeline" id="line-79"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-80"><code><span class="lit-string">	h2 {</span></code></span>
+<span class="codeline" id="line-81"><code><span class="lit-string">		padding: 0;</span></code></span>
+<span class="codeline" id="line-82"><code><span class="lit-string">		margin: 0;</span></code></span>
+<span class="codeline" id="line-83"><code><span class="lit-string">		font-size: 2.2em;</span></code></span>
+<span class="codeline" id="line-84"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-85"><code><span class="lit-string">	h2 span {</span></code></span>
+<span class="codeline" id="line-86"><code><span class="lit-string">		font-size: 12px;</span></code></span>
+<span class="codeline" id="line-87"><code><span class="lit-string">		color: #777;</span></code></span>
+<span class="codeline" id="line-88"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-89"><code><span class="lit-string">	h2 span.ram_os { color: rgba(255, 150, 0, .8); }</span></code></span>
+<span class="codeline" id="line-90"><code><span class="lit-string">	h2 span.ram_total { color: rgba(0, 200, 0, .8); }</span></code></span>
+<span class="codeline" id="line-91"><code><span class="lit-string">	canvas {</span></code></span>
+<span class="codeline" id="line-92"><code><span class="lit-string">		width: 200px;</span></code></span>
+<span class="codeline" id="line-93"><code><span class="lit-string">		height: 180px;</span></code></span>
+<span class="codeline" id="line-94"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-95"><code><span class="lit-string">$CUSTOM_HEAD</span></code></span>
+<span class="codeline" id="line-96"><code><span class="lit-string">&lt;/style&gt;</span></code></span>
+<span class="codeline" id="line-97"><code><span class="lit-string">&lt;/head&gt;</span></code></span>
+<span class="codeline" id="line-98"><code><span class="lit-string">&lt;body&gt;</span></code></span>
+<span class="codeline" id="line-99"><code><span class="lit-string">	&lt;section class="wrapper"&gt;</span></code></span>
+<span class="codeline" id="line-100"><code><span class="lit-string">	&lt;div class="title"&gt;&lt;h1&gt;$TITLE&lt;/h1&gt;&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-101"><code><span class="lit-string">	&lt;section class="charts"&gt;</span></code></span>
+<span class="codeline" id="line-102"><code><span class="lit-string">		&lt;div class="row"&gt;</span></code></span>
+<span class="codeline" id="line-103"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-104"><code><span class="lit-string">				&lt;div class="metric"&gt;CPU Usage&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-105"><code><span class="lit-string">				&lt;h2 id="cpuMetric"&gt;0.00%&lt;/h2&gt;</span></code></span>
+<span class="codeline" id="line-106"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-107"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-108"><code><span class="lit-string">				&lt;canvas id="cpuChart"&gt;&lt;/canvas&gt;</span></code></span>
+<span class="codeline" id="line-109"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-110"><code><span class="lit-string">		&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-111"><code><span class="lit-string">		&lt;div class="row"&gt;</span></code></span>
+<span class="codeline" id="line-112"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-113"><code><span class="lit-string">				&lt;div class="metric"&gt;Memory Usage&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-114"><code><span class="lit-string">				&lt;h2 id="ramMetric" title="PID used / OS used / OS total"&gt;0.00 MB&lt;/h2&gt;</span></code></span>
+<span class="codeline" id="line-115"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-116"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-117"><code><span class="lit-string">				&lt;canvas id="ramChart"&gt;&lt;/canvas&gt;</span></code></span>
+<span class="codeline" id="line-118"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-119"><code><span class="lit-string">		&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-120"><code><span class="lit-string">		&lt;div class="row"&gt;</span></code></span>
+<span class="codeline" id="line-121"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-122"><code><span class="lit-string">				&lt;div class="metric"&gt;Response Time&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-123"><code><span class="lit-string">				&lt;h2 id="rtimeMetric"&gt;0ms&lt;/h2&gt;</span></code></span>
+<span class="codeline" id="line-124"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-125"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-126"><code><span class="lit-string">				&lt;canvas id="rtimeChart"&gt;&lt;/canvas&gt;</span></code></span>
+<span class="codeline" id="line-127"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-128"><code><span class="lit-string">		&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-129"><code><span class="lit-string">		&lt;div class="row"&gt;</span></code></span>
+<span class="codeline" id="line-130"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-131"><code><span class="lit-string">				&lt;div class="metric"&gt;Open Connections&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-132"><code><span class="lit-string">				&lt;h2 id="connsMetric"&gt;0&lt;/h2&gt;</span></code></span>
+<span class="codeline" id="line-133"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-134"><code><span class="lit-string">			&lt;div class="column"&gt;</span></code></span>
+<span class="codeline" id="line-135"><code><span class="lit-string">				&lt;canvas id="connsChart"&gt;&lt;/canvas&gt;</span></code></span>
+<span class="codeline" id="line-136"><code><span class="lit-string">			&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-137"><code><span class="lit-string">		&lt;/div&gt;</span></code></span>
+<span class="codeline" id="line-138"><code><span class="lit-string">	&lt;/section&gt;</span></code></span>
+<span class="codeline" id="line-139"><code><span class="lit-string">	&lt;/section&gt;</span></code></span>
+<span class="codeline" id="line-140"><code><span class="lit-string">&lt;script&gt;</span></code></span>
+<span class="codeline" id="line-141"><code><span class="lit-string">	function formatBytes(bytes, decimals = 1) {</span></code></span>
+<span class="codeline" id="line-142"><code><span class="lit-string">		if (bytes === 0) return '0 Bytes';</span></code></span>
+<span class="codeline" id="line-143"><code></code></span>
+<span class="codeline" id="line-144"><code><span class="lit-string">		const k = 1024;</span></code></span>
+<span class="codeline" id="line-145"><code><span class="lit-string">		const dm = decimals &lt; 0 ? 0 : decimals;</span></code></span>
+<span class="codeline" id="line-146"><code><span class="lit-string">		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];</span></code></span>
+<span class="codeline" id="line-147"><code></code></span>
+<span class="codeline" id="line-148"><code><span class="lit-string">		const i = Math.floor(Math.log(bytes) / Math.log(k));</span></code></span>
+<span class="codeline" id="line-149"><code></code></span>
+<span class="codeline" id="line-150"><code><span class="lit-string">		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];</span></code></span>
+<span class="codeline" id="line-151"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-152"><code><span class="lit-string">	Chart.defaults.global.legend.display = false;</span></code></span>
+<span class="codeline" id="line-153"><code><span class="lit-string">	Chart.defaults.global.defaultFontSize = 8;</span></code></span>
+<span class="codeline" id="line-154"><code><span class="lit-string">	Chart.defaults.global.animation.duration = 1000;</span></code></span>
+<span class="codeline" id="line-155"><code><span class="lit-string">	Chart.defaults.global.animation.easing = 'easeOutQuart';</span></code></span>
+<span class="codeline" id="line-156"><code><span class="lit-string">	Chart.defaults.global.elements.line.backgroundColor = 'rgba(0, 172, 215, 0.25)';</span></code></span>
+<span class="codeline" id="line-157"><code><span class="lit-string">	Chart.defaults.global.elements.line.borderColor = 'rgba(0, 172, 215, 1)';</span></code></span>
+<span class="codeline" id="line-158"><code><span class="lit-string">	Chart.defaults.global.elements.line.borderWidth = 2;</span></code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code><span class="lit-string">	const options = {</span></code></span>
+<span class="codeline" id="line-161"><code><span class="lit-string">		scales: {</span></code></span>
+<span class="codeline" id="line-162"><code><span class="lit-string">			yAxes: [{ ticks: { beginAtZero: true }}],</span></code></span>
+<span class="codeline" id="line-163"><code><span class="lit-string">			xAxes: [{</span></code></span>
+<span class="codeline" id="line-164"><code><span class="lit-string">				type: 'time',</span></code></span>
+<span class="codeline" id="line-165"><code><span class="lit-string">				time: {</span></code></span>
+<span class="codeline" id="line-166"><code><span class="lit-string">					unitStepSize: 30,</span></code></span>
+<span class="codeline" id="line-167"><code><span class="lit-string">					unit: 'second'</span></code></span>
+<span class="codeline" id="line-168"><code><span class="lit-string">				},</span></code></span>
+<span class="codeline" id="line-169"><code><span class="lit-string">				gridlines: { display: false }</span></code></span>
+<span class="codeline" id="line-170"><code><span class="lit-string">			}]</span></code></span>
+<span class="codeline" id="line-171"><code><span class="lit-string">		},</span></code></span>
+<span class="codeline" id="line-172"><code><span class="lit-string">		tooltips: {	enabled: false },</span></code></span>
+<span class="codeline" id="line-173"><code><span class="lit-string">		responsive: true,</span></code></span>
+<span class="codeline" id="line-174"><code><span class="lit-string">		maintainAspectRatio: false,</span></code></span>
+<span class="codeline" id="line-175"><code><span class="lit-string">		animation: false</span></code></span>
+<span class="codeline" id="line-176"><code><span class="lit-string">	};</span></code></span>
+<span class="codeline" id="line-177"><code><span class="lit-string">	const cpuMetric = document.querySelector('#cpuMetric');</span></code></span>
+<span class="codeline" id="line-178"><code><span class="lit-string">	const ramMetric = document.querySelector('#ramMetric');</span></code></span>
+<span class="codeline" id="line-179"><code><span class="lit-string">	const rtimeMetric = document.querySelector('#rtimeMetric');</span></code></span>
+<span class="codeline" id="line-180"><code><span class="lit-string">	const connsMetric = document.querySelector('#connsMetric');</span></code></span>
+<span class="codeline" id="line-181"><code></code></span>
+<span class="codeline" id="line-182"><code><span class="lit-string">	const cpuChartCtx = document.querySelector('#cpuChart').getContext('2d');</span></code></span>
+<span class="codeline" id="line-183"><code><span class="lit-string">	const ramChartCtx = document.querySelector('#ramChart').getContext('2d');</span></code></span>
+<span class="codeline" id="line-184"><code><span class="lit-string">	const rtimeChartCtx = document.querySelector('#rtimeChart').getContext('2d');</span></code></span>
+<span class="codeline" id="line-185"><code><span class="lit-string">	const connsChartCtx = document.querySelector('#connsChart').getContext('2d');</span></code></span>
+<span class="codeline" id="line-186"><code></code></span>
+<span class="codeline" id="line-187"><code><span class="lit-string">	const cpuChart = createChart(cpuChartCtx);</span></code></span>
+<span class="codeline" id="line-188"><code><span class="lit-string">	const ramChart = createChart(ramChartCtx);</span></code></span>
+<span class="codeline" id="line-189"><code><span class="lit-string">	const rtimeChart = createChart(rtimeChartCtx);</span></code></span>
+<span class="codeline" id="line-190"><code><span class="lit-string">	const connsChart = createChart(connsChartCtx);</span></code></span>
+<span class="codeline" id="line-191"><code></code></span>
+<span class="codeline" id="line-192"><code><span class="lit-string">	const charts = [cpuChart, ramChart, rtimeChart, connsChart];</span></code></span>
+<span class="codeline" id="line-193"><code></code></span>
+<span class="codeline" id="line-194"><code><span class="lit-string">	function createChart(ctx) {</span></code></span>
+<span class="codeline" id="line-195"><code><span class="lit-string">		return new Chart(ctx, {</span></code></span>
+<span class="codeline" id="line-196"><code><span class="lit-string">			type: 'line',</span></code></span>
+<span class="codeline" id="line-197"><code><span class="lit-string">			data: {</span></code></span>
+<span class="codeline" id="line-198"><code><span class="lit-string">				labels: [],</span></code></span>
+<span class="codeline" id="line-199"><code><span class="lit-string">				datasets: [{</span></code></span>
+<span class="codeline" id="line-200"><code><span class="lit-string">					label: '',</span></code></span>
+<span class="codeline" id="line-201"><code><span class="lit-string">					data: [],</span></code></span>
+<span class="codeline" id="line-202"><code><span class="lit-string">					lineTension: 0.2,</span></code></span>
+<span class="codeline" id="line-203"><code><span class="lit-string">					pointRadius: 0,</span></code></span>
+<span class="codeline" id="line-204"><code><span class="lit-string">				}]</span></code></span>
+<span class="codeline" id="line-205"><code><span class="lit-string">			},</span></code></span>
+<span class="codeline" id="line-206"><code><span class="lit-string">			options</span></code></span>
+<span class="codeline" id="line-207"><code><span class="lit-string">		});</span></code></span>
+<span class="codeline" id="line-208"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-209"><code><span class="lit-string">	ramChart.data.datasets.push({</span></code></span>
+<span class="codeline" id="line-210"><code><span class="lit-string">		data: [],</span></code></span>
+<span class="codeline" id="line-211"><code><span class="lit-string">		lineTension: 0.2,</span></code></span>
+<span class="codeline" id="line-212"><code><span class="lit-string">		pointRadius: 0,</span></code></span>
+<span class="codeline" id="line-213"><code><span class="lit-string">		backgroundColor: 'rgba(255, 200, 0, .6)',</span></code></span>
+<span class="codeline" id="line-214"><code><span class="lit-string">		borderColor: 'rgba(255, 150, 0, .8)',</span></code></span>
+<span class="codeline" id="line-215"><code><span class="lit-string">	})</span></code></span>
+<span class="codeline" id="line-216"><code><span class="lit-string">	ramChart.data.datasets.push({</span></code></span>
+<span class="codeline" id="line-217"><code><span class="lit-string">		data: [],</span></code></span>
+<span class="codeline" id="line-218"><code><span class="lit-string">		lineTension: 0.2,</span></code></span>
+<span class="codeline" id="line-219"><code><span class="lit-string">		pointRadius: 0,</span></code></span>
+<span class="codeline" id="line-220"><code><span class="lit-string">		backgroundColor: 'rgba(0, 255, 0, .4)',</span></code></span>
+<span class="codeline" id="line-221"><code><span class="lit-string">		borderColor: 'rgba(0, 200, 0, .8)',</span></code></span>
+<span class="codeline" id="line-222"><code><span class="lit-string">	})</span></code></span>
+<span class="codeline" id="line-223"><code><span class="lit-string">	function update(json, rtime) {</span></code></span>
+<span class="codeline" id="line-224"><code><span class="lit-string">		cpu = json.pid.cpu.toFixed(1);</span></code></span>
+<span class="codeline" id="line-225"><code><span class="lit-string">		cpuOS = json.os.cpu.toFixed(1);</span></code></span>
+<span class="codeline" id="line-226"><code></code></span>
+<span class="codeline" id="line-227"><code><span class="lit-string">		cpuMetric.innerHTML = cpu + '% &lt;span&gt;' + cpuOS + '%&lt;/span&gt;';</span></code></span>
+<span class="codeline" id="line-228"><code><span class="lit-string">		ramMetric.innerHTML = formatBytes(json.pid.ram) + '&lt;span&gt; / &lt;/span&gt;&lt;span class="ram_os"&gt;' + formatBytes(json.os.ram) +</span></code></span>
+<span class="codeline" id="line-229"><code><span class="lit-string">			'&lt;span&gt;&lt;span&gt; / &lt;/span&gt;&lt;span class="ram_total"&gt;' + formatBytes(json.os.total_ram) + '&lt;/span&gt;';</span></code></span>
+<span class="codeline" id="line-230"><code><span class="lit-string">		rtimeMetric.innerHTML = rtime + 'ms &lt;span&gt;client&lt;/span&gt;';</span></code></span>
+<span class="codeline" id="line-231"><code><span class="lit-string">		connsMetric.innerHTML = json.pid.conns + ' &lt;span&gt;' + json.os.conns + '&lt;/span&gt;';</span></code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code><span class="lit-string">		cpuChart.data.datasets[0].data.push(cpu);</span></code></span>
+<span class="codeline" id="line-234"><code><span class="lit-string">		ramChart.data.datasets[2].data.push((json.os.total_ram / 1e6).toFixed(2));</span></code></span>
+<span class="codeline" id="line-235"><code><span class="lit-string">		ramChart.data.datasets[1].data.push((json.os.ram / 1e6).toFixed(2));</span></code></span>
+<span class="codeline" id="line-236"><code><span class="lit-string">		ramChart.data.datasets[0].data.push((json.pid.ram / 1e6).toFixed(2));</span></code></span>
+<span class="codeline" id="line-237"><code><span class="lit-string">		rtimeChart.data.datasets[0].data.push(rtime);</span></code></span>
+<span class="codeline" id="line-238"><code><span class="lit-string">		connsChart.data.datasets[0].data.push(json.pid.conns);</span></code></span>
+<span class="codeline" id="line-239"><code></code></span>
+<span class="codeline" id="line-240"><code><span class="lit-string">		const timestamp = new Date().getTime();</span></code></span>
+<span class="codeline" id="line-241"><code></code></span>
+<span class="codeline" id="line-242"><code><span class="lit-string">		charts.forEach(chart =&gt; {</span></code></span>
+<span class="codeline" id="line-243"><code><span class="lit-string">			if (chart.data.labels.length &gt; 50) {</span></code></span>
+<span class="codeline" id="line-244"><code><span class="lit-string">				chart.data.datasets.forEach(function (dataset) { dataset.data.shift(); });</span></code></span>
+<span class="codeline" id="line-245"><code><span class="lit-string">				chart.data.labels.shift();</span></code></span>
+<span class="codeline" id="line-246"><code><span class="lit-string">			}</span></code></span>
+<span class="codeline" id="line-247"><code><span class="lit-string">			chart.data.labels.push(timestamp);</span></code></span>
+<span class="codeline" id="line-248"><code><span class="lit-string">			chart.update();</span></code></span>
+<span class="codeline" id="line-249"><code><span class="lit-string">		});</span></code></span>
+<span class="codeline" id="line-250"><code><span class="lit-string">		setTimeout(fetchJSON, $TIMEOUT)</span></code></span>
+<span class="codeline" id="line-251"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-252"><code><span class="lit-string">	function fetchJSON() {</span></code></span>
+<span class="codeline" id="line-253"><code><span class="lit-string">		var t1 = ''</span></code></span>
+<span class="codeline" id="line-254"><code><span class="lit-string">		var t0 = performance.now()</span></code></span>
+<span class="codeline" id="line-255"><code><span class="lit-string">		fetch(window.location.href, {</span></code></span>
+<span class="codeline" id="line-256"><code><span class="lit-string">				headers: { 'Accept': 'application/json' },</span></code></span>
+<span class="codeline" id="line-257"><code><span class="lit-string">				credentials: 'same-origin'</span></code></span>
+<span class="codeline" id="line-258"><code><span class="lit-string">			})</span></code></span>
+<span class="codeline" id="line-259"><code><span class="lit-string">			.then(res =&gt; {</span></code></span>
+<span class="codeline" id="line-260"><code><span class="lit-string">				t1 = performance.now()</span></code></span>
+<span class="codeline" id="line-261"><code><span class="lit-string">				return res.json()</span></code></span>
+<span class="codeline" id="line-262"><code><span class="lit-string">			})</span></code></span>
+<span class="codeline" id="line-263"><code><span class="lit-string">			.then(res =&gt; { update(res, Math.round(t1 - t0)) })</span></code></span>
+<span class="codeline" id="line-264"><code><span class="lit-string">			.catch(console.error);</span></code></span>
+<span class="codeline" id="line-265"><code><span class="lit-string">	}</span></code></span>
+<span class="codeline" id="line-266"><code><span class="lit-string">	fetchJSON()</span></code></span>
+<span class="codeline" id="line-267"><code><span class="lit-string">&lt;/script&gt;</span></code></span>
+<span class="codeline" id="line-268"><code><span class="lit-string">&lt;/body&gt;</span></code></span>
+<span class="codeline" id="line-269"><code><span class="lit-string">&lt;/html&gt;</span></code></span>
+<span class="codeline" id="line-270"><code><span class="lit-string">`</span></code></span>
+<span class="codeline" id="line-271"><code>)</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

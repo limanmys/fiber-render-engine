@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Package: crypto/rsa</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="package-details"><code><span style="font-size:xx-large;">package <b>rsa</b></span>
@@ -15,14 +15,14 @@
 	<a href="../../index.html#pkg-crypto/rsa">crypto/rsa</a><i> (on <a href="https://pkg.go.dev/crypto/rsa" target="_blank">go.dev</a>)</i>
 
 <span class="title">Dependency Relation</span>
-	imports <a href="../../dep/crypto/rsa.html">12 packages</a>, and imported by <a href="../../dep/crypto/rsa.html#imported-by">5 packages</a>
+	imports <a href="../../dep/crypto/rsa.html">13 packages</a>, and imported by <a href="../../dep/crypto/rsa.html#imported-by">7 packages</a>
 
 <div id="files"><span class="title">Involved Source Files</span>
 
-	<span class="nodocs">      <a href="../../src/crypto/rsa/notboring.go.html">notboring.go</a></span>
-	<span class="nodocs">      <a href="../../src/crypto/rsa/pkcs1v15.go.html">pkcs1v15.go</a></span>
-	<span class="nodocs">      <a href="../../src/crypto/rsa/pss.go.html">pss.go</a></span>
-	<input type='checkbox' checked class="fold" id="file-3-fold-content"><label for="file-3-fold-content">   <a href="../../src/crypto/rsa/rsa.go.html#doc">#d</a> <a href="../../src/crypto/rsa/rsa.go.html">rsa.go</a></label><span id='file-3-fold-content-items' class="fold-items">
+	<span class="nodocs">    <a href="../../src/crypto/rsa/notboring.go.html">notboring.go</a></span>
+	<span class="nodocs">    <a href="../../src/crypto/rsa/pkcs1v15.go.html">pkcs1v15.go</a></span>
+	<span class="nodocs">    <a href="../../src/crypto/rsa/pss.go.html">pss.go</a></span>
+	<input type='checkbox' checked class="fold" id="file-3-fold-content"><label for="file-3-fold-content">  <a href="../../src/crypto/rsa/rsa.go.html#doc">d</a> <a href="../../src/crypto/rsa/rsa.go.html">rsa.go</a></label><span id='file-3-fold-content-items' class="fold-items">
 <span class="md-text">		Package rsa implements RSA encryption as specified in PKCS #1 and RFC 8017.
 		
 		RSA is a single, fundamental operation that is used in this package to
@@ -40,7 +40,10 @@
 		over the public key primitive, the PrivateKey type implements the
 		Decrypter and Signer interfaces from the crypto package.
 		
-		The RSA operations in this package are not implemented using constant-time algorithms.</span></span></div>
+		Operations in this package are implemented using constant-time algorithms,
+		except for [GenerateKey], [PrivateKey.Precompute], and [PrivateKey.Validate].
+		Every other operation only leaks the bit size of the involved values, which
+		all depend on the selected key size.</span></span></div>
 <div id="examples"><span class="title">Code Examples</span>
 
 	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">DecryptOAEP</label><span id='example-0-fold-content-items' class="fold-items">
@@ -48,9 +51,7 @@
 	  	ciphertext, _ := hex.DecodeString("4d1ee10e8f286390258c51a5e80802844c3e6358ad6690b7285218a7c7ed7fc3a4c7b950fbd04d4b0239cc060dcc7065ca6f84c1756deb71ca5685cadbb82be025e16449b905c568a19c088a1abfad54bf7ecc67a7df39943ec511091a34c0f2348d04e058fcff4d55644de3cd1d580791d4524b92f3e91695582e6e340a1c50b6c6d78e80b4e42c5b4d45e479b492de42bbd39cc642ebb80226bb5200020d501b24a37bcc2ec7f34e596b4fd6b063de4858dbf5a4e3dd18e262eda0ec2d19dbd8e890d672b63d368768360b20c0b6b8592a438fa275e5fa7f60bef0dd39673fd3989cc54d2cb80c08fcd19dacbc265ee1c6014616b0e04ea0328c2a04e73460")
 	  	label := []byte("orders")
 	  
-	  	rng := rand.Reader
-	  
-	  	plaintext, err := DecryptOAEP(sha256.New(), rng, test2048Key, ciphertext, label)
+	  	plaintext, err := rsa.DecryptOAEP(sha256.New(), nil, test2048Key, ciphertext, label)
 	  	if err != nil {
 	  		fmt.Fprintf(os.Stderr, "Error from decryption: %s\n", err)
 	  		return
@@ -62,16 +63,14 @@
 	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">DecryptPKCS1v15SessionKey</label><span id='example-1-fold-content-items' class="fold-items">
 	  {
 	  
-	  	rng := rand.Reader
-	  
 	  	key := make([]byte, 32)
-	  	if _, err := io.ReadFull(rng, key); err != nil {
+	  	if _, err := rand.Read(key); err != nil {
 	  		panic("RNG failure")
 	  	}
 	  
 	  	rsaCiphertext, _ := hex.DecodeString("aabbccddeeff")
 	  
-	  	if err := DecryptPKCS1v15SessionKey(rng, rsaPrivateKey, rsaCiphertext, key); err != nil {
+	  	if err := rsa.DecryptPKCS1v15SessionKey(nil, rsaPrivateKey, rsaCiphertext, key); err != nil {
 	  
 	  		fmt.Fprintf(os.Stderr, "Error from RSA decryption: %s\n", err)
 	  		return
@@ -106,7 +105,7 @@
 	  
 	  	rng := rand.Reader
 	  
-	  	ciphertext, err := EncryptOAEP(sha256.New(), rng, &amp;test2048Key.PublicKey, secretMessage, label)
+	  	ciphertext, err := rsa.EncryptOAEP(sha256.New(), rng, &amp;test2048Key.PublicKey, secretMessage, label)
 	  	if err != nil {
 	  		fmt.Fprintf(os.Stderr, "Error from encryption: %s\n", err)
 	  		return
@@ -116,14 +115,11 @@
 	  }</span>
 	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">SignPKCS1v15</label><span id='example-3-fold-content-items' class="fold-items">
 	  {
-	  
-	  	rng := rand.Reader
-	  
 	  	message := []byte("message to be signed")
 	  
 	  	hashed := sha256.Sum256(message)
 	  
-	  	signature, err := SignPKCS1v15(rng, rsaPrivateKey, crypto.SHA256, hashed[:])
+	  	signature, err := rsa.SignPKCS1v15(nil, rsaPrivateKey, crypto.SHA256, hashed[:])
 	  	if err != nil {
 	  		fmt.Fprintf(os.Stderr, "Error from signing: %s\n", err)
 	  		return
@@ -138,7 +134,7 @@
 	  
 	  	hashed := sha256.Sum256(message)
 	  
-	  	err := VerifyPKCS1v15(&amp;rsaPrivateKey.PublicKey, crypto.SHA256, hashed[:], signature)
+	  	err := rsa.VerifyPKCS1v15(&amp;rsaPrivateKey.PublicKey, crypto.SHA256, hashed[:], signature)
 	  	if err != nil {
 	  		fmt.Fprintf(os.Stderr, "Error from verification: %s\n", err)
 	  		return
@@ -148,105 +144,115 @@
 </div>
 <div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 7)</i></span></span>
 
-<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-CRTValue" data-popularity="0">	<input type='checkbox' class="fold" id="CRTValue-fold-content"><label for="CRTValue-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-196">CRTValue</a> <i>(struct)</i></label><span id='CRTValue-fold-content-docs' class="fold-docs">
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-CRTValue" data-popularity="0">	<input type='checkbox' class="fold" id="CRTValue-fold-content"><label for="CRTValue-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-222">CRTValue</a> <i>(struct)</i></label><span id='CRTValue-fold-content-docs' class="fold-docs">
 <span class="md-text">		CRTValue contains the precomputed Chinese remainder theorem values.</span>
 
 		<input type='checkbox' class="fold" id="CRTValue-fold-fields"><label for="CRTValue-fold-fields">Fields (<i>total 3</i>)</label><span id='CRTValue-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="CRTValue-fold-field-Coeff"><label for="CRTValue-fold-field-Coeff"><a href="../../src/crypto/rsa/rsa.go.html#line-198">Coeff</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-Coeff-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="CRTValue-fold-field-Coeff"><label for="CRTValue-fold-field-Coeff"><a href="../../src/crypto/rsa/rsa.go.html#line-224">Coeff</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-Coeff-docs' class="fold-docs">
 <span class="md-text">				// R·Coeff ≡ 1 mod Prime.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="CRTValue-fold-field-Exp"><label for="CRTValue-fold-field-Exp"><a href="../../src/crypto/rsa/rsa.go.html#line-197">Exp</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-Exp-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="CRTValue-fold-field-Exp"><label for="CRTValue-fold-field-Exp"><a href="../../src/crypto/rsa/rsa.go.html#line-223">Exp</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-Exp-docs' class="fold-docs">
 <span class="md-text">				// D mod (prime-1).</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="CRTValue-fold-field-R"><label for="CRTValue-fold-field-R"><a href="../../src/crypto/rsa/rsa.go.html#line-199">R</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-R-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="CRTValue-fold-field-R"><label for="CRTValue-fold-field-R"><a href="../../src/crypto/rsa/rsa.go.html#line-225">R</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='CRTValue-fold-field-R-docs' class="fold-docs">
 <span class="md-text">				// product of primes prior to this (inc p and q).</span>
 </span></span></span>
 
-</span></div><div class="anchor type-res" id="name-OAEPOptions" data-popularity="0">	<input type='checkbox' class="fold" id="OAEPOptions-fold-content"><label for="OAEPOptions-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-68">OAEPOptions</a> <i>(struct)</i></label><span id='OAEPOptions-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor type-res" id="name-OAEPOptions" data-popularity="0">	<input type='checkbox' class="fold" id="OAEPOptions-fold-content"><label for="OAEPOptions-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-71">OAEPOptions</a> <i>(struct)</i></label><span id='OAEPOptions-fold-content-docs' class="fold-docs">
 <span class="md-text">		OAEPOptions is an interface for passing options to OAEP decryption using the
 		crypto.Decrypter interface.</span>
 
-		<input type='checkbox' class="fold" id="OAEPOptions-fold-fields"><label for="OAEPOptions-fold-fields">Fields (<i>total 2</i>)</label><span id='OAEPOptions-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="OAEPOptions-fold-field-Hash"><label for="OAEPOptions-fold-field-Hash"><a href="../../src/crypto/rsa/rsa.go.html#line-70">Hash</a> <i><a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></i></label><span id='OAEPOptions-fold-field-Hash-docs' class="fold-docs">
+		<input type='checkbox' class="fold" id="OAEPOptions-fold-fields"><label for="OAEPOptions-fold-fields">Fields (<i>total 3</i>)</label><span id='OAEPOptions-fold-fields-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="OAEPOptions-fold-field-Hash"><label for="OAEPOptions-fold-field-Hash"><a href="../../src/crypto/rsa/rsa.go.html#line-73">Hash</a> <i><a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></i></label><span id='OAEPOptions-fold-field-Hash-docs' class="fold-docs">
 <span class="md-text">				Hash is the hash function that will be used when generating the mask.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="OAEPOptions-fold-field-Label"><label for="OAEPOptions-fold-field-Label"><a href="../../src/crypto/rsa/rsa.go.html#line-73">Label</a> <i>[]<a href="../builtin.html#name-byte">byte</a></i></label><span id='OAEPOptions-fold-field-Label-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="OAEPOptions-fold-field-Label"><label for="OAEPOptions-fold-field-Label"><a href="../../src/crypto/rsa/rsa.go.html#line-81">Label</a> <i>[]<a href="../builtin.html#name-byte">byte</a></i></label><span id='OAEPOptions-fold-field-Label-docs' class="fold-docs">
 <span class="md-text">				Label is an arbitrary byte string that must be equal to the value
 				used when encrypting.</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="OAEPOptions-fold-field-MGFHash"><label for="OAEPOptions-fold-field-MGFHash"><a href="../../src/crypto/rsa/rsa.go.html#line-77">MGFHash</a> <i><a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></i></label><span id='OAEPOptions-fold-field-MGFHash-docs' class="fold-docs">
+<span class="md-text">				MGFHash is the hash function used for MGF1.
+				If zero, Hash is used instead.</span>
 </span></span></span>
 
-</span></div><div class="anchor type-res" id="name-PKCS1v15DecryptOptions" data-popularity="0">	<input type='checkbox' class="fold" id="PKCS1v15DecryptOptions-fold-content"><label for="PKCS1v15DecryptOptions-fold-content"> type <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-21">PKCS1v15DecryptOptions</a> <i>(struct)</i></label><span id='PKCS1v15DecryptOptions-fold-content-docs' class="fold-docs">
-<span class="md-text">		PKCS1v15DecrypterOpts is for passing options to PKCS #1 v1.5 decryption using
+</span></div><div class="anchor type-res" id="name-PKCS1v15DecryptOptions" data-popularity="0">	<input type='checkbox' class="fold" id="PKCS1v15DecryptOptions-fold-content"><label for="PKCS1v15DecryptOptions-fold-content"> type <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-20">PKCS1v15DecryptOptions</a> <i>(struct)</i></label><span id='PKCS1v15DecryptOptions-fold-content-docs' class="fold-docs">
+<span class="md-text">		PKCS1v15DecryptOptions is for passing options to PKCS #1 v1.5 decryption using
 		the crypto.Decrypter interface.</span>
 
 		<input type='checkbox' class="fold" id="PKCS1v15DecryptOptions-fold-fields"><label for="PKCS1v15DecryptOptions-fold-fields">Fields (<i>only one</i>)</label><span id='PKCS1v15DecryptOptions-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PKCS1v15DecryptOptions-fold-field-SessionKeyLen"><label for="PKCS1v15DecryptOptions-fold-field-SessionKeyLen"><a href="../../src/crypto/rsa/pkcs1v15.go.html#line-26">SessionKeyLen</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PKCS1v15DecryptOptions-fold-field-SessionKeyLen-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PKCS1v15DecryptOptions-fold-field-SessionKeyLen"><label for="PKCS1v15DecryptOptions-fold-field-SessionKeyLen"><a href="../../src/crypto/rsa/pkcs1v15.go.html#line-25">SessionKeyLen</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PKCS1v15DecryptOptions-fold-field-SessionKeyLen-docs' class="fold-docs">
 <span class="md-text">				SessionKeyLen is the length of the session key that is being
 				decrypted. If not zero, then a padding error during decryption will
 				cause a random plaintext of this length to be returned rather than
 				an error. These alternatives happen in constant time.</span>
 </span></span></span>
 
-</span></div><div class="anchor type-res" id="name-PrecomputedValues" data-popularity="0">	<input type='checkbox' class="fold" id="PrecomputedValues-fold-content"><label for="PrecomputedValues-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-184">PrecomputedValues</a> <i>(struct)</i></label><span id='PrecomputedValues-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor type-res" id="name-PrecomputedValues" data-popularity="0">	<input type='checkbox' class="fold" id="PrecomputedValues-fold-content"><label for="PrecomputedValues-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-203">PrecomputedValues</a> <i>(struct)</i></label><span id='PrecomputedValues-fold-content-docs' class="fold-docs">
 
 		<input type='checkbox' class="fold" id="PrecomputedValues-fold-fields"><label for="PrecomputedValues-fold-fields">Fields (<i>total 4</i>)</label><span id='PrecomputedValues-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-CRTValues"><label for="PrecomputedValues-fold-field-CRTValues"><a href="../../src/crypto/rsa/rsa.go.html#line-192">CRTValues</a> <i>[]<a href="#name-CRTValue">CRTValue</a></i></label><span id='PrecomputedValues-fold-field-CRTValues-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-CRTValues"><label for="PrecomputedValues-fold-field-CRTValues"><a href="../../src/crypto/rsa/rsa.go.html#line-216">CRTValues</a> <i>[]<a href="#name-CRTValue">CRTValue</a></i></label><span id='PrecomputedValues-fold-field-CRTValues-docs' class="fold-docs">
 <span class="md-text">				CRTValues is used for the 3rd and subsequent primes. Due to a
 				historical accident, the CRT for the first two primes is handled
 				differently in PKCS #1 and interoperability is sufficiently
-				important that we mirror this.</span>
+				important that we mirror this.
+				
+				Deprecated: These values are still filled in by Precompute for
+				backwards compatibility but are not used. Multi-prime RSA is very rare,
+				and is implemented by this package without CRT optimizations to limit
+				complexity.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Dp"><label for="PrecomputedValues-fold-field-Dp"><a href="../../src/crypto/rsa/rsa.go.html#line-185">Dp</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Dp-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Dp"><label for="PrecomputedValues-fold-field-Dp"><a href="../../src/crypto/rsa/rsa.go.html#line-204">Dp</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Dp-docs' class="fold-docs">
 <span class="md-text">				// D mod (P-1) (or mod Q-1)</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Dq"><label for="PrecomputedValues-fold-field-Dq"><a href="../../src/crypto/rsa/rsa.go.html#line-185">Dq</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Dq-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Dq"><label for="PrecomputedValues-fold-field-Dq"><a href="../../src/crypto/rsa/rsa.go.html#line-204">Dq</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Dq-docs' class="fold-docs">
 <span class="md-text">				// D mod (P-1) (or mod Q-1)</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Qinv"><label for="PrecomputedValues-fold-field-Qinv"><a href="../../src/crypto/rsa/rsa.go.html#line-186">Qinv</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Qinv-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrecomputedValues-fold-field-Qinv"><label for="PrecomputedValues-fold-field-Qinv"><a href="../../src/crypto/rsa/rsa.go.html#line-205">Qinv</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrecomputedValues-fold-field-Qinv-docs' class="fold-docs">
 <span class="md-text">				// Q^-1 mod P</span>
 </span></span></span>
 
-</span></div><div class="anchor type-res" id="name-PrivateKey" data-popularity="885">	<input type='checkbox' class="fold" id="PrivateKey-fold-content"><label for="PrivateKey-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-101">PrivateKey</a> <i>(struct)</i></label><span id='PrivateKey-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor type-res" id="name-PrivateKey" data-popularity="1035">	<input type='checkbox' class="fold" id="PrivateKey-fold-content"><label for="PrivateKey-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-109">PrivateKey</a> <i>(struct)</i></label><span id='PrivateKey-fold-content-docs' class="fold-docs">
 <span class="md-text">		A PrivateKey represents an RSA key</span>
 
 		<input type='checkbox' class="fold" id="PrivateKey-fold-fields"><label for="PrivateKey-fold-fields">Fields (<i>total 6</i>)</label><span id='PrivateKey-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-D"><label for="PrivateKey-fold-field-D"><a href="../../src/crypto/rsa/rsa.go.html#line-103">D</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-D-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-D"><label for="PrivateKey-fold-field-D"><a href="../../src/crypto/rsa/rsa.go.html#line-111">D</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-D-docs' class="fold-docs">
 <span class="md-text">				// private exponent</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-Precomputed"><label for="PrivateKey-fold-field-Precomputed"><a href="../../src/crypto/rsa/rsa.go.html#line-108">Precomputed</a> <i><a href="#name-PrecomputedValues">PrecomputedValues</a></i></label><span id='PrivateKey-fold-field-Precomputed-docs' class="fold-docs">
-<span class="md-text">				Precomputed contains precomputed values that speed up private
-				operations, if available.</span>
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-Precomputed"><label for="PrivateKey-fold-field-Precomputed"><a href="../../src/crypto/rsa/rsa.go.html#line-117">Precomputed</a> <i><a href="#name-PrecomputedValues">PrecomputedValues</a></i></label><span id='PrivateKey-fold-field-Precomputed-docs' class="fold-docs">
+<span class="md-text">				Precomputed contains precomputed values that speed up RSA operations,
+				if available. It must be generated by calling PrivateKey.Precompute and
+				must not be modified.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-Primes"><label for="PrivateKey-fold-field-Primes"><a href="../../src/crypto/rsa/rsa.go.html#line-104">Primes</a> <i>[]*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-Primes-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-Primes"><label for="PrivateKey-fold-field-Primes"><a href="../../src/crypto/rsa/rsa.go.html#line-112">Primes</a> <i>[]*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-Primes-docs' class="fold-docs">
 <span class="md-text">				// prime factors of N, has &gt;= 2 elements.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-PublicKey"><label for="PrivateKey-fold-field-PublicKey"><a href="../../src/crypto/rsa/rsa.go.html#line-102">PublicKey</a> <i><a href="#name-PublicKey">PublicKey</a></i></label><span id='PrivateKey-fold-field-PublicKey-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-PublicKey"><label for="PrivateKey-fold-field-PublicKey"><a href="../../src/crypto/rsa/rsa.go.html#line-110">PublicKey</a> <i><a href="#name-PublicKey">PublicKey</a></i></label><span id='PrivateKey-fold-field-PublicKey-docs' class="fold-docs">
 <span class="md-text">				// public part.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-E"><label for="PrivateKey-fold-field-E"><a href="../../src/crypto/rsa/rsa.go.html#line-102" class="path-duplicate">PublicKey</a>.<a href="../../src/crypto/rsa/rsa.go.html#line-45">E</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PrivateKey-fold-field-E-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-E"><label for="PrivateKey-fold-field-E"><a href="../../src/crypto/rsa/rsa.go.html#line-110" class="path-duplicate">PublicKey</a>.<a href="../../src/crypto/rsa/rsa.go.html#line-48">E</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PrivateKey-fold-field-E-docs' class="fold-docs">
 <span class="md-text">				// public exponent</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-field-N"><label for="PrivateKey-fold-field-N"><a href="../../src/crypto/rsa/rsa.go.html#line-102" class="path-duplicate">PublicKey</a>.<a href="../../src/crypto/rsa/rsa.go.html#line-44">N</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-N-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-field-N"><label for="PrivateKey-fold-field-N"><a href="../../src/crypto/rsa/rsa.go.html#line-110" class="path-duplicate">PublicKey</a>.<a href="../../src/crypto/rsa/rsa.go.html#line-47">N</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PrivateKey-fold-field-N-docs' class="fold-docs">
 <span class="md-text">				// modulus</span>
 </span></span></span>
 		<input type='checkbox' class="fold" id="PrivateKey-fold-methods"><label for="PrivateKey-fold-methods">Methods (<i>total 7</i>)</label><span id='PrivateKey-fold-methods-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Decrypt"><label for="PrivateKey-fold-method-Decrypt">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-156">Decrypt</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, opts <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-DecrypterOpts">DecrypterOpts</a>) (plaintext []<a href="../builtin.html#name-byte">byte</a>, err <a href="../builtin.html#name-error">error</a>)</label><span id='PrivateKey-fold-method-Decrypt-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Decrypt"><label for="PrivateKey-fold-method-Decrypt">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-171">Decrypt</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, opts <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-DecrypterOpts">DecrypterOpts</a>) (plaintext []<a href="../builtin.html#name-byte">byte</a>, err <a href="../builtin.html#name-error">error</a>)</label><span id='PrivateKey-fold-method-Decrypt-docs' class="fold-docs">
 <span class="md-text">				Decrypt decrypts ciphertext with priv. If opts is nil or of type
 				*PKCS1v15DecryptOptions then PKCS #1 v1.5 decryption is performed. Otherwise
 				opts must have type *OAEPOptions and OAEP decryption is done.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Equal"><label for="PrivateKey-fold-method-Equal">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-118">Equal</a>(x <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PrivateKey">PrivateKey</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='PrivateKey-fold-method-Equal-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Equal"><label for="PrivateKey-fold-method-Equal">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-127">Equal</a>(x <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PrivateKey">PrivateKey</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='PrivateKey-fold-method-Equal-docs' class="fold-docs">
 <span class="md-text">				Equal reports whether priv and x have equivalent values. It ignores
 				Precomputed values.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Precompute"><label for="PrivateKey-fold-method-Precompute">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-512">Precompute</a>()</label><span id='PrivateKey-fold-method-Precompute-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Precompute"><label for="PrivateKey-fold-method-Precompute">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-583">Precompute</a>()</label><span id='PrivateKey-fold-method-Precompute-docs' class="fold-docs">
 <span class="md-text">				Precompute performs some calculations that speed up private key operations
 				in the future.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Public"><label for="PrivateKey-fold-method-Public">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-112">Public</a>() <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PublicKey">PublicKey</a></label><span id='PrivateKey-fold-method-Public-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Public"><label for="PrivateKey-fold-method-Public">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-121">Public</a>() <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PublicKey">PublicKey</a></label><span id='PrivateKey-fold-method-Public-docs' class="fold-docs">
 <span class="md-text">				Public returns the public key corresponding to priv.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Sign"><label for="PrivateKey-fold-method-Sign">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-145">Sign</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-SignerOpts">SignerOpts</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='PrivateKey-fold-method-Sign-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Sign"><label for="PrivateKey-fold-method-Sign">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-160">Sign</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-SignerOpts">SignerOpts</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='PrivateKey-fold-method-Sign-docs' class="fold-docs">
 <span class="md-text">				Sign signs digest with priv, reading randomness from rand. If opts is a
 				*PSSOptions then the PSS algorithm will be used, otherwise PKCS #1 v1.5 will
 				be used. digest must be the result of hashing the input message using
@@ -256,21 +262,23 @@
 				where the private part is kept in, for example, a hardware module. Common
 				uses should use the Sign* functions in this package directly.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Size"><label for="PrivateKey-fold-method-Size">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-53">Size</a>() <a href="../builtin.html#name-int">int</a></label><span id='PrivateKey-fold-method-Size-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Size"><label for="PrivateKey-fold-method-Size">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-56">Size</a>() <a href="../builtin.html#name-int">int</a></label><span id='PrivateKey-fold-method-Size-docs' class="fold-docs">
 <span class="md-text">				Size returns the modulus size in bytes. Raw signatures and ciphertexts
 				for or by this public key will have the same size.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Validate"><label for="PrivateKey-fold-method-Validate">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-204">Validate</a>() <a href="../builtin.html#name-error">error</a></label><span id='PrivateKey-fold-method-Validate-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PrivateKey-fold-method-Validate"><label for="PrivateKey-fold-method-Validate">(*PrivateKey) <a href="../../src/crypto/rsa/rsa.go.html#line-230">Validate</a>() <a href="../builtin.html#name-error">error</a></label><span id='PrivateKey-fold-method-Validate-docs' class="fold-docs">
 <span class="md-text">				Validate performs basic sanity checks on the key.
 				It returns nil if the key is valid, or else an error describing a problem.</span>
 </span></span></span>
 		<input type='checkbox' class="fold" id="PrivateKey-fold-impls"><label for="PrivateKey-fold-impls">Implements (<i>at least 2</i>)</label><span id='PrivateKey-fold-impls-items' class="fold-items"><span>
 			*PrivateKey : crypto.<a href="../crypto.html#name-Decrypter">Decrypter</a></span><span>
 			*PrivateKey : crypto.<a href="../crypto.html#name-Signer">Signer</a></span></span>
-		<input type='checkbox' class="fold" id="PrivateKey-fold-results"><label for="PrivateKey-fold-results">As Outputs Of (<i>at least 3</i>)</label><span id='PrivateKey-fold-results-items' class="fold-items"><span>
+		<input type='checkbox' class="fold" id="PrivateKey-fold-results"><label for="PrivateKey-fold-results">As Outputs Of (<i>at least 5</i>)</label><span id='PrivateKey-fold-results-items' class="fold-items"><span>
 			func <a href="#name-GenerateKey">GenerateKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, bits <a href="../builtin.html#name-int">int</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span><span>
 			func <a href="#name-GenerateMultiPrimeKey">GenerateMultiPrimeKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, nprimes <a href="../builtin.html#name-int">int</a>, bits <a href="../builtin.html#name-int">int</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span><span>
-			func crypto/x509.<a href="x509.html#name-ParsePKCS1PrivateKey">ParsePKCS1PrivateKey</a>(der []<a href="../builtin.html#name-byte">byte</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span></span>
+			func crypto/x509.<a href="x509.html#name-ParsePKCS1PrivateKey">ParsePKCS1PrivateKey</a>(der []<a href="../builtin.html#name-byte">byte</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span><span>
+			func github.com/golang-jwt/jwt/v4.<a href="../github.com/golang-jwt/jwt/v4.html#name-ParseRSAPrivateKeyFromPEM">ParseRSAPrivateKeyFromPEM</a>(key []<a href="../builtin.html#name-byte">byte</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span><span>
+			func github.com/golang-jwt/jwt/v4.<a href="../github.com/golang-jwt/jwt/v4.html#name-ParseRSAPrivateKeyFromPEMWithPassword">ParseRSAPrivateKeyFromPEMWithPassword</a>(key []<a href="../builtin.html#name-byte">byte</a>, password <a href="../builtin.html#name-string">string</a>) (*<b>PrivateKey</b>, <a href="../builtin.html#name-error">error</a>)</span></span>
 		<input type='checkbox' class="fold" id="PrivateKey-fold-params"><label for="PrivateKey-fold-params">As Inputs Of (<i>at least 6</i>)</label><span id='PrivateKey-fold-params-items' class="fold-items"><span>
 			func <a href="#name-DecryptOAEP">DecryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<b>PrivateKey</b>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
 			func <a href="#name-DecryptPKCS1v15">DecryptPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<b>PrivateKey</b>, ciphertext []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
@@ -279,22 +287,22 @@
 			func <a href="#name-SignPSS">SignPSS</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<b>PrivateKey</b>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts *<a href="#name-PSSOptions">PSSOptions</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
 			func crypto/x509.<a href="x509.html#name-MarshalPKCS1PrivateKey">MarshalPKCS1PrivateKey</a>(key *<b>PrivateKey</b>) []<a href="../builtin.html#name-byte">byte</a></span></span>
 
-</span></div><div class="anchor type-res" id="name-PSSOptions" data-popularity="170">	<input type='checkbox' class="fold" id="PSSOptions-fold-content"><label for="PSSOptions-fold-content"> type <a href="../../src/crypto/rsa/pss.go.html#line-251">PSSOptions</a> <i>(struct)</i></label><span id='PSSOptions-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor type-res" id="name-PSSOptions" data-popularity="170">	<input type='checkbox' class="fold" id="PSSOptions-fold-content"><label for="PSSOptions-fold-content"> type <a href="../../src/crypto/rsa/pss.go.html#line-257">PSSOptions</a> <i>(struct)</i></label><span id='PSSOptions-fold-content-docs' class="fold-docs">
 <span class="md-text">		PSSOptions contains options for creating and verifying PSS signatures.</span>
 
 		<input type='checkbox' class="fold" id="PSSOptions-fold-fields"><label for="PSSOptions-fold-fields">Fields (<i>total 2</i>)</label><span id='PSSOptions-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PSSOptions-fold-field-Hash"><label for="PSSOptions-fold-field-Hash"><a href="../../src/crypto/rsa/pss.go.html#line-260">Hash</a> <i><a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></i></label><span id='PSSOptions-fold-field-Hash-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PSSOptions-fold-field-Hash"><label for="PSSOptions-fold-field-Hash"><a href="../../src/crypto/rsa/pss.go.html#line-266">Hash</a> <i><a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></i></label><span id='PSSOptions-fold-field-Hash-docs' class="fold-docs">
 <span class="md-text">				Hash is the hash function used to generate the message digest. If not
 				zero, it overrides the hash function passed to SignPSS. It's required
 				when using PrivateKey.Sign.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PSSOptions-fold-field-SaltLength"><label for="PSSOptions-fold-field-SaltLength"><a href="../../src/crypto/rsa/pss.go.html#line-255">SaltLength</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PSSOptions-fold-field-SaltLength-docs' class="fold-docs">
-<span class="md-text">				SaltLength controls the length of the salt used in the PSS
-				signature. It can either be a number of bytes, or one of the special
+			<input type='checkbox' class="fold" id="PSSOptions-fold-field-SaltLength"><label for="PSSOptions-fold-field-SaltLength"><a href="../../src/crypto/rsa/pss.go.html#line-261">SaltLength</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PSSOptions-fold-field-SaltLength-docs' class="fold-docs">
+<span class="md-text">				SaltLength controls the length of the salt used in the PSS signature. It
+				can either be a positive number of bytes, or one of the special
 				PSSSaltLength constants.</span>
 </span></span></span>
 		<input type='checkbox' class="fold" id="PSSOptions-fold-methods"><label for="PSSOptions-fold-methods">Methods (<i>only one</i>)</label><span id='PSSOptions-fold-methods-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PSSOptions-fold-method-HashFunc"><label for="PSSOptions-fold-method-HashFunc">(*PSSOptions) <a href="../../src/crypto/rsa/pss.go.html#line-264">HashFunc</a>() <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></label><span id='PSSOptions-fold-method-HashFunc-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PSSOptions-fold-method-HashFunc"><label for="PSSOptions-fold-method-HashFunc">(*PSSOptions) <a href="../../src/crypto/rsa/pss.go.html#line-270">HashFunc</a>() <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a></label><span id='PSSOptions-fold-method-HashFunc-docs' class="fold-docs">
 <span class="md-text">				HashFunc returns opts.Hash so that PSSOptions implements crypto.SignerOpts.</span>
 </span></span></span>
 		<input type='checkbox' class="fold" id="PSSOptions-fold-impls"><label for="PSSOptions-fold-impls">Implements (<i>at least one exported</i>)</label><span id='PSSOptions-fold-impls-items' class="fold-items"><span>
@@ -303,26 +311,27 @@
 			func <a href="#name-SignPSS">SignPSS</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts *<b>PSSOptions</b>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
 			func <a href="#name-VerifyPSS">VerifyPSS</a>(pub *<a href="#name-PublicKey">PublicKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, sig []<a href="../builtin.html#name-byte">byte</a>, opts *<b>PSSOptions</b>) <a href="../builtin.html#name-error">error</a></span></span>
 
-</span></div><div class="anchor type-res" id="name-PublicKey" data-popularity="385">	<input type='checkbox' class="fold" id="PublicKey-fold-content"><label for="PublicKey-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-43">PublicKey</a> <i>(struct)</i></label><span id='PublicKey-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor type-res" id="name-PublicKey" data-popularity="460">	<input type='checkbox' class="fold" id="PublicKey-fold-content"><label for="PublicKey-fold-content"> type <a href="../../src/crypto/rsa/rsa.go.html#line-46">PublicKey</a> <i>(struct)</i></label><span id='PublicKey-fold-content-docs' class="fold-docs">
 <span class="md-text">		A PublicKey represents the public part of an RSA key.</span>
 
 		<input type='checkbox' class="fold" id="PublicKey-fold-fields"><label for="PublicKey-fold-fields">Fields (<i>total 2</i>)</label><span id='PublicKey-fold-fields-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PublicKey-fold-field-E"><label for="PublicKey-fold-field-E"><a href="../../src/crypto/rsa/rsa.go.html#line-45">E</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PublicKey-fold-field-E-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PublicKey-fold-field-E"><label for="PublicKey-fold-field-E"><a href="../../src/crypto/rsa/rsa.go.html#line-48">E</a> <i><a href="../builtin.html#name-int">int</a></i></label><span id='PublicKey-fold-field-E-docs' class="fold-docs">
 <span class="md-text">				// public exponent</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PublicKey-fold-field-N"><label for="PublicKey-fold-field-N"><a href="../../src/crypto/rsa/rsa.go.html#line-44">N</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PublicKey-fold-field-N-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PublicKey-fold-field-N"><label for="PublicKey-fold-field-N"><a href="../../src/crypto/rsa/rsa.go.html#line-47">N</a> <i>*<a href="../math/big.html">big</a>.<a href="../math/big.html#name-Int">Int</a></i></label><span id='PublicKey-fold-field-N-docs' class="fold-docs">
 <span class="md-text">				// modulus</span>
 </span></span></span>
 		<input type='checkbox' class="fold" id="PublicKey-fold-methods"><label for="PublicKey-fold-methods">Methods (<i>total 2</i>)</label><span id='PublicKey-fold-methods-items' class="fold-items"><span>
-			<input type='checkbox' class="fold" id="PublicKey-fold-method-Equal"><label for="PublicKey-fold-method-Equal">(*PublicKey) <a href="../../src/crypto/rsa/rsa.go.html#line-58">Equal</a>(x <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PublicKey">PublicKey</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='PublicKey-fold-method-Equal-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PublicKey-fold-method-Equal"><label for="PublicKey-fold-method-Equal">(*PublicKey) <a href="../../src/crypto/rsa/rsa.go.html#line-61">Equal</a>(x <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-PublicKey">PublicKey</a>) <a href="../builtin.html#name-bool">bool</a></label><span id='PublicKey-fold-method-Equal-docs' class="fold-docs">
 <span class="md-text">				Equal reports whether pub and x have the same value.</span>
 </span></span><span>
-			<input type='checkbox' class="fold" id="PublicKey-fold-method-Size"><label for="PublicKey-fold-method-Size">(*PublicKey) <a href="../../src/crypto/rsa/rsa.go.html#line-53">Size</a>() <a href="../builtin.html#name-int">int</a></label><span id='PublicKey-fold-method-Size-docs' class="fold-docs">
+			<input type='checkbox' class="fold" id="PublicKey-fold-method-Size"><label for="PublicKey-fold-method-Size">(*PublicKey) <a href="../../src/crypto/rsa/rsa.go.html#line-56">Size</a>() <a href="../builtin.html#name-int">int</a></label><span id='PublicKey-fold-method-Size-docs' class="fold-docs">
 <span class="md-text">				Size returns the modulus size in bytes. Raw signatures and ciphertexts
 				for or by this public key will have the same size.</span>
 </span></span></span>
-		<input type='checkbox' class="fold" id="PublicKey-fold-results"><label for="PublicKey-fold-results">As Outputs Of (<i>at least one exported</i>)</label><span id='PublicKey-fold-results-items' class="fold-items"><span>
-			func crypto/x509.<a href="x509.html#name-ParsePKCS1PublicKey">ParsePKCS1PublicKey</a>(der []<a href="../builtin.html#name-byte">byte</a>) (*<b>PublicKey</b>, <a href="../builtin.html#name-error">error</a>)</span></span>
+		<input type='checkbox' class="fold" id="PublicKey-fold-results"><label for="PublicKey-fold-results">As Outputs Of (<i>at least 2</i>)</label><span id='PublicKey-fold-results-items' class="fold-items"><span>
+			func crypto/x509.<a href="x509.html#name-ParsePKCS1PublicKey">ParsePKCS1PublicKey</a>(der []<a href="../builtin.html#name-byte">byte</a>) (*<b>PublicKey</b>, <a href="../builtin.html#name-error">error</a>)</span><span>
+			func github.com/golang-jwt/jwt/v4.<a href="../github.com/golang-jwt/jwt/v4.html#name-ParseRSAPublicKeyFromPEM">ParseRSAPublicKeyFromPEM</a>(key []<a href="../builtin.html#name-byte">byte</a>) (*<b>PublicKey</b>, <a href="../builtin.html#name-error">error</a>)</span></span>
 		<input type='checkbox' class="fold" id="PublicKey-fold-params"><label for="PublicKey-fold-params">As Inputs Of (<i>at least 6</i>)</label><span id='PublicKey-fold-params-items' class="fold-items"><span>
 			func <a href="#name-EncryptOAEP">EncryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<b>PublicKey</b>, msg []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
 			func <a href="#name-EncryptPKCS1v15">EncryptPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<b>PublicKey</b>, msg []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</span><span>
@@ -334,23 +343,21 @@
 </span></div></div>
 <div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 11)</i></span></span>
 
-<div class="anchor value-res" id="name-DecryptOAEP">	<input type='checkbox' class="fold" id="DecryptOAEP-fold-content"><label for="DecryptOAEP-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-653">DecryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='DecryptOAEP-fold-content-docs' class="fold-docs">
+<div class="anchor value-res" id="name-DecryptOAEP">	<input type='checkbox' class="fold" id="DecryptOAEP-fold-content"><label for="DecryptOAEP-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-708">DecryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='DecryptOAEP-fold-content-docs' class="fold-docs">
 <span class="md-text">		DecryptOAEP decrypts ciphertext using RSA-OAEP.
 		
 		OAEP is parameterised by a hash function that is used as a random oracle.
 		Encryption and decryption of a given message must use the same hash function
 		and sha256.New() is a reasonable choice.
 		
-		The random parameter, if not nil, is used to blind the private-key operation
-		and avoid timing side-channel attacks. Blinding is purely internal to this
-		function – the random data need not match that used when encrypting.
+		The random parameter is legacy and ignored, and it can be nil.
 		
 		The label parameter must match the value given when encrypting. See
 		EncryptOAEP for details.</span>
 
 </span></div><div class="anchor value-res" id="name-DecryptPKCS1v15">	<input type='checkbox' class="fold" id="DecryptPKCS1v15-fold-content"><label for="DecryptPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-92">DecryptPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='DecryptPKCS1v15-fold-content-docs' class="fold-docs">
 <span class="md-text">		DecryptPKCS1v15 decrypts a plaintext using RSA and the padding scheme from PKCS #1 v1.5.
-		If random != nil, it uses RSA blinding to avoid timing side-channel attacks.
+		The random parameter is legacy and ignored, and it can be nil.
 		
 		Note that whether this function returns an error or not discloses secret
 		information. If an attacker can cause this function to run repeatedly and
@@ -358,28 +365,43 @@
 		forge signatures as if they had the private key. See
 		DecryptPKCS1v15SessionKey for a way of solving this problem.</span>
 
-</span></div><div class="anchor value-res" id="name-DecryptPKCS1v15SessionKey">	<input type='checkbox' class="fold" id="DecryptPKCS1v15SessionKey-fold-content"><label for="DecryptPKCS1v15SessionKey-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-138">DecryptPKCS1v15SessionKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, key []<a href="../builtin.html#name-byte">byte</a>) <a href="../builtin.html#name-error">error</a></label><span id='DecryptPKCS1v15SessionKey-fold-content-docs' class="fold-docs">
-<span class="md-text">		DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding scheme from PKCS #1 v1.5.
-		If random != nil, it uses RSA blinding to avoid timing side-channel attacks.
-		It returns an error if the ciphertext is the wrong length or if the
-		ciphertext is greater than the public modulus. Otherwise, no error is
-		returned. If the padding is valid, the resulting plaintext message is copied
-		into key. Otherwise, key is unchanged. These alternatives occur in constant
-		time. It is intended that the user of this function generate a random
-		session key beforehand and continue the protocol with the resulting value.
-		This will remove any possibility that an attacker can learn any information
-		about the plaintext.
-		See “Chosen Ciphertext Attacks Against Protocols Based on the RSA
-		Encryption Standard PKCS #1”, Daniel Bleichenbacher, Advances in Cryptology
-		(Crypto '98).
+</span></div><div class="anchor value-res" id="name-DecryptPKCS1v15SessionKey">	<input type='checkbox' class="fold" id="DecryptPKCS1v15SessionKey-fold-content"><label for="DecryptPKCS1v15SessionKey-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-153">DecryptPKCS1v15SessionKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, ciphertext []<a href="../builtin.html#name-byte">byte</a>, key []<a href="../builtin.html#name-byte">byte</a>) <a href="../builtin.html#name-error">error</a></label><span id='DecryptPKCS1v15SessionKey-fold-content-docs' class="fold-docs">
+<span class="md-text">		DecryptPKCS1v15SessionKey decrypts a session key using RSA and the padding
+		scheme from PKCS #1 v1.5. The random parameter is legacy and ignored, and it
+		can be nil.
+		
+		DecryptPKCS1v15SessionKey returns an error if the ciphertext is the wrong
+		length or if the ciphertext is greater than the public modulus. Otherwise, no
+		error is returned. If the padding is valid, the resulting plaintext message
+		is copied into key. Otherwise, key is unchanged. These alternatives occur in
+		constant time. It is intended that the user of this function generate a
+		random session key beforehand and continue the protocol with the resulting
+		value.
 		
 		Note that if the session key is too small then it may be possible for an
-		attacker to brute-force it. If they can do that then they can learn whether
-		a random value was used (because it'll be different for the same ciphertext)
-		and thus whether the padding was correct. This defeats the point of this
-		function. Using at least a 16-byte key will protect against this attack.</span>
+		attacker to brute-force it. If they can do that then they can learn whether a
+		random value was used (because it'll be different for the same ciphertext)
+		and thus whether the padding was correct. This also defeats the point of this
+		function. Using at least a 16-byte key will protect against this attack.
+		
+		This method implements protections against Bleichenbacher chosen ciphertext
+		attacks [0] described in RFC 3218 Section 2.3.2 [1]. While these protections
+		make a Bleichenbacher attack significantly more difficult, the protections
+		are only effective if the rest of the protocol which uses
+		DecryptPKCS1v15SessionKey is designed with these considerations in mind. In
+		particular, if any subsequent operations which use the decrypted session key
+		leak any information about the key (e.g. whether it is a static or random
+		key) then the mitigations are defeated. This method must be used extremely
+		carefully, and typically should only be used when absolutely necessary for
+		compatibility with an existing protocol (such as TLS) that is designed with
+		these properties in mind.
+		
+		  - [0] “Chosen Ciphertext Attacks Against Protocols Based on the RSA Encryption
+		    Standard PKCS #1”, Daniel Bleichenbacher, Advances in Cryptology (Crypto '98)
+		  - [1] RFC 3218, Preventing the Million Message Attack on CMS,
+		    https://www.rfc-editor.org/rfc/rfc3218.html</span>
 
-</span></div><div class="anchor value-res" id="name-EncryptOAEP">	<input type='checkbox' class="fold" id="EncryptOAEP-fold-content"><label for="EncryptOAEP-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-446">EncryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<a href="#name-PublicKey">PublicKey</a>, msg []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='EncryptOAEP-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-EncryptOAEP">	<input type='checkbox' class="fold" id="EncryptOAEP-fold-content"><label for="EncryptOAEP-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-516">EncryptOAEP</a>(hash <a href="../hash.html">hash</a>.<a href="../hash.html#name-Hash">Hash</a>, random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<a href="#name-PublicKey">PublicKey</a>, msg []<a href="../builtin.html#name-byte">byte</a>, label []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='EncryptOAEP-fold-content-docs' class="fold-docs">
 <span class="md-text">		EncryptOAEP encrypts the given message with RSA-OAEP.
 		
 		OAEP is parameterised by a hash function that is used as a random oracle.
@@ -388,6 +410,7 @@
 		
 		The random parameter is used as a source of entropy to ensure that
 		encrypting the same message twice doesn't result in the same ciphertext.
+		Most applications should use [crypto/rand.Reader] as random.
 		
 		The label parameter may contain arbitrary data that will not be encrypted,
 		but which gives important context to the message. For example, if a given
@@ -398,65 +421,82 @@
 		The message must be no longer than the length of the public modulus minus
 		twice the hash length, minus a further 2.</span>
 
-</span></div><div class="anchor value-res" id="name-EncryptPKCS1v15">	<input type='checkbox' class="fold" id="EncryptPKCS1v15-fold-content"><label for="EncryptPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-39">EncryptPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<a href="#name-PublicKey">PublicKey</a>, msg []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='EncryptPKCS1v15-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-EncryptPKCS1v15">	<input type='checkbox' class="fold" id="EncryptPKCS1v15-fold-content"><label for="EncryptPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-41">EncryptPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, pub *<a href="#name-PublicKey">PublicKey</a>, msg []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='EncryptPKCS1v15-fold-content-docs' class="fold-docs">
 <span class="md-text">		EncryptPKCS1v15 encrypts the given message with RSA and the padding
 		scheme from PKCS #1 v1.5.  The message must be no longer than the
 		length of the public modulus minus 11 bytes.
 		
 		The random parameter is used as a source of entropy to ensure that
 		encrypting the same message twice doesn't result in the same
-		ciphertext.
+		ciphertext. Most applications should use [crypto/rand.Reader]
+		as random. Note that the returned ciphertext does not depend
+		deterministically on the bytes read from random, and may change
+		between calls and/or between versions.
 		
 		WARNING: use of this function to encrypt plaintexts other than
 		session keys is dangerous. Use RSA OAEP in new protocols.</span>
 
-</span></div><div class="anchor value-res" id="name-GenerateKey">	<input type='checkbox' class="fold" id="GenerateKey-fold-content"><label for="GenerateKey-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-242">GenerateKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, bits <a href="../builtin.html#name-int">int</a>) (*<a href="#name-PrivateKey">PrivateKey</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='GenerateKey-fold-content-docs' class="fold-docs">
-<span class="md-text">		GenerateKey generates an RSA keypair of the given bit size using the
-		random source random (for example, crypto/rand.Reader).</span>
+</span></div><div class="anchor value-res" id="name-GenerateKey">	<input type='checkbox' class="fold" id="GenerateKey-fold-content"><label for="GenerateKey-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-271">GenerateKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, bits <a href="../builtin.html#name-int">int</a>) (*<a href="#name-PrivateKey">PrivateKey</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='GenerateKey-fold-content-docs' class="fold-docs">
+<span class="md-text">		GenerateKey generates a random RSA private key of the given bit size.
+		
+		Most applications should use [crypto/rand.Reader] as rand. Note that the
+		returned key does not depend deterministically on the bytes read from rand,
+		and may change between calls and/or between versions.</span>
 
-</span></div><div class="anchor value-res" id="name-GenerateMultiPrimeKey">	<input type='checkbox' class="fold" id="GenerateMultiPrimeKey-fold-content"><label for="GenerateMultiPrimeKey-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-257">GenerateMultiPrimeKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, nprimes <a href="../builtin.html#name-int">int</a>, bits <a href="../builtin.html#name-int">int</a>) (*<a href="#name-PrivateKey">PrivateKey</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='GenerateMultiPrimeKey-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-GenerateMultiPrimeKey">	<input type='checkbox' class="fold" id="GenerateMultiPrimeKey-fold-content"><label for="GenerateMultiPrimeKey-fold-content"> func <a href="../../src/crypto/rsa/rsa.go.html#line-294">GenerateMultiPrimeKey</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, nprimes <a href="../builtin.html#name-int">int</a>, bits <a href="../builtin.html#name-int">int</a>) (*<a href="#name-PrivateKey">PrivateKey</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='GenerateMultiPrimeKey-fold-content-docs' class="fold-docs">
 <span class="md-text">		GenerateMultiPrimeKey generates a multi-prime RSA keypair of the given bit
-		size and the given random source, as suggested in [1]. Although the public
-		keys are compatible (actually, indistinguishable) from the 2-prime case,
-		the private keys are not. Thus it may not be possible to export multi-prime
-		private keys in certain formats or to subsequently import them into other
-		code.
+		size and the given random source.
 		
-		Table 1 in [2] suggests maximum numbers of primes for a given size.
+		Table 1 in "[On the Security of Multi-prime RSA]" suggests maximum numbers of
+		primes for a given bit size.
 		
-		[1] US patent 4405829 (1972, expired)
-		[2] http://www.cacr.math.uwaterloo.ca/techreports/2006/cacr2006-16.pdf</span>
+		Although the public keys are compatible (actually, indistinguishable) from
+		the 2-prime case, the private keys are not. Thus it may not be possible to
+		export multi-prime private keys in certain formats or to subsequently import
+		them into other code.
+		
+		This package does not implement CRT optimizations for multi-prime RSA, so the
+		keys with more than two primes will have worse performance.
+		
+		Deprecated: The use of this function with a number of primes different from
+		two is not recommended for the above security, compatibility, and performance
+		reasons. Use GenerateKey instead.
+		
+		[On the Security of Multi-prime RSA]: http://www.cacr.math.uwaterloo.ca/techreports/2006/cacr2006-16.pdf</span>
 
-</span></div><div class="anchor value-res" id="name-SignPKCS1v15">	<input type='checkbox' class="fold" id="SignPKCS1v15-fold-content"><label for="SignPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-276">SignPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, hashed []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='SignPKCS1v15-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-SignPKCS1v15">	<input type='checkbox' class="fold" id="SignPKCS1v15-fold-content"><label for="SignPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-287">SignPKCS1v15</a>(random <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, hashed []<a href="../builtin.html#name-byte">byte</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='SignPKCS1v15-fold-content-docs' class="fold-docs">
 <span class="md-text">		SignPKCS1v15 calculates the signature of hashed using
 		RSASSA-PKCS1-V1_5-SIGN from RSA PKCS #1 v1.5.  Note that hashed must
 		be the result of hashing the input message using the given hash
 		function. If hash is zero, hashed is signed directly. This isn't
 		advisable except for interoperability.
 		
-		If random is not nil then RSA blinding will be used to avoid timing
-		side-channel attacks.
+		The random parameter is legacy and ignored, and it can be nil.
 		
 		This function is deterministic. Thus, if the set of possible
 		messages is small, an attacker may be able to build a map from
 		messages to signatures and identify the signed messages. As ever,
 		signatures provide authenticity, not confidentiality.</span>
 
-</span></div><div class="anchor value-res" id="name-SignPSS">	<input type='checkbox' class="fold" id="SignPSS-fold-content"><label for="SignPSS-fold-content"> func <a href="../../src/crypto/rsa/pss.go.html#line-280">SignPSS</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts *<a href="#name-PSSOptions">PSSOptions</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='SignPSS-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-SignPSS">	<input type='checkbox' class="fold" id="SignPSS-fold-content"><label for="SignPSS-fold-content"> func <a href="../../src/crypto/rsa/pss.go.html#line-292">SignPSS</a>(rand <a href="../io.html">io</a>.<a href="../io.html#name-Reader">Reader</a>, priv *<a href="#name-PrivateKey">PrivateKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, opts *<a href="#name-PSSOptions">PSSOptions</a>) ([]<a href="../builtin.html#name-byte">byte</a>, <a href="../builtin.html#name-error">error</a>)</label><span id='SignPSS-fold-content-docs' class="fold-docs">
 <span class="md-text">		SignPSS calculates the signature of digest using PSS.
 		
 		digest must be the result of hashing the input message using the given hash
 		function. The opts argument may be nil, in which case sensible defaults are
-		used. If opts.Hash is set, it overrides hash.</span>
+		used. If opts.Hash is set, it overrides hash.
+		
+		The signature is randomized depending on the message, key, and salt size,
+		using bytes from rand. Most applications should use [crypto/rand.Reader] as
+		rand.</span>
 
-</span></div><div class="anchor value-res" id="name-VerifyPKCS1v15">	<input type='checkbox' class="fold" id="VerifyPKCS1v15-fold-content"><label for="VerifyPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-319">VerifyPKCS1v15</a>(pub *<a href="#name-PublicKey">PublicKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, hashed []<a href="../builtin.html#name-byte">byte</a>, sig []<a href="../builtin.html#name-byte">byte</a>) <a href="../builtin.html#name-error">error</a></label><span id='VerifyPKCS1v15-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-VerifyPKCS1v15">	<input type='checkbox' class="fold" id="VerifyPKCS1v15-fold-content"><label for="VerifyPKCS1v15-fold-content"> func <a href="../../src/crypto/rsa/pkcs1v15.go.html#line-324">VerifyPKCS1v15</a>(pub *<a href="#name-PublicKey">PublicKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, hashed []<a href="../builtin.html#name-byte">byte</a>, sig []<a href="../builtin.html#name-byte">byte</a>) <a href="../builtin.html#name-error">error</a></label><span id='VerifyPKCS1v15-fold-content-docs' class="fold-docs">
 <span class="md-text">		VerifyPKCS1v15 verifies an RSA PKCS #1 v1.5 signature.
 		hashed is the result of hashing the input message using the given hash
 		function and sig is the signature. A valid signature is indicated by
 		returning a nil error. If hash is zero then hashed is used directly. This
 		isn't advisable except for interoperability.</span>
 
-</span></div><div class="anchor value-res" id="name-VerifyPSS">	<input type='checkbox' class="fold" id="VerifyPSS-fold-content"><label for="VerifyPSS-fold-content"> func <a href="../../src/crypto/rsa/pss.go.html#line-315">VerifyPSS</a>(pub *<a href="#name-PublicKey">PublicKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, sig []<a href="../builtin.html#name-byte">byte</a>, opts *<a href="#name-PSSOptions">PSSOptions</a>) <a href="../builtin.html#name-error">error</a></label><span id='VerifyPSS-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-VerifyPSS">	<input type='checkbox' class="fold" id="VerifyPSS-fold-content"><label for="VerifyPSS-fold-content"> func <a href="../../src/crypto/rsa/pss.go.html#line-341">VerifyPSS</a>(pub *<a href="#name-PublicKey">PublicKey</a>, hash <a href="../crypto.html">crypto</a>.<a href="../crypto.html#name-Hash">Hash</a>, digest []<a href="../builtin.html#name-byte">byte</a>, sig []<a href="../builtin.html#name-byte">byte</a>, opts *<a href="#name-PSSOptions">PSSOptions</a>) <a href="../builtin.html#name-error">error</a></label><span id='VerifyPSS-fold-content-docs' class="fold-docs">
 <span class="md-text">		VerifyPSS verifies a PSS signature.
 		
 		A valid signature is indicated by returning a nil error. digest must be the
@@ -467,32 +507,33 @@
 </span></div></div>
 <div id="exported-variables"><span class="title">Package-Level Variables<span class="title-stat"><i> (total 3)</i></span></span>
 
-<div class="anchor value-res" id="name-ErrDecryption">	<input type='checkbox' class="fold" id="ErrDecryption-fold-content"><label for="ErrDecryption-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-504">ErrDecryption</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrDecryption-fold-content-docs' class="fold-docs">
+<div class="anchor value-res" id="name-ErrDecryption">	<input type='checkbox' class="fold" id="ErrDecryption-fold-content"><label for="ErrDecryption-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-575">ErrDecryption</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrDecryption-fold-content-docs' class="fold-docs">
 <span class="md-text">		ErrDecryption represents a failure to decrypt a message.
 		It is deliberately vague to avoid adaptive attacks.</span>
 
-</span></div><div class="anchor value-res" id="name-ErrMessageTooLong">	<input type='checkbox' class="fold" id="ErrMessageTooLong-fold-content"><label for="ErrMessageTooLong-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-420">ErrMessageTooLong</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrMessageTooLong-fold-content-docs' class="fold-docs">
-<span class="md-text">		ErrMessageTooLong is returned when attempting to encrypt a message which is
-		too large for the size of the public key.</span>
+</span></div><div class="anchor value-res" id="name-ErrMessageTooLong">	<input type='checkbox' class="fold" id="ErrMessageTooLong-fold-content"><label for="ErrMessageTooLong-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-476">ErrMessageTooLong</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrMessageTooLong-fold-content-docs' class="fold-docs">
+<span class="md-text">		ErrMessageTooLong is returned when attempting to encrypt or sign a message
+		which is too large for the size of the key. When using SignPSS, this can also
+		be returned if the size of the salt is too large.</span>
 
-</span></div><div class="anchor value-res" id="name-ErrVerification">	<input type='checkbox' class="fold" id="ErrVerification-fold-content"><label for="ErrVerification-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-508">ErrVerification</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrVerification-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-ErrVerification">	<input type='checkbox' class="fold" id="ErrVerification-fold-content"><label for="ErrVerification-fold-content">  var <a href="../../src/crypto/rsa/rsa.go.html#line-579">ErrVerification</a> <a href="../builtin.html#name-error">error</a></label><span id='ErrVerification-fold-content-docs' class="fold-docs">
 <span class="md-text">		ErrVerification represents a failure to verify a signature.
 		It is deliberately vague to avoid adaptive attacks.</span>
 
 </span></div></div>
 <div id="exported-constants"><span class="title">Package-Level Constants<span class="title-stat"><i> (total 2)</i></span></span>
 
-<div class="anchor value-res" id="name-PSSSaltLengthAuto">	<input type='checkbox' class="fold" id="PSSSaltLengthAuto-fold-content"><label for="PSSSaltLengthAuto-fold-content">const <a href="../../src/crypto/rsa/pss.go.html#line-244">PSSSaltLengthAuto</a> = 0</label><span id='PSSSaltLengthAuto-fold-content-docs' class="fold-docs">
+<div class="anchor value-res" id="name-PSSSaltLengthAuto">	<input type='checkbox' class="fold" id="PSSSaltLengthAuto-fold-content"><label for="PSSSaltLengthAuto-fold-content">const <a href="../../src/crypto/rsa/pss.go.html#line-250">PSSSaltLengthAuto</a> = 0</label><span id='PSSSaltLengthAuto-fold-content-docs' class="fold-docs">
 <span class="md-text">		PSSSaltLengthAuto causes the salt in a PSS signature to be as large
 		as possible when signing, and to be auto-detected when verifying.</span>
 
-</span></div><div class="anchor value-res" id="name-PSSSaltLengthEqualsHash">	<input type='checkbox' class="fold" id="PSSSaltLengthEqualsHash-fold-content"><label for="PSSSaltLengthEqualsHash-fold-content">const <a href="../../src/crypto/rsa/pss.go.html#line-247">PSSSaltLengthEqualsHash</a> = -1</label><span id='PSSSaltLengthEqualsHash-fold-content-docs' class="fold-docs">
+</span></div><div class="anchor value-res" id="name-PSSSaltLengthEqualsHash">	<input type='checkbox' class="fold" id="PSSSaltLengthEqualsHash-fold-content"><label for="PSSSaltLengthEqualsHash-fold-content">const <a href="../../src/crypto/rsa/pss.go.html#line-253">PSSSaltLengthEqualsHash</a> = -1</label><span id='PSSSaltLengthEqualsHash-fold-content-docs' class="fold-docs">
 <span class="md-text">		PSSSaltLengthEqualsHash causes the salt length to equal the length
 		of the hash used in the signature.</span>
 
 </span></div></div></code></pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Package: github.com/pkg/errors</title>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="package-details"><code><span style="font-size:xx-large;">package <b>errors</b></span>
+
+<span class="title">Import Path</span>
+	<a href="../../../index.html#pkg-github.com/pkg/errors">github.com/pkg/errors</a><i> (on <a href="https://pkg.go.dev/github.com/pkg/errors" target="_blank">go.dev</a>)</i>
+
+<span class="title">Dependency Relation</span>
+	imports <a href="../../../dep/github.com/pkg/errors.html">7 packages</a>, and imported by <a href="../../../dep/github.com/pkg/errors.html#imported-by">2 packages</a>
+
+<div id="files"><span class="title">Involved Source Files</span>
+
+	<input type='checkbox' checked class="fold" id="file-0-fold-content"><label for="file-0-fold-content">  <a href="../../../src/github.com/pkg/errors/errors.go.html#doc">d</a> <a href="../../../src/github.com/pkg/errors/errors.go.html">errors.go</a></label><span id='file-0-fold-content-items' class="fold-items">
+<span class="md-text">		Package errors provides simple error handling primitives.
+		
+		The traditional error handling idiom in Go is roughly akin to
+		
+		    if err != nil {
+		            return err
+		    }
+		
+		which when applied recursively up the call stack results in error reports
+		without context or debugging information. The errors package allows
+		programmers to add context to the failure path in their code in a way
+		that does not destroy the original value of the error.
+		
+		Adding context to an error
+		
+		The errors.Wrap function returns a new error that adds context to the
+		original error by recording a stack trace at the point Wrap is called,
+		together with the supplied message. For example
+		
+		    _, err := ioutil.ReadAll(r)
+		    if err != nil {
+		            return errors.Wrap(err, "read failed")
+		    }
+		
+		If additional control is required, the errors.WithStack and
+		errors.WithMessage functions destructure errors.Wrap into its component
+		operations: annotating an error with a stack trace and with a message,
+		respectively.
+		
+		Retrieving the cause of an error
+		
+		Using errors.Wrap constructs a stack of errors, adding context to the
+		preceding error. Depending on the nature of the error it may be necessary
+		to reverse the operation of errors.Wrap to retrieve the original error
+		for inspection. Any error value which implements this interface
+		
+		    type causer interface {
+		            Cause() error
+		    }
+		
+		can be inspected by errors.Cause. errors.Cause will recursively retrieve
+		the topmost error that does not implement causer, which is assumed to be
+		the original cause. For example:
+		
+		    switch err := errors.Cause(err).(type) {
+		    case *MyError:
+		            // handle specifically
+		    default:
+		            // unknown error
+		    }
+		
+		Although the causer interface is not exported by this package, it is
+		considered a part of its stable public interface.
+		
+		Formatted printing of errors
+		
+		All error values returned from this package implement fmt.Formatter and can
+		be formatted by the fmt package. The following verbs are supported:
+		
+		    %s    print the error. If the error has a Cause it will be
+		          printed recursively.
+		    %v    see %s
+		    %+v   extended format. Each Frame of the error's StackTrace will
+		          be printed in detail.
+		
+		Retrieving the stack trace of an error or wrapper
+		
+		New, Errorf, Wrap, and Wrapf record a stack trace at the point they are
+		invoked. This information can be retrieved with the following interface:
+		
+		    type stackTracer interface {
+		            StackTrace() errors.StackTrace
+		    }
+		
+		The returned errors.StackTrace type is defined as
+		
+		    type StackTrace []Frame
+		
+		The Frame type represents a call site in the stack trace. Frame supports
+		the fmt.Formatter interface that can be used for printing information about
+		the stack trace of this error. For example:
+		
+		    if err, ok := err.(stackTracer); ok {
+		            for _, f := range err.StackTrace() {
+		                    fmt.Printf("%+s:%d\n", f, f)
+		            }
+		    }
+		
+		Although the stackTracer interface is not exported by this package, it is
+		considered a part of its stable public interface.
+		
+		See the documentation for Frame.Format for more details.</span>
+</span>
+	<span class="nodocs">    <a href="../../../src/github.com/pkg/errors/go113.go.html">go113.go</a></span>
+	<span class="nodocs">    <a href="../../../src/github.com/pkg/errors/stack.go.html">stack.go</a></span></div>
+<div id="examples"><span class="title">Code Examples</span>
+
+	<input type='checkbox' class="fold" id="example-0-fold-content"><label for="example-0-fold-content">Cause</label><span id='example-0-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func fn() error {
+			e1 := errors.New("error")
+			e2 := errors.Wrap(e1, "inner")
+			e3 := errors.Wrap(e2, "middle")
+			return errors.Wrap(e3, "outer")
+		}
+		
+		func main() {
+			err := fn()
+			fmt.Println(err)
+			fmt.Println(errors.Cause(err))
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-1-fold-content"><label for="example-1-fold-content">Cause_printf</label><span id='example-1-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			err := errors.Wrap(func() error {
+				return func() error {
+					return errors.New("hello world")
+				}()
+			}(), "failed")
+		
+			fmt.Printf("%v", err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-2-fold-content"><label for="example-2-fold-content">Errorf_extended</label><span id='example-2-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			err := errors.Errorf("whoops: %s", "foo")
+			fmt.Printf("%+v", err)
+		
+			// Example output:
+			// whoops: foo
+			// github.com/pkg/errors_test.ExampleErrorf
+			//         /home/dfc/src/github.com/pkg/errors/example_test.go:101
+			// testing.runExample
+			//         /home/dfc/go/src/testing/example.go:114
+			// testing.RunExamples
+			//         /home/dfc/go/src/testing/example.go:38
+			// testing.(*M).Run
+			//         /home/dfc/go/src/testing/testing.go:744
+			// main.main
+			//         /github.com/pkg/errors/_test/_testmain.go:102
+			// runtime.main
+			//         /home/dfc/go/src/runtime/proc.go:183
+			// runtime.goexit
+			//         /home/dfc/go/src/runtime/asm_amd64.s:2059
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-3-fold-content"><label for="example-3-fold-content">New</label><span id='example-3-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			err := errors.New("whoops")
+			fmt.Println(err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-4-fold-content"><label for="example-4-fold-content">New_printf</label><span id='example-4-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			err := errors.New("whoops")
+			fmt.Printf("%+v", err)
+		
+			// Example output:
+			// whoops
+			// github.com/pkg/errors_test.ExampleNew_printf
+			//         /home/dfc/src/github.com/pkg/errors/example_test.go:17
+			// testing.runExample
+			//         /home/dfc/go/src/testing/example.go:114
+			// testing.RunExamples
+			//         /home/dfc/go/src/testing/example.go:38
+			// testing.(*M).Run
+			//         /home/dfc/go/src/testing/testing.go:744
+			// main.main
+			//         /github.com/pkg/errors/_test/_testmain.go:106
+			// runtime.main
+			//         /home/dfc/go/src/runtime/proc.go:183
+			// runtime.goexit
+			//         /home/dfc/go/src/runtime/asm_amd64.s:2059
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-5-fold-content"><label for="example-5-fold-content">WithMessage</label><span id='example-5-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			cause := errors.New("whoops")
+			err := errors.WithMessage(cause, "oh noes")
+			fmt.Println(err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-6-fold-content"><label for="example-6-fold-content">WithStack</label><span id='example-6-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			cause := errors.New("whoops")
+			err := errors.WithStack(cause)
+			fmt.Println(err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-7-fold-content"><label for="example-7-fold-content">WithStack_printf</label><span id='example-7-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			cause := errors.New("whoops")
+			err := errors.WithStack(cause)
+			fmt.Printf("%+v", err)
+		
+			// Example Output:
+			// whoops
+			// github.com/pkg/errors_test.ExampleWithStack_printf
+			//         /home/fabstu/go/src/github.com/pkg/errors/example_test.go:55
+			// testing.runExample
+			//         /usr/lib/go/src/testing/example.go:114
+			// testing.RunExamples
+			//         /usr/lib/go/src/testing/example.go:38
+			// testing.(*M).Run
+			//         /usr/lib/go/src/testing/testing.go:744
+			// main.main
+			//         github.com/pkg/errors/_test/_testmain.go:106
+			// runtime.main
+			//         /usr/lib/go/src/runtime/proc.go:183
+			// runtime.goexit
+			//         /usr/lib/go/src/runtime/asm_amd64.s:2086
+			// github.com/pkg/errors_test.ExampleWithStack_printf
+			//         /home/fabstu/go/src/github.com/pkg/errors/example_test.go:56
+			// testing.runExample
+			//         /usr/lib/go/src/testing/example.go:114
+			// testing.RunExamples
+			//         /usr/lib/go/src/testing/example.go:38
+			// testing.(*M).Run
+			//         /usr/lib/go/src/testing/testing.go:744
+			// main.main
+			//         github.com/pkg/errors/_test/_testmain.go:106
+			// runtime.main
+			//         /usr/lib/go/src/runtime/proc.go:183
+			// runtime.goexit
+			//         /usr/lib/go/src/runtime/asm_amd64.s:2086
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-8-fold-content"><label for="example-8-fold-content">Wrap</label><span id='example-8-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			cause := errors.New("whoops")
+			err := errors.Wrap(cause, "oh noes")
+			fmt.Println(err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-9-fold-content"><label for="example-9-fold-content">Wrap_extended</label><span id='example-9-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func fn() error {
+			e1 := errors.New("error")
+			e2 := errors.Wrap(e1, "inner")
+			e3 := errors.Wrap(e2, "middle")
+			return errors.Wrap(e3, "outer")
+		}
+		
+		func main() {
+			err := fn()
+			fmt.Printf("%+v\n", err)
+		
+			// Example output:
+			// error
+			// github.com/pkg/errors_test.fn
+			//         /home/dfc/src/github.com/pkg/errors/example_test.go:47
+			// github.com/pkg/errors_test.ExampleCause_printf
+			//         /home/dfc/src/github.com/pkg/errors/example_test.go:63
+			// testing.runExample
+			//         /home/dfc/go/src/testing/example.go:114
+			// testing.RunExamples
+			//         /home/dfc/go/src/testing/example.go:38
+			// testing.(*M).Run
+			//         /home/dfc/go/src/testing/testing.go:744
+			// main.main
+			//         /github.com/pkg/errors/_test/_testmain.go:104
+			// runtime.main
+			//         /home/dfc/go/src/runtime/proc.go:183
+			// runtime.goexit
+			//         /home/dfc/go/src/runtime/asm_amd64.s:2059
+			// github.com/pkg/errors_test.fn
+			// 	  /home/dfc/src/github.com/pkg/errors/example_test.go:48: inner
+			// github.com/pkg/errors_test.fn
+			//        /home/dfc/src/github.com/pkg/errors/example_test.go:49: middle
+			// github.com/pkg/errors_test.fn
+			//      /home/dfc/src/github.com/pkg/errors/example_test.go:50: outer
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-10-fold-content"><label for="example-10-fold-content">Wrapf</label><span id='example-10-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func main() {
+			cause := errors.New("whoops")
+			err := errors.Wrapf(cause, "oh noes #%d", 2)
+			fmt.Println(err)
+		
+		}
+</span>
+	<input type='checkbox' class="fold" id="example-11-fold-content"><label for="example-11-fold-content">_stackTrace</label><span id='example-11-fold-content-items' class="fold-items">
+		package main
+		
+		import (
+			"fmt"
+		
+			"github.com/pkg/errors"
+		)
+		
+		func fn() error {
+			e1 := errors.New("error")
+			e2 := errors.Wrap(e1, "inner")
+			e3 := errors.Wrap(e2, "middle")
+			return errors.Wrap(e3, "outer")
+		}
+		
+		func main() {
+			type stackTracer interface {
+				StackTrace() errors.StackTrace
+			}
+		
+			err, ok := errors.Cause(fn()).(stackTracer)
+			if !ok {
+				panic("oops, err does not implement stackTracer")
+			}
+		
+			st := err.StackTrace()
+			fmt.Printf("%+v", st[0:2]) // top two frames
+		
+			// Example output:
+			// github.com/pkg/errors_test.fn
+			//	/home/dfc/src/github.com/pkg/errors/example_test.go:47
+			// github.com/pkg/errors_test.Example_stackTrace
+			//	/home/dfc/src/github.com/pkg/errors/example_test.go:127
+		}
+</span>
+</div>
+<div id="exported-types"><span class="title">Package-Level Type Names<span class="title-stat"><i> (total 2)</i></span></span>
+
+<div id="exported-types-buttons" class="js-on">	/* sort by: <label id="sort-types-by-alphabet" class="button">alphabet</label> | <label id="sort-types-by-popularity" class="button">popularity</label> */</div><div class="anchor type-res" id="name-Frame" data-popularity="200">	<input type='checkbox' class="fold" id="Frame-fold-content"><label for="Frame-fold-content"> type <a href="../../../src/github.com/pkg/errors/stack.go.html#line-15">Frame</a> <a href="../../builtin.html#name-uintptr">uintptr</a> <i>(basic type)</i></label><span id='Frame-fold-content-docs' class="fold-docs">
+<span class="md-text">		Frame represents a program counter inside a stack frame.
+		For historical reasons if Frame is interpreted as a uintptr
+		its value represents the program counter + 1.</span>
+
+		<input type='checkbox' class="fold" id="Frame-fold-methods"><label for="Frame-fold-methods">Methods (<i>total 2</i>)</label><span id='Frame-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="Frame-fold-method-Format"><label for="Frame-fold-method-Format">( Frame) <a href="../../../src/github.com/pkg/errors/stack.go.html#line-64">Format</a>(s <a href="../../fmt.html">fmt</a>.<a href="../../fmt.html#name-State">State</a>, verb <a href="../../builtin.html#name-rune">rune</a>)</label><span id='Frame-fold-method-Format-docs' class="fold-docs">
+<span class="md-text">				Format formats the frame according to the fmt.Formatter interface.
+				
+				   %s    source file
+				   %d    source line
+				   %n    function name
+				   %v    equivalent to %s:%d
+				
+				Format accepts flags that alter the printing of some verbs, as follows:
+				
+				   %+s   function name and path of source file relative to the compile time
+				         GOPATH separated by \n\t (&lt;funcname&gt;\n\t&lt;path&gt;)
+				   %+v   equivalent to %+s:%d</span>
+</span></span><span>
+			<input type='checkbox' class="fold" id="Frame-fold-method-MarshalText"><label for="Frame-fold-method-MarshalText">( Frame) <a href="../../../src/github.com/pkg/errors/stack.go.html#line-88">MarshalText</a>() ([]<a href="../../builtin.html#name-byte">byte</a>, <a href="../../builtin.html#name-error">error</a>)</label><span id='Frame-fold-method-MarshalText-docs' class="fold-docs">
+<span class="md-text">				MarshalText formats a stacktrace Frame as a text string. The output is the
+				same as that of fmt.Sprintf("%+v", f), but without newlines or tabs.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="Frame-fold-impls"><label for="Frame-fold-impls">Implements (<i>at least 2</i>)</label><span id='Frame-fold-impls-items' class="fold-items"><span>
+			 Frame : encoding.<a href="../../encoding.html#name-TextMarshaler">TextMarshaler</a></span><span>
+			 Frame : fmt.<a href="../../fmt.html#name-Formatter">Formatter</a></span></span>
+
+</span></div><div class="anchor type-res" id="name-StackTrace" data-popularity="100">	<input type='checkbox' class="fold" id="StackTrace-fold-content"><label for="StackTrace-fold-content"> type <a href="../../../src/github.com/pkg/errors/stack.go.html#line-97">StackTrace</a> <i>([])</i></label><span id='StackTrace-fold-content-docs' class="fold-docs">
+<span class="md-text">		StackTrace is stack of Frames from innermost (newest) to outermost (oldest).</span>
+
+		<input type='checkbox' class="fold" id="StackTrace-fold-methods"><label for="StackTrace-fold-methods">Methods (<i>only one</i>)</label><span id='StackTrace-fold-methods-items' class="fold-items"><span>
+			<input type='checkbox' class="fold" id="StackTrace-fold-method-Format"><label for="StackTrace-fold-method-Format">( StackTrace) <a href="../../../src/github.com/pkg/errors/stack.go.html#line-107">Format</a>(s <a href="../../fmt.html">fmt</a>.<a href="../../fmt.html#name-State">State</a>, verb <a href="../../builtin.html#name-rune">rune</a>)</label><span id='StackTrace-fold-method-Format-docs' class="fold-docs">
+<span class="md-text">				Format formats the stack of Frames according to the fmt.Formatter interface.
+				
+				   %s	lists source files for each Frame in the stack
+				   %v	lists the source file and line number for each Frame in the stack
+				
+				Format accepts flags that alter the printing of some verbs, as follows:
+				
+				   %+v   Prints filename, function, and line number for each Frame in the stack.</span>
+</span></span></span>
+		<input type='checkbox' class="fold" id="StackTrace-fold-impls"><label for="StackTrace-fold-impls">Implements (<i>at least one exported</i>)</label><span id='StackTrace-fold-impls-items' class="fold-items"><span>
+			 StackTrace : fmt.<a href="../../fmt.html#name-Formatter">Formatter</a></span></span>
+
+</span></div></div>
+<div id="exported-functions"><span class="title">Package-Level Functions<span class="title-stat"><i> (total 11)</i></span></span>
+
+<div class="anchor value-res" id="name-As">	<input type='checkbox' class="fold" id="As-fold-content"><label for="As-fold-content"> func <a href="../../../src/github.com/pkg/errors/go113.go.html#line-31">As</a>(err <a href="../../builtin.html#name-error">error</a>, target interface{}) <a href="../../builtin.html#name-bool">bool</a></label><span id='As-fold-content-docs' class="fold-docs">
+<span class="md-text">		As finds the first error in err's chain that matches target, and if so, sets
+		target to that error value and returns true.
+		
+		The chain consists of err itself followed by the sequence of errors obtained by
+		repeatedly calling Unwrap.
+		
+		An error matches target if the error's concrete value is assignable to the value
+		pointed to by target, or if the error has a method As(interface{}) bool such that
+		As(target) returns true. In the latter case, the As method is responsible for
+		setting target.
+		
+		As will panic if target is not a non-nil pointer to either a type that implements
+		error, or to any interface type. As returns false if err is nil.</span>
+
+</span></div><div class="anchor value-res" id="name-Cause">	<input type='checkbox' class="fold" id="Cause-fold-content"><label for="Cause-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-275">Cause</a>(err <a href="../../builtin.html#name-error">error</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Cause-fold-content-docs' class="fold-docs">
+<span class="md-text">		Cause returns the underlying cause of the error, if possible.
+		An error value has a cause if it implements the following
+		interface:
+		
+		    type causer interface {
+		           Cause() error
+		    }
+		
+		If the error does not implement Cause, the original error will
+		be returned. If the error is nil, nil will be returned without further
+		investigation.</span>
+
+</span></div><div class="anchor value-res" id="name-Errorf">	<input type='checkbox' class="fold" id="Errorf-fold-content"><label for="Errorf-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-112">Errorf</a>(format <a href="../../builtin.html#name-string">string</a>, args ...interface{}) <a href="../../builtin.html#name-error">error</a></label><span id='Errorf-fold-content-docs' class="fold-docs">
+<span class="md-text">		Errorf formats according to a format specifier and returns the string
+		as a value that satisfies error.
+		Errorf also records the stack trace at the point it was called.</span>
+
+</span></div><div class="anchor value-res" id="name-Is">	<input type='checkbox' class="fold" id="Is-fold-content"><label for="Is-fold-content"> func <a href="../../../src/github.com/pkg/errors/go113.go.html#line-16">Is</a>(err, target <a href="../../builtin.html#name-error">error</a>) <a href="../../builtin.html#name-bool">bool</a></label><span id='Is-fold-content-docs' class="fold-docs">
+<span class="md-text">		Is reports whether any error in err's chain matches target.
+		
+		The chain consists of err itself followed by the sequence of errors obtained by
+		repeatedly calling Unwrap.
+		
+		An error is considered to match a target if it is equal to that target or if
+		it implements a method Is(error) bool such that Is(target) returns true.</span>
+
+</span></div><div class="anchor value-res" id="name-New">	<input type='checkbox' class="fold" id="New-fold-content"><label for="New-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-102">New</a>(message <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='New-fold-content-docs' class="fold-docs">
+<span class="md-text">		New returns an error with the supplied message.
+		New also records the stack trace at the point it was called.</span>
+
+</span></div><div class="anchor value-res" id="name-Unwrap">	<input type='checkbox' class="fold" id="Unwrap-fold-content"><label for="Unwrap-fold-content"> func <a href="../../../src/github.com/pkg/errors/go113.go.html#line-36">Unwrap</a>(err <a href="../../builtin.html#name-error">error</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Unwrap-fold-content-docs' class="fold-docs">
+<span class="md-text">		Unwrap returns the result of calling the Unwrap method on err, if err's
+		type contains an Unwrap method returning error.
+		Otherwise, Unwrap returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-WithMessage">	<input type='checkbox' class="fold" id="WithMessage-fold-content"><label for="WithMessage-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-217">WithMessage</a>(err <a href="../../builtin.html#name-error">error</a>, message <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='WithMessage-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithMessage annotates err with a new message.
+		If err is nil, WithMessage returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-WithMessagef">	<input type='checkbox' class="fold" id="WithMessagef-fold-content"><label for="WithMessagef-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-229">WithMessagef</a>(err <a href="../../builtin.html#name-error">error</a>, format <a href="../../builtin.html#name-string">string</a>, args ...interface{}) <a href="../../builtin.html#name-error">error</a></label><span id='WithMessagef-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithMessagef annotates err with the format specifier.
+		If err is nil, WithMessagef returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-WithStack">	<input type='checkbox' class="fold" id="WithStack-fold-content"><label for="WithStack-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-145">WithStack</a>(err <a href="../../builtin.html#name-error">error</a>) <a href="../../builtin.html#name-error">error</a></label><span id='WithStack-fold-content-docs' class="fold-docs">
+<span class="md-text">		WithStack annotates err with a stack trace at the point WithStack was called.
+		If err is nil, WithStack returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-Wrap">	<input type='checkbox' class="fold" id="Wrap-fold-content"><label for="Wrap-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-184">Wrap</a>(err <a href="../../builtin.html#name-error">error</a>, message <a href="../../builtin.html#name-string">string</a>) <a href="../../builtin.html#name-error">error</a></label><span id='Wrap-fold-content-docs' class="fold-docs">
+<span class="md-text">		Wrap returns an error annotating err with a stack trace
+		at the point Wrap is called, and the supplied message.
+		If err is nil, Wrap returns nil.</span>
+
+</span></div><div class="anchor value-res" id="name-Wrapf">	<input type='checkbox' class="fold" id="Wrapf-fold-content"><label for="Wrapf-fold-content"> func <a href="../../../src/github.com/pkg/errors/errors.go.html#line-201">Wrapf</a>(err <a href="../../builtin.html#name-error">error</a>, format <a href="../../builtin.html#name-string">string</a>, args ...interface{}) <a href="../../builtin.html#name-error">error</a></label><span id='Wrapf-fold-content-docs' class="fold-docs">
+<span class="md-text">		Wrapf returns an error annotating err with a stack trace
+		at the point Wrapf is called, and the format specifier.
+		If err is nil, Wrapf returns nil.</span>
+
+</span></div></div></code></pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

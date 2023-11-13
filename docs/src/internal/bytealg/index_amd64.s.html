@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: index_amd64.s in package internal/bytealg</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -252,48 +252,50 @@
 <span class="codeline" id="line-233"><code>	VZEROUPPER</code></span>
 <span class="codeline" id="line-234"><code>	JMP success</code></span>
 <span class="codeline" id="line-235"><code>sse42:</code></span>
-<span class="codeline" id="line-236"><code>	CMPB internal∕cpu·X86+const_offsetX86HasSSE42(SB), $1</code></span>
-<span class="codeline" id="line-237"><code>	JNE no_sse42</code></span>
-<span class="codeline" id="line-238"><code>	CMPQ AX, $12</code></span>
-<span class="codeline" id="line-239"><code>	// PCMPESTRI is slower than normal compare,</code></span>
-<span class="codeline" id="line-240"><code>	// so using it makes sense only if we advance 4+ bytes per compare</code></span>
-<span class="codeline" id="line-241"><code>	// This value was determined experimentally and is the ~same</code></span>
-<span class="codeline" id="line-242"><code>	// on Nehalem (first with SSE42) and Haswell.</code></span>
-<span class="codeline" id="line-243"><code>	JAE _9_or_more</code></span>
-<span class="codeline" id="line-244"><code>	LEAQ 16(R8), SI</code></span>
-<span class="codeline" id="line-245"><code>	TESTW $0xff0, SI</code></span>
-<span class="codeline" id="line-246"><code>	JEQ no_sse42</code></span>
-<span class="codeline" id="line-247"><code>	MOVOU (R8), X1</code></span>
-<span class="codeline" id="line-248"><code>	LEAQ -15(DI)(DX*1), SI</code></span>
-<span class="codeline" id="line-249"><code>	MOVQ $16, R9</code></span>
-<span class="codeline" id="line-250"><code>	SUBQ AX, R9 // We advance by 16-len(sep) each iteration, so precalculate it into R9</code></span>
-<span class="codeline" id="line-251"><code>loop_sse42:</code></span>
-<span class="codeline" id="line-252"><code>	// 0x0c means: unsigned byte compare (bits 0,1 are 00)</code></span>
-<span class="codeline" id="line-253"><code>	// for equality (bits 2,3 are 11)</code></span>
-<span class="codeline" id="line-254"><code>	// result is not masked or inverted (bits 4,5 are 00)</code></span>
-<span class="codeline" id="line-255"><code>	// and corresponds to first matching byte (bit 6 is 0)</code></span>
-<span class="codeline" id="line-256"><code>	PCMPESTRI $0x0c, (DI), X1</code></span>
-<span class="codeline" id="line-257"><code>	// CX == 16 means no match,</code></span>
-<span class="codeline" id="line-258"><code>	// CX &gt; R9 means partial match at the end of the string,</code></span>
-<span class="codeline" id="line-259"><code>	// otherwise sep is at offset CX from X1 start</code></span>
-<span class="codeline" id="line-260"><code>	CMPQ CX, R9</code></span>
-<span class="codeline" id="line-261"><code>	JBE sse42_success</code></span>
-<span class="codeline" id="line-262"><code>	ADDQ R9, DI</code></span>
-<span class="codeline" id="line-263"><code>	CMPQ DI, SI</code></span>
-<span class="codeline" id="line-264"><code>	JB loop_sse42</code></span>
-<span class="codeline" id="line-265"><code>	PCMPESTRI $0x0c, -1(SI), X1</code></span>
-<span class="codeline" id="line-266"><code>	CMPQ CX, R9</code></span>
-<span class="codeline" id="line-267"><code>	JA fail</code></span>
-<span class="codeline" id="line-268"><code>	LEAQ -1(SI), DI</code></span>
-<span class="codeline" id="line-269"><code>sse42_success:</code></span>
-<span class="codeline" id="line-270"><code>	ADDQ CX, DI</code></span>
-<span class="codeline" id="line-271"><code>success:</code></span>
-<span class="codeline" id="line-272"><code>	SUBQ R10, DI</code></span>
-<span class="codeline" id="line-273"><code>	MOVQ DI, (R11)</code></span>
-<span class="codeline" id="line-274"><code>	RET</code></span>
+<span class="codeline" id="line-236"><code>#ifndef hasSSE42</code></span>
+<span class="codeline" id="line-237"><code>	CMPB internal∕cpu·X86+const_offsetX86HasSSE42(SB), $1</code></span>
+<span class="codeline" id="line-238"><code>	JNE no_sse42</code></span>
+<span class="codeline" id="line-239"><code>#endif</code></span>
+<span class="codeline" id="line-240"><code>	CMPQ AX, $12</code></span>
+<span class="codeline" id="line-241"><code>	// PCMPESTRI is slower than normal compare,</code></span>
+<span class="codeline" id="line-242"><code>	// so using it makes sense only if we advance 4+ bytes per compare</code></span>
+<span class="codeline" id="line-243"><code>	// This value was determined experimentally and is the ~same</code></span>
+<span class="codeline" id="line-244"><code>	// on Nehalem (first with SSE42) and Haswell.</code></span>
+<span class="codeline" id="line-245"><code>	JAE _9_or_more</code></span>
+<span class="codeline" id="line-246"><code>	LEAQ 16(R8), SI</code></span>
+<span class="codeline" id="line-247"><code>	TESTW $0xff0, SI</code></span>
+<span class="codeline" id="line-248"><code>	JEQ no_sse42</code></span>
+<span class="codeline" id="line-249"><code>	MOVOU (R8), X1</code></span>
+<span class="codeline" id="line-250"><code>	LEAQ -15(DI)(DX*1), SI</code></span>
+<span class="codeline" id="line-251"><code>	MOVQ $16, R9</code></span>
+<span class="codeline" id="line-252"><code>	SUBQ AX, R9 // We advance by 16-len(sep) each iteration, so precalculate it into R9</code></span>
+<span class="codeline" id="line-253"><code>loop_sse42:</code></span>
+<span class="codeline" id="line-254"><code>	// 0x0c means: unsigned byte compare (bits 0,1 are 00)</code></span>
+<span class="codeline" id="line-255"><code>	// for equality (bits 2,3 are 11)</code></span>
+<span class="codeline" id="line-256"><code>	// result is not masked or inverted (bits 4,5 are 00)</code></span>
+<span class="codeline" id="line-257"><code>	// and corresponds to first matching byte (bit 6 is 0)</code></span>
+<span class="codeline" id="line-258"><code>	PCMPESTRI $0x0c, (DI), X1</code></span>
+<span class="codeline" id="line-259"><code>	// CX == 16 means no match,</code></span>
+<span class="codeline" id="line-260"><code>	// CX &gt; R9 means partial match at the end of the string,</code></span>
+<span class="codeline" id="line-261"><code>	// otherwise sep is at offset CX from X1 start</code></span>
+<span class="codeline" id="line-262"><code>	CMPQ CX, R9</code></span>
+<span class="codeline" id="line-263"><code>	JBE sse42_success</code></span>
+<span class="codeline" id="line-264"><code>	ADDQ R9, DI</code></span>
+<span class="codeline" id="line-265"><code>	CMPQ DI, SI</code></span>
+<span class="codeline" id="line-266"><code>	JB loop_sse42</code></span>
+<span class="codeline" id="line-267"><code>	PCMPESTRI $0x0c, -1(SI), X1</code></span>
+<span class="codeline" id="line-268"><code>	CMPQ CX, R9</code></span>
+<span class="codeline" id="line-269"><code>	JA fail</code></span>
+<span class="codeline" id="line-270"><code>	LEAQ -1(SI), DI</code></span>
+<span class="codeline" id="line-271"><code>sse42_success:</code></span>
+<span class="codeline" id="line-272"><code>	ADDQ CX, DI</code></span>
+<span class="codeline" id="line-273"><code>success:</code></span>
+<span class="codeline" id="line-274"><code>	SUBQ R10, DI</code></span>
+<span class="codeline" id="line-275"><code>	MOVQ DI, (R11)</code></span>
+<span class="codeline" id="line-276"><code>	RET</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

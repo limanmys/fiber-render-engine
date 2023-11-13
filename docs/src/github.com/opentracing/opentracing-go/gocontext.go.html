@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: gocontext.go in package github.com/opentracing/opentracing-go</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	gocontext.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/github.com/opentracing/opentracing-go.html">github.com/opentracing/opentracing-go</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> opentracing</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"context"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">type</span> contextKey <span class="keyword">struct</span>{}</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">var</span> activeSpanKey = <a href="#line-5" class="ident">contextKey</a>{}</code></span>
+<span class="codeline" id="line-8"><code></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// ContextWithSpan returns a new `context.Context` that holds a reference to</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// the span. If span is nil, a new context without an active span is returned.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-ContextWithSpan" class="ident">ContextWithSpan</a></label>(<label for="r1" class="ident">ctx</label> <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>, <label for="r2" class="ident">span</label> <a href="span.go.html#line-27" class="ident">Span</a>) <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a> {</code></span>
+<span class="codeline" id="line-12"><code>	<span class="keyword">if</span> <label for="r2" class="ident">span</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-13"><code>		<span class="keyword">if</span> <label for="r3" class="ident">tracerWithHook</label>, <label for="r4" class="ident">ok</label> := <label for="r2" class="ident">span</label>.<a href="span.go.html#line-115" class="ident">Tracer</a>().(<a href="ext.go.html#line-14" class="ident">TracerContextWithSpanExtension</a>); <label for="r4" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-14"><code>			<label for="r1" class="ident">ctx</label> = <label for="r3" class="ident">tracerWithHook</label>.<a href="ext.go.html#line-23" class="ident">ContextWithSpanHook</a>(<label for="r1" class="ident">ctx</label>, <label for="r2" class="ident">span</label>)</code></span>
+<span class="codeline" id="line-15"><code>		}</code></span>
+<span class="codeline" id="line-16"><code>	}</code></span>
+<span class="codeline" id="line-17"><code>	<span class="keyword">return</span> <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-708" class="ident">WithValue</a>(<label for="r1" class="ident">ctx</label>, <a href="#line-7" class="ident">activeSpanKey</a>, <label for="r2" class="ident">span</label>)</code></span>
+<span class="codeline" id="line-18"><code>}</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// SpanFromContext returns the `Span` previously associated with `ctx`, or</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// `nil` if no such `Span` could be found.</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// NOTE: context.Context != SpanContext: the former is Go's intra-process</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// context propagation mechanism, and the latter houses OpenTracing's per-Span</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// identity and baggage information.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">func</span> <label for="r5" class="ident"><a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-SpanFromContext" class="ident">SpanFromContext</a></label>(<label for="r6" class="ident">ctx</label> <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>) <a href="span.go.html#line-27" class="ident">Span</a> {</code></span>
+<span class="codeline" id="line-27"><code>	<label for="r7" class="ident">val</label> := <label for="r6" class="ident">ctx</label>.<a href="../../../context/context.go.html#line-159" class="ident">Value</a>(<a href="#line-7" class="ident">activeSpanKey</a>)</code></span>
+<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> <label for="r8" class="ident">sp</label>, <label for="r9" class="ident">ok</label> := <label for="r7" class="ident">val</label>.(<a href="span.go.html#line-27" class="ident">Span</a>); <label for="r9" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-29"><code>		<span class="keyword">return</span> <label for="r8" class="ident">sp</label></code></span>
+<span class="codeline" id="line-30"><code>	}</code></span>
+<span class="codeline" id="line-31"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-32"><code>}</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// StartSpanFromContext starts and returns a Span with `operationName`, using</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// any Span found within `ctx` as a ChildOfRef. If no such parent could be</span></code></span>
+<span class="codeline" id="line-36"><code><span class="comment">// found, StartSpanFromContext creates a root (parentless) Span.</span></code></span>
+<span class="codeline" id="line-37"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// The second return value is a context.Context object built around the</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// returned Span.</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// Example usage:</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">//    SomeFunction(ctx context.Context, ...) {</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">//        sp, ctx := opentracing.StartSpanFromContext(ctx, "SomeFunction")</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">//        defer sp.Finish()</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">//        ...</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">//    }</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">func</span> <label for="r10" class="ident"><a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-StartSpanFromContext" class="ident">StartSpanFromContext</a></label>(<label for="r11" class="ident">ctx</label> <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>, <label for="r12" class="ident">operationName</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r13" class="ident">opts</label> ...<a href="tracer.go.html#line-153" class="ident">StartSpanOption</a>) (<a href="span.go.html#line-27" class="ident">Span</a>, <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>) {</code></span>
+<span class="codeline" id="line-49"><code>	<span class="keyword">return</span> <a href="#line-59" class="ident">StartSpanFromContextWithTracer</a>(<label for="r11" class="ident">ctx</label>, <a href="globaltracer.go.html#line-25" class="ident">GlobalTracer</a>(), <label for="r12" class="ident">operationName</label>, <label for="r13" class="ident">opts</label>...)</code></span>
+<span class="codeline" id="line-50"><code>}</code></span>
+<span class="codeline" id="line-51"><code></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// StartSpanFromContextWithTracer starts and returns a span with `operationName`</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// using  a span found within the context as a ChildOfRef. If that doesn't exist</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// it creates a root span. It also returns a context.Context object built</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// around the returned span.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// It's behavior is identical to StartSpanFromContext except that it takes an explicit</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">// tracer as opposed to using the global tracer.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="keyword">func</span> <label for="r14" class="ident"><a href="../../../../pkg/github.com/opentracing/opentracing-go.html#name-StartSpanFromContextWithTracer" class="ident">StartSpanFromContextWithTracer</a></label>(<label for="r15" class="ident">ctx</label> <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>, <label for="r16" class="ident">tracer</label> <a href="tracer.go.html#line-7" class="ident">Tracer</a>, <label for="r17" class="ident">operationName</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r18" class="ident">opts</label> ...<a href="tracer.go.html#line-153" class="ident">StartSpanOption</a>) (<a href="span.go.html#line-27" class="ident">Span</a>, <a href="../../../../pkg/context.html" class="ident i0">context</a>.<a href="../../../context/context.go.html#line-68" class="ident">Context</a>) {</code></span>
+<span class="codeline" id="line-60"><code>	<span class="keyword">if</span> <label for="r19" class="ident">parentSpan</label> := <a href="#line-26" class="ident">SpanFromContext</a>(<label for="r15" class="ident">ctx</label>); <label for="r19" class="ident">parentSpan</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-61"><code>		<label for="r18" class="ident">opts</label> = <a href="../../../../pkg/builtin.html#name-append" class="ident">append</a>(<label for="r18" class="ident">opts</label>, <a href="tracer.go.html#line-236" class="ident">ChildOf</a>(<label for="r19" class="ident">parentSpan</label>.<a href="span.go.html#line-41" class="ident">Context</a>()))</code></span>
+<span class="codeline" id="line-62"><code>	}</code></span>
+<span class="codeline" id="line-63"><code>	<label for="r20" class="ident">span</label> := <label for="r16" class="ident">tracer</label>.<a href="tracer.go.html#line-37" class="ident">StartSpan</a>(<label for="r17" class="ident">operationName</label>, <label for="r18" class="ident">opts</label>...)</code></span>
+<span class="codeline" id="line-64"><code>	<span class="keyword">return</span> <label for="r20" class="ident">span</label>, <a href="#line-11" class="ident">ContextWithSpan</a>(<label for="r15" class="ident">ctx</label>, <label for="r20" class="ident">span</label>)</code></span>
+<span class="codeline" id="line-65"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

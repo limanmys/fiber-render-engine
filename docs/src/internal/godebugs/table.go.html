@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: table.go in package internal/godebugs</title>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	table.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../pkg/internal/godebugs.html">internal/godebugs</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5]
+{background: #226; color: #ff8;}
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2023 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package godebugs provides a table of known GODEBUG settings,</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// for use by a variety of other packages, including internal/godebug,</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// runtime, runtime/metrics, and cmd/go/internal/load.</span></code></span></div><span class="codeline" id="line-8"><code><span class="keyword">package</span> godebugs</code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// An Info describes a single known GODEBUG setting.</span></code></span>
+<span class="codeline" id="line-11"><code><span class="keyword">type</span> <a href="../../../pkg/internal/godebugs.html#name-Info" class="ident">Info</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-12"><code>	Name    <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="comment">// name of the setting ("panicnil")</span></code></span>
+<span class="codeline" id="line-13"><code>	Package <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="comment">// package that uses the setting ("runtime")</span></code></span>
+<span class="codeline" id="line-14"><code>	Changed <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="comment">// minor version when default changed, if any; 21 means Go 1.21</span></code></span>
+<span class="codeline" id="line-15"><code>	Old     <a href="../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="comment">// value that restores behavior prior to Changed</span></code></span>
+<span class="codeline" id="line-16"><code>	Opaque  <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>   <span class="comment">// setting does not export information to runtime/metrics using [internal/godebug.Setting.IncNonDefault]</span></code></span>
+<span class="codeline" id="line-17"><code>}</code></span>
+<span class="codeline" id="line-18"><code></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// All is the table of known settings, sorted by Name.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// Note: After adding entries to this table, run 'go generate runtime/metrics'</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// to update the runtime/metrics doc comment.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// (Otherwise the runtime/metrics test will fail.)</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// Note: After adding entries to this table, update the list in doc/godebug.md as well.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// (Otherwise the test in this package will fail.)</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">var</span> <a href="../../../pkg/internal/godebugs.html#name-All" class="ident">All</a> = []<a href="#line-11" class="ident">Info</a>{</code></span>
+<span class="codeline" id="line-28"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"execerrdot"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"os/exec"</span>},</code></span>
+<span class="codeline" id="line-29"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"gocachehash"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"cmd/go"</span>},</code></span>
+<span class="codeline" id="line-30"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"gocachetest"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"cmd/go"</span>},</code></span>
+<span class="codeline" id="line-31"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"gocacheverify"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"cmd/go"</span>},</code></span>
+<span class="codeline" id="line-32"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"http2client"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"net/http"</span>},</code></span>
+<span class="codeline" id="line-33"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"http2debug"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"net/http"</span>, <a href="#line-16" class="ident">Opaque</a>: <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>},</code></span>
+<span class="codeline" id="line-34"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"http2server"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"net/http"</span>},</code></span>
+<span class="codeline" id="line-35"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"installgoroot"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"go/build"</span>},</code></span>
+<span class="codeline" id="line-36"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"jstmpllitinterp"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"html/template"</span>},</code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">//{Name: "multipartfiles", Package: "mime/multipart"},</span></code></span>
+<span class="codeline" id="line-38"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"multipartmaxheaders"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"mime/multipart"</span>},</code></span>
+<span class="codeline" id="line-39"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"multipartmaxparts"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"mime/multipart"</span>},</code></span>
+<span class="codeline" id="line-40"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"multipathtcp"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"net"</span>},</code></span>
+<span class="codeline" id="line-41"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"netdns"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"net"</span>, <a href="#line-16" class="ident">Opaque</a>: <a href="../../../pkg/builtin.html#name-true" class="ident">true</a>},</code></span>
+<span class="codeline" id="line-42"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"panicnil"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"runtime"</span>, <a href="#line-14" class="ident">Changed</a>: <span class="lit-number">21</span>, <a href="#line-15" class="ident">Old</a>: <span class="lit-string">"1"</span>},</code></span>
+<span class="codeline" id="line-43"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"randautoseed"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"math/rand"</span>},</code></span>
+<span class="codeline" id="line-44"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"tarinsecurepath"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"archive/tar"</span>},</code></span>
+<span class="codeline" id="line-45"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"tlsmaxrsasize"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"crypto/tls"</span>},</code></span>
+<span class="codeline" id="line-46"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"x509sha1"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"crypto/x509"</span>},</code></span>
+<span class="codeline" id="line-47"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"x509usefallbackroots"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"crypto/x509"</span>},</code></span>
+<span class="codeline" id="line-48"><code>	{<a href="#line-12" class="ident">Name</a>: <span class="lit-string">"zipinsecurepath"</span>, <a href="#line-13" class="ident">Package</a>: <span class="lit-string">"archive/zip"</span>},</code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// Lookup returns the Info with the given name.</span></code></span>
+<span class="codeline" id="line-52"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/internal/godebugs.html#name-Lookup" class="ident">Lookup</a></label>(<label for="r1" class="ident">name</label> <a href="../../../pkg/builtin.html#name-string" class="ident">string</a>) *<a href="#line-11" class="ident">Info</a> {</code></span>
+<span class="codeline" id="line-53"><code>	<span class="comment">// binary search, avoiding import of sort.</span></code></span>
+<span class="codeline" id="line-54"><code>	<label for="r2" class="ident">lo</label> := <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-55"><code>	<label for="r3" class="ident">hi</label> := <a href="../../../pkg/builtin.html#name-len" class="ident">len</a>(<a href="#line-27" class="ident">All</a>)</code></span>
+<span class="codeline" id="line-56"><code>	<span class="keyword">for</span> <label for="r2" class="ident">lo</label> &lt; <label for="r3" class="ident">hi</label> {</code></span>
+<span class="codeline" id="line-57"><code>		<label for="r4" class="ident">m</label> := <label for="r2" class="ident">lo</label> + (<label for="r3" class="ident">hi</label>-<label for="r2" class="ident">lo</label>)&gt;&gt;<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-58"><code>		<label for="r5" class="ident">mid</label> := <a href="#line-27" class="ident">All</a>[<label for="r4" class="ident">m</label>].<a href="#line-12" class="ident">Name</a></code></span>
+<span class="codeline" id="line-59"><code>		<span class="keyword">if</span> <label for="r1" class="ident">name</label> == <label for="r5" class="ident">mid</label> {</code></span>
+<span class="codeline" id="line-60"><code>			<span class="keyword">return</span> &amp;<a href="#line-27" class="ident">All</a>[<label for="r4" class="ident">m</label>]</code></span>
+<span class="codeline" id="line-61"><code>		}</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">if</span> <label for="r1" class="ident">name</label> &lt; <label for="r5" class="ident">mid</label> {</code></span>
+<span class="codeline" id="line-63"><code>			<label for="r3" class="ident">hi</label> = <label for="r4" class="ident">m</label></code></span>
+<span class="codeline" id="line-64"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-65"><code>			<label for="r2" class="ident">lo</label> = <label for="r4" class="ident">m</label> + <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-66"><code>		}</code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-69"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: nat.go in package crypto/internal/bigmod</title>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	nat.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../pkg/crypto/internal/bigmod.html">crypto/internal/bigmod</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31],
+input[id=r32]:checked ~pre label[for=r32],
+input[id=r33]:checked ~pre label[for=r33],
+input[id=r34]:checked ~pre label[for=r34],
+input[id=r35]:checked ~pre label[for=r35],
+input[id=r36]:checked ~pre label[for=r36],
+input[id=r37]:checked ~pre label[for=r37],
+input[id=r38]:checked ~pre label[for=r38],
+input[id=r39]:checked ~pre label[for=r39],
+input[id=r40]:checked ~pre label[for=r40],
+input[id=r41]:checked ~pre label[for=r41],
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43],
+input[id=r44]:checked ~pre label[for=r44],
+input[id=r45]:checked ~pre label[for=r45],
+input[id=r46]:checked ~pre label[for=r46],
+input[id=r47]:checked ~pre label[for=r47],
+input[id=r48]:checked ~pre label[for=r48],
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54],
+input[id=r55]:checked ~pre label[for=r55],
+input[id=r56]:checked ~pre label[for=r56],
+input[id=r57]:checked ~pre label[for=r57],
+input[id=r58]:checked ~pre label[for=r58],
+input[id=r59]:checked ~pre label[for=r59],
+input[id=r60]:checked ~pre label[for=r60],
+input[id=r61]:checked ~pre label[for=r61],
+input[id=r62]:checked ~pre label[for=r62],
+input[id=r63]:checked ~pre label[for=r63],
+input[id=r64]:checked ~pre label[for=r64],
+input[id=r65]:checked ~pre label[for=r65],
+input[id=r66]:checked ~pre label[for=r66],
+input[id=r67]:checked ~pre label[for=r67],
+input[id=r68]:checked ~pre label[for=r68],
+input[id=r69]:checked ~pre label[for=r69],
+input[id=r70]:checked ~pre label[for=r70],
+input[id=r71]:checked ~pre label[for=r71],
+input[id=r72]:checked ~pre label[for=r72],
+input[id=r73]:checked ~pre label[for=r73],
+input[id=r74]:checked ~pre label[for=r74],
+input[id=r75]:checked ~pre label[for=r75],
+input[id=r76]:checked ~pre label[for=r76],
+input[id=r77]:checked ~pre label[for=r77],
+input[id=r78]:checked ~pre label[for=r78],
+input[id=r79]:checked ~pre label[for=r79],
+input[id=r80]:checked ~pre label[for=r80],
+input[id=r81]:checked ~pre label[for=r81],
+input[id=r82]:checked ~pre label[for=r82],
+input[id=r83]:checked ~pre label[for=r83],
+input[id=r84]:checked ~pre label[for=r84],
+input[id=r85]:checked ~pre label[for=r85],
+input[id=r86]:checked ~pre label[for=r86],
+input[id=r87]:checked ~pre label[for=r87],
+input[id=r88]:checked ~pre label[for=r88],
+input[id=r89]:checked ~pre label[for=r89],
+input[id=r90]:checked ~pre label[for=r90],
+input[id=r91]:checked ~pre label[for=r91],
+input[id=r92]:checked ~pre label[for=r92],
+input[id=r93]:checked ~pre label[for=r93],
+input[id=r94]:checked ~pre label[for=r94],
+input[id=r95]:checked ~pre label[for=r95],
+input[id=r96]:checked ~pre label[for=r96],
+input[id=r97]:checked ~pre label[for=r97],
+input[id=r98]:checked ~pre label[for=r98],
+input[id=r99]:checked ~pre label[for=r99],
+input[id=r100]:checked ~pre label[for=r100],
+input[id=r101]:checked ~pre label[for=r101],
+input[id=r102]:checked ~pre label[for=r102],
+input[id=r103]:checked ~pre label[for=r103],
+input[id=r104]:checked ~pre label[for=r104],
+input[id=r105]:checked ~pre label[for=r105],
+input[id=r106]:checked ~pre label[for=r106],
+input[id=r107]:checked ~pre label[for=r107],
+input[id=r108]:checked ~pre label[for=r108],
+input[id=r109]:checked ~pre label[for=r109],
+input[id=r110]:checked ~pre label[for=r110],
+input[id=r111]:checked ~pre label[for=r111],
+input[id=r112]:checked ~pre label[for=r112],
+input[id=r113]:checked ~pre label[for=r113],
+input[id=r114]:checked ~pre label[for=r114],
+input[id=r115]:checked ~pre label[for=r115],
+input[id=r116]:checked ~pre label[for=r116],
+input[id=r117]:checked ~pre label[for=r117],
+input[id=r118]:checked ~pre label[for=r118],
+input[id=r119]:checked ~pre label[for=r119],
+input[id=r120]:checked ~pre label[for=r120],
+input[id=r121]:checked ~pre label[for=r121],
+input[id=r122]:checked ~pre label[for=r122],
+input[id=r123]:checked ~pre label[for=r123],
+input[id=r124]:checked ~pre label[for=r124],
+input[id=r125]:checked ~pre label[for=r125],
+input[id=r126]:checked ~pre label[for=r126],
+input[id=r127]:checked ~pre label[for=r127],
+input[id=r128]:checked ~pre label[for=r128],
+input[id=r129]:checked ~pre label[for=r129],
+input[id=r130]:checked ~pre label[for=r130],
+input[id=r131]:checked ~pre label[for=r131],
+input[id=r132]:checked ~pre label[for=r132],
+input[id=r133]:checked ~pre label[for=r133],
+input[id=r134]:checked ~pre label[for=r134],
+input[id=r135]:checked ~pre label[for=r135],
+input[id=r136]:checked ~pre label[for=r136],
+input[id=r137]:checked ~pre label[for=r137],
+input[id=r138]:checked ~pre label[for=r138],
+input[id=r139]:checked ~pre label[for=r139],
+input[id=r140]:checked ~pre label[for=r140],
+input[id=r141]:checked ~pre label[for=r141],
+input[id=r142]:checked ~pre label[for=r142],
+input[id=r143]:checked ~pre label[for=r143],
+input[id=r144]:checked ~pre label[for=r144],
+input[id=r145]:checked ~pre label[for=r145],
+input[id=r146]:checked ~pre label[for=r146],
+input[id=r147]:checked ~pre label[for=r147],
+input[id=r148]:checked ~pre label[for=r148],
+input[id=r149]:checked ~pre label[for=r149],
+input[id=r150]:checked ~pre label[for=r150],
+input[id=r151]:checked ~pre label[for=r151],
+input[id=r152]:checked ~pre label[for=r152],
+input[id=r153]:checked ~pre label[for=r153],
+input[id=r154]:checked ~pre label[for=r154],
+input[id=r155]:checked ~pre label[for=r155],
+input[id=r156]:checked ~pre label[for=r156],
+input[id=r157]:checked ~pre label[for=r157],
+input[id=r158]:checked ~pre label[for=r158],
+input[id=r159]:checked ~pre label[for=r159],
+input[id=r160]:checked ~pre label[for=r160],
+input[id=r161]:checked ~pre label[for=r161],
+input[id=r162]:checked ~pre label[for=r162],
+input[id=r163]:checked ~pre label[for=r163],
+input[id=r164]:checked ~pre label[for=r164],
+input[id=r165]:checked ~pre label[for=r165],
+input[id=r166]:checked ~pre label[for=r166],
+input[id=r167]:checked ~pre label[for=r167],
+input[id=r168]:checked ~pre label[for=r168],
+input[id=r169]:checked ~pre label[for=r169],
+input[id=r170]:checked ~pre label[for=r170],
+input[id=r171]:checked ~pre label[for=r171],
+input[id=r172]:checked ~pre label[for=r172],
+input[id=r173]:checked ~pre label[for=r173],
+input[id=r174]:checked ~pre label[for=r174],
+input[id=r175]:checked ~pre label[for=r175],
+input[id=r176]:checked ~pre label[for=r176],
+input[id=r177]:checked ~pre label[for=r177],
+input[id=r178]:checked ~pre label[for=r178],
+input[id=r179]:checked ~pre label[for=r179],
+input[id=r180]:checked ~pre label[for=r180],
+input[id=r181]:checked ~pre label[for=r181],
+input[id=r182]:checked ~pre label[for=r182],
+input[id=r183]:checked ~pre label[for=r183],
+input[id=r184]:checked ~pre label[for=r184],
+input[id=r185]:checked ~pre label[for=r185],
+input[id=r186]:checked ~pre label[for=r186],
+input[id=r187]:checked ~pre label[for=r187],
+input[id=r188]:checked ~pre label[for=r188],
+input[id=r189]:checked ~pre label[for=r189],
+input[id=r190]:checked ~pre label[for=r190],
+input[id=r191]:checked ~pre label[for=r191],
+input[id=r192]:checked ~pre label[for=r192],
+input[id=r193]:checked ~pre label[for=r193],
+input[id=r194]:checked ~pre label[for=r194],
+input[id=r195]:checked ~pre label[for=r195],
+input[id=r196]:checked ~pre label[for=r196],
+input[id=r197]:checked ~pre label[for=r197],
+input[id=r198]:checked ~pre label[for=r198],
+input[id=r199]:checked ~pre label[for=r199],
+input[id=r200]:checked ~pre label[for=r200],
+input[id=r201]:checked ~pre label[for=r201],
+input[id=r202]:checked ~pre label[for=r202],
+input[id=r203]:checked ~pre label[for=r203],
+input[id=r204]:checked ~pre label[for=r204],
+input[id=r205]:checked ~pre label[for=r205],
+input[id=r206]:checked ~pre label[for=r206],
+input[id=r207]:checked ~pre label[for=r207],
+input[id=r208]:checked ~pre label[for=r208],
+input[id=r209]:checked ~pre label[for=r209],
+input[id=r210]:checked ~pre label[for=r210],
+input[id=r211]:checked ~pre label[for=r211],
+input[id=r212]:checked ~pre label[for=r212],
+input[id=r213]:checked ~pre label[for=r213],
+input[id=r214]:checked ~pre label[for=r214],
+input[id=r215]:checked ~pre label[for=r215],
+input[id=r216]:checked ~pre label[for=r216],
+input[id=r217]:checked ~pre label[for=r217],
+input[id=r218]:checked ~pre label[for=r218],
+input[id=r219]:checked ~pre label[for=r219],
+input[id=r220]:checked ~pre label[for=r220],
+input[id=r221]:checked ~pre label[for=r221],
+input[id=r222]:checked ~pre label[for=r222],
+input[id=r223]:checked ~pre label[for=r223],
+input[id=r224]:checked ~pre label[for=r224],
+input[id=r225]:checked ~pre label[for=r225],
+input[id=r226]:checked ~pre label[for=r226],
+input[id=r227]:checked ~pre label[for=r227],
+input[id=r228]:checked ~pre label[for=r228],
+input[id=r229]:checked ~pre label[for=r229],
+input[id=r230]:checked ~pre label[for=r230],
+input[id=r231]:checked ~pre label[for=r231],
+input[id=r232]:checked ~pre label[for=r232],
+input[id=r233]:checked ~pre label[for=r233],
+input[id=r234]:checked ~pre label[for=r234],
+input[id=r235]:checked ~pre label[for=r235],
+input[id=r236]:checked ~pre label[for=r236],
+input[id=r237]:checked ~pre label[for=r237],
+input[id=r238]:checked ~pre label[for=r238],
+input[id=r239]:checked ~pre label[for=r239],
+input[id=r240]:checked ~pre label[for=r240],
+input[id=r241]:checked ~pre label[for=r241],
+input[id=r242]:checked ~pre label[for=r242],
+input[id=r243]:checked ~pre label[for=r243],
+input[id=r244]:checked ~pre label[for=r244],
+input[id=r245]:checked ~pre label[for=r245],
+input[id=r246]:checked ~pre label[for=r246],
+input[id=r247]:checked ~pre label[for=r247],
+input[id=r248]:checked ~pre label[for=r248],
+input[id=r249]:checked ~pre label[for=r249],
+input[id=r250]:checked ~pre label[for=r250],
+input[id=r251]:checked ~pre label[for=r251],
+input[id=r252]:checked ~pre label[for=r252],
+input[id=r253]:checked ~pre label[for=r253],
+input[id=r254]:checked ~pre label[for=r254],
+input[id=r255]:checked ~pre label[for=r255],
+input[id=r256]:checked ~pre label[for=r256],
+input[id=r257]:checked ~pre label[for=r257],
+input[id=r258]:checked ~pre label[for=r258],
+input[id=r259]:checked ~pre label[for=r259],
+input[id=r260]:checked ~pre label[for=r260],
+input[id=r261]:checked ~pre label[for=r261],
+input[id=r262]:checked ~pre label[for=r262],
+input[id=r263]:checked ~pre label[for=r263]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="r32" type="radio" name="g"/>
+<input id="r33" type="radio" name="g"/>
+<input id="r34" type="radio" name="g"/>
+<input id="r35" type="radio" name="g"/>
+<input id="r36" type="radio" name="g"/>
+<input id="r37" type="radio" name="g"/>
+<input id="r38" type="radio" name="g"/>
+<input id="r39" type="radio" name="g"/>
+<input id="r40" type="radio" name="g"/>
+<input id="r41" type="radio" name="g"/>
+<input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
+<input id="r44" type="radio" name="g"/>
+<input id="r45" type="radio" name="g"/>
+<input id="r46" type="radio" name="g"/>
+<input id="r47" type="radio" name="g"/>
+<input id="r48" type="radio" name="g"/>
+<input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
+<input id="r55" type="radio" name="g"/>
+<input id="r56" type="radio" name="g"/>
+<input id="r57" type="radio" name="g"/>
+<input id="r58" type="radio" name="g"/>
+<input id="r59" type="radio" name="g"/>
+<input id="r60" type="radio" name="g"/>
+<input id="r61" type="radio" name="g"/>
+<input id="r62" type="radio" name="g"/>
+<input id="r63" type="radio" name="g"/>
+<input id="r64" type="radio" name="g"/>
+<input id="r65" type="radio" name="g"/>
+<input id="r66" type="radio" name="g"/>
+<input id="r67" type="radio" name="g"/>
+<input id="r68" type="radio" name="g"/>
+<input id="r69" type="radio" name="g"/>
+<input id="r70" type="radio" name="g"/>
+<input id="r71" type="radio" name="g"/>
+<input id="r72" type="radio" name="g"/>
+<input id="r73" type="radio" name="g"/>
+<input id="r74" type="radio" name="g"/>
+<input id="r75" type="radio" name="g"/>
+<input id="r76" type="radio" name="g"/>
+<input id="r77" type="radio" name="g"/>
+<input id="r78" type="radio" name="g"/>
+<input id="r79" type="radio" name="g"/>
+<input id="r80" type="radio" name="g"/>
+<input id="r81" type="radio" name="g"/>
+<input id="r82" type="radio" name="g"/>
+<input id="r83" type="radio" name="g"/>
+<input id="r84" type="radio" name="g"/>
+<input id="r85" type="radio" name="g"/>
+<input id="r86" type="radio" name="g"/>
+<input id="r87" type="radio" name="g"/>
+<input id="r88" type="radio" name="g"/>
+<input id="r89" type="radio" name="g"/>
+<input id="r90" type="radio" name="g"/>
+<input id="r91" type="radio" name="g"/>
+<input id="r92" type="radio" name="g"/>
+<input id="r93" type="radio" name="g"/>
+<input id="r94" type="radio" name="g"/>
+<input id="r95" type="radio" name="g"/>
+<input id="r96" type="radio" name="g"/>
+<input id="r97" type="radio" name="g"/>
+<input id="r98" type="radio" name="g"/>
+<input id="r99" type="radio" name="g"/>
+<input id="r100" type="radio" name="g"/>
+<input id="r101" type="radio" name="g"/>
+<input id="r102" type="radio" name="g"/>
+<input id="r103" type="radio" name="g"/>
+<input id="r104" type="radio" name="g"/>
+<input id="r105" type="radio" name="g"/>
+<input id="r106" type="radio" name="g"/>
+<input id="r107" type="radio" name="g"/>
+<input id="r108" type="radio" name="g"/>
+<input id="r109" type="radio" name="g"/>
+<input id="r110" type="radio" name="g"/>
+<input id="r111" type="radio" name="g"/>
+<input id="r112" type="radio" name="g"/>
+<input id="r113" type="radio" name="g"/>
+<input id="r114" type="radio" name="g"/>
+<input id="r115" type="radio" name="g"/>
+<input id="r116" type="radio" name="g"/>
+<input id="r117" type="radio" name="g"/>
+<input id="r118" type="radio" name="g"/>
+<input id="r119" type="radio" name="g"/>
+<input id="r120" type="radio" name="g"/>
+<input id="r121" type="radio" name="g"/>
+<input id="r122" type="radio" name="g"/>
+<input id="r123" type="radio" name="g"/>
+<input id="r124" type="radio" name="g"/>
+<input id="r125" type="radio" name="g"/>
+<input id="r126" type="radio" name="g"/>
+<input id="r127" type="radio" name="g"/>
+<input id="r128" type="radio" name="g"/>
+<input id="r129" type="radio" name="g"/>
+<input id="r130" type="radio" name="g"/>
+<input id="r131" type="radio" name="g"/>
+<input id="r132" type="radio" name="g"/>
+<input id="r133" type="radio" name="g"/>
+<input id="r134" type="radio" name="g"/>
+<input id="r135" type="radio" name="g"/>
+<input id="r136" type="radio" name="g"/>
+<input id="r137" type="radio" name="g"/>
+<input id="r138" type="radio" name="g"/>
+<input id="r139" type="radio" name="g"/>
+<input id="r140" type="radio" name="g"/>
+<input id="r141" type="radio" name="g"/>
+<input id="r142" type="radio" name="g"/>
+<input id="r143" type="radio" name="g"/>
+<input id="r144" type="radio" name="g"/>
+<input id="r145" type="radio" name="g"/>
+<input id="r146" type="radio" name="g"/>
+<input id="r147" type="radio" name="g"/>
+<input id="r148" type="radio" name="g"/>
+<input id="r149" type="radio" name="g"/>
+<input id="r150" type="radio" name="g"/>
+<input id="r151" type="radio" name="g"/>
+<input id="r152" type="radio" name="g"/>
+<input id="r153" type="radio" name="g"/>
+<input id="r154" type="radio" name="g"/>
+<input id="r155" type="radio" name="g"/>
+<input id="r156" type="radio" name="g"/>
+<input id="r157" type="radio" name="g"/>
+<input id="r158" type="radio" name="g"/>
+<input id="r159" type="radio" name="g"/>
+<input id="r160" type="radio" name="g"/>
+<input id="r161" type="radio" name="g"/>
+<input id="r162" type="radio" name="g"/>
+<input id="r163" type="radio" name="g"/>
+<input id="r164" type="radio" name="g"/>
+<input id="r165" type="radio" name="g"/>
+<input id="r166" type="radio" name="g"/>
+<input id="r167" type="radio" name="g"/>
+<input id="r168" type="radio" name="g"/>
+<input id="r169" type="radio" name="g"/>
+<input id="r170" type="radio" name="g"/>
+<input id="r171" type="radio" name="g"/>
+<input id="r172" type="radio" name="g"/>
+<input id="r173" type="radio" name="g"/>
+<input id="r174" type="radio" name="g"/>
+<input id="r175" type="radio" name="g"/>
+<input id="r176" type="radio" name="g"/>
+<input id="r177" type="radio" name="g"/>
+<input id="r178" type="radio" name="g"/>
+<input id="r179" type="radio" name="g"/>
+<input id="r180" type="radio" name="g"/>
+<input id="r181" type="radio" name="g"/>
+<input id="r182" type="radio" name="g"/>
+<input id="r183" type="radio" name="g"/>
+<input id="r184" type="radio" name="g"/>
+<input id="r185" type="radio" name="g"/>
+<input id="r186" type="radio" name="g"/>
+<input id="r187" type="radio" name="g"/>
+<input id="r188" type="radio" name="g"/>
+<input id="r189" type="radio" name="g"/>
+<input id="r190" type="radio" name="g"/>
+<input id="r191" type="radio" name="g"/>
+<input id="r192" type="radio" name="g"/>
+<input id="r193" type="radio" name="g"/>
+<input id="r194" type="radio" name="g"/>
+<input id="r195" type="radio" name="g"/>
+<input id="r196" type="radio" name="g"/>
+<input id="r197" type="radio" name="g"/>
+<input id="r198" type="radio" name="g"/>
+<input id="r199" type="radio" name="g"/>
+<input id="r200" type="radio" name="g"/>
+<input id="r201" type="radio" name="g"/>
+<input id="r202" type="radio" name="g"/>
+<input id="r203" type="radio" name="g"/>
+<input id="r204" type="radio" name="g"/>
+<input id="r205" type="radio" name="g"/>
+<input id="r206" type="radio" name="g"/>
+<input id="r207" type="radio" name="g"/>
+<input id="r208" type="radio" name="g"/>
+<input id="r209" type="radio" name="g"/>
+<input id="r210" type="radio" name="g"/>
+<input id="r211" type="radio" name="g"/>
+<input id="r212" type="radio" name="g"/>
+<input id="r213" type="radio" name="g"/>
+<input id="r214" type="radio" name="g"/>
+<input id="r215" type="radio" name="g"/>
+<input id="r216" type="radio" name="g"/>
+<input id="r217" type="radio" name="g"/>
+<input id="r218" type="radio" name="g"/>
+<input id="r219" type="radio" name="g"/>
+<input id="r220" type="radio" name="g"/>
+<input id="r221" type="radio" name="g"/>
+<input id="r222" type="radio" name="g"/>
+<input id="r223" type="radio" name="g"/>
+<input id="r224" type="radio" name="g"/>
+<input id="r225" type="radio" name="g"/>
+<input id="r226" type="radio" name="g"/>
+<input id="r227" type="radio" name="g"/>
+<input id="r228" type="radio" name="g"/>
+<input id="r229" type="radio" name="g"/>
+<input id="r230" type="radio" name="g"/>
+<input id="r231" type="radio" name="g"/>
+<input id="r232" type="radio" name="g"/>
+<input id="r233" type="radio" name="g"/>
+<input id="r234" type="radio" name="g"/>
+<input id="r235" type="radio" name="g"/>
+<input id="r236" type="radio" name="g"/>
+<input id="r237" type="radio" name="g"/>
+<input id="r238" type="radio" name="g"/>
+<input id="r239" type="radio" name="g"/>
+<input id="r240" type="radio" name="g"/>
+<input id="r241" type="radio" name="g"/>
+<input id="r242" type="radio" name="g"/>
+<input id="r243" type="radio" name="g"/>
+<input id="r244" type="radio" name="g"/>
+<input id="r245" type="radio" name="g"/>
+<input id="r246" type="radio" name="g"/>
+<input id="r247" type="radio" name="g"/>
+<input id="r248" type="radio" name="g"/>
+<input id="r249" type="radio" name="g"/>
+<input id="r250" type="radio" name="g"/>
+<input id="r251" type="radio" name="g"/>
+<input id="r252" type="radio" name="g"/>
+<input id="r253" type="radio" name="g"/>
+<input id="r254" type="radio" name="g"/>
+<input id="r255" type="radio" name="g"/>
+<input id="r256" type="radio" name="g"/>
+<input id="r257" type="radio" name="g"/>
+<input id="r258" type="radio" name="g"/>
+<input id="r259" type="radio" name="g"/>
+<input id="r260" type="radio" name="g"/>
+<input id="r261" type="radio" name="g"/>
+<input id="r262" type="radio" name="g"/>
+<input id="r263" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="comment">// Copyright 2021 The Go Authors. All rights reserved.</span></code></span>
+<span class="codeline" id="line-2"><code><span class="comment">// Use of this source code is governed by a BSD-style</span></code></span>
+<span class="codeline" id="line-3"><code><span class="comment">// license that can be found in the LICENSE file.</span></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="keyword">package</span> bigmod</code></span>
+<span class="codeline" id="line-6"><code></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"encoding/binary"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"math/big"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"math/bits"</span></label></code></span>
+<span class="codeline" id="line-12"><code>)</code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-15"><code>	<span class="comment">// _W is the size in bits of our limbs.</span></code></span>
+<span class="codeline" id="line-16"><code>	_W = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-20" class="ident">UintSize</a></code></span>
+<span class="codeline" id="line-17"><code>	<span class="comment">// _S is the size in bytes of our limbs.</span></code></span>
+<span class="codeline" id="line-18"><code>	_S = <a href="#line-16" class="ident">_W</a> / <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-19"><code>)</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// choice represents a constant-time boolean. The value of choice is always</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// either 1 or 0. We use an int instead of bool in order to make decisions in</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// constant time by turning it into a mask.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">type</span> choice <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">func</span> not(<label for="r1" class="ident">c</label> <a href="#line-24" class="ident">choice</a>) <a href="#line-24" class="ident">choice</a> { <span class="keyword">return</span> <span class="lit-number">1</span> ^ <label for="r1" class="ident">c</label> }</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">const</span> yes = <a href="#line-24" class="ident">choice</a>(<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-29"><code><span class="keyword">const</span> no = <a href="#line-24" class="ident">choice</a>(<span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-30"><code></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// ctMask is all 1s if on is yes, and all 0s otherwise.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">func</span> ctMask(<label for="r3" class="ident">on</label> <a href="#line-24" class="ident">choice</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> { <span class="keyword">return</span> -<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r3" class="ident">on</label>) }</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// ctEq returns 1 if x == y, and 0 otherwise. The execution time of this</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// function does not depend on its inputs.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">func</span> ctEq(<label for="r5" class="ident">x</label>, <label for="r6" class="ident">y</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) <a href="#line-24" class="ident">choice</a> {</code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">// If x != y, then either x - y or y - x will generate a carry.</span></code></span>
+<span class="codeline" id="line-38"><code>	<label for="r7" class="ident">_</label>, <label for="r8" class="ident">c1</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r5" class="ident">x</label>, <label for="r6" class="ident">y</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-39"><code>	<label for="r9" class="ident">_</label>, <label for="r10" class="ident">c2</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r6" class="ident">y</label>, <label for="r5" class="ident">x</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">return</span> <a href="#line-26" class="ident">not</a>(<a href="#line-24" class="ident">choice</a>(<label for="r8" class="ident">c1</label> | <label for="r10" class="ident">c2</label>))</code></span>
+<span class="codeline" id="line-41"><code>}</code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// ctGeq returns 1 if x &gt;= y, and 0 otherwise. The execution time of this</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// function does not depend on its inputs.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="keyword">func</span> ctGeq(<label for="r12" class="ident">x</label>, <label for="r13" class="ident">y</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) <a href="#line-24" class="ident">choice</a> {</code></span>
+<span class="codeline" id="line-46"><code>	<span class="comment">// If x &lt; y, then x - y generates a carry.</span></code></span>
+<span class="codeline" id="line-47"><code>	<label for="r14" class="ident">_</label>, <label for="r15" class="ident">carry</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r12" class="ident">x</label>, <label for="r13" class="ident">y</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-48"><code>	<span class="keyword">return</span> <a href="#line-26" class="ident">not</a>(<a href="#line-24" class="ident">choice</a>(<label for="r15" class="ident">carry</label>))</code></span>
+<span class="codeline" id="line-49"><code>}</code></span>
+<span class="codeline" id="line-50"><code></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">// Nat represents an arbitrary natural number</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// Each Nat has an announced length, which is the number of limbs it has stored.</span></code></span>
+<span class="codeline" id="line-54"><code><span class="comment">// Operations on this number are allowed to leak this length, but will not leak</span></code></span>
+<span class="codeline" id="line-55"><code><span class="comment">// any information about the values contained in those limbs.</span></code></span>
+<span class="codeline" id="line-56"><code><span class="keyword">type</span> <a href="../../../../pkg/crypto/internal/bigmod.html#name-Nat" class="ident">Nat</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-57"><code>	<span class="comment">// limbs is little-endian in base 2^W with W = bits.UintSize.</span></code></span>
+<span class="codeline" id="line-58"><code>	limbs []<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-59"><code>}</code></span>
+<span class="codeline" id="line-60"><code></code></span>
+<span class="codeline" id="line-61"><code><span class="comment">// preallocTarget is the size in bits of the numbers used to implement the most</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// common and most performant RSA key size. It's also enough to cover some of</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// the operations of key sizes up to 4096.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">const</span> preallocTarget = <span class="lit-number">2048</span></code></span>
+<span class="codeline" id="line-65"><code><span class="keyword">const</span> preallocLimbs = (<a href="#line-64" class="ident">preallocTarget</a> + <a href="#line-16" class="ident">_W</a> - <span class="lit-number">1</span>) / <a href="#line-16" class="ident">_W</a></code></span>
+<span class="codeline" id="line-66"><code></code></span>
+<span class="codeline" id="line-67"><code><span class="comment">// NewNat returns a new nat with a size of zero, just like new(Nat), but with</span></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// the preallocated capacity to hold a number of up to preallocTarget bits.</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// NewNat inlines, so the allocation can live on the stack.</span></code></span>
+<span class="codeline" id="line-70"><code><span class="keyword">func</span> <label for="r16" class="ident"><a href="../../../../pkg/crypto/internal/bigmod.html#name-NewNat" class="ident">NewNat</a></label>() *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-71"><code>	<label for="r17" class="ident">limbs</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <span class="lit-number">0</span>, <a href="#line-65" class="ident">preallocLimbs</a>)</code></span>
+<span class="codeline" id="line-72"><code>	<span class="keyword">return</span> &amp;<a href="#line-56" class="ident">Nat</a>{<label for="r17" class="ident">limbs</label>}</code></span>
+<span class="codeline" id="line-73"><code>}</code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">// expand expands x to n limbs, leaving its value unchanged.</span></code></span>
+<span class="codeline" id="line-76"><code><span class="keyword">func</span> (<label for="r18" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r19" class="ident">expand</label>(<label for="r20" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-77"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) &gt; <label for="r20" class="ident">n</label> {</code></span>
+<span class="codeline" id="line-78"><code>		<a href="../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"bigmod: internal error: shrinking nat"</span>)</code></span>
+<span class="codeline" id="line-79"><code>	}</code></span>
+<span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) &lt; <label for="r20" class="ident">n</label> {</code></span>
+<span class="codeline" id="line-81"><code>		<label for="r21" class="ident">newLimbs</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r20" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-82"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r21" class="ident">newLimbs</label>, <label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-83"><code>		<label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> = <label for="r21" class="ident">newLimbs</label></code></span>
+<span class="codeline" id="line-84"><code>		<span class="keyword">return</span> <label for="r18" class="ident">x</label></code></span>
+<span class="codeline" id="line-85"><code>	}</code></span>
+<span class="codeline" id="line-86"><code>	<label for="r22" class="ident">extraLimbs</label> := <label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>):<label for="r20" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-87"><code>	<span class="keyword">for</span> <label for="r23" class="ident">i</label> := <span class="keyword">range</span> <label for="r22" class="ident">extraLimbs</label> {</code></span>
+<span class="codeline" id="line-88"><code>		<label for="r22" class="ident">extraLimbs</label>[<label for="r23" class="ident">i</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-89"><code>	}</code></span>
+<span class="codeline" id="line-90"><code>	<label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> = <label for="r18" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r20" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-91"><code>	<span class="keyword">return</span> <label for="r18" class="ident">x</label></code></span>
+<span class="codeline" id="line-92"><code>}</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">// reset returns a zero nat of n limbs, reusing x's storage if n &lt;= cap(x.limbs).</span></code></span>
+<span class="codeline" id="line-95"><code><span class="keyword">func</span> (<label for="r24" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r25" class="ident">reset</label>(<label for="r26" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-96"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) &lt; <label for="r26" class="ident">n</label> {</code></span>
+<span class="codeline" id="line-97"><code>		<label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r26" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-98"><code>		<span class="keyword">return</span> <label for="r24" class="ident">x</label></code></span>
+<span class="codeline" id="line-99"><code>	}</code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">for</span> <label for="r27" class="ident">i</label> := <span class="keyword">range</span> <label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> {</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r27" class="ident">i</label>] = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-102"><code>	}</code></span>
+<span class="codeline" id="line-103"><code>	<label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> = <label for="r24" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r26" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-104"><code>	<span class="keyword">return</span> <label for="r24" class="ident">x</label></code></span>
+<span class="codeline" id="line-105"><code>}</code></span>
+<span class="codeline" id="line-106"><code></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">// set assigns x = y, optionally resizing x to the appropriate size.</span></code></span>
+<span class="codeline" id="line-108"><code><span class="keyword">func</span> (<label for="r28" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r29" class="ident">set</label>(<label for="r30" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-109"><code>	<label for="r28" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r30" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>))</code></span>
+<span class="codeline" id="line-110"><code>	<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r28" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>, <label for="r30" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-111"><code>	<span class="keyword">return</span> <label for="r28" class="ident">x</label></code></span>
+<span class="codeline" id="line-112"><code>}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code><span class="comment">// setBig assigns x = n, optionally resizing n to the appropriate size.</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">// The announced length of x is set based on the actual bit size of the input,</span></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// ignoring leading zeroes.</span></code></span>
+<span class="codeline" id="line-118"><code><span class="keyword">func</span> (<label for="r31" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r32" class="ident">setBig</label>(<label for="r33" class="ident">n</label> *<a href="../../../../pkg/math/big.html" class="ident i2">big</a>.<a href="../../../math/big/int.go.html#line-33" class="ident">Int</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-119"><code>	<label for="r34" class="ident">limbs</label> := <label for="r33" class="ident">n</label>.<a href="../../../math/big/int.go.html#line-109" class="ident">Bits</a>()</code></span>
+<span class="codeline" id="line-120"><code>	<label for="r31" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r34" class="ident">limbs</label>))</code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">for</span> <label for="r35" class="ident">i</label> := <span class="keyword">range</span> <label for="r34" class="ident">limbs</label> {</code></span>
+<span class="codeline" id="line-122"><code>		<label for="r31" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r35" class="ident">i</label>] = <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r34" class="ident">limbs</label>[<label for="r35" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-123"><code>	}</code></span>
+<span class="codeline" id="line-124"><code>	<span class="keyword">return</span> <label for="r31" class="ident">x</label></code></span>
+<span class="codeline" id="line-125"><code>}</code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">// Bytes returns x as a zero-extended big-endian byte slice. The size of the</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">// slice will match the size of m.</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-130"><code><span class="comment">// x must have the same size as m and it must be reduced modulo m.</span></code></span>
+<span class="codeline" id="line-131"><code><span class="keyword">func</span> (<label for="r36" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r37" class="ident">Bytes</label>(<label for="r38" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a> {</code></span>
+<span class="codeline" id="line-132"><code>	<label for="r39" class="ident">i</label> := <label for="r38" class="ident">m</label>.<a href="#line-383" class="ident">Size</a>()</code></span>
+<span class="codeline" id="line-133"><code>	<label for="r40" class="ident">bytes</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r39" class="ident">i</label>)</code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">for</span> <label for="r41" class="ident">_</label>, <label for="r42" class="ident">limb</label> := <span class="keyword">range</span> <label for="r36" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a> {</code></span>
+<span class="codeline" id="line-135"><code>		<span class="keyword">for</span> <label for="r43" class="ident">j</label> := <span class="lit-number">0</span>; <label for="r43" class="ident">j</label> &lt; <a href="#line-18" class="ident">_S</a>; <label for="r43" class="ident">j</label>++ {</code></span>
+<span class="codeline" id="line-136"><code>			<label for="r39" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-137"><code>			<span class="keyword">if</span> <label for="r39" class="ident">i</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-138"><code>				<span class="keyword">if</span> <label for="r42" class="ident">limb</label> == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-139"><code>					<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-140"><code>				}</code></span>
+<span class="codeline" id="line-141"><code>				<a href="../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"bigmod: modulus is smaller than nat"</span>)</code></span>
+<span class="codeline" id="line-142"><code>			}</code></span>
+<span class="codeline" id="line-143"><code>			<label for="r40" class="ident">bytes</label>[<label for="r39" class="ident">i</label>] = <a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r42" class="ident">limb</label>)</code></span>
+<span class="codeline" id="line-144"><code>			<label for="r42" class="ident">limb</label> &gt;&gt;= <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-145"><code>		}</code></span>
+<span class="codeline" id="line-146"><code>	}</code></span>
+<span class="codeline" id="line-147"><code>	<span class="keyword">return</span> <label for="r40" class="ident">bytes</label></code></span>
+<span class="codeline" id="line-148"><code>}</code></span>
+<span class="codeline" id="line-149"><code></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">// SetBytes assigns x = b, where b is a slice of big-endian bytes.</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">// SetBytes returns an error if b &gt;= m.</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">// The output will be resized to the size of m and overwritten.</span></code></span>
+<span class="codeline" id="line-154"><code><span class="keyword">func</span> (<label for="r44" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r45" class="ident">SetBytes</label>(<label for="r46" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r47" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) (*<a href="#line-56" class="ident">Nat</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-155"><code>	<span class="keyword">if</span> <label for="r48" class="ident">err</label> := <label for="r44" class="ident">x</label>.<a href="#line-190" class="ident">setBytes</a>(<label for="r46" class="ident">b</label>, <label for="r47" class="ident">m</label>); <label for="r48" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-156"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r48" class="ident">err</label></code></span>
+<span class="codeline" id="line-157"><code>	}</code></span>
+<span class="codeline" id="line-158"><code>	<span class="keyword">if</span> <label for="r44" class="ident">x</label>.<a href="#line-240" class="ident">cmpGeq</a>(<label for="r47" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>) == <a href="#line-28" class="ident">yes</a> {</code></span>
+<span class="codeline" id="line-159"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"input overflows the modulus"</span>)</code></span>
+<span class="codeline" id="line-160"><code>	}</code></span>
+<span class="codeline" id="line-161"><code>	<span class="keyword">return</span> <label for="r44" class="ident">x</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-162"><code>}</code></span>
+<span class="codeline" id="line-163"><code></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">// SetOverflowingBytes assigns x = b, where b is a slice of big-endian bytes.</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">// SetOverflowingBytes returns an error if b has a longer bit length than m, but</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">// reduces overflowing values up to 2^⌈log2(m)⌉ - 1.</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">// The output will be resized to the size of m and overwritten.</span></code></span>
+<span class="codeline" id="line-169"><code><span class="keyword">func</span> (<label for="r49" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r50" class="ident">SetOverflowingBytes</label>(<label for="r51" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r52" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) (*<a href="#line-56" class="ident">Nat</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-170"><code>	<span class="keyword">if</span> <label for="r53" class="ident">err</label> := <label for="r49" class="ident">x</label>.<a href="#line-190" class="ident">setBytes</a>(<label for="r51" class="ident">b</label>, <label for="r52" class="ident">m</label>); <label for="r53" class="ident">err</label> != <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-171"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r53" class="ident">err</label></code></span>
+<span class="codeline" id="line-172"><code>	}</code></span>
+<span class="codeline" id="line-173"><code>	<label for="r54" class="ident">leading</label> := <a href="#line-16" class="ident">_W</a> - <a href="#line-371" class="ident">bitLen</a>(<label for="r49" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r49" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)-<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-174"><code>	<span class="keyword">if</span> <label for="r54" class="ident">leading</label> &lt; <label for="r52" class="ident">m</label>.<a href="#line-313" class="ident">leading</a> {</code></span>
+<span class="codeline" id="line-175"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"input overflows the modulus size"</span>)</code></span>
+<span class="codeline" id="line-176"><code>	}</code></span>
+<span class="codeline" id="line-177"><code>	<label for="r49" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-29" class="ident">no</a>, <label for="r52" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-178"><code>	<span class="keyword">return</span> <label for="r49" class="ident">x</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-179"><code>}</code></span>
+<span class="codeline" id="line-180"><code></code></span>
+<span class="codeline" id="line-181"><code><span class="comment">// bigEndianUint returns the contents of buf interpreted as a</span></code></span>
+<span class="codeline" id="line-182"><code><span class="comment">// big-endian encoded uint value.</span></code></span>
+<span class="codeline" id="line-183"><code><span class="keyword">func</span> bigEndianUint(<label for="r56" class="ident">buf</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-184"><code>	<span class="keyword">if</span> <a href="#line-16" class="ident">_W</a> == <span class="lit-number">64</span> {</code></span>
+<span class="codeline" id="line-185"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-178" class="ident">Uint64</a>(<label for="r56" class="ident">buf</label>))</code></span>
+<span class="codeline" id="line-186"><code>	}</code></span>
+<span class="codeline" id="line-187"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<a href="../../../../pkg/encoding/binary.html" class="ident i0">binary</a>.<a href="../../../encoding/binary/binary.go.html#line-57" class="ident">BigEndian</a>.<a href="../../../encoding/binary/binary.go.html#line-156" class="ident">Uint32</a>(<label for="r56" class="ident">buf</label>))</code></span>
+<span class="codeline" id="line-188"><code>}</code></span>
+<span class="codeline" id="line-189"><code></code></span>
+<span class="codeline" id="line-190"><code><span class="keyword">func</span> (<label for="r57" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r58" class="ident">setBytes</label>(<label for="r59" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r60" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-191"><code>	<label for="r57" class="ident">x</label>.<a href="#line-475" class="ident">resetFor</a>(<label for="r60" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-192"><code>	<label for="r61" class="ident">i</label>, <label for="r62" class="ident">k</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r59" class="ident">b</label>), <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-193"><code>	<span class="keyword">for</span> <label for="r62" class="ident">k</label> &lt; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r57" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) &amp;&amp; <label for="r61" class="ident">i</label> &gt;= <a href="#line-18" class="ident">_S</a> {</code></span>
+<span class="codeline" id="line-194"><code>		<label for="r57" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r62" class="ident">k</label>] = <a href="#line-183" class="ident">bigEndianUint</a>(<label for="r59" class="ident">b</label>[<label for="r61" class="ident">i</label>-<a href="#line-18" class="ident">_S</a> : <label for="r61" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-195"><code>		<label for="r61" class="ident">i</label> -= <a href="#line-18" class="ident">_S</a></code></span>
+<span class="codeline" id="line-196"><code>		<label for="r62" class="ident">k</label>++</code></span>
+<span class="codeline" id="line-197"><code>	}</code></span>
+<span class="codeline" id="line-198"><code>	<span class="keyword">for</span> <label for="r63" class="ident">s</label> := <span class="lit-number">0</span>; <label for="r63" class="ident">s</label> &lt; <a href="#line-16" class="ident">_W</a> &amp;&amp; <label for="r62" class="ident">k</label> &lt; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r57" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) &amp;&amp; <label for="r61" class="ident">i</label> &gt; <span class="lit-number">0</span>; <label for="r63" class="ident">s</label> += <span class="lit-number">8</span> {</code></span>
+<span class="codeline" id="line-199"><code>		<label for="r57" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r62" class="ident">k</label>] |= <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r59" class="ident">b</label>[<label for="r61" class="ident">i</label>-<span class="lit-number">1</span>]) &lt;&lt; <label for="r63" class="ident">s</label></code></span>
+<span class="codeline" id="line-200"><code>		<label for="r61" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-201"><code>	}</code></span>
+<span class="codeline" id="line-202"><code>	<span class="keyword">if</span> <label for="r61" class="ident">i</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-203"><code>		<span class="keyword">return</span> <a href="../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"input overflows the modulus size"</span>)</code></span>
+<span class="codeline" id="line-204"><code>	}</code></span>
+<span class="codeline" id="line-205"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-206"><code>}</code></span>
+<span class="codeline" id="line-207"><code></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">// Equal returns 1 if x == y, and 0 otherwise.</span></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-210"><code><span class="comment">// Both operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-211"><code><span class="keyword">func</span> (<label for="r64" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r65" class="ident">Equal</label>(<label for="r66" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) <a href="#line-24" class="ident">choice</a> {</code></span>
+<span class="codeline" id="line-212"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-213"><code>	<label for="r67" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r64" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-214"><code>	<label for="r68" class="ident">xLimbs</label> := <label for="r64" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r67" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-215"><code>	<label for="r69" class="ident">yLimbs</label> := <label for="r66" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r67" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-216"><code></code></span>
+<span class="codeline" id="line-217"><code>	<label for="r70" class="ident">equal</label> := <a href="#line-28" class="ident">yes</a></code></span>
+<span class="codeline" id="line-218"><code>	<span class="keyword">for</span> <label for="r71" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r71" class="ident">i</label> &lt; <label for="r67" class="ident">size</label>; <label for="r71" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-219"><code>		<label for="r70" class="ident">equal</label> &amp;= <a href="#line-36" class="ident">ctEq</a>(<label for="r68" class="ident">xLimbs</label>[<label for="r71" class="ident">i</label>], <label for="r69" class="ident">yLimbs</label>[<label for="r71" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-220"><code>	}</code></span>
+<span class="codeline" id="line-221"><code>	<span class="keyword">return</span> <label for="r70" class="ident">equal</label></code></span>
+<span class="codeline" id="line-222"><code>}</code></span>
+<span class="codeline" id="line-223"><code></code></span>
+<span class="codeline" id="line-224"><code><span class="comment">// IsZero returns 1 if x == 0, and 0 otherwise.</span></code></span>
+<span class="codeline" id="line-225"><code><span class="keyword">func</span> (<label for="r72" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r73" class="ident">IsZero</label>() <a href="#line-24" class="ident">choice</a> {</code></span>
+<span class="codeline" id="line-226"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-227"><code>	<label for="r74" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r72" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-228"><code>	<label for="r75" class="ident">xLimbs</label> := <label for="r72" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r74" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-229"><code></code></span>
+<span class="codeline" id="line-230"><code>	<label for="r76" class="ident">zero</label> := <a href="#line-28" class="ident">yes</a></code></span>
+<span class="codeline" id="line-231"><code>	<span class="keyword">for</span> <label for="r77" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r77" class="ident">i</label> &lt; <label for="r74" class="ident">size</label>; <label for="r77" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-232"><code>		<label for="r76" class="ident">zero</label> &amp;= <a href="#line-36" class="ident">ctEq</a>(<label for="r75" class="ident">xLimbs</label>[<label for="r77" class="ident">i</label>], <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-233"><code>	}</code></span>
+<span class="codeline" id="line-234"><code>	<span class="keyword">return</span> <label for="r76" class="ident">zero</label></code></span>
+<span class="codeline" id="line-235"><code>}</code></span>
+<span class="codeline" id="line-236"><code></code></span>
+<span class="codeline" id="line-237"><code><span class="comment">// cmpGeq returns 1 if x &gt;= y, and 0 otherwise.</span></code></span>
+<span class="codeline" id="line-238"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-239"><code><span class="comment">// Both operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-240"><code><span class="keyword">func</span> (<label for="r78" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r79" class="ident">cmpGeq</label>(<label for="r80" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) <a href="#line-24" class="ident">choice</a> {</code></span>
+<span class="codeline" id="line-241"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-242"><code>	<label for="r81" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r78" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-243"><code>	<label for="r82" class="ident">xLimbs</label> := <label for="r78" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r81" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-244"><code>	<label for="r83" class="ident">yLimbs</label> := <label for="r80" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r81" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-245"><code></code></span>
+<span class="codeline" id="line-246"><code>	<span class="keyword">var</span> <label for="r84" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-247"><code>	<span class="keyword">for</span> <label for="r85" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r85" class="ident">i</label> &lt; <label for="r81" class="ident">size</label>; <label for="r85" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-248"><code>		_, <label for="r84" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r82" class="ident">xLimbs</label>[<label for="r85" class="ident">i</label>], <label for="r83" class="ident">yLimbs</label>[<label for="r85" class="ident">i</label>], <label for="r84" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-249"><code>	}</code></span>
+<span class="codeline" id="line-250"><code>	<span class="comment">// If there was a carry, then subtracting y underflowed, so</span></code></span>
+<span class="codeline" id="line-251"><code><span class="comment">	// x is not greater than or equal to y.</span></code></span>
+<span class="codeline" id="line-252"><code>	<span class="keyword">return</span> <a href="#line-26" class="ident">not</a>(<a href="#line-24" class="ident">choice</a>(<label for="r84" class="ident">c</label>))</code></span>
+<span class="codeline" id="line-253"><code>}</code></span>
+<span class="codeline" id="line-254"><code></code></span>
+<span class="codeline" id="line-255"><code><span class="comment">// assign sets x &lt;- y if on == 1, and does nothing otherwise.</span></code></span>
+<span class="codeline" id="line-256"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-257"><code><span class="comment">// Both operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-258"><code><span class="keyword">func</span> (<label for="r86" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r87" class="ident">assign</label>(<label for="r88" class="ident">on</label> <a href="#line-24" class="ident">choice</a>, <label for="r89" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-259"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-260"><code>	<label for="r90" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r86" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-261"><code>	<label for="r91" class="ident">xLimbs</label> := <label for="r86" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r90" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-262"><code>	<label for="r92" class="ident">yLimbs</label> := <label for="r89" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r90" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-263"><code></code></span>
+<span class="codeline" id="line-264"><code>	<label for="r93" class="ident">mask</label> := <a href="#line-32" class="ident">ctMask</a>(<label for="r88" class="ident">on</label>)</code></span>
+<span class="codeline" id="line-265"><code>	<span class="keyword">for</span> <label for="r94" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r94" class="ident">i</label> &lt; <label for="r90" class="ident">size</label>; <label for="r94" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-266"><code>		<label for="r91" class="ident">xLimbs</label>[<label for="r94" class="ident">i</label>] ^= <label for="r93" class="ident">mask</label> &amp; (<label for="r91" class="ident">xLimbs</label>[<label for="r94" class="ident">i</label>] ^ <label for="r92" class="ident">yLimbs</label>[<label for="r94" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-267"><code>	}</code></span>
+<span class="codeline" id="line-268"><code>	<span class="keyword">return</span> <label for="r86" class="ident">x</label></code></span>
+<span class="codeline" id="line-269"><code>}</code></span>
+<span class="codeline" id="line-270"><code></code></span>
+<span class="codeline" id="line-271"><code><span class="comment">// add computes x += y and returns the carry.</span></code></span>
+<span class="codeline" id="line-272"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-273"><code><span class="comment">// Both operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-274"><code><span class="keyword">func</span> (<label for="r95" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r96" class="ident">add</label>(<label for="r97" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) (<label for="r98" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) {</code></span>
+<span class="codeline" id="line-275"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-276"><code>	<label for="r99" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r95" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-277"><code>	<label for="r100" class="ident">xLimbs</label> := <label for="r95" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r99" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-278"><code>	<label for="r101" class="ident">yLimbs</label> := <label for="r97" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r99" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-279"><code></code></span>
+<span class="codeline" id="line-280"><code>	<span class="keyword">for</span> <label for="r102" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r102" class="ident">i</label> &lt; <label for="r99" class="ident">size</label>; <label for="r102" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-281"><code>		<label for="r100" class="ident">xLimbs</label>[<label for="r102" class="ident">i</label>], <label for="r98" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r100" class="ident">xLimbs</label>[<label for="r102" class="ident">i</label>], <label for="r101" class="ident">yLimbs</label>[<label for="r102" class="ident">i</label>], <label for="r98" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-282"><code>	}</code></span>
+<span class="codeline" id="line-283"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-284"><code>}</code></span>
+<span class="codeline" id="line-285"><code></code></span>
+<span class="codeline" id="line-286"><code><span class="comment">// sub computes x -= y. It returns the borrow of the subtraction.</span></code></span>
+<span class="codeline" id="line-287"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-288"><code><span class="comment">// Both operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-289"><code><span class="keyword">func</span> (<label for="r103" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r104" class="ident">sub</label>(<label for="r105" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>) (<label for="r106" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) {</code></span>
+<span class="codeline" id="line-290"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-291"><code>	<label for="r107" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r103" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-292"><code>	<label for="r108" class="ident">xLimbs</label> := <label for="r103" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r107" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-293"><code>	<label for="r109" class="ident">yLimbs</label> := <label for="r105" class="ident">y</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r107" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-294"><code></code></span>
+<span class="codeline" id="line-295"><code>	<span class="keyword">for</span> <label for="r110" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r110" class="ident">i</label> &lt; <label for="r107" class="ident">size</label>; <label for="r110" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-296"><code>		<label for="r108" class="ident">xLimbs</label>[<label for="r110" class="ident">i</label>], <label for="r106" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r108" class="ident">xLimbs</label>[<label for="r110" class="ident">i</label>], <label for="r109" class="ident">yLimbs</label>[<label for="r110" class="ident">i</label>], <label for="r106" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-297"><code>	}</code></span>
+<span class="codeline" id="line-298"><code>	<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-299"><code>}</code></span>
+<span class="codeline" id="line-300"><code></code></span>
+<span class="codeline" id="line-301"><code><span class="comment">// Modulus is used for modular arithmetic, precomputing relevant constants.</span></code></span>
+<span class="codeline" id="line-302"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-303"><code><span class="comment">// Moduli are assumed to be odd numbers. Moduli can also leak the exact</span></code></span>
+<span class="codeline" id="line-304"><code><span class="comment">// number of bits needed to store their value, and are stored without padding.</span></code></span>
+<span class="codeline" id="line-305"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-306"><code><span class="comment">// Their actual value is still kept secret.</span></code></span>
+<span class="codeline" id="line-307"><code><span class="keyword">type</span> <a href="../../../../pkg/crypto/internal/bigmod.html#name-Modulus" class="ident">Modulus</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-308"><code>	<span class="comment">// The underlying natural number for this modulus.</span></code></span>
+<span class="codeline" id="line-309"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-310"><code><span class="comment">	// This will be stored without any padding, and shouldn't alias with any</span></code></span>
+<span class="codeline" id="line-311"><code><span class="comment">	// other natural number being used.</span></code></span>
+<span class="codeline" id="line-312"><code>	nat     *<a href="#line-56" class="ident">Nat</a></code></span>
+<span class="codeline" id="line-313"><code>	leading <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>  <span class="comment">// number of leading zeros in the modulus</span></code></span>
+<span class="codeline" id="line-314"><code>	m0inv   <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> <span class="comment">// -nat.limbs[0]⁻¹ mod _W</span></code></span>
+<span class="codeline" id="line-315"><code>	rr      *<a href="#line-56" class="ident">Nat</a> <span class="comment">// R*R for montgomeryRepresentation</span></code></span>
+<span class="codeline" id="line-316"><code>}</code></span>
+<span class="codeline" id="line-317"><code></code></span>
+<span class="codeline" id="line-318"><code><span class="comment">// rr returns R*R with R = 2^(_W * n) and n = len(m.nat.limbs).</span></code></span>
+<span class="codeline" id="line-319"><code><span class="keyword">func</span> rr(<label for="r112" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-320"><code>	<label for="r113" class="ident">rr</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-468" class="ident">ExpandFor</a>(<label for="r112" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-321"><code>	<span class="comment">// R*R is 2^(2 * _W * n). We can safely get 2^(_W * (n - 1)) by setting the</span></code></span>
+<span class="codeline" id="line-322"><code><span class="comment">	// most significant limb to 1. We then get to R*R by shifting left by _W</span></code></span>
+<span class="codeline" id="line-323"><code><span class="comment">	// n + 1 times.</span></code></span>
+<span class="codeline" id="line-324"><code>	<label for="r114" class="ident">n</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r113" class="ident">rr</label>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-325"><code>	<label for="r113" class="ident">rr</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r114" class="ident">n</label>-<span class="lit-number">1</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-326"><code>	<span class="keyword">for</span> <label for="r115" class="ident">i</label> := <label for="r114" class="ident">n</label> - <span class="lit-number">1</span>; <label for="r115" class="ident">i</label> &lt; <span class="lit-number">2</span>*<label for="r114" class="ident">n</label>; <label for="r115" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-327"><code>		<label for="r113" class="ident">rr</label>.<a href="#line-400" class="ident">shiftIn</a>(<span class="lit-number">0</span>, <label for="r112" class="ident">m</label>) <span class="comment">// x = x * 2^_W mod m</span></code></span>
+<span class="codeline" id="line-328"><code>	}</code></span>
+<span class="codeline" id="line-329"><code>	<span class="keyword">return</span> <label for="r113" class="ident">rr</label></code></span>
+<span class="codeline" id="line-330"><code>}</code></span>
+<span class="codeline" id="line-331"><code></code></span>
+<span class="codeline" id="line-332"><code><span class="comment">// minusInverseModW computes -x⁻¹ mod _W with x odd.</span></code></span>
+<span class="codeline" id="line-333"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-334"><code><span class="comment">// This operation is used to precompute a constant involved in Montgomery</span></code></span>
+<span class="codeline" id="line-335"><code><span class="comment">// multiplication.</span></code></span>
+<span class="codeline" id="line-336"><code><span class="keyword">func</span> minusInverseModW(<label for="r117" class="ident">x</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a> {</code></span>
+<span class="codeline" id="line-337"><code>	<span class="comment">// Every iteration of this loop doubles the least-significant bits of</span></code></span>
+<span class="codeline" id="line-338"><code><span class="comment">	// correct inverse in y. The first three bits are already correct (1⁻¹ = 1,</span></code></span>
+<span class="codeline" id="line-339"><code><span class="comment">	// 3⁻¹ = 3, 5⁻¹ = 5, and 7⁻¹ = 7 mod 8), so doubling five times is enough</span></code></span>
+<span class="codeline" id="line-340"><code><span class="comment">	// for 64 bits (and wastes only one iteration for 32 bits).</span></code></span>
+<span class="codeline" id="line-341"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-342"><code><span class="comment">	// See https://crypto.stackexchange.com/a/47496.</span></code></span>
+<span class="codeline" id="line-343"><code>	<label for="r118" class="ident">y</label> := <label for="r117" class="ident">x</label></code></span>
+<span class="codeline" id="line-344"><code>	<span class="keyword">for</span> <label for="r119" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r119" class="ident">i</label> &lt; <span class="lit-number">5</span>; <label for="r119" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-345"><code>		<label for="r118" class="ident">y</label> = <label for="r118" class="ident">y</label> * (<span class="lit-number">2</span> - <label for="r117" class="ident">x</label>*<label for="r118" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-346"><code>	}</code></span>
+<span class="codeline" id="line-347"><code>	<span class="keyword">return</span> -<label for="r118" class="ident">y</label></code></span>
+<span class="codeline" id="line-348"><code>}</code></span>
+<span class="codeline" id="line-349"><code></code></span>
+<span class="codeline" id="line-350"><code><span class="comment">// NewModulusFromBig creates a new Modulus from a [big.Int].</span></code></span>
+<span class="codeline" id="line-351"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-352"><code><span class="comment">// The Int must be odd. The number of significant bits (and nothing else) is</span></code></span>
+<span class="codeline" id="line-353"><code><span class="comment">// leaked through timing side-channels.</span></code></span>
+<span class="codeline" id="line-354"><code><span class="keyword">func</span> <label for="r120" class="ident"><a href="../../../../pkg/crypto/internal/bigmod.html#name-NewModulusFromBig" class="ident">NewModulusFromBig</a></label>(<label for="r121" class="ident">n</label> *<a href="../../../../pkg/math/big.html" class="ident i2">big</a>.<a href="../../../math/big/int.go.html#line-33" class="ident">Int</a>) (*<a href="#line-307" class="ident">Modulus</a>, <a href="../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-355"><code>	<span class="keyword">if</span> <label for="r122" class="ident">b</label> := <label for="r121" class="ident">n</label>.<a href="../../../math/big/int.go.html#line-109" class="ident">Bits</a>(); <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r122" class="ident">b</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-356"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"modulus must be &gt;= 0"</span>)</code></span>
+<span class="codeline" id="line-357"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r122" class="ident">b</label>[<span class="lit-number">0</span>]&amp;<span class="lit-number">1</span> != <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-358"><code>		<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"modulus must be odd"</span>)</code></span>
+<span class="codeline" id="line-359"><code>	}</code></span>
+<span class="codeline" id="line-360"><code>	<label for="r123" class="ident">m</label> := &amp;<a href="#line-307" class="ident">Modulus</a>{}</code></span>
+<span class="codeline" id="line-361"><code>	<label for="r123" class="ident">m</label>.<a href="#line-312" class="ident">nat</a> = <a href="#line-70" class="ident">NewNat</a>().<a href="#line-118" class="ident">setBig</a>(<label for="r121" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-362"><code>	<label for="r123" class="ident">m</label>.<a href="#line-313" class="ident">leading</a> = <a href="#line-16" class="ident">_W</a> - <a href="#line-371" class="ident">bitLen</a>(<label for="r123" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>[<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r123" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>)-<span class="lit-number">1</span>])</code></span>
+<span class="codeline" id="line-363"><code>	<label for="r123" class="ident">m</label>.<a href="#line-314" class="ident">m0inv</a> = <a href="#line-336" class="ident">minusInverseModW</a>(<label for="r123" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>[<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-364"><code>	<label for="r123" class="ident">m</label>.<a href="#line-315" class="ident">rr</a> = <a href="#line-319" class="ident">rr</a>(<label for="r123" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-365"><code>	<span class="keyword">return</span> <label for="r123" class="ident">m</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-366"><code>}</code></span>
+<span class="codeline" id="line-367"><code></code></span>
+<span class="codeline" id="line-368"><code><span class="comment">// bitLen is a version of bits.Len that only leaks the bit length of n, but not</span></code></span>
+<span class="codeline" id="line-369"><code><span class="comment">// its value. bits.Len and bits.LeadingZeros use a lookup table for the</span></code></span>
+<span class="codeline" id="line-370"><code><span class="comment">// low-order bits on some architectures.</span></code></span>
+<span class="codeline" id="line-371"><code><span class="keyword">func</span> bitLen(<label for="r125" class="ident">n</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-372"><code>	<span class="keyword">var</span> <label for="r126" class="ident">len</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a></code></span>
+<span class="codeline" id="line-373"><code>	<span class="comment">// We assume, here and elsewhere, that comparison to zero is constant time</span></code></span>
+<span class="codeline" id="line-374"><code><span class="comment">	// with respect to different non-zero values.</span></code></span>
+<span class="codeline" id="line-375"><code>	<span class="keyword">for</span> <label for="r125" class="ident">n</label> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-376"><code>		<label for="r126" class="ident">len</label>++</code></span>
+<span class="codeline" id="line-377"><code>		<label for="r125" class="ident">n</label> &gt;&gt;= <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-378"><code>	}</code></span>
+<span class="codeline" id="line-379"><code>	<span class="keyword">return</span> <label for="r126" class="ident">len</label></code></span>
+<span class="codeline" id="line-380"><code>}</code></span>
+<span class="codeline" id="line-381"><code></code></span>
+<span class="codeline" id="line-382"><code><span class="comment">// Size returns the size of m in bytes.</span></code></span>
+<span class="codeline" id="line-383"><code><span class="keyword">func</span> (<label for="r127" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) <label for="r128" class="ident">Size</label>() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-384"><code>	<span class="keyword">return</span> (<label for="r127" class="ident">m</label>.<a href="#line-388" class="ident">BitLen</a>() + <span class="lit-number">7</span>) / <span class="lit-number">8</span></code></span>
+<span class="codeline" id="line-385"><code>}</code></span>
+<span class="codeline" id="line-386"><code></code></span>
+<span class="codeline" id="line-387"><code><span class="comment">// BitLen returns the size of m in bits.</span></code></span>
+<span class="codeline" id="line-388"><code><span class="keyword">func</span> (<label for="r129" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) <label for="r130" class="ident">BitLen</label>() <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a> {</code></span>
+<span class="codeline" id="line-389"><code>	<span class="keyword">return</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r129" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>)*<a href="#line-16" class="ident">_W</a> - <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r129" class="ident">m</label>.<a href="#line-313" class="ident">leading</a>)</code></span>
+<span class="codeline" id="line-390"><code>}</code></span>
+<span class="codeline" id="line-391"><code></code></span>
+<span class="codeline" id="line-392"><code><span class="comment">// Nat returns m as a Nat. The return value must not be written to.</span></code></span>
+<span class="codeline" id="line-393"><code><span class="keyword">func</span> (<label for="r131" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) <label for="r132" class="ident">Nat</label>() *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-394"><code>	<span class="keyword">return</span> <label for="r131" class="ident">m</label>.<a href="#line-312" class="ident">nat</a></code></span>
+<span class="codeline" id="line-395"><code>}</code></span>
+<span class="codeline" id="line-396"><code></code></span>
+<span class="codeline" id="line-397"><code><span class="comment">// shiftIn calculates x = x &lt;&lt; _W + y mod m.</span></code></span>
+<span class="codeline" id="line-398"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-399"><code><span class="comment">// This assumes that x is already reduced mod m.</span></code></span>
+<span class="codeline" id="line-400"><code><span class="keyword">func</span> (<label for="r133" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r134" class="ident">shiftIn</label>(<label for="r135" class="ident">y</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r136" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-401"><code>	<label for="r137" class="ident">d</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-475" class="ident">resetFor</a>(<label for="r136" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-402"><code></code></span>
+<span class="codeline" id="line-403"><code>	<span class="comment">// Eliminate bounds checks in the loop.</span></code></span>
+<span class="codeline" id="line-404"><code>	<label for="r138" class="ident">size</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r136" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-405"><code>	<label for="r139" class="ident">xLimbs</label> := <label for="r133" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r138" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-406"><code>	<label for="r140" class="ident">dLimbs</label> := <label for="r137" class="ident">d</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r138" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-407"><code>	<label for="r141" class="ident">mLimbs</label> := <label for="r136" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>[:<label for="r138" class="ident">size</label>]</code></span>
+<span class="codeline" id="line-408"><code></code></span>
+<span class="codeline" id="line-409"><code>	<span class="comment">// Each iteration of this loop computes x = 2x + b mod m, where b is a bit</span></code></span>
+<span class="codeline" id="line-410"><code><span class="comment">	// from y. Effectively, it left-shifts x and adds y one bit at a time,</span></code></span>
+<span class="codeline" id="line-411"><code><span class="comment">	// reducing it every time.</span></code></span>
+<span class="codeline" id="line-412"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-413"><code><span class="comment">	// To do the reduction, each iteration computes both 2x + b and 2x + b - m.</span></code></span>
+<span class="codeline" id="line-414"><code><span class="comment">	// The next iteration (and finally the return line) will use either result</span></code></span>
+<span class="codeline" id="line-415"><code><span class="comment">	// based on whether 2x + b overflows m.</span></code></span>
+<span class="codeline" id="line-416"><code>	<label for="r142" class="ident">needSubtraction</label> := <a href="#line-29" class="ident">no</a></code></span>
+<span class="codeline" id="line-417"><code>	<span class="keyword">for</span> <label for="r143" class="ident">i</label> := <a href="#line-16" class="ident">_W</a> - <span class="lit-number">1</span>; <label for="r143" class="ident">i</label> &gt;= <span class="lit-number">0</span>; <label for="r143" class="ident">i</label>-- {</code></span>
+<span class="codeline" id="line-418"><code>		<label for="r144" class="ident">carry</label> := (<label for="r135" class="ident">y</label> &gt;&gt; <label for="r143" class="ident">i</label>) &amp; <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-419"><code>		<span class="keyword">var</span> <label for="r145" class="ident">borrow</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-420"><code>		<label for="r146" class="ident">mask</label> := <a href="#line-32" class="ident">ctMask</a>(<label for="r142" class="ident">needSubtraction</label>)</code></span>
+<span class="codeline" id="line-421"><code>		<span class="keyword">for</span> <label for="r147" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r147" class="ident">i</label> &lt; <label for="r138" class="ident">size</label>; <label for="r147" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-422"><code>			<label for="r148" class="ident">l</label> := <label for="r139" class="ident">xLimbs</label>[<label for="r147" class="ident">i</label>] ^ (<label for="r146" class="ident">mask</label> &amp; (<label for="r139" class="ident">xLimbs</label>[<label for="r147" class="ident">i</label>] ^ <label for="r140" class="ident">dLimbs</label>[<label for="r147" class="ident">i</label>]))</code></span>
+<span class="codeline" id="line-423"><code>			<label for="r139" class="ident">xLimbs</label>[<label for="r147" class="ident">i</label>], <label for="r144" class="ident">carry</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r148" class="ident">l</label>, <label for="r148" class="ident">l</label>, <label for="r144" class="ident">carry</label>)</code></span>
+<span class="codeline" id="line-424"><code>			<label for="r140" class="ident">dLimbs</label>[<label for="r147" class="ident">i</label>], <label for="r145" class="ident">borrow</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-402" class="ident">Sub</a>(<label for="r139" class="ident">xLimbs</label>[<label for="r147" class="ident">i</label>], <label for="r141" class="ident">mLimbs</label>[<label for="r147" class="ident">i</label>], <label for="r145" class="ident">borrow</label>)</code></span>
+<span class="codeline" id="line-425"><code>		}</code></span>
+<span class="codeline" id="line-426"><code>		<span class="comment">// Like in maybeSubtractModulus, we need the subtraction if either it</span></code></span>
+<span class="codeline" id="line-427"><code><span class="comment">		// didn't underflow (meaning 2x + b &gt; m) or if computing 2x + b</span></code></span>
+<span class="codeline" id="line-428"><code><span class="comment">		// overflowed (meaning 2x + b &gt; 2^_W*n &gt; m).</span></code></span>
+<span class="codeline" id="line-429"><code>		<label for="r142" class="ident">needSubtraction</label> = <a href="#line-26" class="ident">not</a>(<a href="#line-24" class="ident">choice</a>(<label for="r145" class="ident">borrow</label>)) | <a href="#line-24" class="ident">choice</a>(<label for="r144" class="ident">carry</label>)</code></span>
+<span class="codeline" id="line-430"><code>	}</code></span>
+<span class="codeline" id="line-431"><code>	<span class="keyword">return</span> <label for="r133" class="ident">x</label>.<a href="#line-258" class="ident">assign</a>(<label for="r142" class="ident">needSubtraction</label>, <label for="r137" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-432"><code>}</code></span>
+<span class="codeline" id="line-433"><code></code></span>
+<span class="codeline" id="line-434"><code><span class="comment">// Mod calculates out = x mod m.</span></code></span>
+<span class="codeline" id="line-435"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-436"><code><span class="comment">// This works regardless how large the value of x is.</span></code></span>
+<span class="codeline" id="line-437"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-438"><code><span class="comment">// The output will be resized to the size of m and overwritten.</span></code></span>
+<span class="codeline" id="line-439"><code><span class="keyword">func</span> (<label for="r149" class="ident">out</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r150" class="ident">Mod</label>(<label for="r151" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r152" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-440"><code>	<label for="r149" class="ident">out</label>.<a href="#line-475" class="ident">resetFor</a>(<label for="r152" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-441"><code>	<span class="comment">// Working our way from the most significant to the least significant limb,</span></code></span>
+<span class="codeline" id="line-442"><code><span class="comment">	// we can insert each limb at the least significant position, shifting all</span></code></span>
+<span class="codeline" id="line-443"><code><span class="comment">	// previous limbs left by _W. This way each limb will get shifted by the</span></code></span>
+<span class="codeline" id="line-444"><code><span class="comment">	// correct number of bits. We can insert at least N - 1 limbs without</span></code></span>
+<span class="codeline" id="line-445"><code><span class="comment">	// overflowing m. After that, we need to reduce every time we shift.</span></code></span>
+<span class="codeline" id="line-446"><code>	<label for="r153" class="ident">i</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r151" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>) - <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-447"><code>	<span class="comment">// For the first N - 1 limbs we can skip the actual shifting and position</span></code></span>
+<span class="codeline" id="line-448"><code><span class="comment">	// them at the shifted position, which starts at min(N - 2, i).</span></code></span>
+<span class="codeline" id="line-449"><code>	<label for="r154" class="ident">start</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r152" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>) - <span class="lit-number">2</span></code></span>
+<span class="codeline" id="line-450"><code>	<span class="keyword">if</span> <label for="r153" class="ident">i</label> &lt; <label for="r154" class="ident">start</label> {</code></span>
+<span class="codeline" id="line-451"><code>		<label for="r154" class="ident">start</label> = <label for="r153" class="ident">i</label></code></span>
+<span class="codeline" id="line-452"><code>	}</code></span>
+<span class="codeline" id="line-453"><code>	<span class="keyword">for</span> <label for="r155" class="ident">j</label> := <label for="r154" class="ident">start</label>; <label for="r155" class="ident">j</label> &gt;= <span class="lit-number">0</span>; <label for="r155" class="ident">j</label>-- {</code></span>
+<span class="codeline" id="line-454"><code>		<label for="r149" class="ident">out</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r155" class="ident">j</label>] = <label for="r151" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r153" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-455"><code>		<label for="r153" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-456"><code>	}</code></span>
+<span class="codeline" id="line-457"><code>	<span class="comment">// We shift in the remaining limbs, reducing modulo m each time.</span></code></span>
+<span class="codeline" id="line-458"><code>	<span class="keyword">for</span> <label for="r153" class="ident">i</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-459"><code>		<label for="r149" class="ident">out</label>.<a href="#line-400" class="ident">shiftIn</a>(<label for="r151" class="ident">x</label>.<a href="#line-58" class="ident">limbs</a>[<label for="r153" class="ident">i</label>], <label for="r152" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-460"><code>		<label for="r153" class="ident">i</label>--</code></span>
+<span class="codeline" id="line-461"><code>	}</code></span>
+<span class="codeline" id="line-462"><code>	<span class="keyword">return</span> <label for="r149" class="ident">out</label></code></span>
+<span class="codeline" id="line-463"><code>}</code></span>
+<span class="codeline" id="line-464"><code></code></span>
+<span class="codeline" id="line-465"><code><span class="comment">// ExpandFor ensures x has the right size to work with operations modulo m.</span></code></span>
+<span class="codeline" id="line-466"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-467"><code><span class="comment">// The announced size of x must be smaller than or equal to that of m.</span></code></span>
+<span class="codeline" id="line-468"><code><span class="keyword">func</span> (<label for="r156" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r157" class="ident">ExpandFor</label>(<label for="r158" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-469"><code>	<span class="keyword">return</span> <label for="r156" class="ident">x</label>.<a href="#line-76" class="ident">expand</a>(<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r158" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>))</code></span>
+<span class="codeline" id="line-470"><code>}</code></span>
+<span class="codeline" id="line-471"><code></code></span>
+<span class="codeline" id="line-472"><code><span class="comment">// resetFor ensures out has the right size to work with operations modulo m.</span></code></span>
+<span class="codeline" id="line-473"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-474"><code><span class="comment">// out is zeroed and may start at any size.</span></code></span>
+<span class="codeline" id="line-475"><code><span class="keyword">func</span> (<label for="r159" class="ident">out</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r160" class="ident">resetFor</label>(<label for="r161" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-476"><code>	<span class="keyword">return</span> <label for="r159" class="ident">out</label>.<a href="#line-95" class="ident">reset</a>(<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r161" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>))</code></span>
+<span class="codeline" id="line-477"><code>}</code></span>
+<span class="codeline" id="line-478"><code></code></span>
+<span class="codeline" id="line-479"><code><span class="comment">// maybeSubtractModulus computes x -= m if and only if x &gt;= m or if "always" is yes.</span></code></span>
+<span class="codeline" id="line-480"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-481"><code><span class="comment">// It can be used to reduce modulo m a value up to 2m - 1, which is a common</span></code></span>
+<span class="codeline" id="line-482"><code><span class="comment">// range for results computed by higher level operations.</span></code></span>
+<span class="codeline" id="line-483"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-484"><code><span class="comment">// always is usually a carry that indicates that the operation that produced x</span></code></span>
+<span class="codeline" id="line-485"><code><span class="comment">// overflowed its size, meaning abstractly x &gt; 2^_W*n &gt; m even if x &lt; m.</span></code></span>
+<span class="codeline" id="line-486"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-487"><code><span class="comment">// x and m operands must have the same announced length.</span></code></span>
+<span class="codeline" id="line-488"><code><span class="keyword">func</span> (<label for="r162" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r163" class="ident">maybeSubtractModulus</label>(<label for="r164" class="ident">always</label> <a href="#line-24" class="ident">choice</a>, <label for="r165" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) {</code></span>
+<span class="codeline" id="line-489"><code>	<label for="r166" class="ident">t</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-108" class="ident">set</a>(<label for="r162" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-490"><code>	<label for="r167" class="ident">underflow</label> := <label for="r166" class="ident">t</label>.<a href="#line-289" class="ident">sub</a>(<label for="r165" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>)</code></span>
+<span class="codeline" id="line-491"><code>	<span class="comment">// We keep the result if x - m didn't underflow (meaning x &gt;= m)</span></code></span>
+<span class="codeline" id="line-492"><code><span class="comment">	// or if always was set.</span></code></span>
+<span class="codeline" id="line-493"><code>	<label for="r168" class="ident">keep</label> := <a href="#line-26" class="ident">not</a>(<a href="#line-24" class="ident">choice</a>(<label for="r167" class="ident">underflow</label>)) | <a href="#line-24" class="ident">choice</a>(<label for="r164" class="ident">always</label>)</code></span>
+<span class="codeline" id="line-494"><code>	<label for="r162" class="ident">x</label>.<a href="#line-258" class="ident">assign</a>(<label for="r168" class="ident">keep</label>, <label for="r166" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-495"><code>}</code></span>
+<span class="codeline" id="line-496"><code></code></span>
+<span class="codeline" id="line-497"><code><span class="comment">// Sub computes x = x - y mod m.</span></code></span>
+<span class="codeline" id="line-498"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-499"><code><span class="comment">// The length of both operands must be the same as the modulus. Both operands</span></code></span>
+<span class="codeline" id="line-500"><code><span class="comment">// must already be reduced modulo m.</span></code></span>
+<span class="codeline" id="line-501"><code><span class="keyword">func</span> (<label for="r169" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r170" class="ident">Sub</label>(<label for="r171" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r172" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-502"><code>	<label for="r173" class="ident">underflow</label> := <label for="r169" class="ident">x</label>.<a href="#line-289" class="ident">sub</a>(<label for="r171" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-503"><code>	<span class="comment">// If the subtraction underflowed, add m.</span></code></span>
+<span class="codeline" id="line-504"><code>	<label for="r174" class="ident">t</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-108" class="ident">set</a>(<label for="r169" class="ident">x</label>)</code></span>
+<span class="codeline" id="line-505"><code>	<label for="r174" class="ident">t</label>.<a href="#line-274" class="ident">add</a>(<label for="r172" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>)</code></span>
+<span class="codeline" id="line-506"><code>	<label for="r169" class="ident">x</label>.<a href="#line-258" class="ident">assign</a>(<a href="#line-24" class="ident">choice</a>(<label for="r173" class="ident">underflow</label>), <label for="r174" class="ident">t</label>)</code></span>
+<span class="codeline" id="line-507"><code>	<span class="keyword">return</span> <label for="r169" class="ident">x</label></code></span>
+<span class="codeline" id="line-508"><code>}</code></span>
+<span class="codeline" id="line-509"><code></code></span>
+<span class="codeline" id="line-510"><code><span class="comment">// Add computes x = x + y mod m.</span></code></span>
+<span class="codeline" id="line-511"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-512"><code><span class="comment">// The length of both operands must be the same as the modulus. Both operands</span></code></span>
+<span class="codeline" id="line-513"><code><span class="comment">// must already be reduced modulo m.</span></code></span>
+<span class="codeline" id="line-514"><code><span class="keyword">func</span> (<label for="r175" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r176" class="ident">Add</label>(<label for="r177" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r178" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-515"><code>	<label for="r179" class="ident">overflow</label> := <label for="r175" class="ident">x</label>.<a href="#line-274" class="ident">add</a>(<label for="r177" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-516"><code>	<label for="r175" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-24" class="ident">choice</a>(<label for="r179" class="ident">overflow</label>), <label for="r178" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-517"><code>	<span class="keyword">return</span> <label for="r175" class="ident">x</label></code></span>
+<span class="codeline" id="line-518"><code>}</code></span>
+<span class="codeline" id="line-519"><code></code></span>
+<span class="codeline" id="line-520"><code><span class="comment">// montgomeryRepresentation calculates x = x * R mod m, with R = 2^(_W * n) and</span></code></span>
+<span class="codeline" id="line-521"><code><span class="comment">// n = len(m.nat.limbs).</span></code></span>
+<span class="codeline" id="line-522"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-523"><code><span class="comment">// Faster Montgomery multiplication replaces standard modular multiplication for</span></code></span>
+<span class="codeline" id="line-524"><code><span class="comment">// numbers in this representation.</span></code></span>
+<span class="codeline" id="line-525"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-526"><code><span class="comment">// This assumes that x is already reduced mod m.</span></code></span>
+<span class="codeline" id="line-527"><code><span class="keyword">func</span> (<label for="r180" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r181" class="ident">montgomeryRepresentation</label>(<label for="r182" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-528"><code>	<span class="comment">// A Montgomery multiplication (which computes a * b / R) by R * R works out</span></code></span>
+<span class="codeline" id="line-529"><code><span class="comment">	// to a multiplication by R, which takes the value out of the Montgomery domain.</span></code></span>
+<span class="codeline" id="line-530"><code>	<span class="keyword">return</span> <label for="r180" class="ident">x</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r180" class="ident">x</label>, <label for="r182" class="ident">m</label>.<a href="#line-315" class="ident">rr</a>, <label for="r182" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-531"><code>}</code></span>
+<span class="codeline" id="line-532"><code></code></span>
+<span class="codeline" id="line-533"><code><span class="comment">// montgomeryReduction calculates x = x / R mod m, with R = 2^(_W * n) and</span></code></span>
+<span class="codeline" id="line-534"><code><span class="comment">// n = len(m.nat.limbs).</span></code></span>
+<span class="codeline" id="line-535"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-536"><code><span class="comment">// This assumes that x is already reduced mod m.</span></code></span>
+<span class="codeline" id="line-537"><code><span class="keyword">func</span> (<label for="r183" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r184" class="ident">montgomeryReduction</label>(<label for="r185" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-538"><code>	<span class="comment">// By Montgomery multiplying with 1 not in Montgomery representation, we</span></code></span>
+<span class="codeline" id="line-539"><code><span class="comment">	// convert out back from Montgomery representation, because it works out to</span></code></span>
+<span class="codeline" id="line-540"><code><span class="comment">	// dividing by R.</span></code></span>
+<span class="codeline" id="line-541"><code>	<label for="r186" class="ident">one</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-468" class="ident">ExpandFor</a>(<label for="r185" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-542"><code>	<label for="r186" class="ident">one</label>.<a href="#line-58" class="ident">limbs</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-543"><code>	<span class="keyword">return</span> <label for="r183" class="ident">x</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r183" class="ident">x</label>, <label for="r186" class="ident">one</label>, <label for="r185" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-544"><code>}</code></span>
+<span class="codeline" id="line-545"><code></code></span>
+<span class="codeline" id="line-546"><code><span class="comment">// montgomeryMul calculates x = a * b / R mod m, with R = 2^(_W * n) and</span></code></span>
+<span class="codeline" id="line-547"><code><span class="comment">// n = len(m.nat.limbs), also known as a Montgomery multiplication.</span></code></span>
+<span class="codeline" id="line-548"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-549"><code><span class="comment">// All inputs should be the same length and already reduced modulo m.</span></code></span>
+<span class="codeline" id="line-550"><code><span class="comment">// x will be resized to the size of m and overwritten.</span></code></span>
+<span class="codeline" id="line-551"><code><span class="keyword">func</span> (<label for="r187" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r188" class="ident">montgomeryMul</label>(<label for="r189" class="ident">a</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r190" class="ident">b</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r191" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-552"><code>	<label for="r192" class="ident">n</label> := <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r191" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>)</code></span>
+<span class="codeline" id="line-553"><code>	<label for="r193" class="ident">mLimbs</label> := <label for="r191" class="ident">m</label>.<a href="#line-312" class="ident">nat</a>.<a href="#line-58" class="ident">limbs</a>[:<label for="r192" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-554"><code>	<label for="r194" class="ident">aLimbs</label> := <label for="r189" class="ident">a</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r192" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-555"><code>	<label for="r195" class="ident">bLimbs</label> := <label for="r190" class="ident">b</label>.<a href="#line-58" class="ident">limbs</a>[:<label for="r192" class="ident">n</label>]</code></span>
+<span class="codeline" id="line-556"><code></code></span>
+<span class="codeline" id="line-557"><code>	<span class="keyword">switch</span> <label for="r192" class="ident">n</label> {</code></span>
+<span class="codeline" id="line-558"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-559"><code>		<span class="comment">// Attempt to use a stack-allocated backing array.</span></code></span>
+<span class="codeline" id="line-560"><code>		<label for="r196" class="ident">T</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <span class="lit-number">0</span>, <a href="#line-65" class="ident">preallocLimbs</a>*<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-561"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-cap" class="ident">cap</a>(<label for="r196" class="ident">T</label>) &lt; <label for="r192" class="ident">n</label>*<span class="lit-number">2</span> {</code></span>
+<span class="codeline" id="line-562"><code>			<label for="r196" class="ident">T</label> = <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <span class="lit-number">0</span>, <label for="r192" class="ident">n</label>*<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-563"><code>		}</code></span>
+<span class="codeline" id="line-564"><code>		<label for="r196" class="ident">T</label> = <label for="r196" class="ident">T</label>[:<label for="r192" class="ident">n</label>*<span class="lit-number">2</span>]</code></span>
+<span class="codeline" id="line-565"><code></code></span>
+<span class="codeline" id="line-566"><code>		<span class="comment">// This loop implements Word-by-Word Montgomery Multiplication, as</span></code></span>
+<span class="codeline" id="line-567"><code><span class="comment">		// described in Algorithm 4 (Fig. 3) of "Efficient Software</span></code></span>
+<span class="codeline" id="line-568"><code><span class="comment">		// Implementations of Modular Exponentiation" by Shay Gueron</span></code></span>
+<span class="codeline" id="line-569"><code><span class="comment">		// [https://eprint.iacr.org/2011/239.pdf].</span></code></span>
+<span class="codeline" id="line-570"><code>		<span class="keyword">var</span> <label for="r197" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-571"><code>		<span class="keyword">for</span> <label for="r198" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r198" class="ident">i</label> &lt; <label for="r192" class="ident">n</label>; <label for="r198" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-572"><code>			_ = <label for="r196" class="ident">T</label>[<label for="r192" class="ident">n</label>+<label for="r198" class="ident">i</label>] <span class="comment">// bounds check elimination hint</span></code></span>
+<span class="codeline" id="line-573"><code></code></span>
+<span class="codeline" id="line-574"><code>			<span class="comment">// Step 1 (T = a × b) is computed as a large pen-and-paper column</span></code></span>
+<span class="codeline" id="line-575"><code><span class="comment">			// multiplication of two numbers with n base-2^_W digits. If we just</span></code></span>
+<span class="codeline" id="line-576"><code><span class="comment">			// wanted to produce 2n-wide T, we would do</span></code></span>
+<span class="codeline" id="line-577"><code><span class="comment">			//</span></code></span>
+<span class="codeline" id="line-578"><code><span class="comment">			//   for i := 0; i &lt; n; i++ {</span></code></span>
+<span class="codeline" id="line-579"><code><span class="comment">			//       d := bLimbs[i]</span></code></span>
+<span class="codeline" id="line-580"><code><span class="comment">			//       T[n+i] = addMulVVW(T[i:n+i], aLimbs, d)</span></code></span>
+<span class="codeline" id="line-581"><code><span class="comment">			//   }</span></code></span>
+<span class="codeline" id="line-582"><code><span class="comment">			//</span></code></span>
+<span class="codeline" id="line-583"><code><span class="comment">			// where d is a digit of the multiplier, T[i:n+i] is the shifted</span></code></span>
+<span class="codeline" id="line-584"><code><span class="comment">			// position of the product of that digit, and T[n+i] is the final carry.</span></code></span>
+<span class="codeline" id="line-585"><code><span class="comment">			// Note that T[i] isn't modified after processing the i-th digit.</span></code></span>
+<span class="codeline" id="line-586"><code><span class="comment">			//</span></code></span>
+<span class="codeline" id="line-587"><code><span class="comment">			// Instead of running two loops, one for Step 1 and one for Steps 2–6,</span></code></span>
+<span class="codeline" id="line-588"><code><span class="comment">			// the result of Step 1 is computed during the next loop. This is</span></code></span>
+<span class="codeline" id="line-589"><code><span class="comment">			// possible because each iteration only uses T[i] in Step 2 and then</span></code></span>
+<span class="codeline" id="line-590"><code><span class="comment">			// discards it in Step 6.</span></code></span>
+<span class="codeline" id="line-591"><code>			<label for="r199" class="ident">d</label> := <label for="r195" class="ident">bLimbs</label>[<label for="r198" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-592"><code>			<label for="r200" class="ident">c1</label> := <a href="#line-672" class="ident">addMulVVW</a>(<label for="r196" class="ident">T</label>[<label for="r198" class="ident">i</label>:<label for="r192" class="ident">n</label>+<label for="r198" class="ident">i</label>], <label for="r194" class="ident">aLimbs</label>, <label for="r199" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-593"><code></code></span>
+<span class="codeline" id="line-594"><code>			<span class="comment">// Step 6 is replaced by shifting the virtual window we operate</span></code></span>
+<span class="codeline" id="line-595"><code><span class="comment">			// over: T of the algorithm is T[i:] for us. That means that T1 in</span></code></span>
+<span class="codeline" id="line-596"><code><span class="comment">			// Step 2 (T mod 2^_W) is simply T[i]. k0 in Step 3 is our m0inv.</span></code></span>
+<span class="codeline" id="line-597"><code>			<label for="r201" class="ident">Y</label> := <label for="r196" class="ident">T</label>[<label for="r198" class="ident">i</label>] * <label for="r191" class="ident">m</label>.<a href="#line-314" class="ident">m0inv</a></code></span>
+<span class="codeline" id="line-598"><code></code></span>
+<span class="codeline" id="line-599"><code>			<span class="comment">// Step 4 and 5 add Y × m to T, which as mentioned above is stored</span></code></span>
+<span class="codeline" id="line-600"><code><span class="comment">			// at T[i:]. The two carries (from a × d and Y × m) are added up in</span></code></span>
+<span class="codeline" id="line-601"><code><span class="comment">			// the next word T[n+i], and the carry bit from that addition is</span></code></span>
+<span class="codeline" id="line-602"><code><span class="comment">			// brought forward to the next iteration.</span></code></span>
+<span class="codeline" id="line-603"><code>			<label for="r202" class="ident">c2</label> := <a href="#line-672" class="ident">addMulVVW</a>(<label for="r196" class="ident">T</label>[<label for="r198" class="ident">i</label>:<label for="r192" class="ident">n</label>+<label for="r198" class="ident">i</label>], <label for="r193" class="ident">mLimbs</label>, <label for="r201" class="ident">Y</label>)</code></span>
+<span class="codeline" id="line-604"><code>			<label for="r196" class="ident">T</label>[<label for="r192" class="ident">n</label>+<label for="r198" class="ident">i</label>], <label for="r197" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r200" class="ident">c1</label>, <label for="r202" class="ident">c2</label>, <label for="r197" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-605"><code>		}</code></span>
+<span class="codeline" id="line-606"><code></code></span>
+<span class="codeline" id="line-607"><code>		<span class="comment">// Finally for Step 7 we copy the final T window into x, and subtract m</span></code></span>
+<span class="codeline" id="line-608"><code><span class="comment">		// if necessary (which as explained in maybeSubtractModulus can be the</span></code></span>
+<span class="codeline" id="line-609"><code><span class="comment">		// case both if x &gt;= m, or if x overflowed).</span></code></span>
+<span class="codeline" id="line-610"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-611"><code><span class="comment">		// The paper suggests in Section 4 that we can do an "Almost Montgomery</span></code></span>
+<span class="codeline" id="line-612"><code><span class="comment">		// Multiplication" by subtracting only in the overflow case, but the</span></code></span>
+<span class="codeline" id="line-613"><code><span class="comment">		// cost is very similar since the constant time subtraction tells us if</span></code></span>
+<span class="codeline" id="line-614"><code><span class="comment">		// x &gt;= m as a side effect, and taking care of the broken invariant is</span></code></span>
+<span class="codeline" id="line-615"><code><span class="comment">		// highly undesirable (see https://go.dev/issue/13907).</span></code></span>
+<span class="codeline" id="line-616"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r187" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<label for="r192" class="ident">n</label>).<a href="#line-58" class="ident">limbs</a>, <label for="r196" class="ident">T</label>[<label for="r192" class="ident">n</label>:])</code></span>
+<span class="codeline" id="line-617"><code>		<label for="r187" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-24" class="ident">choice</a>(<label for="r197" class="ident">c</label>), <label for="r191" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-618"><code></code></span>
+<span class="codeline" id="line-619"><code>	<span class="comment">// The following specialized cases follow the exact same algorithm, but</span></code></span>
+<span class="codeline" id="line-620"><code><span class="comment">	// optimized for the sizes most used in RSA. addMulVVW is implemented in</span></code></span>
+<span class="codeline" id="line-621"><code><span class="comment">	// assembly with loop unrolling depending on the architecture and bounds</span></code></span>
+<span class="codeline" id="line-622"><code><span class="comment">	// checks are removed by the compiler thanks to the constant size.</span></code></span>
+<span class="codeline" id="line-623"><code>	<span class="keyword">case</span> <span class="lit-number">1024</span> / <a href="#line-16" class="ident">_W</a>:</code></span>
+<span class="codeline" id="line-624"><code>		<span class="keyword">const</span> <label for="r203" class="ident">n</label> = <span class="lit-number">1024</span> / <a href="#line-16" class="ident">_W</a> <span class="comment">// compiler hint</span></code></span>
+<span class="codeline" id="line-625"><code>		<label for="r204" class="ident">T</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r203" class="ident">n</label>*<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-626"><code>		<span class="keyword">var</span> <label for="r205" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-627"><code>		<span class="keyword">for</span> <label for="r206" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r206" class="ident">i</label> &lt; <label for="r203" class="ident">n</label>; <label for="r206" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-628"><code>			<label for="r207" class="ident">d</label> := <label for="r195" class="ident">bLimbs</label>[<label for="r206" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-629"><code>			<label for="r208" class="ident">c1</label> := <a href="nat_asm.go.html#line-22" class="ident">addMulVVW1024</a>(&amp;<label for="r204" class="ident">T</label>[<label for="r206" class="ident">i</label>], &amp;<label for="r194" class="ident">aLimbs</label>[<span class="lit-number">0</span>], <label for="r207" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-630"><code>			<label for="r209" class="ident">Y</label> := <label for="r204" class="ident">T</label>[<label for="r206" class="ident">i</label>] * <label for="r191" class="ident">m</label>.<a href="#line-314" class="ident">m0inv</a></code></span>
+<span class="codeline" id="line-631"><code>			<label for="r210" class="ident">c2</label> := <a href="nat_asm.go.html#line-22" class="ident">addMulVVW1024</a>(&amp;<label for="r204" class="ident">T</label>[<label for="r206" class="ident">i</label>], &amp;<label for="r193" class="ident">mLimbs</label>[<span class="lit-number">0</span>], <label for="r209" class="ident">Y</label>)</code></span>
+<span class="codeline" id="line-632"><code>			<label for="r204" class="ident">T</label>[<label for="r203" class="ident">n</label>+<label for="r206" class="ident">i</label>], <label for="r205" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r208" class="ident">c1</label>, <label for="r210" class="ident">c2</label>, <label for="r205" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-633"><code>		}</code></span>
+<span class="codeline" id="line-634"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r187" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<label for="r203" class="ident">n</label>).<a href="#line-58" class="ident">limbs</a>, <label for="r204" class="ident">T</label>[<label for="r203" class="ident">n</label>:])</code></span>
+<span class="codeline" id="line-635"><code>		<label for="r187" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-24" class="ident">choice</a>(<label for="r205" class="ident">c</label>), <label for="r191" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-636"><code></code></span>
+<span class="codeline" id="line-637"><code>	<span class="keyword">case</span> <span class="lit-number">1536</span> / <a href="#line-16" class="ident">_W</a>:</code></span>
+<span class="codeline" id="line-638"><code>		<span class="keyword">const</span> <label for="r211" class="ident">n</label> = <span class="lit-number">1536</span> / <a href="#line-16" class="ident">_W</a> <span class="comment">// compiler hint</span></code></span>
+<span class="codeline" id="line-639"><code>		<label for="r212" class="ident">T</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r211" class="ident">n</label>*<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-640"><code>		<span class="keyword">var</span> <label for="r213" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-641"><code>		<span class="keyword">for</span> <label for="r214" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r214" class="ident">i</label> &lt; <label for="r211" class="ident">n</label>; <label for="r214" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-642"><code>			<label for="r215" class="ident">d</label> := <label for="r195" class="ident">bLimbs</label>[<label for="r214" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-643"><code>			<label for="r216" class="ident">c1</label> := <a href="nat_asm.go.html#line-25" class="ident">addMulVVW1536</a>(&amp;<label for="r212" class="ident">T</label>[<label for="r214" class="ident">i</label>], &amp;<label for="r194" class="ident">aLimbs</label>[<span class="lit-number">0</span>], <label for="r215" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-644"><code>			<label for="r217" class="ident">Y</label> := <label for="r212" class="ident">T</label>[<label for="r214" class="ident">i</label>] * <label for="r191" class="ident">m</label>.<a href="#line-314" class="ident">m0inv</a></code></span>
+<span class="codeline" id="line-645"><code>			<label for="r218" class="ident">c2</label> := <a href="nat_asm.go.html#line-25" class="ident">addMulVVW1536</a>(&amp;<label for="r212" class="ident">T</label>[<label for="r214" class="ident">i</label>], &amp;<label for="r193" class="ident">mLimbs</label>[<span class="lit-number">0</span>], <label for="r217" class="ident">Y</label>)</code></span>
+<span class="codeline" id="line-646"><code>			<label for="r212" class="ident">T</label>[<label for="r211" class="ident">n</label>+<label for="r214" class="ident">i</label>], <label for="r213" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r216" class="ident">c1</label>, <label for="r218" class="ident">c2</label>, <label for="r213" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-647"><code>		}</code></span>
+<span class="codeline" id="line-648"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r187" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<label for="r211" class="ident">n</label>).<a href="#line-58" class="ident">limbs</a>, <label for="r212" class="ident">T</label>[<label for="r211" class="ident">n</label>:])</code></span>
+<span class="codeline" id="line-649"><code>		<label for="r187" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-24" class="ident">choice</a>(<label for="r213" class="ident">c</label>), <label for="r191" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-650"><code></code></span>
+<span class="codeline" id="line-651"><code>	<span class="keyword">case</span> <span class="lit-number">2048</span> / <a href="#line-16" class="ident">_W</a>:</code></span>
+<span class="codeline" id="line-652"><code>		<span class="keyword">const</span> <label for="r219" class="ident">n</label> = <span class="lit-number">2048</span> / <a href="#line-16" class="ident">_W</a> <span class="comment">// compiler hint</span></code></span>
+<span class="codeline" id="line-653"><code>		<label for="r220" class="ident">T</label> := <a href="../../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r219" class="ident">n</label>*<span class="lit-number">2</span>)</code></span>
+<span class="codeline" id="line-654"><code>		<span class="keyword">var</span> <label for="r221" class="ident">c</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a></code></span>
+<span class="codeline" id="line-655"><code>		<span class="keyword">for</span> <label for="r222" class="ident">i</label> := <span class="lit-number">0</span>; <label for="r222" class="ident">i</label> &lt; <label for="r219" class="ident">n</label>; <label for="r222" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-656"><code>			<label for="r223" class="ident">d</label> := <label for="r195" class="ident">bLimbs</label>[<label for="r222" class="ident">i</label>]</code></span>
+<span class="codeline" id="line-657"><code>			<label for="r224" class="ident">c1</label> := <a href="nat_asm.go.html#line-28" class="ident">addMulVVW2048</a>(&amp;<label for="r220" class="ident">T</label>[<label for="r222" class="ident">i</label>], &amp;<label for="r194" class="ident">aLimbs</label>[<span class="lit-number">0</span>], <label for="r223" class="ident">d</label>)</code></span>
+<span class="codeline" id="line-658"><code>			<label for="r225" class="ident">Y</label> := <label for="r220" class="ident">T</label>[<label for="r222" class="ident">i</label>] * <label for="r191" class="ident">m</label>.<a href="#line-314" class="ident">m0inv</a></code></span>
+<span class="codeline" id="line-659"><code>			<label for="r226" class="ident">c2</label> := <a href="nat_asm.go.html#line-28" class="ident">addMulVVW2048</a>(&amp;<label for="r220" class="ident">T</label>[<label for="r222" class="ident">i</label>], &amp;<label for="r193" class="ident">mLimbs</label>[<span class="lit-number">0</span>], <label for="r225" class="ident">Y</label>)</code></span>
+<span class="codeline" id="line-660"><code>			<label for="r220" class="ident">T</label>[<label for="r219" class="ident">n</label>+<label for="r222" class="ident">i</label>], <label for="r221" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r224" class="ident">c1</label>, <label for="r226" class="ident">c2</label>, <label for="r221" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-661"><code>		}</code></span>
+<span class="codeline" id="line-662"><code>		<a href="../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r187" class="ident">x</label>.<a href="#line-95" class="ident">reset</a>(<label for="r219" class="ident">n</label>).<a href="#line-58" class="ident">limbs</a>, <label for="r220" class="ident">T</label>[<label for="r219" class="ident">n</label>:])</code></span>
+<span class="codeline" id="line-663"><code>		<label for="r187" class="ident">x</label>.<a href="#line-488" class="ident">maybeSubtractModulus</a>(<a href="#line-24" class="ident">choice</a>(<label for="r221" class="ident">c</label>), <label for="r191" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-664"><code>	}</code></span>
+<span class="codeline" id="line-665"><code></code></span>
+<span class="codeline" id="line-666"><code>	<span class="keyword">return</span> <label for="r187" class="ident">x</label></code></span>
+<span class="codeline" id="line-667"><code>}</code></span>
+<span class="codeline" id="line-668"><code></code></span>
+<span class="codeline" id="line-669"><code><span class="comment">// addMulVVW multiplies the multi-word value x by the single-word value y,</span></code></span>
+<span class="codeline" id="line-670"><code><span class="comment">// adding the result to the multi-word value z and returning the final carry.</span></code></span>
+<span class="codeline" id="line-671"><code><span class="comment">// It can be thought of as one row of a pen-and-paper column multiplication.</span></code></span>
+<span class="codeline" id="line-672"><code><span class="keyword">func</span> addMulVVW(<label for="r228" class="ident">z</label>, <label for="r229" class="ident">x</label> []<a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r230" class="ident">y</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) (<label for="r231" class="ident">carry</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>) {</code></span>
+<span class="codeline" id="line-673"><code>	_ = <label for="r229" class="ident">x</label>[<a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r228" class="ident">z</label>)-<span class="lit-number">1</span>] <span class="comment">// bounds check elimination hint</span></code></span>
+<span class="codeline" id="line-674"><code>	<span class="keyword">for</span> <label for="r232" class="ident">i</label> := <span class="keyword">range</span> <label for="r228" class="ident">z</label> {</code></span>
+<span class="codeline" id="line-675"><code>		<label for="r233" class="ident">hi</label>, <label for="r234" class="ident">lo</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-445" class="ident">Mul</a>(<label for="r229" class="ident">x</label>[<label for="r232" class="ident">i</label>], <label for="r230" class="ident">y</label>)</code></span>
+<span class="codeline" id="line-676"><code>		<label for="r234" class="ident">lo</label>, <label for="r235" class="ident">c</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r234" class="ident">lo</label>, <label for="r228" class="ident">z</label>[<label for="r232" class="ident">i</label>], <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-677"><code>		<span class="comment">// We use bits.Add with zero to get an add-with-carry instruction that</span></code></span>
+<span class="codeline" id="line-678"><code><span class="comment">		// absorbs the carry from the previous bits.Add.</span></code></span>
+<span class="codeline" id="line-679"><code>		<label for="r233" class="ident">hi</label>, _ = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r233" class="ident">hi</label>, <span class="lit-number">0</span>, <label for="r235" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-680"><code>		<label for="r234" class="ident">lo</label>, <label for="r235" class="ident">c</label> = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r234" class="ident">lo</label>, <label for="r231" class="ident">carry</label>, <span class="lit-number">0</span>)</code></span>
+<span class="codeline" id="line-681"><code>		<label for="r233" class="ident">hi</label>, _ = <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-360" class="ident">Add</a>(<label for="r233" class="ident">hi</label>, <span class="lit-number">0</span>, <label for="r235" class="ident">c</label>)</code></span>
+<span class="codeline" id="line-682"><code>		<label for="r231" class="ident">carry</label> = <label for="r233" class="ident">hi</label></code></span>
+<span class="codeline" id="line-683"><code>		<label for="r228" class="ident">z</label>[<label for="r232" class="ident">i</label>] = <label for="r234" class="ident">lo</label></code></span>
+<span class="codeline" id="line-684"><code>	}</code></span>
+<span class="codeline" id="line-685"><code>	<span class="keyword">return</span> <label for="r231" class="ident">carry</label></code></span>
+<span class="codeline" id="line-686"><code>}</code></span>
+<span class="codeline" id="line-687"><code></code></span>
+<span class="codeline" id="line-688"><code><span class="comment">// Mul calculates x = x * y mod m.</span></code></span>
+<span class="codeline" id="line-689"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-690"><code><span class="comment">// The length of both operands must be the same as the modulus. Both operands</span></code></span>
+<span class="codeline" id="line-691"><code><span class="comment">// must already be reduced modulo m.</span></code></span>
+<span class="codeline" id="line-692"><code><span class="keyword">func</span> (<label for="r236" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r237" class="ident">Mul</label>(<label for="r238" class="ident">y</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r239" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-693"><code>	<span class="comment">// A Montgomery multiplication by a value out of the Montgomery domain</span></code></span>
+<span class="codeline" id="line-694"><code><span class="comment">	// takes the result out of Montgomery representation.</span></code></span>
+<span class="codeline" id="line-695"><code>	<label for="r240" class="ident">xR</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-108" class="ident">set</a>(<label for="r236" class="ident">x</label>).<a href="#line-527" class="ident">montgomeryRepresentation</a>(<label for="r239" class="ident">m</label>) <span class="comment">// xR = x * R mod m</span></code></span>
+<span class="codeline" id="line-696"><code>	<span class="keyword">return</span> <label for="r236" class="ident">x</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r240" class="ident">xR</label>, <label for="r238" class="ident">y</label>, <label for="r239" class="ident">m</label>)                  <span class="comment">// x = xR * y / R mod m</span></code></span>
+<span class="codeline" id="line-697"><code>}</code></span>
+<span class="codeline" id="line-698"><code></code></span>
+<span class="codeline" id="line-699"><code><span class="comment">// Exp calculates out = x^e mod m.</span></code></span>
+<span class="codeline" id="line-700"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-701"><code><span class="comment">// The exponent e is represented in big-endian order. The output will be resized</span></code></span>
+<span class="codeline" id="line-702"><code><span class="comment">// to the size of m and overwritten. x must already be reduced modulo m.</span></code></span>
+<span class="codeline" id="line-703"><code><span class="keyword">func</span> (<label for="r241" class="ident">out</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r242" class="ident">Exp</label>(<label for="r243" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r244" class="ident">e</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r245" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-704"><code>	<span class="comment">// We use a 4 bit window. For our RSA workload, 4 bit windows are faster</span></code></span>
+<span class="codeline" id="line-705"><code><span class="comment">	// than 2 bit windows, but use an extra 12 nats worth of scratch space.</span></code></span>
+<span class="codeline" id="line-706"><code><span class="comment">	// Using bit sizes that don't divide 8 are more complex to implement, but</span></code></span>
+<span class="codeline" id="line-707"><code><span class="comment">	// are likely to be more efficient if necessary.</span></code></span>
+<span class="codeline" id="line-708"><code></code></span>
+<span class="codeline" id="line-709"><code>	<label for="r246" class="ident">table</label> := [(<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">4</span>) - <span class="lit-number">1</span>]*<a href="#line-56" class="ident">Nat</a>{ <span class="comment">// table[i] = x ^ (i+1)</span></code></span>
+<span class="codeline" id="line-710"><code>		<span class="comment">// newNat calls are unrolled so they are allocated on the stack.</span></code></span>
+<span class="codeline" id="line-711"><code>		<a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(),</code></span>
+<span class="codeline" id="line-712"><code>		<a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(),</code></span>
+<span class="codeline" id="line-713"><code>		<a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(), <a href="#line-70" class="ident">NewNat</a>(),</code></span>
+<span class="codeline" id="line-714"><code>	}</code></span>
+<span class="codeline" id="line-715"><code>	<label for="r246" class="ident">table</label>[<span class="lit-number">0</span>].<a href="#line-108" class="ident">set</a>(<label for="r243" class="ident">x</label>).<a href="#line-527" class="ident">montgomeryRepresentation</a>(<label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-716"><code>	<span class="keyword">for</span> <label for="r247" class="ident">i</label> := <span class="lit-number">1</span>; <label for="r247" class="ident">i</label> &lt; <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r246" class="ident">table</label>); <label for="r247" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-717"><code>		<label for="r246" class="ident">table</label>[<label for="r247" class="ident">i</label>].<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r246" class="ident">table</label>[<label for="r247" class="ident">i</label>-<span class="lit-number">1</span>], <label for="r246" class="ident">table</label>[<span class="lit-number">0</span>], <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-718"><code>	}</code></span>
+<span class="codeline" id="line-719"><code></code></span>
+<span class="codeline" id="line-720"><code>	<label for="r241" class="ident">out</label>.<a href="#line-475" class="ident">resetFor</a>(<label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-721"><code>	<label for="r241" class="ident">out</label>.<a href="#line-58" class="ident">limbs</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-722"><code>	<label for="r241" class="ident">out</label>.<a href="#line-527" class="ident">montgomeryRepresentation</a>(<label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-723"><code>	<label for="r248" class="ident">tmp</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-468" class="ident">ExpandFor</a>(<label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-724"><code>	<span class="keyword">for</span> <label for="r249" class="ident">_</label>, <label for="r250" class="ident">b</label> := <span class="keyword">range</span> <label for="r244" class="ident">e</label> {</code></span>
+<span class="codeline" id="line-725"><code>		<span class="keyword">for</span> <label for="r251" class="ident">_</label>, <label for="r252" class="ident">j</label> := <span class="keyword">range</span> []<a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>{<span class="lit-number">4</span>, <span class="lit-number">0</span>} {</code></span>
+<span class="codeline" id="line-726"><code>			<span class="comment">// Square four times. Optimization note: this can be implemented</span></code></span>
+<span class="codeline" id="line-727"><code><span class="comment">			// more efficiently than with generic Montgomery multiplication.</span></code></span>
+<span class="codeline" id="line-728"><code>			<label for="r241" class="ident">out</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r241" class="ident">out</label>, <label for="r241" class="ident">out</label>, <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-729"><code>			<label for="r241" class="ident">out</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r241" class="ident">out</label>, <label for="r241" class="ident">out</label>, <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-730"><code>			<label for="r241" class="ident">out</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r241" class="ident">out</label>, <label for="r241" class="ident">out</label>, <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-731"><code>			<label for="r241" class="ident">out</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r241" class="ident">out</label>, <label for="r241" class="ident">out</label>, <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-732"><code></code></span>
+<span class="codeline" id="line-733"><code>			<span class="comment">// Select x^k in constant time from the table.</span></code></span>
+<span class="codeline" id="line-734"><code>			<label for="r253" class="ident">k</label> := <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>((<label for="r250" class="ident">b</label> &gt;&gt; <label for="r252" class="ident">j</label>) &amp; <span class="lit-number">0b1111</span>)</code></span>
+<span class="codeline" id="line-735"><code>			<span class="keyword">for</span> <label for="r254" class="ident">i</label> := <span class="keyword">range</span> <label for="r246" class="ident">table</label> {</code></span>
+<span class="codeline" id="line-736"><code>				<label for="r248" class="ident">tmp</label>.<a href="#line-258" class="ident">assign</a>(<a href="#line-36" class="ident">ctEq</a>(<label for="r253" class="ident">k</label>, <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r254" class="ident">i</label>+<span class="lit-number">1</span>)), <label for="r246" class="ident">table</label>[<label for="r254" class="ident">i</label>])</code></span>
+<span class="codeline" id="line-737"><code>			}</code></span>
+<span class="codeline" id="line-738"><code></code></span>
+<span class="codeline" id="line-739"><code>			<span class="comment">// Multiply by x^k, discarding the result if k = 0.</span></code></span>
+<span class="codeline" id="line-740"><code>			<label for="r248" class="ident">tmp</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r241" class="ident">out</label>, <label for="r248" class="ident">tmp</label>, <label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-741"><code>			<label for="r241" class="ident">out</label>.<a href="#line-258" class="ident">assign</a>(<a href="#line-26" class="ident">not</a>(<a href="#line-36" class="ident">ctEq</a>(<label for="r253" class="ident">k</label>, <span class="lit-number">0</span>)), <label for="r248" class="ident">tmp</label>)</code></span>
+<span class="codeline" id="line-742"><code>		}</code></span>
+<span class="codeline" id="line-743"><code>	}</code></span>
+<span class="codeline" id="line-744"><code></code></span>
+<span class="codeline" id="line-745"><code>	<span class="keyword">return</span> <label for="r241" class="ident">out</label>.<a href="#line-537" class="ident">montgomeryReduction</a>(<label for="r245" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-746"><code>}</code></span>
+<span class="codeline" id="line-747"><code></code></span>
+<span class="codeline" id="line-748"><code><span class="comment">// ExpShort calculates out = x^e mod m.</span></code></span>
+<span class="codeline" id="line-749"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-750"><code><span class="comment">// The output will be resized to the size of m and overwritten. x must already</span></code></span>
+<span class="codeline" id="line-751"><code><span class="comment">// be reduced modulo m. This leaks the exact bit size of the exponent.</span></code></span>
+<span class="codeline" id="line-752"><code><span class="keyword">func</span> (<label for="r255" class="ident">out</label> *<a href="#line-56" class="ident">Nat</a>) <label for="r256" class="ident">ExpShort</label>(<label for="r257" class="ident">x</label> *<a href="#line-56" class="ident">Nat</a>, <label for="r258" class="ident">e</label> <a href="../../../../pkg/builtin.html#name-uint" class="ident">uint</a>, <label for="r259" class="ident">m</label> *<a href="#line-307" class="ident">Modulus</a>) *<a href="#line-56" class="ident">Nat</a> {</code></span>
+<span class="codeline" id="line-753"><code>	<label for="r260" class="ident">xR</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-108" class="ident">set</a>(<label for="r257" class="ident">x</label>).<a href="#line-527" class="ident">montgomeryRepresentation</a>(<label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-754"><code></code></span>
+<span class="codeline" id="line-755"><code>	<label for="r255" class="ident">out</label>.<a href="#line-475" class="ident">resetFor</a>(<label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-756"><code>	<label for="r255" class="ident">out</label>.<a href="#line-58" class="ident">limbs</a>[<span class="lit-number">0</span>] = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-757"><code>	<label for="r255" class="ident">out</label>.<a href="#line-527" class="ident">montgomeryRepresentation</a>(<label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-758"><code></code></span>
+<span class="codeline" id="line-759"><code>	<span class="comment">// For short exponents, precomputing a table and using a window like in Exp</span></code></span>
+<span class="codeline" id="line-760"><code><span class="comment">	// doesn't pay off. Instead, we do a simple constant-time conditional</span></code></span>
+<span class="codeline" id="line-761"><code><span class="comment">	// square-and-multiply chain, skipping the initial run of zeroes.</span></code></span>
+<span class="codeline" id="line-762"><code>	<label for="r261" class="ident">tmp</label> := <a href="#line-70" class="ident">NewNat</a>().<a href="#line-468" class="ident">ExpandFor</a>(<label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-763"><code>	<span class="keyword">for</span> <label for="r262" class="ident">i</label> := <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-20" class="ident">UintSize</a> - <a href="#line-371" class="ident">bitLen</a>(<label for="r258" class="ident">e</label>); <label for="r262" class="ident">i</label> &lt; <a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-20" class="ident">UintSize</a>; <label for="r262" class="ident">i</label>++ {</code></span>
+<span class="codeline" id="line-764"><code>		<label for="r255" class="ident">out</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r255" class="ident">out</label>, <label for="r255" class="ident">out</label>, <label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-765"><code>		<label for="r263" class="ident">k</label> := (<label for="r258" class="ident">e</label> &gt;&gt; (<a href="../../../../pkg/math/bits.html" class="ident i3">bits</a>.<a href="../../../math/bits/bits.go.html#line-20" class="ident">UintSize</a> - <label for="r262" class="ident">i</label> - <span class="lit-number">1</span>)) &amp; <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-766"><code>		<label for="r261" class="ident">tmp</label>.<a href="#line-551" class="ident">montgomeryMul</a>(<label for="r255" class="ident">out</label>, <label for="r260" class="ident">xR</label>, <label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-767"><code>		<label for="r255" class="ident">out</label>.<a href="#line-258" class="ident">assign</a>(<a href="#line-36" class="ident">ctEq</a>(<label for="r263" class="ident">k</label>, <span class="lit-number">1</span>), <label for="r261" class="ident">tmp</label>)</code></span>
+<span class="codeline" id="line-768"><code>	}</code></span>
+<span class="codeline" id="line-769"><code>	<span class="keyword">return</span> <label for="r255" class="ident">out</label>.<a href="#line-537" class="ident">montgomeryReduction</a>(<label for="r259" class="ident">m</label>)</code></span>
+<span class="codeline" id="line-770"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

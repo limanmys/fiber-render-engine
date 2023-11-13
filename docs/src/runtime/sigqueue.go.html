@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: sigqueue.go in package runtime</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -131,13 +131,13 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-49"><code><span class="comment">// as there is no connection between handling a signal and receiving one,</span></code></span>
 <span class="codeline" id="line-50"><code><span class="comment">// but atomic instructions should minimize it.</span></code></span>
 <span class="codeline" id="line-51"><code><span class="keyword">var</span> sig <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-52"><code>	note       <a href="runtime2.go.html#line-190" class="ident">note</a></code></span>
+<span class="codeline" id="line-52"><code>	note       <a href="runtime2.go.html#line-192" class="ident">note</a></code></span>
 <span class="codeline" id="line-53"><code>	mask       [(<a href="os_linux_generic.go.html#line-11" class="ident">_NSIG</a> + <span class="lit-number">31</span>) / <span class="lit-number">32</span>]<a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
 <span class="codeline" id="line-54"><code>	wanted     [(<a href="os_linux_generic.go.html#line-11" class="ident">_NSIG</a> + <span class="lit-number">31</span>) / <span class="lit-number">32</span>]<a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
 <span class="codeline" id="line-55"><code>	ignored    [(<a href="os_linux_generic.go.html#line-11" class="ident">_NSIG</a> + <span class="lit-number">31</span>) / <span class="lit-number">32</span>]<a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
 <span class="codeline" id="line-56"><code>	recv       [(<a href="os_linux_generic.go.html#line-11" class="ident">_NSIG</a> + <span class="lit-number">31</span>) / <span class="lit-number">32</span>]<a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
-<span class="codeline" id="line-57"><code>	state      <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
-<span class="codeline" id="line-58"><code>	delivering <a href="../../pkg/builtin.html#name-uint32" class="ident">uint32</a></code></span>
+<span class="codeline" id="line-57"><code>	state      <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/types.go.html#line-185" class="ident">Uint32</a></code></span>
+<span class="codeline" id="line-58"><code>	delivering <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/types.go.html#line-185" class="ident">Uint32</a></code></span>
 <span class="codeline" id="line-59"><code>	inuse      <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
 <span class="codeline" id="line-60"><code>}</code></span>
 <span class="codeline" id="line-61"><code></code></span>
@@ -156,11 +156,11 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-74"><code>		<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
 <span class="codeline" id="line-75"><code>	}</code></span>
 <span class="codeline" id="line-76"><code></code></span>
-<span class="codeline" id="line-77"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-52" class="ident">Xadd</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>, <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-77"><code>	<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>.<a href="internal/atomic/types.go.html#line-290" class="ident">Add</a>(<span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-78"><code>	<span class="comment">// We are running in the signal handler; defer is not available.</span></code></span>
 <span class="codeline" id="line-79"><code></code></span>
 <span class="codeline" id="line-80"><code>	<span class="keyword">if</span> <label for="r3" class="ident">w</label> := <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-17" class="ident">Load</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-54" class="ident">wanted</a>[<label for="r1" class="ident">s</label>/<span class="lit-number">32</span>]); <label for="r3" class="ident">w</label>&amp;<label for="r2" class="ident">bit</label> == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-81"><code>		<a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-52" class="ident">Xadd</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>, -<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-81"><code>		<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>.<a href="internal/atomic/types.go.html#line-290" class="ident">Add</a>(-<span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-82"><code>		<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
 <span class="codeline" id="line-83"><code>	}</code></span>
 <span class="codeline" id="line-84"><code></code></span>
@@ -168,7 +168,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-86"><code>	<span class="keyword">for</span> {</code></span>
 <span class="codeline" id="line-87"><code>		<label for="r4" class="ident">mask</label> := <a href="#line-51" class="ident">sig</a>.<a href="#line-53" class="ident">mask</a>[<label for="r1" class="ident">s</label>/<span class="lit-number">32</span>]</code></span>
 <span class="codeline" id="line-88"><code>		<span class="keyword">if</span> <label for="r4" class="ident">mask</label>&amp;<label for="r2" class="ident">bit</label> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-89"><code>			<a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-52" class="ident">Xadd</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>, -<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-89"><code>			<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>.<a href="internal/atomic/types.go.html#line-290" class="ident">Add</a>(-<span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-90"><code>			<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-true" class="ident">true</a> <span class="comment">// signal already in queue</span></code></span>
 <span class="codeline" id="line-91"><code>		}</code></span>
 <span class="codeline" id="line-92"><code>		<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/stubs.go.html#line-12" class="ident">Cas</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-53" class="ident">mask</a>[<label for="r1" class="ident">s</label>/<span class="lit-number">32</span>], <label for="r4" class="ident">mask</label>, <label for="r4" class="ident">mask</label>|<label for="r2" class="ident">bit</label>) {</code></span>
@@ -179,19 +179,19 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-97"><code>	<span class="comment">// Notify receiver that queue has new bit.</span></code></span>
 <span class="codeline" id="line-98"><code><label for="r5" class="ident">Send</label>:</code></span>
 <span class="codeline" id="line-99"><code>	<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-100"><code>		<span class="keyword">switch</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-17" class="ident">Load</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>) {</code></span>
+<span class="codeline" id="line-100"><code>		<span class="keyword">switch</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() {</code></span>
 <span class="codeline" id="line-101"><code>		<span class="keyword">default</span>:</code></span>
-<span class="codeline" id="line-102"><code>			<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"sigsend: inconsistent state"</span>)</code></span>
+<span class="codeline" id="line-102"><code>			<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"sigsend: inconsistent state"</span>)</code></span>
 <span class="codeline" id="line-103"><code>		<span class="keyword">case</span> <a href="#line-63" class="ident">sigIdle</a>:</code></span>
-<span class="codeline" id="line-104"><code>			<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/stubs.go.html#line-12" class="ident">Cas</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>, <a href="#line-63" class="ident">sigIdle</a>, <a href="#line-65" class="ident">sigSending</a>) {</code></span>
+<span class="codeline" id="line-104"><code>			<span class="keyword">if</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-235" class="ident">CompareAndSwap</a>(<a href="#line-63" class="ident">sigIdle</a>, <a href="#line-65" class="ident">sigSending</a>) {</code></span>
 <span class="codeline" id="line-105"><code>				<span class="keyword">break</span> <label for="r5" class="ident">Send</label></code></span>
 <span class="codeline" id="line-106"><code>			}</code></span>
 <span class="codeline" id="line-107"><code>		<span class="keyword">case</span> <a href="#line-65" class="ident">sigSending</a>:</code></span>
 <span class="codeline" id="line-108"><code>			<span class="comment">// notification already pending</span></code></span>
 <span class="codeline" id="line-109"><code>			<span class="keyword">break</span> <label for="r5" class="ident">Send</label></code></span>
 <span class="codeline" id="line-110"><code>		<span class="keyword">case</span> <a href="#line-64" class="ident">sigReceiving</a>:</code></span>
-<span class="codeline" id="line-111"><code>			<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/stubs.go.html#line-12" class="ident">Cas</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>, <a href="#line-64" class="ident">sigReceiving</a>, <a href="#line-63" class="ident">sigIdle</a>) {</code></span>
-<span class="codeline" id="line-112"><code>				<span class="keyword">if</span> <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
+<span class="codeline" id="line-111"><code>			<span class="keyword">if</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-235" class="ident">CompareAndSwap</a>(<a href="#line-64" class="ident">sigReceiving</a>, <a href="#line-63" class="ident">sigIdle</a>) {</code></span>
+<span class="codeline" id="line-112"><code>				<span class="keyword">if</span> <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
 <span class="codeline" id="line-113"><code>					<a href="sigqueue_note.go.html#line-22" class="ident">sigNoteWakeup</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-52" class="ident">note</a>)</code></span>
 <span class="codeline" id="line-114"><code>					<span class="keyword">break</span> <label for="r5" class="ident">Send</label></code></span>
 <span class="codeline" id="line-115"><code>				}</code></span>
@@ -201,7 +201,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-119"><code>		}</code></span>
 <span class="codeline" id="line-120"><code>	}</code></span>
 <span class="codeline" id="line-121"><code></code></span>
-<span class="codeline" id="line-122"><code>	<a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-52" class="ident">Xadd</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>, -<span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-122"><code>	<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>.<a href="internal/atomic/types.go.html#line-290" class="ident">Add</a>(-<span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-123"><code>	<span class="keyword">return</span> <a href="../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
 <span class="codeline" id="line-124"><code>}</code></span>
 <span class="codeline" id="line-125"><code></code></span>
@@ -222,12 +222,12 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-140"><code>		<span class="comment">// Wait for updates to be available from signal sender.</span></code></span>
 <span class="codeline" id="line-141"><code>	<label for="r8" class="ident">Receive</label>:</code></span>
 <span class="codeline" id="line-142"><code>		<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-143"><code>			<span class="keyword">switch</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-17" class="ident">Load</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>) {</code></span>
+<span class="codeline" id="line-143"><code>			<span class="keyword">switch</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() {</code></span>
 <span class="codeline" id="line-144"><code>			<span class="keyword">default</span>:</code></span>
-<span class="codeline" id="line-145"><code>				<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"signal_recv: inconsistent state"</span>)</code></span>
+<span class="codeline" id="line-145"><code>				<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"signal_recv: inconsistent state"</span>)</code></span>
 <span class="codeline" id="line-146"><code>			<span class="keyword">case</span> <a href="#line-63" class="ident">sigIdle</a>:</code></span>
-<span class="codeline" id="line-147"><code>				<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/stubs.go.html#line-12" class="ident">Cas</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>, <a href="#line-63" class="ident">sigIdle</a>, <a href="#line-64" class="ident">sigReceiving</a>) {</code></span>
-<span class="codeline" id="line-148"><code>					<span class="keyword">if</span> <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
+<span class="codeline" id="line-147"><code>				<span class="keyword">if</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-235" class="ident">CompareAndSwap</a>(<a href="#line-63" class="ident">sigIdle</a>, <a href="#line-64" class="ident">sigReceiving</a>) {</code></span>
+<span class="codeline" id="line-148"><code>					<span class="keyword">if</span> <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
 <span class="codeline" id="line-149"><code>						<a href="sigqueue_note.go.html#line-18" class="ident">sigNoteSleep</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-52" class="ident">note</a>)</code></span>
 <span class="codeline" id="line-150"><code>						<span class="keyword">break</span> <label for="r8" class="ident">Receive</label></code></span>
 <span class="codeline" id="line-151"><code>					}</code></span>
@@ -236,7 +236,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-154"><code>					<span class="keyword">break</span> <label for="r8" class="ident">Receive</label></code></span>
 <span class="codeline" id="line-155"><code>				}</code></span>
 <span class="codeline" id="line-156"><code>			<span class="keyword">case</span> <a href="#line-65" class="ident">sigSending</a>:</code></span>
-<span class="codeline" id="line-157"><code>				<span class="keyword">if</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/stubs.go.html#line-12" class="ident">Cas</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>, <a href="#line-65" class="ident">sigSending</a>, <a href="#line-63" class="ident">sigIdle</a>) {</code></span>
+<span class="codeline" id="line-157"><code>				<span class="keyword">if</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-235" class="ident">CompareAndSwap</a>(<a href="#line-65" class="ident">sigSending</a>, <a href="#line-63" class="ident">sigIdle</a>) {</code></span>
 <span class="codeline" id="line-158"><code>					<span class="keyword">break</span> <label for="r8" class="ident">Receive</label></code></span>
 <span class="codeline" id="line-159"><code>				}</code></span>
 <span class="codeline" id="line-160"><code>			}</code></span>
@@ -264,15 +264,15 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-182"><code><span class="comment">	// a signal, has read from sig.wanted, is now updating sig.mask,</span></code></span>
 <span class="codeline" id="line-183"><code><span class="comment">	// and has not yet woken up the processor thread. We need to wait</span></code></span>
 <span class="codeline" id="line-184"><code><span class="comment">	// until all current signal deliveries have completed.</span></code></span>
-<span class="codeline" id="line-185"><code>	<span class="keyword">for</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-17" class="ident">Load</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>) != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-186"><code>		<a href="proc.go.html#line-316" class="ident">Gosched</a>()</code></span>
+<span class="codeline" id="line-185"><code>	<span class="keyword">for</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-58" class="ident">delivering</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-186"><code>		<a href="proc.go.html#line-336" class="ident">Gosched</a>()</code></span>
 <span class="codeline" id="line-187"><code>	}</code></span>
 <span class="codeline" id="line-188"><code></code></span>
 <span class="codeline" id="line-189"><code>	<span class="comment">// Although WaitUntilIdle seems like the right name for this</span></code></span>
 <span class="codeline" id="line-190"><code><span class="comment">	// function, the state we are looking for is sigReceiving, not</span></code></span>
 <span class="codeline" id="line-191"><code><span class="comment">	// sigIdle.  The sigIdle state is really more like sigProcessing.</span></code></span>
-<span class="codeline" id="line-192"><code>	<span class="keyword">for</span> <a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/atomic_amd64.go.html#line-17" class="ident">Load</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>) != <a href="#line-64" class="ident">sigReceiving</a> {</code></span>
-<span class="codeline" id="line-193"><code>		<a href="proc.go.html#line-316" class="ident">Gosched</a>()</code></span>
+<span class="codeline" id="line-192"><code>	<span class="keyword">for</span> <a href="#line-51" class="ident">sig</a>.<a href="#line-57" class="ident">state</a>.<a href="internal/atomic/types.go.html#line-193" class="ident">Load</a>() != <a href="#line-64" class="ident">sigReceiving</a> {</code></span>
+<span class="codeline" id="line-193"><code>		<a href="proc.go.html#line-336" class="ident">Gosched</a>()</code></span>
 <span class="codeline" id="line-194"><code>	}</code></span>
 <span class="codeline" id="line-195"><code>}</code></span>
 <span class="codeline" id="line-196"><code></code></span>
@@ -283,7 +283,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-201"><code>	<span class="keyword">if</span> !<a href="#line-51" class="ident">sig</a>.<a href="#line-59" class="ident">inuse</a> {</code></span>
 <span class="codeline" id="line-202"><code>		<span class="comment">// This is the first call to signal_enable. Initialize.</span></code></span>
 <span class="codeline" id="line-203"><code>		<a href="#line-51" class="ident">sig</a>.<a href="#line-59" class="ident">inuse</a> = <a href="../../pkg/builtin.html#name-true" class="ident">true</a> <span class="comment">// enable reception of signals; cannot disable</span></code></span>
-<span class="codeline" id="line-204"><code>		<span class="keyword">if</span> <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-283" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
+<span class="codeline" id="line-204"><code>		<span class="keyword">if</span> <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"darwin"</span> || <a href="extern.go.html#line-337" class="ident">GOOS</a> == <span class="lit-string">"ios"</span> {</code></span>
 <span class="codeline" id="line-205"><code>			<a href="sigqueue_note.go.html#line-14" class="ident">sigNoteSetup</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-52" class="ident">note</a>)</code></span>
 <span class="codeline" id="line-206"><code>		} <span class="keyword">else</span> {</code></span>
 <span class="codeline" id="line-207"><code>			<a href="lock_futex.go.html#line-135" class="ident">noteclear</a>(&amp;<a href="#line-51" class="ident">sig</a>.<a href="#line-52" class="ident">note</a>)</code></span>
@@ -357,7 +357,7 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-275"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

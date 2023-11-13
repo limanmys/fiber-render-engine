@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: curve25519.go in package golang.org/x/crypto/curve25519</title>
-<link href="../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -27,33 +27,8 @@ input[id=r7]:checked ~pre label[for=r7],
 input[id=r8]:checked ~pre label[for=r8],
 input[id=r9]:checked ~pre label[for=r9],
 input[id=r10]:checked ~pre label[for=r10],
-input[id=r11]:checked ~pre label[for=r11],
-input[id=r12]:checked ~pre label[for=r12],
-input[id=r13]:checked ~pre label[for=r13],
-input[id=r14]:checked ~pre label[for=r14],
-input[id=r15]:checked ~pre label[for=r15],
-input[id=r16]:checked ~pre label[for=r16],
-input[id=r17]:checked ~pre label[for=r17],
-input[id=r18]:checked ~pre label[for=r18],
-input[id=r19]:checked ~pre label[for=r19],
-input[id=r20]:checked ~pre label[for=r20],
-input[id=r21]:checked ~pre label[for=r21],
-input[id=r22]:checked ~pre label[for=r22],
-input[id=r23]:checked ~pre label[for=r23],
-input[id=r24]:checked ~pre label[for=r24],
-input[id=r25]:checked ~pre label[for=r25],
-input[id=r26]:checked ~pre label[for=r26],
-input[id=r27]:checked ~pre label[for=r27],
-input[id=r28]:checked ~pre label[for=r28],
-input[id=r29]:checked ~pre label[for=r29],
-input[id=r30]:checked ~pre label[for=r30],
-input[id=r31]:checked ~pre label[for=r31],
-input[id=r32]:checked ~pre label[for=r32]
+input[id=r11]:checked ~pre label[for=r11]
 {background: #226; color: #ff8;}
-input[id=i0]:checked ~pre .i0,
-input[id=i1]:checked ~pre .i1,
-input[id=i2]:checked ~pre .i2,
-input[id=i3]:checked ~pre .i3
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -67,31 +42,6 @@ input[id=i3]:checked ~pre .i3
 <input id="r9" type="radio" name="g"/>
 <input id="r10" type="radio" name="g"/>
 <input id="r11" type="radio" name="g"/>
-<input id="r12" type="radio" name="g"/>
-<input id="r13" type="radio" name="g"/>
-<input id="r14" type="radio" name="g"/>
-<input id="r15" type="radio" name="g"/>
-<input id="r16" type="radio" name="g"/>
-<input id="r17" type="radio" name="g"/>
-<input id="r18" type="radio" name="g"/>
-<input id="r19" type="radio" name="g"/>
-<input id="r20" type="radio" name="g"/>
-<input id="r21" type="radio" name="g"/>
-<input id="r22" type="radio" name="g"/>
-<input id="r23" type="radio" name="g"/>
-<input id="r24" type="radio" name="g"/>
-<input id="r25" type="radio" name="g"/>
-<input id="r26" type="radio" name="g"/>
-<input id="r27" type="radio" name="g"/>
-<input id="r28" type="radio" name="g"/>
-<input id="r29" type="radio" name="g"/>
-<input id="r30" type="radio" name="g"/>
-<input id="r31" type="radio" name="g"/>
-<input id="r32" type="radio" name="g"/>
-<input id="i0" type="radio" name="i"/>
-<input id="i1" type="radio" name="i"/>
-<input id="i2" type="radio" name="i"/>
-<input id="i3" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// Copyright 2019 The Go Authors. All rights reserved.</span></code></span>
@@ -100,148 +50,61 @@ input[id=i3]:checked ~pre .i3
 <span class="codeline" id="line-4"><code></code></span>
 <div class="anchor" id="doc"><span class="codeline" id="line-5"><code><span class="comment">// Package curve25519 provides an implementation of the X25519 function, which</span></code></span>
 <span class="codeline" id="line-6"><code><span class="comment">// performs scalar multiplication on the elliptic curve known as Curve25519.</span></code></span>
-<span class="codeline" id="line-7"><code><span class="comment">// See RFC 7748.</span></code></span></div><span class="codeline" id="line-8"><code><span class="keyword">package</span> curve25519 <span class="comment">// import "golang.org/x/crypto/curve25519"</span></code></span>
-<span class="codeline" id="line-9"><code></code></span>
-<span class="codeline" id="line-10"><code><span class="keyword">import</span> (</code></span>
-<span class="codeline" id="line-11"><code>	<label for="i0"><span class="lit-string i0">"crypto/subtle"</span></label></code></span>
-<span class="codeline" id="line-12"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
-<span class="codeline" id="line-13"><code>	<label for="i2"><span class="lit-string i2">"strconv"</span></label></code></span>
-<span class="codeline" id="line-14"><code></code></span>
-<span class="codeline" id="line-15"><code>	<label for="i3"><span class="lit-string i3">"golang.org/x/crypto/curve25519/internal/field"</span></label></code></span>
-<span class="codeline" id="line-16"><code>)</code></span>
-<span class="codeline" id="line-17"><code></code></span>
-<span class="codeline" id="line-18"><code><span class="comment">// ScalarMult sets dst to the product scalar * point.</span></code></span>
-<span class="codeline" id="line-19"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-20"><code><span class="comment">// Deprecated: when provided a low-order point, ScalarMult will set dst to all</span></code></span>
-<span class="codeline" id="line-21"><code><span class="comment">// zeroes, irrespective of the scalar. Instead, use the X25519 function, which</span></code></span>
-<span class="codeline" id="line-22"><code><span class="comment">// will return an error.</span></code></span>
-<span class="codeline" id="line-23"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarMult" class="ident">ScalarMult</a></label>(<label for="r1" class="ident">dst</label>, <label for="r2" class="ident">scalar</label>, <label for="r3" class="ident">point</label> *[<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
-<span class="codeline" id="line-24"><code>	<span class="keyword">var</span> <label for="r4" class="ident">e</label> [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-25"><code></code></span>
-<span class="codeline" id="line-26"><code>	<a href="../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r4" class="ident">e</label>[:], <label for="r2" class="ident">scalar</label>[:])</code></span>
-<span class="codeline" id="line-27"><code>	<label for="r4" class="ident">e</label>[<span class="lit-number">0</span>] &amp;= <span class="lit-number">248</span></code></span>
-<span class="codeline" id="line-28"><code>	<label for="r4" class="ident">e</label>[<span class="lit-number">31</span>] &amp;= <span class="lit-number">127</span></code></span>
-<span class="codeline" id="line-29"><code>	<label for="r4" class="ident">e</label>[<span class="lit-number">31</span>] |= <span class="lit-number">64</span></code></span>
+<span class="codeline" id="line-7"><code><span class="comment">// See RFC 7748.</span></code></span>
+<span class="codeline" id="line-8"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-9"><code><span class="comment">// Starting in Go 1.20, this package is a wrapper for the X25519 implementation</span></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// in the crypto/ecdh package.</span></code></span></div><span class="codeline" id="line-11"><code><span class="keyword">package</span> curve25519 <span class="comment">// import "golang.org/x/crypto/curve25519"</span></code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// ScalarMult sets dst to the product scalar * point.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-15"><code><span class="comment">// Deprecated: when provided a low-order point, ScalarMult will set dst to all</span></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// zeroes, irrespective of the scalar. Instead, use the X25519 function, which</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// will return an error.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarMult" class="ident">ScalarMult</a></label>(<label for="r1" class="ident">dst</label>, <label for="r2" class="ident">scalar</label>, <label for="r3" class="ident">point</label> *[<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-19"><code>	<a href="curve25519_go120.go.html#line-29" class="ident">scalarMult</a>(<label for="r1" class="ident">dst</label>, <label for="r2" class="ident">scalar</label>, <label for="r3" class="ident">point</label>)</code></span>
+<span class="codeline" id="line-20"><code>}</code></span>
+<span class="codeline" id="line-21"><code></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// ScalarBaseMult sets dst to the product scalar * base where base is the</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// standard generator.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// It is recommended to use the X25519 function with Basepoint instead, as</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// copying into fixed size arrays can lead to unexpected bugs.</span></code></span>
+<span class="codeline" id="line-27"><code><span class="keyword">func</span> <label for="r4" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarBaseMult" class="ident">ScalarBaseMult</a></label>(<label for="r5" class="ident">dst</label>, <label for="r6" class="ident">scalar</label> *[<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
+<span class="codeline" id="line-28"><code>	<a href="curve25519_go120.go.html#line-39" class="ident">scalarBaseMult</a>(<label for="r5" class="ident">dst</label>, <label for="r6" class="ident">scalar</label>)</code></span>
+<span class="codeline" id="line-29"><code>}</code></span>
 <span class="codeline" id="line-30"><code></code></span>
-<span class="codeline" id="line-31"><code>	<span class="keyword">var</span> <label for="r5" class="ident">x1</label>, <label for="r6" class="ident">x2</label>, <label for="r7" class="ident">z2</label>, <label for="r8" class="ident">x3</label>, <label for="r9" class="ident">z3</label>, <label for="r10" class="ident">tmp0</label>, <label for="r11" class="ident">tmp1</label> <a href="../../../../../pkg/golang.org/x/crypto/curve25519/internal/field.html" class="ident i3">field</a>.<a href="internal/field/fe.go.html#line-22" class="ident">Element</a></code></span>
-<span class="codeline" id="line-32"><code>	<label for="r5" class="ident">x1</label>.<a href="internal/field/fe.go.html#line-194" class="ident">SetBytes</a>(<label for="r3" class="ident">point</label>[:])</code></span>
-<span class="codeline" id="line-33"><code>	<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-47" class="ident">One</a>()</code></span>
-<span class="codeline" id="line-34"><code>	<label for="r8" class="ident">x3</label>.<a href="internal/field/fe.go.html#line-184" class="ident">Set</a>(&amp;<label for="r5" class="ident">x1</label>)</code></span>
-<span class="codeline" id="line-35"><code>	<label for="r9" class="ident">z3</label>.<a href="internal/field/fe.go.html#line-47" class="ident">One</a>()</code></span>
-<span class="codeline" id="line-36"><code></code></span>
-<span class="codeline" id="line-37"><code>	<label for="r12" class="ident">swap</label> := <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-38"><code>	<span class="keyword">for</span> <label for="r13" class="ident">pos</label> := <span class="lit-number">254</span>; <label for="r13" class="ident">pos</label> &gt;= <span class="lit-number">0</span>; <label for="r13" class="ident">pos</label>-- {</code></span>
-<span class="codeline" id="line-39"><code>		<label for="r14" class="ident">b</label> := <label for="r4" class="ident">e</label>[<label for="r13" class="ident">pos</label>/<span class="lit-number">8</span>] &gt;&gt; <a href="../../../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<label for="r13" class="ident">pos</label>&amp;<span class="lit-number">7</span>)</code></span>
-<span class="codeline" id="line-40"><code>		<label for="r14" class="ident">b</label> &amp;= <span class="lit-number">1</span></code></span>
-<span class="codeline" id="line-41"><code>		<label for="r12" class="ident">swap</label> ^= <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">b</label>)</code></span>
-<span class="codeline" id="line-42"><code>		<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-268" class="ident">Swap</a>(&amp;<label for="r8" class="ident">x3</label>, <label for="r12" class="ident">swap</label>)</code></span>
-<span class="codeline" id="line-43"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-268" class="ident">Swap</a>(&amp;<label for="r9" class="ident">z3</label>, <label for="r12" class="ident">swap</label>)</code></span>
-<span class="codeline" id="line-44"><code>		<label for="r12" class="ident">swap</label> = <a href="../../../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r14" class="ident">b</label>)</code></span>
-<span class="codeline" id="line-45"><code></code></span>
-<span class="codeline" id="line-46"><code>		<label for="r10" class="ident">tmp0</label>.<a href="internal/field/fe.go.html#line-100" class="ident">Subtract</a>(&amp;<label for="r8" class="ident">x3</label>, &amp;<label for="r9" class="ident">z3</label>)</code></span>
-<span class="codeline" id="line-47"><code>		<label for="r11" class="ident">tmp1</label>.<a href="internal/field/fe.go.html#line-100" class="ident">Subtract</a>(&amp;<label for="r6" class="ident">x2</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-48"><code>		<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-86" class="ident">Add</a>(&amp;<label for="r6" class="ident">x2</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-49"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-86" class="ident">Add</a>(&amp;<label for="r8" class="ident">x3</label>, &amp;<label for="r9" class="ident">z3</label>)</code></span>
-<span class="codeline" id="line-50"><code>		<label for="r9" class="ident">z3</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r10" class="ident">tmp0</label>, &amp;<label for="r6" class="ident">x2</label>)</code></span>
-<span class="codeline" id="line-51"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r7" class="ident">z2</label>, &amp;<label for="r11" class="ident">tmp1</label>)</code></span>
-<span class="codeline" id="line-52"><code>		<label for="r10" class="ident">tmp0</label>.<a href="internal/field/fe.go.html#line-304" class="ident">Square</a>(&amp;<label for="r11" class="ident">tmp1</label>)</code></span>
-<span class="codeline" id="line-53"><code>		<label for="r11" class="ident">tmp1</label>.<a href="internal/field/fe.go.html#line-304" class="ident">Square</a>(&amp;<label for="r6" class="ident">x2</label>)</code></span>
-<span class="codeline" id="line-54"><code>		<label for="r8" class="ident">x3</label>.<a href="internal/field/fe.go.html#line-86" class="ident">Add</a>(&amp;<label for="r9" class="ident">z3</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-55"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-100" class="ident">Subtract</a>(&amp;<label for="r9" class="ident">z3</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-56"><code>		<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r11" class="ident">tmp1</label>, &amp;<label for="r10" class="ident">tmp0</label>)</code></span>
-<span class="codeline" id="line-57"><code>		<label for="r11" class="ident">tmp1</label>.<a href="internal/field/fe.go.html#line-100" class="ident">Subtract</a>(&amp;<label for="r11" class="ident">tmp1</label>, &amp;<label for="r10" class="ident">tmp0</label>)</code></span>
-<span class="codeline" id="line-58"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-304" class="ident">Square</a>(&amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-59"><code></code></span>
-<span class="codeline" id="line-60"><code>		<label for="r9" class="ident">z3</label>.<a href="internal/field/fe.go.html#line-310" class="ident">Mult32</a>(&amp;<label for="r11" class="ident">tmp1</label>, <span class="lit-number">121666</span>)</code></span>
-<span class="codeline" id="line-61"><code>		<label for="r8" class="ident">x3</label>.<a href="internal/field/fe.go.html#line-304" class="ident">Square</a>(&amp;<label for="r8" class="ident">x3</label>)</code></span>
-<span class="codeline" id="line-62"><code>		<label for="r10" class="ident">tmp0</label>.<a href="internal/field/fe.go.html#line-86" class="ident">Add</a>(&amp;<label for="r10" class="ident">tmp0</label>, &amp;<label for="r9" class="ident">z3</label>)</code></span>
-<span class="codeline" id="line-63"><code>		<label for="r9" class="ident">z3</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r5" class="ident">x1</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-64"><code>		<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r11" class="ident">tmp1</label>, &amp;<label for="r10" class="ident">tmp0</label>)</code></span>
-<span class="codeline" id="line-65"><code>	}</code></span>
-<span class="codeline" id="line-66"><code></code></span>
-<span class="codeline" id="line-67"><code>	<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-268" class="ident">Swap</a>(&amp;<label for="r8" class="ident">x3</label>, <label for="r12" class="ident">swap</label>)</code></span>
-<span class="codeline" id="line-68"><code>	<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-268" class="ident">Swap</a>(&amp;<label for="r9" class="ident">z3</label>, <label for="r12" class="ident">swap</label>)</code></span>
-<span class="codeline" id="line-69"><code></code></span>
-<span class="codeline" id="line-70"><code>	<label for="r7" class="ident">z2</label>.<a href="internal/field/fe.go.html#line-119" class="ident">Invert</a>(&amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-71"><code>	<label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-298" class="ident">Multiply</a>(&amp;<label for="r6" class="ident">x2</label>, &amp;<label for="r7" class="ident">z2</label>)</code></span>
-<span class="codeline" id="line-72"><code>	<a href="../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r1" class="ident">dst</label>[:], <label for="r6" class="ident">x2</label>.<a href="internal/field/fe.go.html#line-220" class="ident">Bytes</a>())</code></span>
-<span class="codeline" id="line-73"><code>}</code></span>
-<span class="codeline" id="line-74"><code></code></span>
-<span class="codeline" id="line-75"><code><span class="comment">// ScalarBaseMult sets dst to the product scalar * base where base is the</span></code></span>
-<span class="codeline" id="line-76"><code><span class="comment">// standard generator.</span></code></span>
-<span class="codeline" id="line-77"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-78"><code><span class="comment">// It is recommended to use the X25519 function with Basepoint instead, as</span></code></span>
-<span class="codeline" id="line-79"><code><span class="comment">// copying into fixed size arrays can lead to unexpected bugs.</span></code></span>
-<span class="codeline" id="line-80"><code><span class="keyword">func</span> <label for="r15" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarBaseMult" class="ident">ScalarBaseMult</a></label>(<label for="r16" class="ident">dst</label>, <label for="r17" class="ident">scalar</label> *[<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) {</code></span>
-<span class="codeline" id="line-81"><code>	<a href="#line-23" class="ident">ScalarMult</a>(<label for="r16" class="ident">dst</label>, <label for="r17" class="ident">scalar</label>, &amp;<a href="#line-94" class="ident">basePoint</a>)</code></span>
-<span class="codeline" id="line-82"><code>}</code></span>
-<span class="codeline" id="line-83"><code></code></span>
-<span class="codeline" id="line-84"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-85"><code>	<span class="comment">// ScalarSize is the size of the scalar input to X25519.</span></code></span>
-<span class="codeline" id="line-86"><code>	<a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarSize" class="ident">ScalarSize</a> = <span class="lit-number">32</span></code></span>
-<span class="codeline" id="line-87"><code>	<span class="comment">// PointSize is the size of the point input to X25519.</span></code></span>
-<span class="codeline" id="line-88"><code>	<a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-PointSize" class="ident">PointSize</a> = <span class="lit-number">32</span></code></span>
-<span class="codeline" id="line-89"><code>)</code></span>
-<span class="codeline" id="line-90"><code></code></span>
-<span class="codeline" id="line-91"><code><span class="comment">// Basepoint is the canonical Curve25519 generator.</span></code></span>
-<span class="codeline" id="line-92"><code><span class="keyword">var</span> <a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-Basepoint" class="ident">Basepoint</a> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-93"><code></code></span>
-<span class="codeline" id="line-94"><code><span class="keyword">var</span> basePoint = [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{<span class="lit-number">9</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>, <span class="lit-number">0</span>}</code></span>
-<span class="codeline" id="line-95"><code></code></span>
-<span class="codeline" id="line-96"><code><span class="keyword">func</span> init() { <a href="#line-92" class="ident">Basepoint</a> = <a href="#line-94" class="ident">basePoint</a>[:] }</code></span>
-<span class="codeline" id="line-97"><code></code></span>
-<span class="codeline" id="line-98"><code><span class="keyword">func</span> checkBasepoint() {</code></span>
-<span class="codeline" id="line-99"><code>	<span class="keyword">if</span> <a href="../../../../../pkg/crypto/subtle.html" class="ident i0">subtle</a>.<a href="../../../../crypto/subtle/constant_time.go.html#line-13" class="ident">ConstantTimeCompare</a>(<a href="#line-92" class="ident">Basepoint</a>, []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{</code></span>
-<span class="codeline" id="line-100"><code>		<span class="lit-number">0x09</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>,</code></span>
-<span class="codeline" id="line-101"><code>		<span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>,</code></span>
-<span class="codeline" id="line-102"><code>		<span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>,</code></span>
-<span class="codeline" id="line-103"><code>		<span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>, <span class="lit-number">0x00</span>,</code></span>
-<span class="codeline" id="line-104"><code>	}) != <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-105"><code>		<a href="../../../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"curve25519: global Basepoint value was modified"</span>)</code></span>
-<span class="codeline" id="line-106"><code>	}</code></span>
-<span class="codeline" id="line-107"><code>}</code></span>
-<span class="codeline" id="line-108"><code></code></span>
-<span class="codeline" id="line-109"><code><span class="comment">// X25519 returns the result of the scalar multiplication (scalar * point),</span></code></span>
-<span class="codeline" id="line-110"><code><span class="comment">// according to RFC 7748, Section 5. scalar, point and the return value are</span></code></span>
-<span class="codeline" id="line-111"><code><span class="comment">// slices of 32 bytes.</span></code></span>
-<span class="codeline" id="line-112"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-113"><code><span class="comment">// scalar can be generated at random, for example with crypto/rand. point should</span></code></span>
-<span class="codeline" id="line-114"><code><span class="comment">// be either Basepoint or the output of another X25519 call.</span></code></span>
-<span class="codeline" id="line-115"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-116"><code><span class="comment">// If point is Basepoint (but not if it's a different slice with the same</span></code></span>
-<span class="codeline" id="line-117"><code><span class="comment">// contents) a precomputed implementation might be used for performance.</span></code></span>
-<span class="codeline" id="line-118"><code><span class="keyword">func</span> <label for="r20" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-X25519" class="ident">X25519</a></label>(<label for="r21" class="ident">scalar</label>, <label for="r22" class="ident">point</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-119"><code>	<span class="comment">// Outline the body of function, to let the allocation be inlined in the</span></code></span>
-<span class="codeline" id="line-120"><code><span class="comment">	// caller, and possibly avoid escaping to the heap.</span></code></span>
-<span class="codeline" id="line-121"><code>	<span class="keyword">var</span> <label for="r23" class="ident">dst</label> [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <a href="#line-125" class="ident">x25519</a>(&amp;<label for="r23" class="ident">dst</label>, <label for="r21" class="ident">scalar</label>, <label for="r22" class="ident">point</label>)</code></span>
-<span class="codeline" id="line-123"><code>}</code></span>
-<span class="codeline" id="line-124"><code></code></span>
-<span class="codeline" id="line-125"><code><span class="keyword">func</span> x25519(<label for="r25" class="ident">dst</label> *[<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r26" class="ident">scalar</label>, <label for="r27" class="ident">point</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
-<span class="codeline" id="line-126"><code>	<span class="keyword">var</span> <label for="r28" class="ident">in</label> [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-127"><code>	<span class="keyword">if</span> <label for="r29" class="ident">l</label> := <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r26" class="ident">scalar</label>); <label for="r29" class="ident">l</label> != <span class="lit-number">32</span> {</code></span>
-<span class="codeline" id="line-128"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"bad scalar length: "</span> + <a href="../../../../../pkg/strconv.html" class="ident i2">strconv</a>.<a href="../../../../strconv/itoa.go.html#line-34" class="ident">Itoa</a>(<label for="r29" class="ident">l</label>) + <span class="lit-string">", expected 32"</span>)</code></span>
-<span class="codeline" id="line-129"><code>	}</code></span>
-<span class="codeline" id="line-130"><code>	<span class="keyword">if</span> <label for="r30" class="ident">l</label> := <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r27" class="ident">point</label>); <label for="r30" class="ident">l</label> != <span class="lit-number">32</span> {</code></span>
-<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"bad point length: "</span> + <a href="../../../../../pkg/strconv.html" class="ident i2">strconv</a>.<a href="../../../../strconv/itoa.go.html#line-34" class="ident">Itoa</a>(<label for="r30" class="ident">l</label>) + <span class="lit-string">", expected 32"</span>)</code></span>
-<span class="codeline" id="line-132"><code>	}</code></span>
-<span class="codeline" id="line-133"><code>	<a href="../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r28" class="ident">in</label>[:], <label for="r26" class="ident">scalar</label>)</code></span>
-<span class="codeline" id="line-134"><code>	<span class="keyword">if</span> &amp;<label for="r27" class="ident">point</label>[<span class="lit-number">0</span>] == &amp;<a href="#line-92" class="ident">Basepoint</a>[<span class="lit-number">0</span>] {</code></span>
-<span class="codeline" id="line-135"><code>		<a href="#line-98" class="ident">checkBasepoint</a>()</code></span>
-<span class="codeline" id="line-136"><code>		<a href="#line-80" class="ident">ScalarBaseMult</a>(<label for="r25" class="ident">dst</label>, &amp;<label for="r28" class="ident">in</label>)</code></span>
-<span class="codeline" id="line-137"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-138"><code>		<span class="keyword">var</span> <label for="r31" class="ident">base</label>, <label for="r32" class="ident">zero</label> [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
-<span class="codeline" id="line-139"><code>		<a href="../../../../../pkg/builtin.html#name-copy" class="ident">copy</a>(<label for="r31" class="ident">base</label>[:], <label for="r27" class="ident">point</label>)</code></span>
-<span class="codeline" id="line-140"><code>		<a href="#line-23" class="ident">ScalarMult</a>(<label for="r25" class="ident">dst</label>, &amp;<label for="r28" class="ident">in</label>, &amp;<label for="r31" class="ident">base</label>)</code></span>
-<span class="codeline" id="line-141"><code>		<span class="keyword">if</span> <a href="../../../../../pkg/crypto/subtle.html" class="ident i0">subtle</a>.<a href="../../../../crypto/subtle/constant_time.go.html#line-13" class="ident">ConstantTimeCompare</a>(<label for="r25" class="ident">dst</label>[:], <label for="r32" class="ident">zero</label>[:]) == <span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-142"><code>			<span class="keyword">return</span> <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"bad input point: low order point"</span>)</code></span>
-<span class="codeline" id="line-143"><code>		}</code></span>
-<span class="codeline" id="line-144"><code>	}</code></span>
-<span class="codeline" id="line-145"><code>	<span class="keyword">return</span> <label for="r25" class="ident">dst</label>[:], <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-146"><code>}</code></span>
+<span class="codeline" id="line-31"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-32"><code>	<span class="comment">// ScalarSize is the size of the scalar input to X25519.</span></code></span>
+<span class="codeline" id="line-33"><code>	<a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-ScalarSize" class="ident">ScalarSize</a> = <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-34"><code>	<span class="comment">// PointSize is the size of the point input to X25519.</span></code></span>
+<span class="codeline" id="line-35"><code>	<a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-PointSize" class="ident">PointSize</a> = <span class="lit-number">32</span></code></span>
+<span class="codeline" id="line-36"><code>)</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// Basepoint is the canonical Curve25519 generator.</span></code></span>
+<span class="codeline" id="line-39"><code><span class="keyword">var</span> <a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-Basepoint" class="ident">Basepoint</a> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="keyword">var</span> basePoint = [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>{<span class="lit-number">9</span>}</code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">func</span> init() { <a href="#line-39" class="ident">Basepoint</a> = <a href="#line-41" class="ident">basePoint</a>[:] }</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// X25519 returns the result of the scalar multiplication (scalar * point),</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// according to RFC 7748, Section 5. scalar, point and the return value are</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// slices of 32 bytes.</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// scalar can be generated at random, for example with crypto/rand. point should</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// be either Basepoint or the output of another X25519 call.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-52"><code><span class="comment">// If point is Basepoint (but not if it's a different slice with the same</span></code></span>
+<span class="codeline" id="line-53"><code><span class="comment">// contents) a precomputed implementation might be used for performance.</span></code></span>
+<span class="codeline" id="line-54"><code><span class="keyword">func</span> <label for="r8" class="ident"><a href="../../../../../pkg/golang.org/x/crypto/curve25519.html#name-X25519" class="ident">X25519</a></label>(<label for="r9" class="ident">scalar</label>, <label for="r10" class="ident">point</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-55"><code>	<span class="comment">// Outline the body of function, to let the allocation be inlined in the</span></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">	// caller, and possibly avoid escaping to the heap.</span></code></span>
+<span class="codeline" id="line-57"><code>	<span class="keyword">var</span> <label for="r11" class="ident">dst</label> [<span class="lit-number">32</span>]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-58"><code>	<span class="keyword">return</span> <a href="curve25519_go120.go.html#line-11" class="ident">x25519</a>(&amp;<label for="r11" class="ident">dst</label>, <label for="r9" class="ident">scalar</label>, <label for="r10" class="ident">point</label>)</code></span>
+<span class="codeline" id="line-59"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

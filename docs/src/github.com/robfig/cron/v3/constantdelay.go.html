@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: constantdelay.go in package github.com/robfig/cron/v3</title>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	constantdelay.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/robfig/cron/v3.html">github.com/robfig/cron/v3</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> cron</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"time"</span></label></code></span>
+<span class="codeline" id="line-4"><code></code></span>
+<span class="codeline" id="line-5"><code><span class="comment">// ConstantDelaySchedule represents a simple recurring duty cycle, e.g. "Every 5 minutes".</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// It does not support jobs more frequent than once a second.</span></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/robfig/cron/v3.html#name-ConstantDelaySchedule" class="ident">ConstantDelaySchedule</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-8"><code>	Delay <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a></code></span>
+<span class="codeline" id="line-9"><code>}</code></span>
+<span class="codeline" id="line-10"><code></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// Every returns a crontab Schedule that activates once every duration.</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// Delays of less than a second are not supported (will round up to 1 second).</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// Any fields less than a Second are truncated.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/github.com/robfig/cron/v3.html#name-Every" class="ident">Every</a></label>(<label for="r1" class="ident">duration</label> <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>) <a href="#line-7" class="ident">ConstantDelaySchedule</a> {</code></span>
+<span class="codeline" id="line-15"><code>	<span class="keyword">if</span> <label for="r1" class="ident">duration</label> &lt; <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a> {</code></span>
+<span class="codeline" id="line-16"><code>		<label for="r1" class="ident">duration</label> = <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a></code></span>
+<span class="codeline" id="line-17"><code>	}</code></span>
+<span class="codeline" id="line-18"><code>	<span class="keyword">return</span> <a href="#line-7" class="ident">ConstantDelaySchedule</a>{</code></span>
+<span class="codeline" id="line-19"><code>		<a href="#line-8" class="ident">Delay</a>: <label for="r1" class="ident">duration</label> - <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>(<label for="r1" class="ident">duration</label>.<a href="../../../../time/time.go.html#line-759" class="ident">Nanoseconds</a>())%<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-635" class="ident">Second</a>,</code></span>
+<span class="codeline" id="line-20"><code>	}</code></span>
+<span class="codeline" id="line-21"><code>}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// Next returns the next time this should be run.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// This rounds so that the next activation time will be on the second.</span></code></span>
+<span class="codeline" id="line-25"><code><span class="keyword">func</span> (<label for="r2" class="ident">schedule</label> <a href="#line-7" class="ident">ConstantDelaySchedule</a>) <label for="r3" class="ident">Next</label>(<label for="r4" class="ident">t</label> <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a>) <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-129" class="ident">Time</a> {</code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">return</span> <label for="r4" class="ident">t</label>.<a href="../../../../time/time.go.html#line-856" class="ident">Add</a>(<label for="r2" class="ident">schedule</label>.<a href="#line-8" class="ident">Delay</a> - <a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-612" class="ident">Duration</a>(<label for="r4" class="ident">t</label>.<a href="../../../../time/time.go.html#line-598" class="ident">Nanosecond</a>())*<a href="../../../../../pkg/time.html" class="ident i0">time</a>.<a href="../../../../time/time.go.html#line-632" class="ident">Nanosecond</a>)</code></span>
+<span class="codeline" id="line-27"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

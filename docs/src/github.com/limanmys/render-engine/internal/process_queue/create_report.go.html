@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: create_report.go in package github.com/limanmys/render-engine/internal/process_queue</title>
+<link href="../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	create_report.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/process_queue.html">github.com/limanmys/render-engine/internal/process_queue</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3,
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5,
+input[id=i6]:checked ~pre .i6,
+input[id=i7]:checked ~pre .i7,
+input[id=i8]:checked ~pre .i8,
+input[id=i9]:checked ~pre .i9,
+input[id=i10]:checked ~pre .i10
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+<input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
+<input id="i6" type="radio" name="i"/>
+<input id="i7" type="radio" name="i"/>
+<input id="i8" type="radio" name="i"/>
+<input id="i9" type="radio" name="i"/>
+<input id="i10" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> process_queue</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<a href="../../../../../../pkg/encoding/base64.html" class="ident i0">b64</a> <label for="i0"><span class="lit-string i0">"encoding/base64"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"encoding/json"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"strings"</span></label></code></span>
+<span class="codeline" id="line-7"><code></code></span>
+<span class="codeline" id="line-8"><code>	<label for="i3"><span class="lit-string i3">"github.com/google/uuid"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i4"><span class="lit-string i4">"github.com/limanmys/render-engine/app/models"</span></label></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i5"><span class="lit-string i5">"github.com/limanmys/render-engine/internal/liman"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i6"><span class="lit-string i6">"github.com/limanmys/render-engine/internal/sandbox"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i7"><span class="lit-string i7">"github.com/limanmys/render-engine/internal/user_token"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i8"><span class="lit-string i8">"github.com/limanmys/render-engine/pkg/helpers"</span></label></code></span>
+<span class="codeline" id="line-14"><code>	<label for="i9"><span class="lit-string i9">"github.com/limanmys/render-engine/pkg/linux"</span></label></code></span>
+<span class="codeline" id="line-15"><code>	<label for="i10"><span class="lit-string i10">"gorm.io/gorm"</span></label></code></span>
+<span class="codeline" id="line-16"><code>)</code></span>
+<span class="codeline" id="line-17"><code></code></span>
+<span class="codeline" id="line-18"><code><span class="keyword">type</span> <a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/process_queue.html#name-CreateReport" class="ident">CreateReport</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-19"><code>	Queue *<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/queue.go.html#line-28" class="ident">Queue</a></code></span>
+<span class="codeline" id="line-20"><code>	DB    *<a href="../../../../../../pkg/gorm.io/gorm.html" class="ident i10">gorm</a>.<a href="../../../../../gorm.io/gorm/gorm.go.html#line-94" class="ident">DB</a></code></span>
+<span class="codeline" id="line-21"><code>}</code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// Process creates new report queue</span></code></span>
+<span class="codeline" id="line-24"><code><span class="keyword">func</span> (<label for="r0" class="ident">c</label> <a href="#line-18" class="ident">CreateReport</a>) <label for="r1" class="ident">Process</label>() <a href="../../../../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-25"><code>	<span class="comment">// Update cronjob as processing</span></code></span>
+<span class="codeline" id="line-26"><code>	<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-57" class="ident">UpdateStatus</a>(<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/queue.go.html#line-22" class="ident">StatusProcessing</a>)</code></span>
+<span class="codeline" id="line-27"><code>	<span class="comment">// Check extension</span></code></span>
+<span class="codeline" id="line-28"><code>	<label for="r2" class="ident">extension</label>, <label for="r3" class="ident">err</label> := <a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/liman.html" class="ident i5">liman</a>.<a href="../liman/extension.go.html#line-21" class="ident">GetExtension</a>(&amp;<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/extension.go.html#line-4" class="ident">Extension</a>{</code></span>
+<span class="codeline" id="line-29"><code>		<a href="../../app/models/extension.go.html#line-5" class="ident">ID</a>: <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"extension_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-30"><code>	})</code></span>
+<span class="codeline" id="line-31"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-32"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-33"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<label for="r3" class="ident">err</label>.Error())</code></span>
+<span class="codeline" id="line-34"><code>		<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-35"><code>	}</code></span>
+<span class="codeline" id="line-36"><code>	<span class="comment">// Check extension status</span></code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">if</span> <label for="r2" class="ident">extension</label>.<a href="../../app/models/extension.go.html#line-18" class="ident">Status</a> == <span class="lit-string">"0"</span> {</code></span>
+<span class="codeline" id="line-38"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-39"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<span class="lit-string">"extension is unavailable"</span>)</code></span>
+<span class="codeline" id="line-40"><code>		<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-41"><code>	}</code></span>
+<span class="codeline" id="line-42"><code></code></span>
+<span class="codeline" id="line-43"><code>	<span class="comment">// Get credentials</span></code></span>
+<span class="codeline" id="line-44"><code>	<label for="r4" class="ident">credentials</label> := &amp;<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/credentials.go.html#line-4" class="ident">Credentials</a>{}</code></span>
+<span class="codeline" id="line-45"><code>	<span class="keyword">if</span> <label for="r2" class="ident">extension</label>.<a href="../../app/models/extension.go.html#line-19" class="ident">RequireKey</a> == <span class="lit-string">"true"</span> {</code></span>
+<span class="codeline" id="line-46"><code>		<label for="r4" class="ident">credentials</label>, <label for="r3" class="ident">err</label> = <a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/liman.html" class="ident i5">liman</a>.<a href="../liman/credentials.go.html#line-13" class="ident">GetCredentials</a>(</code></span>
+<span class="codeline" id="line-47"><code>			&amp;<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/user.go.html#line-4" class="ident">User</a>{</code></span>
+<span class="codeline" id="line-48"><code>				<a href="../../app/models/user.go.html#line-5" class="ident">ID</a>: <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"user_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-49"><code>			},</code></span>
+<span class="codeline" id="line-50"><code>			&amp;<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/server.go.html#line-4" class="ident">Server</a>{</code></span>
+<span class="codeline" id="line-51"><code>				<a href="../../app/models/server.go.html#line-5" class="ident">ID</a>: <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"server_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-52"><code>			},</code></span>
+<span class="codeline" id="line-53"><code>		)</code></span>
+<span class="codeline" id="line-54"><code>		<span class="comment">// Check errors and username is valid</span></code></span>
+<span class="codeline" id="line-55"><code>		<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> || <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r4" class="ident">credentials</label>.<a href="../../app/models/credentials.go.html#line-9" class="ident">Username</a>) &lt; <span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-56"><code>			<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-57"><code>			<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<span class="lit-string">"you need a key to use this extension"</span>)</code></span>
+<span class="codeline" id="line-58"><code>			<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-59"><code>		}</code></span>
+<span class="codeline" id="line-60"><code>	}</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code>	<span class="comment">// Encode to b64 and set as form value</span></code></span>
+<span class="codeline" id="line-63"><code>	<label for="r5" class="ident">formValues</label> := <a href="../../../../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>)</code></span>
+<span class="codeline" id="line-64"><code>	<label for="r5" class="ident">formValues</label>[<span class="lit-string">"data"</span>] = <a href="../../../../../../pkg/encoding/base64.html" class="ident i0">b64</a>.<a href="../../../../../encoding/base64/base64.go.html#line-117" class="ident">StdEncoding</a>.<a href="../../../../../encoding/base64/base64.go.html#line-195" class="ident">EncodeToString</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"payload"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>)))</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>	<span class="comment">// Generate token for user</span></code></span>
+<span class="codeline" id="line-67"><code>	<label for="r6" class="ident">token</label>, <label for="r3" class="ident">err</label> := <a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/user_token.html" class="ident i7">user_token</a>.<a href="../user_token/user_token.go.html#line-13" class="ident">Create</a>(<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"user_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>))</code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-69"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-70"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<label for="r3" class="ident">err</label>.Error())</code></span>
+<span class="codeline" id="line-71"><code>		<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-72"><code>	}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code>	<span class="comment">// Generate new id for logs</span></code></span>
+<span class="codeline" id="line-75"><code>	<label for="r7" class="ident">log_id</label> := <a href="../../../../../../pkg/github.com/google/uuid.html" class="ident i3">uuid</a>.<a href="../../../../google/uuid/version4.go.html#line-13" class="ident">New</a>()</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code>	<span class="comment">// Generate command</span></code></span>
+<span class="codeline" id="line-78"><code>	<label for="r8" class="ident">command</label>, <label for="r3" class="ident">err</label> := <a href="../../../../../../pkg/github.com/limanmys/render-engine/internal/sandbox.html" class="ident i6">sandbox</a>.<a href="../sandbox/command_generator.go.html#line-21" class="ident">GenerateCommand</a>(</code></span>
+<span class="codeline" id="line-79"><code>		<label for="r2" class="ident">extension</label>,</code></span>
+<span class="codeline" id="line-80"><code>		<label for="r4" class="ident">credentials</label>,</code></span>
+<span class="codeline" id="line-81"><code>		&amp;<a href="../../../../../../pkg/github.com/limanmys/render-engine/app/models.html" class="ident i4">models</a>.<a href="../../app/models/php_command.go.html#line-4" class="ident">CommandParams</a>{</code></span>
+<span class="codeline" id="line-82"><code>			<a href="../../app/models/php_command.go.html#line-5" class="ident">TargetFunction</a>: <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"target"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-83"><code>			<a href="../../app/models/php_command.go.html#line-12" class="ident">Locale</a>:         <a href="../../../../../../pkg/github.com/limanmys/render-engine/pkg/helpers.html" class="ident i8">helpers</a>.<a href="../../pkg/helpers/env.go.html#line-6" class="ident">Env</a>(<span class="lit-string">"APP_LANG"</span>, <span class="lit-string">"tr"</span>),</code></span>
+<span class="codeline" id="line-84"><code>			<a href="../../app/models/php_command.go.html#line-7" class="ident">Extension</a>:      <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"extension_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-85"><code>			<a href="../../app/models/php_command.go.html#line-8" class="ident">Server</a>:         <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"server_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-86"><code>			<a href="../../app/models/php_command.go.html#line-6" class="ident">User</a>:           <label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-34" class="ident">Data</a>[<span class="lit-string">"user_id"</span>].(<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>),</code></span>
+<span class="codeline" id="line-87"><code>			<a href="../../app/models/php_command.go.html#line-13" class="ident">LogID</a>:          <label for="r7" class="ident">log_id</label>.<a href="../../../../google/uuid/uuid.go.html#line-191" class="ident">String</a>(),</code></span>
+<span class="codeline" id="line-88"><code>			<a href="../../app/models/php_command.go.html#line-9" class="ident">RequestData</a>:    <label for="r5" class="ident">formValues</label>,</code></span>
+<span class="codeline" id="line-89"><code>			<a href="../../app/models/php_command.go.html#line-11" class="ident">BaseURL</a>:        <span class="lit-string">"https://127.0.0.1"</span>,</code></span>
+<span class="codeline" id="line-90"><code>			<a href="../../app/models/php_command.go.html#line-10" class="ident">Token</a>:          <label for="r6" class="ident">token</label>,</code></span>
+<span class="codeline" id="line-91"><code>		},</code></span>
+<span class="codeline" id="line-92"><code>	)</code></span>
+<span class="codeline" id="line-93"><code>	<span class="keyword">if</span> <label for="r3" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-94"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-95"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<label for="r3" class="ident">err</label>.Error())</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code>		<span class="keyword">return</span> <label for="r3" class="ident">err</label></code></span>
+<span class="codeline" id="line-98"><code>	}</code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code>	<span class="keyword">type</span> <label for="r9" class="ident">limanResponse</label> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-101"><code>		<label for="r10" class="ident">Message</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> <span class="lit-string">`json:"message"`</span></code></span>
+<span class="codeline" id="line-102"><code>		<label for="r11" class="ident">Status</label>  <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>    <span class="lit-string">`json:"status"`</span></code></span>
+<span class="codeline" id="line-103"><code>	}</code></span>
+<span class="codeline" id="line-104"><code></code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">var</span> <label for="r12" class="ident">response</label> <label for="r9" class="ident">limanResponse</label></code></span>
+<span class="codeline" id="line-106"><code>	<label for="r13" class="ident">output</label> := <a href="../../../../../../pkg/github.com/limanmys/render-engine/pkg/linux.html" class="ident i9">linux</a>.<a href="../../pkg/linux/exec.go.html#line-10" class="ident">Execute</a>(<label for="r8" class="ident">command</label>)</code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code>	<span class="keyword">if</span> <label for="r14" class="ident">err</label> := <a href="../../../../../../pkg/encoding/json.html" class="ident i1">json</a>.<a href="../../../../../encoding/json/decode.go.html#line-97" class="ident">Unmarshal</a>([]<a href="../../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>(<label for="r13" class="ident">output</label>), &amp;<label for="r12" class="ident">response</label>); <label for="r14" class="ident">err</label> != <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-109"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-110"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<span class="lit-string">"error when unmarshalling json, output: "</span> + <label for="r13" class="ident">output</label>)</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> <label for="r14" class="ident">err</label></code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">if</span> <label for="r12" class="ident">response</label>.<label for="r11" class="ident">Status</label> != <span class="lit-number">200</span> {</code></span>
+<span class="codeline" id="line-115"><code>		<span class="comment">// Update job as failed</span></code></span>
+<span class="codeline" id="line-116"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-62" class="ident">UpdateError</a>(<label for="r12" class="ident">response</label>.<label for="r10" class="ident">Message</label>)</code></span>
+<span class="codeline" id="line-117"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-118"><code>		<span class="comment">// Update job as done</span></code></span>
+<span class="codeline" id="line-119"><code>		<label for="r0" class="ident">c</label>.<a href="#line-19" class="ident">Queue</a>.<a href="../../app/models/queue.go.html#line-68" class="ident">UpdateAsDone</a>(<a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-1007" class="ident">TrimSpace</a>(<a href="../../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../../strings/strings.go.html#line-1104" class="ident">ReplaceAll</a>(<label for="r12" class="ident">response</label>.<label for="r10" class="ident">Message</label>, <span class="lit-string">"\""</span>, <span class="lit-string">""</span>)))</code></span>
+<span class="codeline" id="line-120"><code>	}</code></span>
+<span class="codeline" id="line-121"><code></code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <a href="../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

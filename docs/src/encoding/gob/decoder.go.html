@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: decoder.go in package encoding/gob</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -58,13 +58,15 @@ input[id=r38]:checked ~pre label[for=r38],
 input[id=r39]:checked ~pre label[for=r39],
 input[id=r40]:checked ~pre label[for=r40],
 input[id=r41]:checked ~pre label[for=r41],
-input[id=r42]:checked ~pre label[for=r42]
+input[id=r42]:checked ~pre label[for=r42],
+input[id=r43]:checked ~pre label[for=r43]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0,
 input[id=i1]:checked ~pre .i1,
 input[id=i2]:checked ~pre .i2,
 input[id=i3]:checked ~pre .i3,
-input[id=i4]:checked ~pre .i4
+input[id=i4]:checked ~pre .i4,
+input[id=i5]:checked ~pre .i5
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -109,11 +111,13 @@ input[id=i4]:checked ~pre .i4
 <input id="r40" type="radio" name="g"/>
 <input id="r41" type="radio" name="g"/>
 <input id="r42" type="radio" name="g"/>
+<input id="r43" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 <input id="i1" type="radio" name="i"/>
 <input id="i2" type="radio" name="i"/>
 <input id="i3" type="radio" name="i"/>
 <input id="i4" type="radio" name="i"/>
+<input id="i5" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// Copyright 2009 The Go Authors. All rights reserved.</span></code></span>
@@ -125,235 +129,237 @@ input[id=i4]:checked ~pre .i4
 <span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
 <span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"bufio"</span></label></code></span>
 <span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"errors"</span></label></code></span>
-<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"io"</span></label></code></span>
-<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"reflect"</span></label></code></span>
-<span class="codeline" id="line-12"><code>	<label for="i4"><span class="lit-string i4">"sync"</span></label></code></span>
-<span class="codeline" id="line-13"><code>)</code></span>
-<span class="codeline" id="line-14"><code></code></span>
-<span class="codeline" id="line-15"><code><span class="comment">// tooBig provides a sanity check for sizes; used in several places. Upper limit</span></code></span>
-<span class="codeline" id="line-16"><code><span class="comment">// of is 1GB on 32-bit systems, 8GB on 64-bit, allowing room to grow a little</span></code></span>
-<span class="codeline" id="line-17"><code><span class="comment">// without overflow.</span></code></span>
-<span class="codeline" id="line-18"><code><span class="keyword">const</span> tooBig = (<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">30</span>) &lt;&lt; (^<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">0</span>) &gt;&gt; <span class="lit-number">62</span>)</code></span>
-<span class="codeline" id="line-19"><code></code></span>
-<span class="codeline" id="line-20"><code><span class="comment">// A Decoder manages the receipt of type and data information read from the</span></code></span>
-<span class="codeline" id="line-21"><code><span class="comment">// remote side of a connection.  It is safe for concurrent use by multiple</span></code></span>
-<span class="codeline" id="line-22"><code><span class="comment">// goroutines.</span></code></span>
-<span class="codeline" id="line-23"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-24"><code><span class="comment">// The Decoder does only basic sanity checking on decoded input sizes,</span></code></span>
-<span class="codeline" id="line-25"><code><span class="comment">// and its limits are not configurable. Take caution when decoding gob data</span></code></span>
-<span class="codeline" id="line-26"><code><span class="comment">// from untrusted sources.</span></code></span>
-<span class="codeline" id="line-27"><code><span class="keyword">type</span> <a href="../../../pkg/encoding/gob.html#name-Decoder" class="ident">Decoder</a> <span class="keyword">struct</span> {</code></span>
-<span class="codeline" id="line-28"><code>	mutex        <a href="../../../pkg/sync.html" class="ident i4">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a>                              <span class="comment">// each item must be received atomically</span></code></span>
-<span class="codeline" id="line-29"><code>	r            <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-83" class="ident">Reader</a>                               <span class="comment">// source of the data</span></code></span>
-<span class="codeline" id="line-30"><code>	buf          <a href="decode.go.html#line-39" class="ident">decBuffer</a>                               <span class="comment">// buffer for more efficient i/o from r</span></code></span>
-<span class="codeline" id="line-31"><code>	wireType     <span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]*<a href="type.go.html#line-639" class="ident">wireType</a>                    <span class="comment">// map from remote ID to local description</span></code></span>
-<span class="codeline" id="line-32"><code>	decoderCache <span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]**<a href="decode.go.html#line-421" class="ident">decEngine</a> <span class="comment">// cache of compiled engines</span></code></span>
-<span class="codeline" id="line-33"><code>	ignorerCache <span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]**<a href="decode.go.html#line-421" class="ident">decEngine</a>                  <span class="comment">// ditto for ignored objects</span></code></span>
-<span class="codeline" id="line-34"><code>	freeList     *<a href="decode.go.html#line-28" class="ident">decoderState</a>                           <span class="comment">// list of free decoderStates; avoids reallocation</span></code></span>
-<span class="codeline" id="line-35"><code>	countBuf     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>                                  <span class="comment">// used for decoding integers while parsing messages</span></code></span>
-<span class="codeline" id="line-36"><code>	err          <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-37"><code>}</code></span>
-<span class="codeline" id="line-38"><code></code></span>
-<span class="codeline" id="line-39"><code><span class="comment">// NewDecoder returns a new decoder that reads from the io.Reader.</span></code></span>
-<span class="codeline" id="line-40"><code><span class="comment">// If r does not also implement io.ByteReader, it will be wrapped in a</span></code></span>
-<span class="codeline" id="line-41"><code><span class="comment">// bufio.Reader.</span></code></span>
-<span class="codeline" id="line-42"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/encoding/gob.html#name-NewDecoder" class="ident">NewDecoder</a></label>(<label for="r1" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-83" class="ident">Reader</a>) *<a href="#line-27" class="ident">Decoder</a> {</code></span>
-<span class="codeline" id="line-43"><code>	<label for="r2" class="ident">dec</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-27" class="ident">Decoder</a>)</code></span>
-<span class="codeline" id="line-44"><code>	<span class="comment">// We use the ability to read bytes as a plausible surrogate for buffering.</span></code></span>
-<span class="codeline" id="line-45"><code>	<span class="keyword">if</span> <label for="r3" class="ident">_</label>, <label for="r4" class="ident">ok</label> := <label for="r1" class="ident">r</label>.(<a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-259" class="ident">ByteReader</a>); !<label for="r4" class="ident">ok</label> {</code></span>
-<span class="codeline" id="line-46"><code>		<label for="r1" class="ident">r</label> = <a href="../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../bufio/bufio.go.html#line-62" class="ident">NewReader</a>(<label for="r1" class="ident">r</label>)</code></span>
-<span class="codeline" id="line-47"><code>	}</code></span>
-<span class="codeline" id="line-48"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-29" class="ident">r</a> = <label for="r1" class="ident">r</label></code></span>
-<span class="codeline" id="line-49"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-31" class="ident">wireType</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]*<a href="type.go.html#line-639" class="ident">wireType</a>)</code></span>
-<span class="codeline" id="line-50"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-32" class="ident">decoderCache</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]**<a href="decode.go.html#line-421" class="ident">decEngine</a>)</code></span>
-<span class="codeline" id="line-51"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-33" class="ident">ignorerCache</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="type.go.html#line-161" class="ident">typeId</a>]**<a href="decode.go.html#line-421" class="ident">decEngine</a>)</code></span>
-<span class="codeline" id="line-52"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-35" class="ident">countBuf</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">9</span>) <span class="comment">// counts may be uint64s (unlikely!), require 9 bytes</span></code></span>
-<span class="codeline" id="line-53"><code></code></span>
-<span class="codeline" id="line-54"><code>	<span class="keyword">return</span> <label for="r2" class="ident">dec</label></code></span>
-<span class="codeline" id="line-55"><code>}</code></span>
-<span class="codeline" id="line-56"><code></code></span>
-<span class="codeline" id="line-57"><code><span class="comment">// recvType loads the definition of a type.</span></code></span>
-<span class="codeline" id="line-58"><code><span class="keyword">func</span> (<label for="r5" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r6" class="ident">recvType</label>(<label for="r7" class="ident">id</label> <a href="type.go.html#line-161" class="ident">typeId</a>) {</code></span>
-<span class="codeline" id="line-59"><code>	<span class="comment">// Have we already seen this type? That's an error</span></code></span>
-<span class="codeline" id="line-60"><code>	<span class="keyword">if</span> <label for="r7" class="ident">id</label> &lt; <a href="type.go.html#line-165" class="ident">firstUserId</a> || <label for="r5" class="ident">dec</label>.<a href="#line-31" class="ident">wireType</a>[<label for="r7" class="ident">id</label>] != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-61"><code>		<label for="r5" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"gob: duplicate type received"</span>)</code></span>
-<span class="codeline" id="line-62"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-63"><code>	}</code></span>
-<span class="codeline" id="line-64"><code></code></span>
-<span class="codeline" id="line-65"><code>	<span class="comment">// Type:</span></code></span>
-<span class="codeline" id="line-66"><code>	<label for="r8" class="ident">wire</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="type.go.html#line-639" class="ident">wireType</a>)</code></span>
-<span class="codeline" id="line-67"><code>	<label for="r5" class="ident">dec</label>.<a href="decode.go.html#line-1186" class="ident">decodeValue</a>(<a href="type.go.html#line-259" class="ident">tWireType</a>, <a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r8" class="ident">wire</label>))</code></span>
-<span class="codeline" id="line-68"><code>	<span class="keyword">if</span> <label for="r5" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-69"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-70"><code>	}</code></span>
-<span class="codeline" id="line-71"><code>	<span class="comment">// Remember we've seen this type.</span></code></span>
-<span class="codeline" id="line-72"><code>	<label for="r5" class="ident">dec</label>.<a href="#line-31" class="ident">wireType</a>[<label for="r7" class="ident">id</label>] = <label for="r8" class="ident">wire</label></code></span>
-<span class="codeline" id="line-73"><code>}</code></span>
-<span class="codeline" id="line-74"><code></code></span>
-<span class="codeline" id="line-75"><code><span class="keyword">var</span> errBadCount = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"invalid message length"</span>)</code></span>
-<span class="codeline" id="line-76"><code></code></span>
-<span class="codeline" id="line-77"><code><span class="comment">// recvMessage reads the next count-delimited item from the input. It is the converse</span></code></span>
-<span class="codeline" id="line-78"><code><span class="comment">// of Encoder.writeMessage. It returns false on EOF or other error reading the message.</span></code></span>
-<span class="codeline" id="line-79"><code><span class="keyword">func</span> (<label for="r9" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r10" class="ident">recvMessage</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
-<span class="codeline" id="line-80"><code>	<span class="comment">// Read a count.</span></code></span>
-<span class="codeline" id="line-81"><code>	<label for="r11" class="ident">nbytes</label>, <label for="r12" class="ident">_</label>, <label for="r13" class="ident">err</label> := <a href="decode.go.html#line-118" class="ident">decodeUintReader</a>(<label for="r9" class="ident">dec</label>.<a href="#line-29" class="ident">r</a>, <label for="r9" class="ident">dec</label>.<a href="#line-35" class="ident">countBuf</a>)</code></span>
-<span class="codeline" id="line-82"><code>	<span class="keyword">if</span> <label for="r13" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-83"><code>		<label for="r9" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <label for="r13" class="ident">err</label></code></span>
-<span class="codeline" id="line-84"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-85"><code>	}</code></span>
-<span class="codeline" id="line-86"><code>	<span class="keyword">if</span> <label for="r11" class="ident">nbytes</label> &gt;= <a href="#line-18" class="ident">tooBig</a> {</code></span>
-<span class="codeline" id="line-87"><code>		<label for="r9" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="#line-75" class="ident">errBadCount</a></code></span>
-<span class="codeline" id="line-88"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-89"><code>	}</code></span>
-<span class="codeline" id="line-90"><code>	<label for="r9" class="ident">dec</label>.<a href="#line-95" class="ident">readMessage</a>(<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r11" class="ident">nbytes</label>))</code></span>
-<span class="codeline" id="line-91"><code>	<span class="keyword">return</span> <label for="r9" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-92"><code>}</code></span>
-<span class="codeline" id="line-93"><code></code></span>
-<span class="codeline" id="line-94"><code><span class="comment">// readMessage reads the next nbytes bytes from the input.</span></code></span>
-<span class="codeline" id="line-95"><code><span class="keyword">func</span> (<label for="r14" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r15" class="ident">readMessage</label>(<label for="r16" class="ident">nbytes</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
-<span class="codeline" id="line-96"><code>	<span class="keyword">if</span> <label for="r14" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-80" class="ident">Len</a>() != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-97"><code>		<span class="comment">// The buffer should always be empty now.</span></code></span>
-<span class="codeline" id="line-98"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"non-empty decoder buffer"</span>)</code></span>
-<span class="codeline" id="line-99"><code>	}</code></span>
-<span class="codeline" id="line-100"><code>	<span class="comment">// Read the data</span></code></span>
-<span class="codeline" id="line-101"><code>	<label for="r14" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-62" class="ident">Size</a>(<label for="r16" class="ident">nbytes</label>)</code></span>
-<span class="codeline" id="line-102"><code>	_, <label for="r14" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-350" class="ident">ReadFull</a>(<label for="r14" class="ident">dec</label>.<a href="#line-29" class="ident">r</a>, <label for="r14" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-84" class="ident">Bytes</a>())</code></span>
-<span class="codeline" id="line-103"><code>	<span class="keyword">if</span> <label for="r14" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> == <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
-<span class="codeline" id="line-104"><code>		<label for="r14" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
-<span class="codeline" id="line-105"><code>	}</code></span>
-<span class="codeline" id="line-106"><code>}</code></span>
-<span class="codeline" id="line-107"><code></code></span>
-<span class="codeline" id="line-108"><code><span class="comment">// toInt turns an encoded uint64 into an int, according to the marshaling rules.</span></code></span>
-<span class="codeline" id="line-109"><code><span class="keyword">func</span> toInt(<label for="r18" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a> {</code></span>
-<span class="codeline" id="line-110"><code>	<label for="r19" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r18" class="ident">x</label> &gt;&gt; <span class="lit-number">1</span>)</code></span>
-<span class="codeline" id="line-111"><code>	<span class="keyword">if</span> <label for="r18" class="ident">x</label>&amp;<span class="lit-number">1</span> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-112"><code>		<label for="r19" class="ident">i</label> = ^<label for="r19" class="ident">i</label></code></span>
-<span class="codeline" id="line-113"><code>	}</code></span>
-<span class="codeline" id="line-114"><code>	<span class="keyword">return</span> <label for="r19" class="ident">i</label></code></span>
-<span class="codeline" id="line-115"><code>}</code></span>
-<span class="codeline" id="line-116"><code></code></span>
-<span class="codeline" id="line-117"><code><span class="keyword">func</span> (<label for="r20" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r21" class="ident">nextInt</label>() <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a> {</code></span>
-<span class="codeline" id="line-118"><code>	<label for="r22" class="ident">n</label>, <label for="r23" class="ident">_</label>, <label for="r24" class="ident">err</label> := <a href="decode.go.html#line-118" class="ident">decodeUintReader</a>(&amp;<label for="r20" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>, <label for="r20" class="ident">dec</label>.<a href="#line-35" class="ident">countBuf</a>)</code></span>
-<span class="codeline" id="line-119"><code>	<span class="keyword">if</span> <label for="r24" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-120"><code>		<label for="r20" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <label for="r24" class="ident">err</label></code></span>
-<span class="codeline" id="line-121"><code>	}</code></span>
-<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <a href="#line-109" class="ident">toInt</a>(<label for="r22" class="ident">n</label>)</code></span>
-<span class="codeline" id="line-123"><code>}</code></span>
-<span class="codeline" id="line-124"><code></code></span>
-<span class="codeline" id="line-125"><code><span class="keyword">func</span> (<label for="r25" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r26" class="ident">nextUint</label>() <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
-<span class="codeline" id="line-126"><code>	<label for="r27" class="ident">n</label>, <label for="r28" class="ident">_</label>, <label for="r29" class="ident">err</label> := <a href="decode.go.html#line-118" class="ident">decodeUintReader</a>(&amp;<label for="r25" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>, <label for="r25" class="ident">dec</label>.<a href="#line-35" class="ident">countBuf</a>)</code></span>
-<span class="codeline" id="line-127"><code>	<span class="keyword">if</span> <label for="r29" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-128"><code>		<label for="r25" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <label for="r29" class="ident">err</label></code></span>
-<span class="codeline" id="line-129"><code>	}</code></span>
-<span class="codeline" id="line-130"><code>	<span class="keyword">return</span> <label for="r27" class="ident">n</label></code></span>
-<span class="codeline" id="line-131"><code>}</code></span>
-<span class="codeline" id="line-132"><code></code></span>
-<span class="codeline" id="line-133"><code><span class="comment">// decodeTypeSequence parses:</span></code></span>
-<span class="codeline" id="line-134"><code><span class="comment">// TypeSequence</span></code></span>
-<span class="codeline" id="line-135"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-136"><code><span class="comment">//	(TypeDefinition DelimitedTypeDefinition*)?</span></code></span>
+<span class="codeline" id="line-10"><code>	<label for="i2"><span class="lit-string i2">"internal/saferio"</span></label></code></span>
+<span class="codeline" id="line-11"><code>	<label for="i3"><span class="lit-string i3">"io"</span></label></code></span>
+<span class="codeline" id="line-12"><code>	<label for="i4"><span class="lit-string i4">"reflect"</span></label></code></span>
+<span class="codeline" id="line-13"><code>	<label for="i5"><span class="lit-string i5">"sync"</span></label></code></span>
+<span class="codeline" id="line-14"><code>)</code></span>
+<span class="codeline" id="line-15"><code></code></span>
+<span class="codeline" id="line-16"><code><span class="comment">// tooBig provides a sanity check for sizes; used in several places. Upper limit</span></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// of is 1GB on 32-bit systems, 8GB on 64-bit, allowing room to grow a little</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// without overflow.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="keyword">const</span> tooBig = (<span class="lit-number">1</span> &lt;&lt; <span class="lit-number">30</span>) &lt;&lt; (^<a href="../../../pkg/builtin.html#name-uint" class="ident">uint</a>(<span class="lit-number">0</span>) &gt;&gt; <span class="lit-number">62</span>)</code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// A Decoder manages the receipt of type and data information read from the</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">// remote side of a connection.  It is safe for concurrent use by multiple</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// goroutines.</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// The Decoder does only basic sanity checking on decoded input sizes,</span></code></span>
+<span class="codeline" id="line-26"><code><span class="comment">// and its limits are not configurable. Take caution when decoding gob data</span></code></span>
+<span class="codeline" id="line-27"><code><span class="comment">// from untrusted sources.</span></code></span>
+<span class="codeline" id="line-28"><code><span class="keyword">type</span> <a href="../../../pkg/encoding/gob.html#name-Decoder" class="ident">Decoder</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-29"><code>	mutex        <a href="../../../pkg/sync.html" class="ident i5">sync</a>.<a href="../../sync/mutex.go.html#line-34" class="ident">Mutex</a>                              <span class="comment">// each item must be received atomically</span></code></span>
+<span class="codeline" id="line-30"><code>	r            <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-86" class="ident">Reader</a>                               <span class="comment">// source of the data</span></code></span>
+<span class="codeline" id="line-31"><code>	buf          <a href="decode.go.html#line-40" class="ident">decBuffer</a>                               <span class="comment">// buffer for more efficient i/o from r</span></code></span>
+<span class="codeline" id="line-32"><code>	wireType     <span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]*<a href="type.go.html#line-651" class="ident">wireType</a>                    <span class="comment">// map from remote ID to local description</span></code></span>
+<span class="codeline" id="line-33"><code>	decoderCache <span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]**<a href="decode.go.html#line-445" class="ident">decEngine</a> <span class="comment">// cache of compiled engines</span></code></span>
+<span class="codeline" id="line-34"><code>	ignorerCache <span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]**<a href="decode.go.html#line-445" class="ident">decEngine</a>                  <span class="comment">// ditto for ignored objects</span></code></span>
+<span class="codeline" id="line-35"><code>	freeList     *<a href="decode.go.html#line-29" class="ident">decoderState</a>                           <span class="comment">// list of free decoderStates; avoids reallocation</span></code></span>
+<span class="codeline" id="line-36"><code>	countBuf     []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>                                  <span class="comment">// used for decoding integers while parsing messages</span></code></span>
+<span class="codeline" id="line-37"><code>	err          <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-38"><code>}</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// NewDecoder returns a new decoder that reads from the io.Reader.</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// If r does not also implement io.ByteReader, it will be wrapped in a</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// bufio.Reader.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../pkg/encoding/gob.html#name-NewDecoder" class="ident">NewDecoder</a></label>(<label for="r1" class="ident">r</label> <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-86" class="ident">Reader</a>) *<a href="#line-28" class="ident">Decoder</a> {</code></span>
+<span class="codeline" id="line-44"><code>	<label for="r2" class="ident">dec</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="#line-28" class="ident">Decoder</a>)</code></span>
+<span class="codeline" id="line-45"><code>	<span class="comment">// We use the ability to read bytes as a plausible surrogate for buffering.</span></code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">if</span> <label for="r3" class="ident">_</label>, <label for="r4" class="ident">ok</label> := <label for="r1" class="ident">r</label>.(<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-262" class="ident">ByteReader</a>); !<label for="r4" class="ident">ok</label> {</code></span>
+<span class="codeline" id="line-47"><code>		<label for="r1" class="ident">r</label> = <a href="../../../pkg/bufio.html" class="ident i0">bufio</a>.<a href="../../bufio/bufio.go.html#line-62" class="ident">NewReader</a>(<label for="r1" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-48"><code>	}</code></span>
+<span class="codeline" id="line-49"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-30" class="ident">r</a> = <label for="r1" class="ident">r</label></code></span>
+<span class="codeline" id="line-50"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-32" class="ident">wireType</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]*<a href="type.go.html#line-651" class="ident">wireType</a>)</code></span>
+<span class="codeline" id="line-51"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-33" class="ident">decoderCache</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/type.go.html#line-39" class="ident">Type</a>]<span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]**<a href="decode.go.html#line-445" class="ident">decEngine</a>)</code></span>
+<span class="codeline" id="line-52"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-34" class="ident">ignorerCache</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>(<span class="keyword">map</span>[<a href="type.go.html#line-163" class="ident">typeId</a>]**<a href="decode.go.html#line-445" class="ident">decEngine</a>)</code></span>
+<span class="codeline" id="line-53"><code>	<label for="r2" class="ident">dec</label>.<a href="#line-36" class="ident">countBuf</a> = <a href="../../../pkg/builtin.html#name-make" class="ident">make</a>([]<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <span class="lit-number">9</span>) <span class="comment">// counts may be uint64s (unlikely!), require 9 bytes</span></code></span>
+<span class="codeline" id="line-54"><code></code></span>
+<span class="codeline" id="line-55"><code>	<span class="keyword">return</span> <label for="r2" class="ident">dec</label></code></span>
+<span class="codeline" id="line-56"><code>}</code></span>
+<span class="codeline" id="line-57"><code></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">// recvType loads the definition of a type.</span></code></span>
+<span class="codeline" id="line-59"><code><span class="keyword">func</span> (<label for="r5" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r6" class="ident">recvType</label>(<label for="r7" class="ident">id</label> <a href="type.go.html#line-163" class="ident">typeId</a>) {</code></span>
+<span class="codeline" id="line-60"><code>	<span class="comment">// Have we already seen this type? That's an error</span></code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">if</span> <label for="r7" class="ident">id</label> &lt; <a href="type.go.html#line-166" class="ident">firstUserId</a> || <label for="r5" class="ident">dec</label>.<a href="#line-32" class="ident">wireType</a>[<label for="r7" class="ident">id</label>] != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-62"><code>		<label for="r5" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gob: duplicate type received"</span>)</code></span>
+<span class="codeline" id="line-63"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-64"><code>	}</code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code>	<span class="comment">// Type:</span></code></span>
+<span class="codeline" id="line-67"><code>	<label for="r8" class="ident">wire</label> := <a href="../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="type.go.html#line-651" class="ident">wireType</a>)</code></span>
+<span class="codeline" id="line-68"><code>	<label for="r5" class="ident">dec</label>.<a href="decode.go.html#line-1223" class="ident">decodeValue</a>(<a href="type.go.html#line-276" class="ident">tWireType</a>, <a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r8" class="ident">wire</label>))</code></span>
+<span class="codeline" id="line-69"><code>	<span class="keyword">if</span> <label for="r5" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-70"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-71"><code>	}</code></span>
+<span class="codeline" id="line-72"><code>	<span class="comment">// Remember we've seen this type.</span></code></span>
+<span class="codeline" id="line-73"><code>	<label for="r5" class="ident">dec</label>.<a href="#line-32" class="ident">wireType</a>[<label for="r7" class="ident">id</label>] = <label for="r8" class="ident">wire</label></code></span>
+<span class="codeline" id="line-74"><code>}</code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code><span class="keyword">var</span> errBadCount = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"invalid message length"</span>)</code></span>
+<span class="codeline" id="line-77"><code></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">// recvMessage reads the next count-delimited item from the input. It is the converse</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">// of Encoder.writeMessage. It returns false on EOF or other error reading the message.</span></code></span>
+<span class="codeline" id="line-80"><code><span class="keyword">func</span> (<label for="r9" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r10" class="ident">recvMessage</label>() <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a> {</code></span>
+<span class="codeline" id="line-81"><code>	<span class="comment">// Read a count.</span></code></span>
+<span class="codeline" id="line-82"><code>	<label for="r11" class="ident">nbytes</label>, <label for="r12" class="ident">_</label>, <label for="r13" class="ident">err</label> := <a href="decode.go.html#line-114" class="ident">decodeUintReader</a>(<label for="r9" class="ident">dec</label>.<a href="#line-30" class="ident">r</a>, <label for="r9" class="ident">dec</label>.<a href="#line-36" class="ident">countBuf</a>)</code></span>
+<span class="codeline" id="line-83"><code>	<span class="keyword">if</span> <label for="r13" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-84"><code>		<label for="r9" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <label for="r13" class="ident">err</label></code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-86"><code>	}</code></span>
+<span class="codeline" id="line-87"><code>	<span class="keyword">if</span> <label for="r11" class="ident">nbytes</label> &gt;= <a href="#line-19" class="ident">tooBig</a> {</code></span>
+<span class="codeline" id="line-88"><code>		<label for="r9" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="#line-76" class="ident">errBadCount</a></code></span>
+<span class="codeline" id="line-89"><code>		<span class="keyword">return</span> <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-90"><code>	}</code></span>
+<span class="codeline" id="line-91"><code>	<label for="r9" class="ident">dec</label>.<a href="#line-96" class="ident">readMessage</a>(<a href="../../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r11" class="ident">nbytes</label>))</code></span>
+<span class="codeline" id="line-92"><code>	<span class="keyword">return</span> <label for="r9" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-93"><code>}</code></span>
+<span class="codeline" id="line-94"><code></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// readMessage reads the next nbytes bytes from the input.</span></code></span>
+<span class="codeline" id="line-96"><code><span class="keyword">func</span> (<label for="r14" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r15" class="ident">readMessage</label>(<label for="r16" class="ident">nbytes</label> <a href="../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-97"><code>	<span class="keyword">if</span> <label for="r14" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>.<a href="decode.go.html#line-70" class="ident">Len</a>() != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-98"><code>		<span class="comment">// The buffer should always be empty now.</span></code></span>
+<span class="codeline" id="line-99"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"non-empty decoder buffer"</span>)</code></span>
+<span class="codeline" id="line-100"><code>	}</code></span>
+<span class="codeline" id="line-101"><code>	<span class="comment">// Read the data</span></code></span>
+<span class="codeline" id="line-102"><code>	<span class="keyword">var</span> <label for="r17" class="ident">buf</label> []<a href="../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-103"><code>	<label for="r17" class="ident">buf</label>, <label for="r14" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/internal/saferio.html" class="ident i2">saferio</a>.<a href="../../internal/saferio/io.go.html#line-28" class="ident">ReadData</a>(<label for="r14" class="ident">dec</label>.<a href="#line-30" class="ident">r</a>, <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>(<label for="r16" class="ident">nbytes</label>))</code></span>
+<span class="codeline" id="line-104"><code>	<label for="r14" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>.<a href="decode.go.html#line-79" class="ident">SetBytes</a>(<label for="r17" class="ident">buf</label>)</code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">if</span> <label for="r14" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> == <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-106"><code>		<label for="r14" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
+<span class="codeline" id="line-107"><code>	}</code></span>
+<span class="codeline" id="line-108"><code>}</code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// toInt turns an encoded uint64 into an int, according to the marshaling rules.</span></code></span>
+<span class="codeline" id="line-111"><code><span class="keyword">func</span> toInt(<label for="r19" class="ident">x</label> <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a>) <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a> {</code></span>
+<span class="codeline" id="line-112"><code>	<label for="r20" class="ident">i</label> := <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a>(<label for="r19" class="ident">x</label> &gt;&gt; <span class="lit-number">1</span>)</code></span>
+<span class="codeline" id="line-113"><code>	<span class="keyword">if</span> <label for="r19" class="ident">x</label>&amp;<span class="lit-number">1</span> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-114"><code>		<label for="r20" class="ident">i</label> = ^<label for="r20" class="ident">i</label></code></span>
+<span class="codeline" id="line-115"><code>	}</code></span>
+<span class="codeline" id="line-116"><code>	<span class="keyword">return</span> <label for="r20" class="ident">i</label></code></span>
+<span class="codeline" id="line-117"><code>}</code></span>
+<span class="codeline" id="line-118"><code></code></span>
+<span class="codeline" id="line-119"><code><span class="keyword">func</span> (<label for="r21" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r22" class="ident">nextInt</label>() <a href="../../../pkg/builtin.html#name-int64" class="ident">int64</a> {</code></span>
+<span class="codeline" id="line-120"><code>	<label for="r23" class="ident">n</label>, <label for="r24" class="ident">_</label>, <label for="r25" class="ident">err</label> := <a href="decode.go.html#line-114" class="ident">decodeUintReader</a>(&amp;<label for="r21" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>, <label for="r21" class="ident">dec</label>.<a href="#line-36" class="ident">countBuf</a>)</code></span>
+<span class="codeline" id="line-121"><code>	<span class="keyword">if</span> <label for="r25" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-122"><code>		<label for="r21" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <label for="r25" class="ident">err</label></code></span>
+<span class="codeline" id="line-123"><code>	}</code></span>
+<span class="codeline" id="line-124"><code>	<span class="keyword">return</span> <a href="#line-111" class="ident">toInt</a>(<label for="r23" class="ident">n</label>)</code></span>
+<span class="codeline" id="line-125"><code>}</code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code><span class="keyword">func</span> (<label for="r26" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r27" class="ident">nextUint</label>() <a href="../../../pkg/builtin.html#name-uint64" class="ident">uint64</a> {</code></span>
+<span class="codeline" id="line-128"><code>	<label for="r28" class="ident">n</label>, <label for="r29" class="ident">_</label>, <label for="r30" class="ident">err</label> := <a href="decode.go.html#line-114" class="ident">decodeUintReader</a>(&amp;<label for="r26" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>, <label for="r26" class="ident">dec</label>.<a href="#line-36" class="ident">countBuf</a>)</code></span>
+<span class="codeline" id="line-129"><code>	<span class="keyword">if</span> <label for="r30" class="ident">err</label> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-130"><code>		<label for="r26" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <label for="r30" class="ident">err</label></code></span>
+<span class="codeline" id="line-131"><code>	}</code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">return</span> <label for="r28" class="ident">n</label></code></span>
+<span class="codeline" id="line-133"><code>}</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">// decodeTypeSequence parses:</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">// TypeSequence</span></code></span>
 <span class="codeline" id="line-137"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-138"><code><span class="comment">// and returns the type id of the next value. It returns -1 at</span></code></span>
-<span class="codeline" id="line-139"><code><span class="comment">// EOF.  Upon return, the remainder of dec.buf is the value to be</span></code></span>
-<span class="codeline" id="line-140"><code><span class="comment">// decoded. If this is an interface value, it can be ignored by</span></code></span>
-<span class="codeline" id="line-141"><code><span class="comment">// resetting that buffer.</span></code></span>
-<span class="codeline" id="line-142"><code><span class="keyword">func</span> (<label for="r30" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r31" class="ident">decodeTypeSequence</label>(<label for="r32" class="ident">isInterface</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) <a href="type.go.html#line-161" class="ident">typeId</a> {</code></span>
-<span class="codeline" id="line-143"><code>	<label for="r33" class="ident">firstMessage</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
-<span class="codeline" id="line-144"><code>	<span class="keyword">for</span> <label for="r30" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-145"><code>		<span class="keyword">if</span> <label for="r30" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-80" class="ident">Len</a>() == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-146"><code>			<span class="keyword">if</span> !<label for="r30" class="ident">dec</label>.<a href="#line-79" class="ident">recvMessage</a>() {</code></span>
-<span class="codeline" id="line-147"><code>				<span class="comment">// We can only return io.EOF if the input was empty.</span></code></span>
-<span class="codeline" id="line-148"><code><span class="comment">				// If we read one or more type spec messages,</span></code></span>
-<span class="codeline" id="line-149"><code><span class="comment">				// require a data item message to follow.</span></code></span>
-<span class="codeline" id="line-150"><code><span class="comment">				// If we hit an EOF before that, then give ErrUnexpectedEOF.</span></code></span>
-<span class="codeline" id="line-151"><code>				<span class="keyword">if</span> !<label for="r33" class="ident">firstMessage</label> &amp;&amp; <label for="r30" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> == <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
-<span class="codeline" id="line-152"><code>					<label for="r30" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
-<span class="codeline" id="line-153"><code>				}</code></span>
-<span class="codeline" id="line-154"><code>				<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-155"><code>			}</code></span>
-<span class="codeline" id="line-156"><code>		}</code></span>
-<span class="codeline" id="line-157"><code>		<span class="comment">// Receive a type id.</span></code></span>
-<span class="codeline" id="line-158"><code>		<label for="r34" class="ident">id</label> := <a href="type.go.html#line-161" class="ident">typeId</a>(<label for="r30" class="ident">dec</label>.<a href="#line-117" class="ident">nextInt</a>())</code></span>
-<span class="codeline" id="line-159"><code>		<span class="keyword">if</span> <label for="r34" class="ident">id</label> &gt;= <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-160"><code>			<span class="comment">// Value follows.</span></code></span>
-<span class="codeline" id="line-161"><code>			<span class="keyword">return</span> <label for="r34" class="ident">id</label></code></span>
-<span class="codeline" id="line-162"><code>		}</code></span>
-<span class="codeline" id="line-163"><code>		<span class="comment">// Type definition for (-id) follows.</span></code></span>
-<span class="codeline" id="line-164"><code>		<label for="r30" class="ident">dec</label>.<a href="#line-58" class="ident">recvType</a>(-<label for="r34" class="ident">id</label>)</code></span>
-<span class="codeline" id="line-165"><code>		<span class="keyword">if</span> <label for="r30" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-166"><code>			<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-167"><code>		}</code></span>
-<span class="codeline" id="line-168"><code>		<span class="comment">// When decoding an interface, after a type there may be a</span></code></span>
-<span class="codeline" id="line-169"><code><span class="comment">		// DelimitedValue still in the buffer. Skip its count.</span></code></span>
-<span class="codeline" id="line-170"><code><span class="comment">		// (Alternatively, the buffer is empty and the byte count</span></code></span>
-<span class="codeline" id="line-171"><code><span class="comment">		// will be absorbed by recvMessage.)</span></code></span>
-<span class="codeline" id="line-172"><code>		<span class="keyword">if</span> <label for="r30" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-80" class="ident">Len</a>() &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-173"><code>			<span class="keyword">if</span> !<label for="r32" class="ident">isInterface</label> {</code></span>
-<span class="codeline" id="line-174"><code>				<label for="r30" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"extra data in buffer"</span>)</code></span>
-<span class="codeline" id="line-175"><code>				<span class="keyword">break</span></code></span>
-<span class="codeline" id="line-176"><code>			}</code></span>
-<span class="codeline" id="line-177"><code>			<label for="r30" class="ident">dec</label>.<a href="#line-125" class="ident">nextUint</a>()</code></span>
-<span class="codeline" id="line-178"><code>		}</code></span>
-<span class="codeline" id="line-179"><code>		<label for="r33" class="ident">firstMessage</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
-<span class="codeline" id="line-180"><code>	}</code></span>
-<span class="codeline" id="line-181"><code>	<span class="keyword">return</span> -<span class="lit-number">1</span></code></span>
-<span class="codeline" id="line-182"><code>}</code></span>
-<span class="codeline" id="line-183"><code></code></span>
-<span class="codeline" id="line-184"><code><span class="comment">// Decode reads the next value from the input stream and stores</span></code></span>
-<span class="codeline" id="line-185"><code><span class="comment">// it in the data represented by the empty interface value.</span></code></span>
-<span class="codeline" id="line-186"><code><span class="comment">// If e is nil, the value will be discarded. Otherwise,</span></code></span>
-<span class="codeline" id="line-187"><code><span class="comment">// the value underlying e must be a pointer to the</span></code></span>
-<span class="codeline" id="line-188"><code><span class="comment">// correct type for the next data item received.</span></code></span>
-<span class="codeline" id="line-189"><code><span class="comment">// If the input is at EOF, Decode returns io.EOF and</span></code></span>
-<span class="codeline" id="line-190"><code><span class="comment">// does not modify e.</span></code></span>
-<span class="codeline" id="line-191"><code><span class="keyword">func</span> (<label for="r35" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r36" class="ident">Decode</label>(<label for="r37" class="ident">e</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-192"><code>	<span class="keyword">if</span> <label for="r37" class="ident">e</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-193"><code>		<span class="keyword">return</span> <label for="r35" class="ident">dec</label>.<a href="#line-211" class="ident">DecodeValue</a>(<a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/value.go.html#line-39" class="ident">Value</a>{})</code></span>
-<span class="codeline" id="line-194"><code>	}</code></span>
-<span class="codeline" id="line-195"><code>	<label for="r38" class="ident">value</label> := <a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/value.go.html#line-3039" class="ident">ValueOf</a>(<label for="r37" class="ident">e</label>)</code></span>
-<span class="codeline" id="line-196"><code>	<span class="comment">// If e represents a value as opposed to a pointer, the answer won't</span></code></span>
-<span class="codeline" id="line-197"><code><span class="comment">	// get back to the caller. Make sure it's a pointer.</span></code></span>
-<span class="codeline" id="line-198"><code>	<span class="keyword">if</span> <label for="r38" class="ident">value</label>.<a href="../../reflect/value.go.html#line-2525" class="ident">Type</a>().<a href="../../reflect/type.go.html#line-103" class="ident">Kind</a>() != <a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/type.go.html#line-266" class="ident">Pointer</a> {</code></span>
-<span class="codeline" id="line-199"><code>		<label for="r35" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"gob: attempt to decode into a non-pointer"</span>)</code></span>
-<span class="codeline" id="line-200"><code>		<span class="keyword">return</span> <label for="r35" class="ident">dec</label>.<a href="#line-36" class="ident">err</a></code></span>
-<span class="codeline" id="line-201"><code>	}</code></span>
-<span class="codeline" id="line-202"><code>	<span class="keyword">return</span> <label for="r35" class="ident">dec</label>.<a href="#line-211" class="ident">DecodeValue</a>(<label for="r38" class="ident">value</label>)</code></span>
-<span class="codeline" id="line-203"><code>}</code></span>
-<span class="codeline" id="line-204"><code></code></span>
-<span class="codeline" id="line-205"><code><span class="comment">// DecodeValue reads the next value from the input stream.</span></code></span>
-<span class="codeline" id="line-206"><code><span class="comment">// If v is the zero reflect.Value (v.Kind() == Invalid), DecodeValue discards the value.</span></code></span>
-<span class="codeline" id="line-207"><code><span class="comment">// Otherwise, it stores the value into v. In that case, v must represent</span></code></span>
-<span class="codeline" id="line-208"><code><span class="comment">// a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())</span></code></span>
-<span class="codeline" id="line-209"><code><span class="comment">// If the input is at EOF, DecodeValue returns io.EOF and</span></code></span>
-<span class="codeline" id="line-210"><code><span class="comment">// does not modify v.</span></code></span>
-<span class="codeline" id="line-211"><code><span class="keyword">func</span> (<label for="r39" class="ident">dec</label> *<a href="#line-27" class="ident">Decoder</a>) <label for="r40" class="ident">DecodeValue</label>(<label for="r41" class="ident">v</label> <a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/value.go.html#line-39" class="ident">Value</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
-<span class="codeline" id="line-212"><code>	<span class="keyword">if</span> <label for="r41" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1562" class="ident">IsValid</a>() {</code></span>
-<span class="codeline" id="line-213"><code>		<span class="keyword">if</span> <label for="r41" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1608" class="ident">Kind</a>() == <a href="../../../pkg/reflect.html" class="ident i3">reflect</a>.<a href="../../reflect/type.go.html#line-266" class="ident">Pointer</a> &amp;&amp; !<label for="r41" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1537" class="ident">IsNil</a>() {</code></span>
-<span class="codeline" id="line-214"><code>			<span class="comment">// That's okay, we'll store through the pointer.</span></code></span>
-<span class="codeline" id="line-215"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> !<label for="r41" class="ident">v</label>.<a href="../../reflect/value.go.html#line-353" class="ident">CanSet</a>() {</code></span>
-<span class="codeline" id="line-216"><code>			<span class="keyword">return</span> <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-58" class="ident">New</a>(<span class="lit-string">"gob: DecodeValue of unassignable value"</span>)</code></span>
-<span class="codeline" id="line-217"><code>		}</code></span>
-<span class="codeline" id="line-218"><code>	}</code></span>
-<span class="codeline" id="line-219"><code>	<span class="comment">// Make sure we're single-threaded through here.</span></code></span>
-<span class="codeline" id="line-220"><code>	<label for="r39" class="ident">dec</label>.<a href="#line-28" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
-<span class="codeline" id="line-221"><code>	<span class="keyword">defer</span> <label for="r39" class="ident">dec</label>.<a href="#line-28" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
-<span class="codeline" id="line-222"><code></code></span>
-<span class="codeline" id="line-223"><code>	<label for="r39" class="ident">dec</label>.<a href="#line-30" class="ident">buf</a>.<a href="decode.go.html#line-88" class="ident">Reset</a>() <span class="comment">// In case data lingers from previous invocation.</span></code></span>
-<span class="codeline" id="line-224"><code>	<label for="r39" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-225"><code>	<label for="r42" class="ident">id</label> := <label for="r39" class="ident">dec</label>.<a href="#line-142" class="ident">decodeTypeSequence</a>(<a href="../../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
-<span class="codeline" id="line-226"><code>	<span class="keyword">if</span> <label for="r39" class="ident">dec</label>.<a href="#line-36" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-227"><code>		<label for="r39" class="ident">dec</label>.<a href="decode.go.html#line-1186" class="ident">decodeValue</a>(<label for="r42" class="ident">id</label>, <label for="r41" class="ident">v</label>)</code></span>
-<span class="codeline" id="line-228"><code>	}</code></span>
-<span class="codeline" id="line-229"><code>	<span class="keyword">return</span> <label for="r39" class="ident">dec</label>.<a href="#line-36" class="ident">err</a></code></span>
-<span class="codeline" id="line-230"><code>}</code></span>
-<span class="codeline" id="line-231"><code></code></span>
-<span class="codeline" id="line-232"><code><span class="comment">// If debug.go is compiled into the program, debugFunc prints a human-readable</span></code></span>
-<span class="codeline" id="line-233"><code><span class="comment">// representation of the gob data read from r by calling that file's Debug function.</span></code></span>
-<span class="codeline" id="line-234"><code><span class="comment">// Otherwise it is nil.</span></code></span>
-<span class="codeline" id="line-235"><code><span class="keyword">var</span> debugFunc <span class="keyword">func</span>(<a href="../../../pkg/io.html" class="ident i2">io</a>.<a href="../../io/io.go.html#line-83" class="ident">Reader</a>)</code></span>
+<span class="codeline" id="line-138"><code><span class="comment">//	(TypeDefinition DelimitedTypeDefinition*)?</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">// and returns the type id of the next value. It returns -1 at</span></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">// EOF.  Upon return, the remainder of dec.buf is the value to be</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">// decoded. If this is an interface value, it can be ignored by</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">// resetting that buffer.</span></code></span>
+<span class="codeline" id="line-144"><code><span class="keyword">func</span> (<label for="r31" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r32" class="ident">decodeTypeSequence</label>(<label for="r33" class="ident">isInterface</label> <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a>) <a href="type.go.html#line-163" class="ident">typeId</a> {</code></span>
+<span class="codeline" id="line-145"><code>	<label for="r34" class="ident">firstMessage</label> := <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">for</span> <label for="r31" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">if</span> <label for="r31" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>.<a href="decode.go.html#line-70" class="ident">Len</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-148"><code>			<span class="keyword">if</span> !<label for="r31" class="ident">dec</label>.<a href="#line-80" class="ident">recvMessage</a>() {</code></span>
+<span class="codeline" id="line-149"><code>				<span class="comment">// We can only return io.EOF if the input was empty.</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">				// If we read one or more type spec messages,</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">				// require a data item message to follow.</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">				// If we hit an EOF before that, then give ErrUnexpectedEOF.</span></code></span>
+<span class="codeline" id="line-153"><code>				<span class="keyword">if</span> !<label for="r34" class="ident">firstMessage</label> &amp;&amp; <label for="r31" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> == <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-44" class="ident">EOF</a> {</code></span>
+<span class="codeline" id="line-154"><code>					<label for="r31" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-48" class="ident">ErrUnexpectedEOF</a></code></span>
+<span class="codeline" id="line-155"><code>				}</code></span>
+<span class="codeline" id="line-156"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-157"><code>			}</code></span>
+<span class="codeline" id="line-158"><code>		}</code></span>
+<span class="codeline" id="line-159"><code>		<span class="comment">// Receive a type id.</span></code></span>
+<span class="codeline" id="line-160"><code>		<label for="r35" class="ident">id</label> := <a href="type.go.html#line-163" class="ident">typeId</a>(<label for="r31" class="ident">dec</label>.<a href="#line-119" class="ident">nextInt</a>())</code></span>
+<span class="codeline" id="line-161"><code>		<span class="keyword">if</span> <label for="r35" class="ident">id</label> &gt;= <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-162"><code>			<span class="comment">// Value follows.</span></code></span>
+<span class="codeline" id="line-163"><code>			<span class="keyword">return</span> <label for="r35" class="ident">id</label></code></span>
+<span class="codeline" id="line-164"><code>		}</code></span>
+<span class="codeline" id="line-165"><code>		<span class="comment">// Type definition for (-id) follows.</span></code></span>
+<span class="codeline" id="line-166"><code>		<label for="r31" class="ident">dec</label>.<a href="#line-59" class="ident">recvType</a>(-<label for="r35" class="ident">id</label>)</code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">if</span> <label for="r31" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-168"><code>			<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-169"><code>		}</code></span>
+<span class="codeline" id="line-170"><code>		<span class="comment">// When decoding an interface, after a type there may be a</span></code></span>
+<span class="codeline" id="line-171"><code><span class="comment">		// DelimitedValue still in the buffer. Skip its count.</span></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">		// (Alternatively, the buffer is empty and the byte count</span></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">		// will be absorbed by recvMessage.)</span></code></span>
+<span class="codeline" id="line-174"><code>		<span class="keyword">if</span> <label for="r31" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>.<a href="decode.go.html#line-70" class="ident">Len</a>() &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-175"><code>			<span class="keyword">if</span> !<label for="r33" class="ident">isInterface</label> {</code></span>
+<span class="codeline" id="line-176"><code>				<label for="r31" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"extra data in buffer"</span>)</code></span>
+<span class="codeline" id="line-177"><code>				<span class="keyword">break</span></code></span>
+<span class="codeline" id="line-178"><code>			}</code></span>
+<span class="codeline" id="line-179"><code>			<label for="r31" class="ident">dec</label>.<a href="#line-127" class="ident">nextUint</a>()</code></span>
+<span class="codeline" id="line-180"><code>		}</code></span>
+<span class="codeline" id="line-181"><code>		<label for="r34" class="ident">firstMessage</label> = <a href="../../../pkg/builtin.html#name-false" class="ident">false</a></code></span>
+<span class="codeline" id="line-182"><code>	}</code></span>
+<span class="codeline" id="line-183"><code>	<span class="keyword">return</span> -<span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-184"><code>}</code></span>
+<span class="codeline" id="line-185"><code></code></span>
+<span class="codeline" id="line-186"><code><span class="comment">// Decode reads the next value from the input stream and stores</span></code></span>
+<span class="codeline" id="line-187"><code><span class="comment">// it in the data represented by the empty interface value.</span></code></span>
+<span class="codeline" id="line-188"><code><span class="comment">// If e is nil, the value will be discarded. Otherwise,</span></code></span>
+<span class="codeline" id="line-189"><code><span class="comment">// the value underlying e must be a pointer to the</span></code></span>
+<span class="codeline" id="line-190"><code><span class="comment">// correct type for the next data item received.</span></code></span>
+<span class="codeline" id="line-191"><code><span class="comment">// If the input is at EOF, Decode returns io.EOF and</span></code></span>
+<span class="codeline" id="line-192"><code><span class="comment">// does not modify e.</span></code></span>
+<span class="codeline" id="line-193"><code><span class="keyword">func</span> (<label for="r36" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r37" class="ident">Decode</label>(<label for="r38" class="ident">e</label> <a href="../../../pkg/builtin.html#name-any" class="ident">any</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-194"><code>	<span class="keyword">if</span> <label for="r38" class="ident">e</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-195"><code>		<span class="keyword">return</span> <label for="r36" class="ident">dec</label>.<a href="#line-213" class="ident">DecodeValue</a>(<a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/value.go.html#line-39" class="ident">Value</a>{})</code></span>
+<span class="codeline" id="line-196"><code>	}</code></span>
+<span class="codeline" id="line-197"><code>	<label for="r39" class="ident">value</label> := <a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/value.go.html#line-3203" class="ident">ValueOf</a>(<label for="r38" class="ident">e</label>)</code></span>
+<span class="codeline" id="line-198"><code>	<span class="comment">// If e represents a value as opposed to a pointer, the answer won't</span></code></span>
+<span class="codeline" id="line-199"><code><span class="comment">	// get back to the caller. Make sure it's a pointer.</span></code></span>
+<span class="codeline" id="line-200"><code>	<span class="keyword">if</span> <label for="r39" class="ident">value</label>.<a href="../../reflect/value.go.html#line-2625" class="ident">Type</a>().<a href="../../reflect/type.go.html#line-103" class="ident">Kind</a>() != <a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/type.go.html#line-266" class="ident">Pointer</a> {</code></span>
+<span class="codeline" id="line-201"><code>		<label for="r36" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gob: attempt to decode into a non-pointer"</span>)</code></span>
+<span class="codeline" id="line-202"><code>		<span class="keyword">return</span> <label for="r36" class="ident">dec</label>.<a href="#line-37" class="ident">err</a></code></span>
+<span class="codeline" id="line-203"><code>	}</code></span>
+<span class="codeline" id="line-204"><code>	<span class="keyword">return</span> <label for="r36" class="ident">dec</label>.<a href="#line-213" class="ident">DecodeValue</a>(<label for="r39" class="ident">value</label>)</code></span>
+<span class="codeline" id="line-205"><code>}</code></span>
+<span class="codeline" id="line-206"><code></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">// DecodeValue reads the next value from the input stream.</span></code></span>
+<span class="codeline" id="line-208"><code><span class="comment">// If v is the zero reflect.Value (v.Kind() == Invalid), DecodeValue discards the value.</span></code></span>
+<span class="codeline" id="line-209"><code><span class="comment">// Otherwise, it stores the value into v. In that case, v must represent</span></code></span>
+<span class="codeline" id="line-210"><code><span class="comment">// a non-nil pointer to data or be an assignable reflect.Value (v.CanSet())</span></code></span>
+<span class="codeline" id="line-211"><code><span class="comment">// If the input is at EOF, DecodeValue returns io.EOF and</span></code></span>
+<span class="codeline" id="line-212"><code><span class="comment">// does not modify v.</span></code></span>
+<span class="codeline" id="line-213"><code><span class="keyword">func</span> (<label for="r40" class="ident">dec</label> *<a href="#line-28" class="ident">Decoder</a>) <label for="r41" class="ident">DecodeValue</label>(<label for="r42" class="ident">v</label> <a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/value.go.html#line-39" class="ident">Value</a>) <a href="../../../pkg/builtin.html#name-error" class="ident">error</a> {</code></span>
+<span class="codeline" id="line-214"><code>	<span class="keyword">if</span> <label for="r42" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1576" class="ident">IsValid</a>() {</code></span>
+<span class="codeline" id="line-215"><code>		<span class="keyword">if</span> <label for="r42" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1698" class="ident">Kind</a>() == <a href="../../../pkg/reflect.html" class="ident i4">reflect</a>.<a href="../../reflect/type.go.html#line-266" class="ident">Pointer</a> &amp;&amp; !<label for="r42" class="ident">v</label>.<a href="../../reflect/value.go.html#line-1551" class="ident">IsNil</a>() {</code></span>
+<span class="codeline" id="line-216"><code>			<span class="comment">// That's okay, we'll store through the pointer.</span></code></span>
+<span class="codeline" id="line-217"><code>		} <span class="keyword">else</span> <span class="keyword">if</span> !<label for="r42" class="ident">v</label>.<a href="../../reflect/value.go.html#line-365" class="ident">CanSet</a>() {</code></span>
+<span class="codeline" id="line-218"><code>			<span class="keyword">return</span> <a href="../../../pkg/errors.html" class="ident i1">errors</a>.<a href="../../errors/errors.go.html#line-61" class="ident">New</a>(<span class="lit-string">"gob: DecodeValue of unassignable value"</span>)</code></span>
+<span class="codeline" id="line-219"><code>		}</code></span>
+<span class="codeline" id="line-220"><code>	}</code></span>
+<span class="codeline" id="line-221"><code>	<span class="comment">// Make sure we're single-threaded through here.</span></code></span>
+<span class="codeline" id="line-222"><code>	<label for="r40" class="ident">dec</label>.<a href="#line-29" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-81" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-223"><code>	<span class="keyword">defer</span> <label for="r40" class="ident">dec</label>.<a href="#line-29" class="ident">mutex</a>.<a href="../../sync/mutex.go.html#line-212" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-224"><code></code></span>
+<span class="codeline" id="line-225"><code>	<label for="r40" class="ident">dec</label>.<a href="#line-31" class="ident">buf</a>.<a href="decode.go.html#line-84" class="ident">Reset</a>() <span class="comment">// In case data lingers from previous invocation.</span></code></span>
+<span class="codeline" id="line-226"><code>	<label for="r40" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-227"><code>	<label for="r43" class="ident">id</label> := <label for="r40" class="ident">dec</label>.<a href="#line-144" class="ident">decodeTypeSequence</a>(<a href="../../../pkg/builtin.html#name-false" class="ident">false</a>)</code></span>
+<span class="codeline" id="line-228"><code>	<span class="keyword">if</span> <label for="r40" class="ident">dec</label>.<a href="#line-37" class="ident">err</a> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-229"><code>		<label for="r40" class="ident">dec</label>.<a href="decode.go.html#line-1223" class="ident">decodeValue</a>(<label for="r43" class="ident">id</label>, <label for="r42" class="ident">v</label>)</code></span>
+<span class="codeline" id="line-230"><code>	}</code></span>
+<span class="codeline" id="line-231"><code>	<span class="keyword">return</span> <label for="r40" class="ident">dec</label>.<a href="#line-37" class="ident">err</a></code></span>
+<span class="codeline" id="line-232"><code>}</code></span>
+<span class="codeline" id="line-233"><code></code></span>
+<span class="codeline" id="line-234"><code><span class="comment">// If debug.go is compiled into the program, debugFunc prints a human-readable</span></code></span>
+<span class="codeline" id="line-235"><code><span class="comment">// representation of the gob data read from r by calling that file's Debug function.</span></code></span>
+<span class="codeline" id="line-236"><code><span class="comment">// Otherwise it is nil.</span></code></span>
+<span class="codeline" id="line-237"><code><span class="keyword">var</span> debugFunc <span class="keyword">func</span>(<a href="../../../pkg/io.html" class="ident i3">io</a>.<a href="../../io/io.go.html#line-86" class="ident">Reader</a>)</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

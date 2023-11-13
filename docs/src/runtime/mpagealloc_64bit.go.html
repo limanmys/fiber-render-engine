@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: mpagealloc_64bit.go in package runtime</title>
-<link href="../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../jvs/golds-v0.5.7.js"></script>
+<link href="../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -65,10 +65,14 @@ input[id=r45]:checked ~pre label[for=r45],
 input[id=r46]:checked ~pre label[for=r46],
 input[id=r47]:checked ~pre label[for=r47],
 input[id=r48]:checked ~pre label[for=r48],
-input[id=r49]:checked ~pre label[for=r49]
+input[id=r49]:checked ~pre label[for=r49],
+input[id=r50]:checked ~pre label[for=r50],
+input[id=r51]:checked ~pre label[for=r51],
+input[id=r52]:checked ~pre label[for=r52],
+input[id=r53]:checked ~pre label[for=r53],
+input[id=r54]:checked ~pre label[for=r54]
 {background: #226; color: #ff8;}
-input[id=i0]:checked ~pre .i0,
-input[id=i1]:checked ~pre .i1
+input[id=i0]:checked ~pre .i0
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -120,8 +124,12 @@ input[id=i1]:checked ~pre .i1
 <input id="r47" type="radio" name="g"/>
 <input id="r48" type="radio" name="g"/>
 <input id="r49" type="radio" name="g"/>
+<input id="r50" type="radio" name="g"/>
+<input id="r51" type="radio" name="g"/>
+<input id="r52" type="radio" name="g"/>
+<input id="r53" type="radio" name="g"/>
+<input id="r54" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
-<input id="i1" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// Copyright 2019 The Go Authors. All rights reserved.</span></code></span>
@@ -133,257 +141,258 @@ input[id=i1]:checked ~pre .i1
 <span class="codeline" id="line-7"><code><span class="keyword">package</span> runtime</code></span>
 <span class="codeline" id="line-8"><code></code></span>
 <span class="codeline" id="line-9"><code><span class="keyword">import</span> (</code></span>
-<span class="codeline" id="line-10"><code>	<label for="i0"><span class="lit-string i0">"runtime/internal/atomic"</span></label></code></span>
-<span class="codeline" id="line-11"><code>	<label for="i1"><span class="lit-string i1">"unsafe"</span></label></code></span>
-<span class="codeline" id="line-12"><code>)</code></span>
-<span class="codeline" id="line-13"><code></code></span>
-<span class="codeline" id="line-14"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-15"><code>	<span class="comment">// The number of levels in the radix tree.</span></code></span>
-<span class="codeline" id="line-16"><code>	summaryLevels = <span class="lit-number">5</span></code></span>
-<span class="codeline" id="line-17"><code></code></span>
-<span class="codeline" id="line-18"><code>	<span class="comment">// Constants for testing.</span></code></span>
-<span class="codeline" id="line-19"><code>	pageAlloc32Bit = <span class="lit-number">0</span></code></span>
-<span class="codeline" id="line-20"><code>	pageAlloc64Bit = <span class="lit-number">1</span></code></span>
-<span class="codeline" id="line-21"><code></code></span>
-<span class="codeline" id="line-22"><code>	<span class="comment">// Number of bits needed to represent all indices into the L1 of the</span></code></span>
-<span class="codeline" id="line-23"><code><span class="comment">	// chunks map.</span></code></span>
-<span class="codeline" id="line-24"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-25"><code><span class="comment">	// See (*pageAlloc).chunks for more details. Update the documentation</span></code></span>
-<span class="codeline" id="line-26"><code><span class="comment">	// there should this number change.</span></code></span>
-<span class="codeline" id="line-27"><code>	pallocChunksL1Bits = <span class="lit-number">13</span></code></span>
-<span class="codeline" id="line-28"><code>)</code></span>
-<span class="codeline" id="line-29"><code></code></span>
-<span class="codeline" id="line-30"><code><span class="comment">// levelBits is the number of bits in the radix for a given level in the super summary</span></code></span>
-<span class="codeline" id="line-31"><code><span class="comment">// structure.</span></code></span>
-<span class="codeline" id="line-32"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-33"><code><span class="comment">// The sum of all the entries of levelBits should equal heapAddrBits.</span></code></span>
-<span class="codeline" id="line-34"><code><span class="keyword">var</span> levelBits = [<a href="#line-16" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
-<span class="codeline" id="line-35"><code>	<a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a>,</code></span>
+<span class="codeline" id="line-10"><code>	<label for="i0"><span class="lit-string i0">"unsafe"</span></label></code></span>
+<span class="codeline" id="line-11"><code>)</code></span>
+<span class="codeline" id="line-12"><code></code></span>
+<span class="codeline" id="line-13"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-14"><code>	<span class="comment">// The number of levels in the radix tree.</span></code></span>
+<span class="codeline" id="line-15"><code>	summaryLevels = <span class="lit-number">5</span></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code>	<span class="comment">// Constants for testing.</span></code></span>
+<span class="codeline" id="line-18"><code>	pageAlloc32Bit = <span class="lit-number">0</span></code></span>
+<span class="codeline" id="line-19"><code>	pageAlloc64Bit = <span class="lit-number">1</span></code></span>
+<span class="codeline" id="line-20"><code></code></span>
+<span class="codeline" id="line-21"><code>	<span class="comment">// Number of bits needed to represent all indices into the L1 of the</span></code></span>
+<span class="codeline" id="line-22"><code><span class="comment">	// chunks map.</span></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">	// See (*pageAlloc).chunks for more details. Update the documentation</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">	// there should this number change.</span></code></span>
+<span class="codeline" id="line-26"><code>	pallocChunksL1Bits = <span class="lit-number">13</span></code></span>
+<span class="codeline" id="line-27"><code>)</code></span>
+<span class="codeline" id="line-28"><code></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// levelBits is the number of bits in the radix for a given level in the super summary</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// structure.</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-32"><code><span class="comment">// The sum of all the entries of levelBits should equal heapAddrBits.</span></code></span>
+<span class="codeline" id="line-33"><code><span class="keyword">var</span> levelBits = [<a href="#line-15" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-34"><code>	<a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a>,</code></span>
+<span class="codeline" id="line-35"><code>	<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
 <span class="codeline" id="line-36"><code>	<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
 <span class="codeline" id="line-37"><code>	<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
 <span class="codeline" id="line-38"><code>	<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-39"><code>	<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-40"><code>}</code></span>
-<span class="codeline" id="line-41"><code></code></span>
-<span class="codeline" id="line-42"><code><span class="comment">// levelShift is the number of bits to shift to acquire the radix for a given level</span></code></span>
-<span class="codeline" id="line-43"><code><span class="comment">// in the super summary structure.</span></code></span>
-<span class="codeline" id="line-44"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-45"><code><span class="comment">// With levelShift, one can compute the index of the summary at level l related to a</span></code></span>
-<span class="codeline" id="line-46"><code><span class="comment">// pointer p by doing:</span></code></span>
-<span class="codeline" id="line-47"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-48"><code><span class="comment">//	p &gt;&gt; levelShift[l]</span></code></span>
-<span class="codeline" id="line-49"><code><span class="keyword">var</span> levelShift = [<a href="#line-16" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
-<span class="codeline" id="line-50"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a>,</code></span>
-<span class="codeline" id="line-51"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">1</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-52"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">2</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-53"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">3</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-54"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">4</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-55"><code>}</code></span>
-<span class="codeline" id="line-56"><code></code></span>
-<span class="codeline" id="line-57"><code><span class="comment">// levelLogPages is log2 the maximum number of runtime pages in the address space</span></code></span>
-<span class="codeline" id="line-58"><code><span class="comment">// a summary in the given level represents.</span></code></span>
-<span class="codeline" id="line-59"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-60"><code><span class="comment">// The leaf level always represents exactly log2 of 1 chunk's worth of pages.</span></code></span>
-<span class="codeline" id="line-61"><code><span class="keyword">var</span> levelLogPages = [<a href="#line-16" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
-<span class="codeline" id="line-62"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">4</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-63"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">3</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-64"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">2</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-65"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">1</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
-<span class="codeline" id="line-66"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a>,</code></span>
-<span class="codeline" id="line-67"><code>}</code></span>
-<span class="codeline" id="line-68"><code></code></span>
-<span class="codeline" id="line-69"><code><span class="comment">// sysInit performs architecture-dependent initialization of fields</span></code></span>
-<span class="codeline" id="line-70"><code><span class="comment">// in pageAlloc. pageAlloc should be uninitialized except for sysStat</span></code></span>
-<span class="codeline" id="line-71"><code><span class="comment">// if any runtime statistic should be updated.</span></code></span>
-<span class="codeline" id="line-72"><code><span class="keyword">func</span> (<label for="r0" class="ident">p</label> *<a href="mpagealloc.go.html#line-180" class="ident">pageAlloc</a>) <label for="r1" class="ident">sysInit</label>() {</code></span>
-<span class="codeline" id="line-73"><code>	<span class="comment">// Reserve memory for each level. This will get mapped in</span></code></span>
-<span class="codeline" id="line-74"><code><span class="comment">	// as R/W by setArenas.</span></code></span>
-<span class="codeline" id="line-75"><code>	<span class="keyword">for</span> <label for="r2" class="ident">l</label>, <label for="r3" class="ident">shift</label> := <span class="keyword">range</span> <a href="#line-49" class="ident">levelShift</a> {</code></span>
-<span class="codeline" id="line-76"><code>		<label for="r4" class="ident">entries</label> := <span class="lit-number">1</span> &lt;&lt; (<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <label for="r3" class="ident">shift</label>)</code></span>
-<span class="codeline" id="line-77"><code></code></span>
-<span class="codeline" id="line-78"><code>		<span class="comment">// Reserve b bytes of memory anywhere in the address space.</span></code></span>
-<span class="codeline" id="line-79"><code>		<label for="r5" class="ident">b</label> := <a href="stubs.go.html#line-412" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r4" class="ident">entries</label>)*<a href="mpagealloc.go.html#line-908" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-332" class="ident">physPageSize</a>)</code></span>
-<span class="codeline" id="line-80"><code>		<label for="r6" class="ident">r</label> := <a href="mem.go.html#line-132" class="ident">sysReserve</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r5" class="ident">b</label>)</code></span>
-<span class="codeline" id="line-81"><code>		<span class="keyword">if</span> <label for="r6" class="ident">r</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-82"><code>			<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"failed to reserve page summary memory"</span>)</code></span>
-<span class="codeline" id="line-83"><code>		}</code></span>
-<span class="codeline" id="line-84"><code></code></span>
-<span class="codeline" id="line-85"><code>		<span class="comment">// Put this reservation into a slice.</span></code></span>
-<span class="codeline" id="line-86"><code>		<label for="r7" class="ident">sl</label> := <a href="slice.go.html#line-22" class="ident">notInHeapSlice</a>{(*<a href="malloc.go.html#line-1474" class="ident">notInHeap</a>)(<label for="r6" class="ident">r</label>), <span class="lit-number">0</span>, <label for="r4" class="ident">entries</label>}</code></span>
-<span class="codeline" id="line-87"><code>		<label for="r0" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r2" class="ident">l</label>] = *(*[]<a href="mpagealloc.go.html#line-925" class="ident">pallocSum</a>)(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r7" class="ident">sl</label>))</code></span>
-<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-39"><code>}</code></span>
+<span class="codeline" id="line-40"><code></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// levelShift is the number of bits to shift to acquire the radix for a given level</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// in the super summary structure.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// With levelShift, one can compute the index of the summary at level l related to a</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// pointer p by doing:</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">//	p &gt;&gt; levelShift[l]</span></code></span>
+<span class="codeline" id="line-48"><code><span class="keyword">var</span> levelShift = [<a href="#line-15" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-49"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a>,</code></span>
+<span class="codeline" id="line-50"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">1</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-51"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">2</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-52"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">3</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-53"><code>	<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <a href="mpagealloc.go.html#line-75" class="ident">summaryL0Bits</a> - <span class="lit-number">4</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-54"><code>}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// levelLogPages is log2 the maximum number of runtime pages in the address space</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">// a summary in the given level represents.</span></code></span>
+<span class="codeline" id="line-58"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-59"><code><span class="comment">// The leaf level always represents exactly log2 of 1 chunk's worth of pages.</span></code></span>
+<span class="codeline" id="line-60"><code><span class="keyword">var</span> levelLogPages = [<a href="#line-15" class="ident">summaryLevels</a>]<a href="../../pkg/builtin.html#name-uint" class="ident">uint</a>{</code></span>
+<span class="codeline" id="line-61"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">4</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-62"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">3</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-63"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">2</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-64"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a> + <span class="lit-number">1</span>*<a href="mpagealloc.go.html#line-74" class="ident">summaryLevelBits</a>,</code></span>
+<span class="codeline" id="line-65"><code>	<a href="mpagealloc.go.html#line-60" class="ident">logPallocChunkPages</a>,</code></span>
+<span class="codeline" id="line-66"><code>}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// sysInit performs architecture-dependent initialization of fields</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">// in pageAlloc. pageAlloc should be uninitialized except for sysStat</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">// if any runtime statistic should be updated.</span></code></span>
+<span class="codeline" id="line-71"><code><span class="keyword">func</span> (<label for="r0" class="ident">p</label> *<a href="mpagealloc.go.html#line-180" class="ident">pageAlloc</a>) <label for="r1" class="ident">sysInit</label>(<label for="r2" class="ident">test</label> <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>) {</code></span>
+<span class="codeline" id="line-72"><code>	<span class="comment">// Reserve memory for each level. This will get mapped in</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">	// as R/W by setArenas.</span></code></span>
+<span class="codeline" id="line-74"><code>	<span class="keyword">for</span> <label for="r3" class="ident">l</label>, <label for="r4" class="ident">shift</label> := <span class="keyword">range</span> <a href="#line-48" class="ident">levelShift</a> {</code></span>
+<span class="codeline" id="line-75"><code>		<label for="r5" class="ident">entries</label> := <span class="lit-number">1</span> &lt;&lt; (<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a> - <label for="r4" class="ident">shift</label>)</code></span>
+<span class="codeline" id="line-76"><code></code></span>
+<span class="codeline" id="line-77"><code>		<span class="comment">// Reserve b bytes of memory anywhere in the address space.</span></code></span>
+<span class="codeline" id="line-78"><code>		<label for="r6" class="ident">b</label> := <a href="stubs.go.html#line-424" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r5" class="ident">entries</label>)*<a href="mpagealloc.go.html#line-972" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-356" class="ident">physPageSize</a>)</code></span>
+<span class="codeline" id="line-79"><code>		<label for="r7" class="ident">r</label> := <a href="mem.go.html#line-145" class="ident">sysReserve</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r6" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">if</span> <label for="r7" class="ident">r</label> == <a href="../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-81"><code>			<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"failed to reserve page summary memory"</span>)</code></span>
+<span class="codeline" id="line-82"><code>		}</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>		<span class="comment">// Put this reservation into a slice.</span></code></span>
+<span class="codeline" id="line-85"><code>		<label for="r8" class="ident">sl</label> := <a href="slice.go.html#line-22" class="ident">notInHeapSlice</a>{(*<a href="malloc.go.html#line-1605" class="ident">notInHeap</a>)(<label for="r7" class="ident">r</label>), <span class="lit-number">0</span>, <label for="r5" class="ident">entries</label>}</code></span>
+<span class="codeline" id="line-86"><code>		<label for="r0" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r3" class="ident">l</label>] = *(*[]<a href="mpagealloc.go.html#line-989" class="ident">pallocSum</a>)(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r8" class="ident">sl</label>))</code></span>
+<span class="codeline" id="line-87"><code>	}</code></span>
+<span class="codeline" id="line-88"><code>}</code></span>
 <span class="codeline" id="line-89"><code></code></span>
-<span class="codeline" id="line-90"><code>	<span class="comment">// Set up the scavenge index.</span></code></span>
-<span class="codeline" id="line-91"><code>	<label for="r8" class="ident">nbytes</label> := <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<span class="lit-number">1</span>&lt;&lt;<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a>) / <a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> / <span class="lit-number">8</span></code></span>
-<span class="codeline" id="line-92"><code>	<label for="r9" class="ident">r</label> := <a href="mem.go.html#line-132" class="ident">sysReserve</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r8" class="ident">nbytes</label>)</code></span>
-<span class="codeline" id="line-93"><code>	<label for="r10" class="ident">sl</label> := <a href="slice.go.html#line-22" class="ident">notInHeapSlice</a>{(*<a href="malloc.go.html#line-1474" class="ident">notInHeap</a>)(<label for="r9" class="ident">r</label>), <a href="../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r8" class="ident">nbytes</label>), <a href="../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r8" class="ident">nbytes</label>)}</code></span>
-<span class="codeline" id="line-94"><code>	<label for="r0" class="ident">p</label>.<a href="mpagealloc.go.html#line-273" class="ident">scav</a>.<a href="mpagealloc.go.html#line-276" class="ident">index</a>.<a href="mgcscavenge.go.html#line-990" class="ident">chunks</a> = *(*[]<a href="../../pkg/runtime/internal/atomic.html" class="ident i0">atomic</a>.<a href="internal/atomic/types.go.html#line-97" class="ident">Uint8</a>)(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r10" class="ident">sl</label>))</code></span>
-<span class="codeline" id="line-95"><code>}</code></span>
-<span class="codeline" id="line-96"><code></code></span>
-<span class="codeline" id="line-97"><code><span class="comment">// sysGrow performs architecture-dependent operations on heap</span></code></span>
-<span class="codeline" id="line-98"><code><span class="comment">// growth for the page allocator, such as mapping in new memory</span></code></span>
-<span class="codeline" id="line-99"><code><span class="comment">// for summaries. It also updates the length of the slices in</span></code></span>
-<span class="codeline" id="line-100"><code><span class="comment">// [.summary.</span></code></span>
-<span class="codeline" id="line-101"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-102"><code><span class="comment">// base is the base of the newly-added heap memory and limit is</span></code></span>
-<span class="codeline" id="line-103"><code><span class="comment">// the first address past the end of the newly-added heap memory.</span></code></span>
-<span class="codeline" id="line-104"><code><span class="comment">// Both must be aligned to pallocChunkBytes.</span></code></span>
-<span class="codeline" id="line-105"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-106"><code><span class="comment">// The caller must update p.start and p.end after calling sysGrow.</span></code></span>
-<span class="codeline" id="line-107"><code><span class="keyword">func</span> (<label for="r11" class="ident">p</label> *<a href="mpagealloc.go.html#line-180" class="ident">pageAlloc</a>) <label for="r12" class="ident">sysGrow</label>(<label for="r13" class="ident">base</label>, <label for="r14" class="ident">limit</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) {</code></span>
-<span class="codeline" id="line-108"><code>	<span class="keyword">if</span> <label for="r13" class="ident">base</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> || <label for="r14" class="ident">limit</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-109"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: base = "</span>, <a href="print.go.html#line-15" class="ident">hex</a>(<label for="r13" class="ident">base</label>), <span class="lit-string">", limit = "</span>, <a href="print.go.html#line-15" class="ident">hex</a>(<label for="r14" class="ident">limit</label>), <span class="lit-string">"\n"</span>)</code></span>
-<span class="codeline" id="line-110"><code>		<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"sysGrow bounds not aligned to pallocChunkBytes"</span>)</code></span>
-<span class="codeline" id="line-111"><code>	}</code></span>
-<span class="codeline" id="line-112"><code></code></span>
-<span class="codeline" id="line-113"><code>	<span class="comment">// addrRangeToSummaryRange converts a range of addresses into a range</span></code></span>
-<span class="codeline" id="line-114"><code><span class="comment">	// of summary indices which must be mapped to support those addresses</span></code></span>
-<span class="codeline" id="line-115"><code><span class="comment">	// in the summary range.</span></code></span>
-<span class="codeline" id="line-116"><code>	<label for="r15" class="ident">addrRangeToSummaryRange</label> := <span class="keyword">func</span>(<label for="r16" class="ident">level</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r17" class="ident">r</label> <a href="mranges.go.html#line-21" class="ident">addrRange</a>) (<a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
-<span class="codeline" id="line-117"><code>		<label for="r18" class="ident">sumIdxBase</label>, <label for="r19" class="ident">sumIdxLimit</label> := <a href="mpagealloc.go.html#line-158" class="ident">addrsToSummaryRange</a>(<label for="r16" class="ident">level</label>, <label for="r17" class="ident">r</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>(), <label for="r17" class="ident">r</label>.<a href="mranges.go.html#line-27" class="ident">limit</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>())</code></span>
-<span class="codeline" id="line-118"><code>		<span class="keyword">return</span> <a href="mpagealloc.go.html#line-175" class="ident">blockAlignSummaryRange</a>(<label for="r16" class="ident">level</label>, <label for="r18" class="ident">sumIdxBase</label>, <label for="r19" class="ident">sumIdxLimit</label>)</code></span>
-<span class="codeline" id="line-119"><code>	}</code></span>
-<span class="codeline" id="line-120"><code></code></span>
-<span class="codeline" id="line-121"><code>	<span class="comment">// summaryRangeToSumAddrRange converts a range of indices in any</span></code></span>
-<span class="codeline" id="line-122"><code><span class="comment">	// level of p.summary into page-aligned addresses which cover that</span></code></span>
-<span class="codeline" id="line-123"><code><span class="comment">	// range of indices.</span></code></span>
-<span class="codeline" id="line-124"><code>	<label for="r20" class="ident">summaryRangeToSumAddrRange</label> := <span class="keyword">func</span>(<label for="r21" class="ident">level</label>, <label for="r22" class="ident">sumIdxBase</label>, <label for="r23" class="ident">sumIdxLimit</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="mranges.go.html#line-21" class="ident">addrRange</a> {</code></span>
-<span class="codeline" id="line-125"><code>		<label for="r24" class="ident">baseOffset</label> := <a href="stubs.go.html#line-417" class="ident">alignDown</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r22" class="ident">sumIdxBase</label>)*<a href="mpagealloc.go.html#line-908" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-332" class="ident">physPageSize</a>)</code></span>
-<span class="codeline" id="line-126"><code>		<label for="r25" class="ident">limitOffset</label> := <a href="stubs.go.html#line-412" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r23" class="ident">sumIdxLimit</label>)*<a href="mpagealloc.go.html#line-908" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-332" class="ident">physPageSize</a>)</code></span>
-<span class="codeline" id="line-127"><code>		<label for="r26" class="ident">base</label> := <a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r21" class="ident">level</label>][<span class="lit-number">0</span>])</code></span>
-<span class="codeline" id="line-128"><code>		<span class="keyword">return</span> <a href="mranges.go.html#line-21" class="ident">addrRange</a>{</code></span>
-<span class="codeline" id="line-129"><code>			<a href="mranges.go.html#line-99" class="ident">offAddr</a>{<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r26" class="ident">base</label>, <label for="r24" class="ident">baseOffset</label>))},</code></span>
-<span class="codeline" id="line-130"><code>			<a href="mranges.go.html#line-99" class="ident">offAddr</a>{<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r26" class="ident">base</label>, <label for="r25" class="ident">limitOffset</label>))},</code></span>
-<span class="codeline" id="line-131"><code>		}</code></span>
-<span class="codeline" id="line-132"><code>	}</code></span>
-<span class="codeline" id="line-133"><code></code></span>
-<span class="codeline" id="line-134"><code>	<span class="comment">// addrRangeToSumAddrRange is a convienience function that converts</span></code></span>
-<span class="codeline" id="line-135"><code><span class="comment">	// an address range r to the address range of the given summary level</span></code></span>
-<span class="codeline" id="line-136"><code><span class="comment">	// that stores the summaries for r.</span></code></span>
-<span class="codeline" id="line-137"><code>	<label for="r27" class="ident">addrRangeToSumAddrRange</label> := <span class="keyword">func</span>(<label for="r28" class="ident">level</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r29" class="ident">r</label> <a href="mranges.go.html#line-21" class="ident">addrRange</a>) <a href="mranges.go.html#line-21" class="ident">addrRange</a> {</code></span>
-<span class="codeline" id="line-138"><code>		<label for="r30" class="ident">sumIdxBase</label>, <label for="r31" class="ident">sumIdxLimit</label> := <label for="r15" class="ident">addrRangeToSummaryRange</label>(<label for="r28" class="ident">level</label>, <label for="r29" class="ident">r</label>)</code></span>
-<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> <label for="r20" class="ident">summaryRangeToSumAddrRange</label>(<label for="r28" class="ident">level</label>, <label for="r30" class="ident">sumIdxBase</label>, <label for="r31" class="ident">sumIdxLimit</label>)</code></span>
-<span class="codeline" id="line-140"><code>	}</code></span>
-<span class="codeline" id="line-141"><code></code></span>
-<span class="codeline" id="line-142"><code>	<span class="comment">// Find the first inUse index which is strictly greater than base.</span></code></span>
-<span class="codeline" id="line-143"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-144"><code><span class="comment">	// Because this function will never be asked remap the same memory</span></code></span>
-<span class="codeline" id="line-145"><code><span class="comment">	// twice, this index is effectively the index at which we would insert</span></code></span>
-<span class="codeline" id="line-146"><code><span class="comment">	// this new growth, and base will never overlap/be contained within</span></code></span>
-<span class="codeline" id="line-147"><code><span class="comment">	// any existing range.</span></code></span>
-<span class="codeline" id="line-148"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-149"><code><span class="comment">	// This will be used to look at what memory in the summary array is already</span></code></span>
-<span class="codeline" id="line-150"><code><span class="comment">	// mapped before and after this new range.</span></code></span>
-<span class="codeline" id="line-151"><code>	<label for="r32" class="ident">inUseIndex</label> := <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-268" class="ident">inUse</a>.<a href="mranges.go.html#line-241" class="ident">findSucc</a>(<label for="r13" class="ident">base</label>)</code></span>
-<span class="codeline" id="line-152"><code></code></span>
-<span class="codeline" id="line-153"><code>	<span class="comment">// Walk up the radix tree and map summaries in as needed.</span></code></span>
-<span class="codeline" id="line-154"><code>	<span class="keyword">for</span> <label for="r33" class="ident">l</label> := <span class="keyword">range</span> <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a> {</code></span>
-<span class="codeline" id="line-155"><code>		<span class="comment">// Figure out what part of the summary array this new address space needs.</span></code></span>
-<span class="codeline" id="line-156"><code>		<label for="r34" class="ident">needIdxBase</label>, <label for="r35" class="ident">needIdxLimit</label> := <label for="r15" class="ident">addrRangeToSummaryRange</label>(<label for="r33" class="ident">l</label>, <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(<label for="r13" class="ident">base</label>, <label for="r14" class="ident">limit</label>))</code></span>
-<span class="codeline" id="line-157"><code></code></span>
-<span class="codeline" id="line-158"><code>		<span class="comment">// Update the summary slices with a new upper-bound. This ensures</span></code></span>
-<span class="codeline" id="line-159"><code><span class="comment">		// we get tight bounds checks on at least the top bound.</span></code></span>
-<span class="codeline" id="line-160"><code><span class="comment">		//</span></code></span>
-<span class="codeline" id="line-161"><code><span class="comment">		// We must do this regardless of whether we map new memory.</span></code></span>
-<span class="codeline" id="line-162"><code>		<span class="keyword">if</span> <label for="r35" class="ident">needIdxLimit</label> &gt; <a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r33" class="ident">l</label>]) {</code></span>
-<span class="codeline" id="line-163"><code>			<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r33" class="ident">l</label>] = <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r33" class="ident">l</label>][:<label for="r35" class="ident">needIdxLimit</label>]</code></span>
-<span class="codeline" id="line-164"><code>		}</code></span>
-<span class="codeline" id="line-165"><code></code></span>
-<span class="codeline" id="line-166"><code>		<span class="comment">// Compute the needed address range in the summary array for level l.</span></code></span>
-<span class="codeline" id="line-167"><code>		<label for="r36" class="ident">need</label> := <label for="r20" class="ident">summaryRangeToSumAddrRange</label>(<label for="r33" class="ident">l</label>, <label for="r34" class="ident">needIdxBase</label>, <label for="r35" class="ident">needIdxLimit</label>)</code></span>
-<span class="codeline" id="line-168"><code></code></span>
-<span class="codeline" id="line-169"><code>		<span class="comment">// Prune need down to what needs to be newly mapped. Some parts of it may</span></code></span>
-<span class="codeline" id="line-170"><code><span class="comment">		// already be mapped by what inUse describes due to page alignment requirements</span></code></span>
-<span class="codeline" id="line-171"><code><span class="comment">		// for mapping. prune's invariants are guaranteed by the fact that this</span></code></span>
-<span class="codeline" id="line-172"><code><span class="comment">		// function will never be asked to remap the same memory twice.</span></code></span>
-<span class="codeline" id="line-173"><code>		<span class="keyword">if</span> <label for="r32" class="ident">inUseIndex</label> &gt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-174"><code>			<label for="r36" class="ident">need</label> = <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r27" class="ident">addrRangeToSumAddrRange</label>(<label for="r33" class="ident">l</label>, <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-268" class="ident">inUse</a>.<a href="mranges.go.html#line-220" class="ident">ranges</a>[<label for="r32" class="ident">inUseIndex</label>-<span class="lit-number">1</span>]))</code></span>
-<span class="codeline" id="line-175"><code>		}</code></span>
-<span class="codeline" id="line-176"><code>		<span class="keyword">if</span> <label for="r32" class="ident">inUseIndex</label> &lt; <a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-268" class="ident">inUse</a>.<a href="mranges.go.html#line-220" class="ident">ranges</a>) {</code></span>
-<span class="codeline" id="line-177"><code>			<label for="r36" class="ident">need</label> = <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r27" class="ident">addrRangeToSumAddrRange</label>(<label for="r33" class="ident">l</label>, <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-268" class="ident">inUse</a>.<a href="mranges.go.html#line-220" class="ident">ranges</a>[<label for="r32" class="ident">inUseIndex</label>]))</code></span>
-<span class="codeline" id="line-178"><code>		}</code></span>
-<span class="codeline" id="line-179"><code>		<span class="comment">// It's possible that after our pruning above, there's nothing new to map.</span></code></span>
-<span class="codeline" id="line-180"><code>		<span class="keyword">if</span> <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>() == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-181"><code>			<span class="keyword">continue</span></code></span>
-<span class="codeline" id="line-182"><code>		}</code></span>
+<span class="codeline" id="line-90"><code><span class="comment">// sysGrow performs architecture-dependent operations on heap</span></code></span>
+<span class="codeline" id="line-91"><code><span class="comment">// growth for the page allocator, such as mapping in new memory</span></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">// for summaries. It also updates the length of the slices in</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">// p.summary.</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">// base is the base of the newly-added heap memory and limit is</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">// the first address past the end of the newly-added heap memory.</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">// Both must be aligned to pallocChunkBytes.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">// The caller must update p.start and p.end after calling sysGrow.</span></code></span>
+<span class="codeline" id="line-100"><code><span class="keyword">func</span> (<label for="r9" class="ident">p</label> *<a href="mpagealloc.go.html#line-180" class="ident">pageAlloc</a>) <label for="r10" class="ident">sysGrow</label>(<label for="r11" class="ident">base</label>, <label for="r12" class="ident">limit</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>) {</code></span>
+<span class="codeline" id="line-101"><code>	<span class="keyword">if</span> <label for="r11" class="ident">base</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> || <label for="r12" class="ident">limit</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-102"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: base = "</span>, <a href="print.go.html#line-14" class="ident">hex</a>(<label for="r11" class="ident">base</label>), <span class="lit-string">", limit = "</span>, <a href="print.go.html#line-14" class="ident">hex</a>(<label for="r12" class="ident">limit</label>), <span class="lit-string">"\n"</span>)</code></span>
+<span class="codeline" id="line-103"><code>		<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"sysGrow bounds not aligned to pallocChunkBytes"</span>)</code></span>
+<span class="codeline" id="line-104"><code>	}</code></span>
+<span class="codeline" id="line-105"><code></code></span>
+<span class="codeline" id="line-106"><code>	<span class="comment">// addrRangeToSummaryRange converts a range of addresses into a range</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">	// of summary indices which must be mapped to support those addresses</span></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">	// in the summary range.</span></code></span>
+<span class="codeline" id="line-109"><code>	<label for="r13" class="ident">addrRangeToSummaryRange</label> := <span class="keyword">func</span>(<label for="r14" class="ident">level</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r15" class="ident">r</label> <a href="mranges.go.html#line-21" class="ident">addrRange</a>) (<a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-110"><code>		<label for="r16" class="ident">sumIdxBase</label>, <label for="r17" class="ident">sumIdxLimit</label> := <a href="mpagealloc.go.html#line-158" class="ident">addrsToSummaryRange</a>(<label for="r14" class="ident">level</label>, <label for="r15" class="ident">r</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>(), <label for="r15" class="ident">r</label>.<a href="mranges.go.html#line-27" class="ident">limit</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>())</code></span>
+<span class="codeline" id="line-111"><code>		<span class="keyword">return</span> <a href="mpagealloc.go.html#line-175" class="ident">blockAlignSummaryRange</a>(<label for="r14" class="ident">level</label>, <label for="r16" class="ident">sumIdxBase</label>, <label for="r17" class="ident">sumIdxLimit</label>)</code></span>
+<span class="codeline" id="line-112"><code>	}</code></span>
+<span class="codeline" id="line-113"><code></code></span>
+<span class="codeline" id="line-114"><code>	<span class="comment">// summaryRangeToSumAddrRange converts a range of indices in any</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">	// level of p.summary into page-aligned addresses which cover that</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">	// range of indices.</span></code></span>
+<span class="codeline" id="line-117"><code>	<label for="r18" class="ident">summaryRangeToSumAddrRange</label> := <span class="keyword">func</span>(<label for="r19" class="ident">level</label>, <label for="r20" class="ident">sumIdxBase</label>, <label for="r21" class="ident">sumIdxLimit</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="mranges.go.html#line-21" class="ident">addrRange</a> {</code></span>
+<span class="codeline" id="line-118"><code>		<label for="r22" class="ident">baseOffset</label> := <a href="stubs.go.html#line-429" class="ident">alignDown</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r20" class="ident">sumIdxBase</label>)*<a href="mpagealloc.go.html#line-972" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-356" class="ident">physPageSize</a>)</code></span>
+<span class="codeline" id="line-119"><code>		<label for="r23" class="ident">limitOffset</label> := <a href="stubs.go.html#line-424" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r21" class="ident">sumIdxLimit</label>)*<a href="mpagealloc.go.html#line-972" class="ident">pallocSumBytes</a>, <a href="malloc.go.html#line-356" class="ident">physPageSize</a>)</code></span>
+<span class="codeline" id="line-120"><code>		<label for="r24" class="ident">base</label> := <a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r19" class="ident">level</label>][<span class="lit-number">0</span>])</code></span>
+<span class="codeline" id="line-121"><code>		<span class="keyword">return</span> <a href="mranges.go.html#line-21" class="ident">addrRange</a>{</code></span>
+<span class="codeline" id="line-122"><code>			<a href="mranges.go.html#line-123" class="ident">offAddr</a>{<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r24" class="ident">base</label>, <label for="r22" class="ident">baseOffset</label>))},</code></span>
+<span class="codeline" id="line-123"><code>			<a href="mranges.go.html#line-123" class="ident">offAddr</a>{<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="stubs.go.html#line-17" class="ident">add</a>(<label for="r24" class="ident">base</label>, <label for="r23" class="ident">limitOffset</label>))},</code></span>
+<span class="codeline" id="line-124"><code>		}</code></span>
+<span class="codeline" id="line-125"><code>	}</code></span>
+<span class="codeline" id="line-126"><code></code></span>
+<span class="codeline" id="line-127"><code>	<span class="comment">// addrRangeToSumAddrRange is a convenience function that converts</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">	// an address range r to the address range of the given summary level</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">	// that stores the summaries for r.</span></code></span>
+<span class="codeline" id="line-130"><code>	<label for="r25" class="ident">addrRangeToSumAddrRange</label> := <span class="keyword">func</span>(<label for="r26" class="ident">level</label> <a href="../../pkg/builtin.html#name-int" class="ident">int</a>, <label for="r27" class="ident">r</label> <a href="mranges.go.html#line-21" class="ident">addrRange</a>) <a href="mranges.go.html#line-21" class="ident">addrRange</a> {</code></span>
+<span class="codeline" id="line-131"><code>		<label for="r28" class="ident">sumIdxBase</label>, <label for="r29" class="ident">sumIdxLimit</label> := <label for="r13" class="ident">addrRangeToSummaryRange</label>(<label for="r26" class="ident">level</label>, <label for="r27" class="ident">r</label>)</code></span>
+<span class="codeline" id="line-132"><code>		<span class="keyword">return</span> <label for="r18" class="ident">summaryRangeToSumAddrRange</label>(<label for="r26" class="ident">level</label>, <label for="r28" class="ident">sumIdxBase</label>, <label for="r29" class="ident">sumIdxLimit</label>)</code></span>
+<span class="codeline" id="line-133"><code>	}</code></span>
+<span class="codeline" id="line-134"><code></code></span>
+<span class="codeline" id="line-135"><code>	<span class="comment">// Find the first inUse index which is strictly greater than base.</span></code></span>
+<span class="codeline" id="line-136"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">	// Because this function will never be asked remap the same memory</span></code></span>
+<span class="codeline" id="line-138"><code><span class="comment">	// twice, this index is effectively the index at which we would insert</span></code></span>
+<span class="codeline" id="line-139"><code><span class="comment">	// this new growth, and base will never overlap/be contained within</span></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">	// any existing range.</span></code></span>
+<span class="codeline" id="line-141"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">	// This will be used to look at what memory in the summary array is already</span></code></span>
+<span class="codeline" id="line-143"><code><span class="comment">	// mapped before and after this new range.</span></code></span>
+<span class="codeline" id="line-144"><code>	<label for="r30" class="ident">inUseIndex</label> := <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-266" class="ident">inUse</a>.<a href="mranges.go.html#line-265" class="ident">findSucc</a>(<label for="r11" class="ident">base</label>)</code></span>
+<span class="codeline" id="line-145"><code></code></span>
+<span class="codeline" id="line-146"><code>	<span class="comment">// Walk up the radix tree and map summaries in as needed.</span></code></span>
+<span class="codeline" id="line-147"><code>	<span class="keyword">for</span> <label for="r31" class="ident">l</label> := <span class="keyword">range</span> <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a> {</code></span>
+<span class="codeline" id="line-148"><code>		<span class="comment">// Figure out what part of the summary array this new address space needs.</span></code></span>
+<span class="codeline" id="line-149"><code>		<label for="r32" class="ident">needIdxBase</label>, <label for="r33" class="ident">needIdxLimit</label> := <label for="r13" class="ident">addrRangeToSummaryRange</label>(<label for="r31" class="ident">l</label>, <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(<label for="r11" class="ident">base</label>, <label for="r12" class="ident">limit</label>))</code></span>
+<span class="codeline" id="line-150"><code></code></span>
+<span class="codeline" id="line-151"><code>		<span class="comment">// Update the summary slices with a new upper-bound. This ensures</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">		// we get tight bounds checks on at least the top bound.</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">		//</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">		// We must do this regardless of whether we map new memory.</span></code></span>
+<span class="codeline" id="line-155"><code>		<span class="keyword">if</span> <label for="r33" class="ident">needIdxLimit</label> &gt; <a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r31" class="ident">l</label>]) {</code></span>
+<span class="codeline" id="line-156"><code>			<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r31" class="ident">l</label>] = <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-202" class="ident">summary</a>[<label for="r31" class="ident">l</label>][:<label for="r33" class="ident">needIdxLimit</label>]</code></span>
+<span class="codeline" id="line-157"><code>		}</code></span>
+<span class="codeline" id="line-158"><code></code></span>
+<span class="codeline" id="line-159"><code>		<span class="comment">// Compute the needed address range in the summary array for level l.</span></code></span>
+<span class="codeline" id="line-160"><code>		<label for="r34" class="ident">need</label> := <label for="r18" class="ident">summaryRangeToSumAddrRange</label>(<label for="r31" class="ident">l</label>, <label for="r32" class="ident">needIdxBase</label>, <label for="r33" class="ident">needIdxLimit</label>)</code></span>
+<span class="codeline" id="line-161"><code></code></span>
+<span class="codeline" id="line-162"><code>		<span class="comment">// Prune need down to what needs to be newly mapped. Some parts of it may</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">		// already be mapped by what inUse describes due to page alignment requirements</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">		// for mapping. Because this function will never be asked to remap the same</span></code></span>
+<span class="codeline" id="line-165"><code><span class="comment">		// memory twice, it should never be possible to prune in such a way that causes</span></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">		// need to be split.</span></code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">if</span> <label for="r30" class="ident">inUseIndex</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-168"><code>			<label for="r34" class="ident">need</label> = <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r25" class="ident">addrRangeToSumAddrRange</label>(<label for="r31" class="ident">l</label>, <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-266" class="ident">inUse</a>.<a href="mranges.go.html#line-244" class="ident">ranges</a>[<label for="r30" class="ident">inUseIndex</label>-<span class="lit-number">1</span>]))</code></span>
+<span class="codeline" id="line-169"><code>		}</code></span>
+<span class="codeline" id="line-170"><code>		<span class="keyword">if</span> <label for="r30" class="ident">inUseIndex</label> &lt; <a href="../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-266" class="ident">inUse</a>.<a href="mranges.go.html#line-244" class="ident">ranges</a>) {</code></span>
+<span class="codeline" id="line-171"><code>			<label for="r34" class="ident">need</label> = <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r25" class="ident">addrRangeToSumAddrRange</label>(<label for="r31" class="ident">l</label>, <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-266" class="ident">inUse</a>.<a href="mranges.go.html#line-244" class="ident">ranges</a>[<label for="r30" class="ident">inUseIndex</label>]))</code></span>
+<span class="codeline" id="line-172"><code>		}</code></span>
+<span class="codeline" id="line-173"><code>		<span class="comment">// It's possible that after our pruning above, there's nothing new to map.</span></code></span>
+<span class="codeline" id="line-174"><code>		<span class="keyword">if</span> <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>() == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-175"><code>			<span class="keyword">continue</span></code></span>
+<span class="codeline" id="line-176"><code>		}</code></span>
+<span class="codeline" id="line-177"><code></code></span>
+<span class="codeline" id="line-178"><code>		<span class="comment">// Map and commit need.</span></code></span>
+<span class="codeline" id="line-179"><code>		<a href="mem.go.html#line-153" class="ident">sysMap</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>()), <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-289" class="ident">sysStat</a>)</code></span>
+<span class="codeline" id="line-180"><code>		<a href="mem.go.html#line-75" class="ident">sysUsed</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>()), <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>())</code></span>
+<span class="codeline" id="line-181"><code>		<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-295" class="ident">summaryMappedReady</a> += <label for="r34" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>()</code></span>
+<span class="codeline" id="line-182"><code>	}</code></span>
 <span class="codeline" id="line-183"><code></code></span>
-<span class="codeline" id="line-184"><code>		<span class="comment">// Map and commit need.</span></code></span>
-<span class="codeline" id="line-185"><code>		<a href="mem.go.html#line-140" class="ident">sysMap</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>()), <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-297" class="ident">sysStat</a>)</code></span>
-<span class="codeline" id="line-186"><code>		<a href="mem.go.html#line-75" class="ident">sysUsed</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>()), <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>())</code></span>
-<span class="codeline" id="line-187"><code>		<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-303" class="ident">summaryMappedReady</a> += <label for="r36" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>()</code></span>
-<span class="codeline" id="line-188"><code>	}</code></span>
-<span class="codeline" id="line-189"><code></code></span>
-<span class="codeline" id="line-190"><code>	<span class="comment">// Update the scavenge index.</span></code></span>
-<span class="codeline" id="line-191"><code>	<label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-303" class="ident">summaryMappedReady</a> += <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-273" class="ident">scav</a>.<a href="mpagealloc.go.html#line-276" class="ident">index</a>.<a href="#line-197" class="ident">grow</a>(<label for="r13" class="ident">base</label>, <label for="r14" class="ident">limit</label>, <label for="r11" class="ident">p</label>.<a href="mpagealloc.go.html#line-297" class="ident">sysStat</a>)</code></span>
-<span class="codeline" id="line-192"><code>}</code></span>
-<span class="codeline" id="line-193"><code></code></span>
-<span class="codeline" id="line-194"><code><span class="comment">// grow increases the index's backing store in response to a heap growth.</span></code></span>
-<span class="codeline" id="line-195"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-196"><code><span class="comment">// Returns the amount of memory added to sysStat.</span></code></span>
-<span class="codeline" id="line-197"><code><span class="keyword">func</span> (<label for="r37" class="ident">s</label> *<a href="mgcscavenge.go.html#line-955" class="ident">scavengeIndex</a>) <label for="r38" class="ident">grow</label>(<label for="r39" class="ident">base</label>, <label for="r40" class="ident">limit</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>, <label for="r41" class="ident">sysStat</label> *<a href="mstats.go.html#line-628" class="ident">sysMemStat</a>) <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a> {</code></span>
-<span class="codeline" id="line-198"><code>	<span class="keyword">if</span> <label for="r39" class="ident">base</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> || <label for="r40" class="ident">limit</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-199"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: base = "</span>, <a href="print.go.html#line-15" class="ident">hex</a>(<label for="r39" class="ident">base</label>), <span class="lit-string">", limit = "</span>, <a href="print.go.html#line-15" class="ident">hex</a>(<label for="r40" class="ident">limit</label>), <span class="lit-string">"\n"</span>)</code></span>
-<span class="codeline" id="line-200"><code>		<a href="panic.go.html#line-1040" class="ident">throw</a>(<span class="lit-string">"sysGrow bounds not aligned to pallocChunkBytes"</span>)</code></span>
-<span class="codeline" id="line-201"><code>	}</code></span>
-<span class="codeline" id="line-202"><code>	<span class="comment">// Map and commit the pieces of chunks that we need.</span></code></span>
-<span class="codeline" id="line-203"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-204"><code><span class="comment">	// We always map the full range of the minimum heap address to the</span></code></span>
-<span class="codeline" id="line-205"><code><span class="comment">	// maximum heap address. We don't do this for the summary structure</span></code></span>
-<span class="codeline" id="line-206"><code><span class="comment">	// because it's quite large and a discontiguous heap could cause a</span></code></span>
-<span class="codeline" id="line-207"><code><span class="comment">	// lot of memory to be used. In this situation, the worst case overhead</span></code></span>
-<span class="codeline" id="line-208"><code><span class="comment">	// is in the single-digit MiB if we map the whole thing.</span></code></span>
-<span class="codeline" id="line-209"><code><span class="comment">	//</span></code></span>
-<span class="codeline" id="line-210"><code><span class="comment">	// The base address of the backing store is always page-aligned,</span></code></span>
-<span class="codeline" id="line-211"><code><span class="comment">	// because it comes from the OS, so it's sufficient to align the</span></code></span>
-<span class="codeline" id="line-212"><code><span class="comment">	// index.</span></code></span>
-<span class="codeline" id="line-213"><code>	<label for="r42" class="ident">haveMin</label> := <label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-992" class="ident">min</a>.<a href="internal/atomic/types.go.html#line-18" class="ident">Load</a>()</code></span>
-<span class="codeline" id="line-214"><code>	<label for="r43" class="ident">haveMax</label> := <label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-992" class="ident">max</a>.<a href="internal/atomic/types.go.html#line-18" class="ident">Load</a>()</code></span>
-<span class="codeline" id="line-215"><code>	<label for="r44" class="ident">needMin</label> := <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="stubs.go.html#line-417" class="ident">alignDown</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="mpagealloc.go.html#line-106" class="ident">chunkIndex</a>(<label for="r39" class="ident">base</label>)/<span class="lit-number">8</span>), <a href="malloc.go.html#line-332" class="ident">physPageSize</a>))</code></span>
-<span class="codeline" id="line-216"><code>	<label for="r45" class="ident">needMax</label> := <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="stubs.go.html#line-412" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>((<a href="mpagealloc.go.html#line-106" class="ident">chunkIndex</a>(<label for="r40" class="ident">limit</label>)+<span class="lit-number">7</span>)/<span class="lit-number">8</span>), <a href="malloc.go.html#line-332" class="ident">physPageSize</a>))</code></span>
-<span class="codeline" id="line-217"><code>	<span class="comment">// Extend the range down to what we have, if there's no overlap.</span></code></span>
-<span class="codeline" id="line-218"><code>	<span class="keyword">if</span> <label for="r45" class="ident">needMax</label> &lt; <label for="r42" class="ident">haveMin</label> {</code></span>
-<span class="codeline" id="line-219"><code>		<label for="r45" class="ident">needMax</label> = <label for="r42" class="ident">haveMin</label></code></span>
-<span class="codeline" id="line-220"><code>	}</code></span>
-<span class="codeline" id="line-221"><code>	<span class="keyword">if</span> <label for="r44" class="ident">needMin</label> &gt; <label for="r43" class="ident">haveMax</label> {</code></span>
-<span class="codeline" id="line-222"><code>		<label for="r44" class="ident">needMin</label> = <label for="r43" class="ident">haveMax</label></code></span>
-<span class="codeline" id="line-223"><code>	}</code></span>
-<span class="codeline" id="line-224"><code>	<label for="r46" class="ident">have</label> := <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(</code></span>
+<span class="codeline" id="line-184"><code>	<span class="comment">// Update the scavenge index.</span></code></span>
+<span class="codeline" id="line-185"><code>	<label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-295" class="ident">summaryMappedReady</a> += <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-269" class="ident">scav</a>.<a href="mpagealloc.go.html#line-272" class="ident">index</a>.<a href="#line-191" class="ident">sysGrow</a>(<label for="r11" class="ident">base</label>, <label for="r12" class="ident">limit</label>, <label for="r9" class="ident">p</label>.<a href="mpagealloc.go.html#line-289" class="ident">sysStat</a>)</code></span>
+<span class="codeline" id="line-186"><code>}</code></span>
+<span class="codeline" id="line-187"><code></code></span>
+<span class="codeline" id="line-188"><code><span class="comment">// sysGrow increases the index's backing store in response to a heap growth.</span></code></span>
+<span class="codeline" id="line-189"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-190"><code><span class="comment">// Returns the amount of memory added to sysStat.</span></code></span>
+<span class="codeline" id="line-191"><code><span class="keyword">func</span> (<label for="r35" class="ident">s</label> *<a href="mgcscavenge.go.html#line-1002" class="ident">scavengeIndex</a>) <label for="r36" class="ident">sysGrow</label>(<label for="r37" class="ident">base</label>, <label for="r38" class="ident">limit</label> <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>, <label for="r39" class="ident">sysStat</label> *<a href="mstats.go.html#line-633" class="ident">sysMemStat</a>) <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a> {</code></span>
+<span class="codeline" id="line-192"><code>	<span class="keyword">if</span> <label for="r37" class="ident">base</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> || <label for="r38" class="ident">limit</label>%<a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a> != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-193"><code>		<a href="../../pkg/builtin.html#name-print" class="ident">print</a>(<span class="lit-string">"runtime: base = "</span>, <a href="print.go.html#line-14" class="ident">hex</a>(<label for="r37" class="ident">base</label>), <span class="lit-string">", limit = "</span>, <a href="print.go.html#line-14" class="ident">hex</a>(<label for="r38" class="ident">limit</label>), <span class="lit-string">"\n"</span>)</code></span>
+<span class="codeline" id="line-194"><code>		<a href="panic.go.html#line-1070" class="ident">throw</a>(<span class="lit-string">"sysGrow bounds not aligned to pallocChunkBytes"</span>)</code></span>
+<span class="codeline" id="line-195"><code>	}</code></span>
+<span class="codeline" id="line-196"><code>	<label for="r40" class="ident">scSize</label> := <a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Sizeof" class="ident">Sizeof</a>(<a href="mgcscavenge.go.html#line-1232" class="ident">atomicScavChunkData</a>{})</code></span>
+<span class="codeline" id="line-197"><code>	<span class="comment">// Map and commit the pieces of chunks that we need.</span></code></span>
+<span class="codeline" id="line-198"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-199"><code><span class="comment">	// We always map the full range of the minimum heap address to the</span></code></span>
+<span class="codeline" id="line-200"><code><span class="comment">	// maximum heap address. We don't do this for the summary structure</span></code></span>
+<span class="codeline" id="line-201"><code><span class="comment">	// because it's quite large and a discontiguous heap could cause a</span></code></span>
+<span class="codeline" id="line-202"><code><span class="comment">	// lot of memory to be used. In this situation, the worst case overhead</span></code></span>
+<span class="codeline" id="line-203"><code><span class="comment">	// is in the single-digit MiB if we map the whole thing.</span></code></span>
+<span class="codeline" id="line-204"><code><span class="comment">	//</span></code></span>
+<span class="codeline" id="line-205"><code><span class="comment">	// The base address of the backing store is always page-aligned,</span></code></span>
+<span class="codeline" id="line-206"><code><span class="comment">	// because it comes from the OS, so it's sufficient to align the</span></code></span>
+<span class="codeline" id="line-207"><code><span class="comment">	// index.</span></code></span>
+<span class="codeline" id="line-208"><code>	<label for="r41" class="ident">haveMin</label> := <label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1018" class="ident">min</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-209"><code>	<label for="r42" class="ident">haveMax</label> := <label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1018" class="ident">max</a>.<a href="internal/atomic/types.go.html#line-358" class="ident">Load</a>()</code></span>
+<span class="codeline" id="line-210"><code>	<label for="r43" class="ident">needMin</label> := <a href="stubs.go.html#line-429" class="ident">alignDown</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="mpagealloc.go.html#line-106" class="ident">chunkIndex</a>(<label for="r37" class="ident">base</label>)), <a href="malloc.go.html#line-356" class="ident">physPageSize</a>/<label for="r40" class="ident">scSize</label>)</code></span>
+<span class="codeline" id="line-211"><code>	<label for="r44" class="ident">needMax</label> := <a href="stubs.go.html#line-424" class="ident">alignUp</a>(<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="mpagealloc.go.html#line-106" class="ident">chunkIndex</a>(<label for="r38" class="ident">limit</label>)), <a href="malloc.go.html#line-356" class="ident">physPageSize</a>/<label for="r40" class="ident">scSize</label>)</code></span>
+<span class="codeline" id="line-212"><code>	<span class="comment">// Extend the range down to what we have, if there's no overlap.</span></code></span>
+<span class="codeline" id="line-213"><code>	<span class="keyword">if</span> <label for="r44" class="ident">needMax</label> &lt; <label for="r41" class="ident">haveMin</label> {</code></span>
+<span class="codeline" id="line-214"><code>		<label for="r44" class="ident">needMax</label> = <label for="r41" class="ident">haveMin</label></code></span>
+<span class="codeline" id="line-215"><code>	}</code></span>
+<span class="codeline" id="line-216"><code>	<span class="keyword">if</span> <label for="r42" class="ident">haveMax</label> != <span class="lit-number">0</span> &amp;&amp; <label for="r43" class="ident">needMin</label> &gt; <label for="r42" class="ident">haveMax</label> {</code></span>
+<span class="codeline" id="line-217"><code>		<label for="r43" class="ident">needMin</label> = <label for="r42" class="ident">haveMax</label></code></span>
+<span class="codeline" id="line-218"><code>	}</code></span>
+<span class="codeline" id="line-219"><code>	<label for="r45" class="ident">have</label> := <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(</code></span>
+<span class="codeline" id="line-220"><code>		<span class="comment">// Avoid a panic from indexing one past the last element.</span></code></span>
+<span class="codeline" id="line-221"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1017" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<label for="r41" class="ident">haveMin</label>*<label for="r40" class="ident">scSize</label>,</code></span>
+<span class="codeline" id="line-222"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1017" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<label for="r42" class="ident">haveMax</label>*<label for="r40" class="ident">scSize</label>,</code></span>
+<span class="codeline" id="line-223"><code>	)</code></span>
+<span class="codeline" id="line-224"><code>	<label for="r46" class="ident">need</label> := <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(</code></span>
 <span class="codeline" id="line-225"><code>		<span class="comment">// Avoid a panic from indexing one past the last element.</span></code></span>
-<span class="codeline" id="line-226"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-990" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r42" class="ident">haveMin</label>),</code></span>
-<span class="codeline" id="line-227"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-990" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r43" class="ident">haveMax</label>),</code></span>
+<span class="codeline" id="line-226"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1017" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<label for="r43" class="ident">needMin</label>*<label for="r40" class="ident">scSize</label>,</code></span>
+<span class="codeline" id="line-227"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1017" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<label for="r44" class="ident">needMax</label>*<label for="r40" class="ident">scSize</label>,</code></span>
 <span class="codeline" id="line-228"><code>	)</code></span>
-<span class="codeline" id="line-229"><code>	<label for="r47" class="ident">need</label> := <a href="mranges.go.html#line-33" class="ident">makeAddrRange</a>(</code></span>
-<span class="codeline" id="line-230"><code>		<span class="comment">// Avoid a panic from indexing one past the last element.</span></code></span>
-<span class="codeline" id="line-231"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-990" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r44" class="ident">needMin</label>),</code></span>
-<span class="codeline" id="line-232"><code>		<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-990" class="ident">chunks</a>[<span class="lit-number">0</span>]))+<a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<label for="r45" class="ident">needMax</label>),</code></span>
-<span class="codeline" id="line-233"><code>	)</code></span>
-<span class="codeline" id="line-234"><code>	<span class="comment">// Subtract any overlap from rounding. We can't re-map memory because</span></code></span>
-<span class="codeline" id="line-235"><code><span class="comment">	// it'll be zeroed.</span></code></span>
-<span class="codeline" id="line-236"><code>	<label for="r47" class="ident">need</label> = <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r46" class="ident">have</label>)</code></span>
-<span class="codeline" id="line-237"><code></code></span>
-<span class="codeline" id="line-238"><code>	<span class="comment">// If we've got something to map, map it, and update the slice bounds.</span></code></span>
-<span class="codeline" id="line-239"><code>	<span class="keyword">if</span> <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>() != <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-240"><code>		<a href="mem.go.html#line-140" class="ident">sysMap</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>()), <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r41" class="ident">sysStat</label>)</code></span>
-<span class="codeline" id="line-241"><code>		<a href="mem.go.html#line-75" class="ident">sysUsed</a>(<a href="../../pkg/unsafe.html" class="ident i1">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-141" class="ident">addr</a>()), <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>())</code></span>
-<span class="codeline" id="line-242"><code>		<span class="comment">// Update the indices only after the new memory is valid.</span></code></span>
-<span class="codeline" id="line-243"><code>		<span class="keyword">if</span> <label for="r42" class="ident">haveMin</label> == <span class="lit-number">0</span> || <label for="r44" class="ident">needMin</label> &lt; <label for="r42" class="ident">haveMin</label> {</code></span>
-<span class="codeline" id="line-244"><code>			<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-992" class="ident">min</a>.<a href="internal/atomic/types.go.html#line-23" class="ident">Store</a>(<label for="r44" class="ident">needMin</label>)</code></span>
-<span class="codeline" id="line-245"><code>		}</code></span>
-<span class="codeline" id="line-246"><code>		<span class="keyword">if</span> <label for="r43" class="ident">haveMax</label> == <span class="lit-number">0</span> || <label for="r45" class="ident">needMax</label> &gt; <label for="r43" class="ident">haveMax</label> {</code></span>
-<span class="codeline" id="line-247"><code>			<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-992" class="ident">max</a>.<a href="internal/atomic/types.go.html#line-23" class="ident">Store</a>(<label for="r45" class="ident">needMax</label>)</code></span>
-<span class="codeline" id="line-248"><code>		}</code></span>
-<span class="codeline" id="line-249"><code>	}</code></span>
-<span class="codeline" id="line-250"><code>	<span class="comment">// Update minHeapIdx. Note that even if there's no mapping work to do,</span></code></span>
-<span class="codeline" id="line-251"><code><span class="comment">	// we may still have a new, lower minimum heap address.</span></code></span>
-<span class="codeline" id="line-252"><code>	<label for="r48" class="ident">minHeapIdx</label> := <label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-991" class="ident">minHeapIdx</a>.<a href="internal/atomic/types.go.html#line-18" class="ident">Load</a>()</code></span>
-<span class="codeline" id="line-253"><code>	<span class="keyword">if</span> <label for="r49" class="ident">baseIdx</label> := <a href="../../pkg/builtin.html#name-int32" class="ident">int32</a>(<a href="mpagealloc.go.html#line-106" class="ident">chunkIndex</a>(<label for="r39" class="ident">base</label>) / <span class="lit-number">8</span>); <label for="r48" class="ident">minHeapIdx</label> == <span class="lit-number">0</span> || <label for="r49" class="ident">baseIdx</label> &lt; <label for="r48" class="ident">minHeapIdx</label> {</code></span>
-<span class="codeline" id="line-254"><code>		<label for="r37" class="ident">s</label>.<a href="mgcscavenge.go.html#line-991" class="ident">minHeapIdx</a>.<a href="internal/atomic/types.go.html#line-23" class="ident">Store</a>(<label for="r49" class="ident">baseIdx</label>)</code></span>
-<span class="codeline" id="line-255"><code>	}</code></span>
-<span class="codeline" id="line-256"><code>	<span class="keyword">return</span> <label for="r47" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>()</code></span>
-<span class="codeline" id="line-257"><code>}</code></span>
+<span class="codeline" id="line-229"><code>	<span class="comment">// Subtract any overlap from rounding. We can't re-map memory because</span></code></span>
+<span class="codeline" id="line-230"><code><span class="comment">	// it'll be zeroed.</span></code></span>
+<span class="codeline" id="line-231"><code>	<label for="r46" class="ident">need</label> = <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-60" class="ident">subtract</a>(<label for="r45" class="ident">have</label>)</code></span>
+<span class="codeline" id="line-232"><code></code></span>
+<span class="codeline" id="line-233"><code>	<span class="comment">// If we've got something to map, map it, and update the slice bounds.</span></code></span>
+<span class="codeline" id="line-234"><code>	<span class="keyword">if</span> <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>() != <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-235"><code>		<a href="mem.go.html#line-153" class="ident">sysMap</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>()), <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r39" class="ident">sysStat</label>)</code></span>
+<span class="codeline" id="line-236"><code>		<a href="mem.go.html#line-75" class="ident">sysUsed</a>(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(<label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-27" class="ident">base</a>.<a href="mranges.go.html#line-165" class="ident">addr</a>()), <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>(), <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>())</code></span>
+<span class="codeline" id="line-237"><code>		<span class="comment">// Update the indices only after the new memory is valid.</span></code></span>
+<span class="codeline" id="line-238"><code>		<span class="keyword">if</span> <label for="r41" class="ident">haveMin</label> == <span class="lit-number">0</span> || <label for="r43" class="ident">needMin</label> &lt; <label for="r41" class="ident">haveMin</label> {</code></span>
+<span class="codeline" id="line-239"><code>			<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1018" class="ident">min</a>.<a href="internal/atomic/types.go.html#line-378" class="ident">Store</a>(<label for="r43" class="ident">needMin</label>)</code></span>
+<span class="codeline" id="line-240"><code>		}</code></span>
+<span class="codeline" id="line-241"><code>		<span class="keyword">if</span> <label for="r42" class="ident">haveMax</label> == <span class="lit-number">0</span> || <label for="r44" class="ident">needMax</label> &gt; <label for="r42" class="ident">haveMax</label> {</code></span>
+<span class="codeline" id="line-242"><code>			<label for="r35" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1018" class="ident">max</a>.<a href="internal/atomic/types.go.html#line-378" class="ident">Store</a>(<label for="r44" class="ident">needMax</label>)</code></span>
+<span class="codeline" id="line-243"><code>		}</code></span>
+<span class="codeline" id="line-244"><code>	}</code></span>
+<span class="codeline" id="line-245"><code>	<span class="keyword">return</span> <label for="r46" class="ident">need</label>.<a href="mranges.go.html#line-42" class="ident">size</a>()</code></span>
+<span class="codeline" id="line-246"><code>}</code></span>
+<span class="codeline" id="line-247"><code></code></span>
+<span class="codeline" id="line-248"><code><span class="comment">// sysInit initializes the scavengeIndex' chunks array.</span></code></span>
+<span class="codeline" id="line-249"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-250"><code><span class="comment">// Returns the amount of memory added to sysStat.</span></code></span>
+<span class="codeline" id="line-251"><code><span class="keyword">func</span> (<label for="r47" class="ident">s</label> *<a href="mgcscavenge.go.html#line-1002" class="ident">scavengeIndex</a>) <label for="r48" class="ident">sysInit</label>(<label for="r49" class="ident">test</label> <a href="../../pkg/builtin.html#name-bool" class="ident">bool</a>, <label for="r50" class="ident">sysStat</label> *<a href="mstats.go.html#line-633" class="ident">sysMemStat</a>) <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a> {</code></span>
+<span class="codeline" id="line-252"><code>	<label for="r51" class="ident">n</label> := <a href="../../pkg/builtin.html#name-uintptr" class="ident">uintptr</a>(<span class="lit-number">1</span>&lt;&lt;<a href="malloc.go.html#line-212" class="ident">heapAddrBits</a>) / <a href="mpagealloc.go.html#line-59" class="ident">pallocChunkBytes</a></code></span>
+<span class="codeline" id="line-253"><code>	<label for="r52" class="ident">nbytes</label> := <label for="r51" class="ident">n</label> * <a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Sizeof" class="ident">Sizeof</a>(<a href="mgcscavenge.go.html#line-1232" class="ident">atomicScavChunkData</a>{})</code></span>
+<span class="codeline" id="line-254"><code>	<label for="r53" class="ident">r</label> := <a href="mem.go.html#line-145" class="ident">sysReserve</a>(<a href="../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r52" class="ident">nbytes</label>)</code></span>
+<span class="codeline" id="line-255"><code>	<label for="r54" class="ident">sl</label> := <a href="slice.go.html#line-22" class="ident">notInHeapSlice</a>{(*<a href="malloc.go.html#line-1605" class="ident">notInHeap</a>)(<label for="r53" class="ident">r</label>), <a href="../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r51" class="ident">n</label>), <a href="../../pkg/builtin.html#name-int" class="ident">int</a>(<label for="r51" class="ident">n</label>)}</code></span>
+<span class="codeline" id="line-256"><code>	<label for="r47" class="ident">s</label>.<a href="mgcscavenge.go.html#line-1017" class="ident">chunks</a> = *(*[]<a href="mgcscavenge.go.html#line-1232" class="ident">atomicScavChunkData</a>)(<a href="../../pkg/unsafe.html" class="ident i0">unsafe</a>.<a href="../../pkg/unsafe.html#name-Pointer" class="ident">Pointer</a>(&amp;<label for="r54" class="ident">sl</label>))</code></span>
+<span class="codeline" id="line-257"><code>	<span class="keyword">return</span> <span class="lit-number">0</span> <span class="comment">// All memory above is mapped Reserved.</span></code></span>
+<span class="codeline" id="line-258"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

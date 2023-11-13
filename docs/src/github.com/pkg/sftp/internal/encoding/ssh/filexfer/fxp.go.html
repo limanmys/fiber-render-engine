@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: fxp.go in package github.com/pkg/sftp/internal/encoding/ssh/filexfer</title>
-<link href="../../../../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -17,16 +17,20 @@
 </code></pre>
 <style>input[type=radio] {display: none;}
 input[id=r0]:checked ~pre label[for=r0],
-input[id=r1]:checked ~pre label[for=r1]
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3]
 {background: #226; color: #ff8;}
 input[id=i0]:checked ~pre .i0
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
 
 <pre class="line-numbers">
-<span class="codeline" id="line-1"><code><span class="keyword">package</span> filexfer</code></span>
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> sshfx</code></span>
 <span class="codeline" id="line-2"><code></code></span>
 <span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
 <span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"fmt"</span></label></code></span>
@@ -37,7 +41,7 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-9"><code></code></span>
 <span class="codeline" id="line-10"><code><span class="comment">// Request packet types.</span></code></span>
 <span class="codeline" id="line-11"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-12"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-12"><code>	<span class="comment">// https://filezilla-project.org/specs/draft-ietf-secsh-filexfer-02.txt#section-3</span></code></span>
 <span class="codeline" id="line-13"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeInit" class="ident">PacketTypeInit</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">1</span>)</code></span>
 <span class="codeline" id="line-14"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeVersion" class="ident">PacketTypeVersion</a></code></span>
 <span class="codeline" id="line-15"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeOpen" class="ident">PacketTypeOpen</a></code></span>
@@ -59,17 +63,17 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-31"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeReadLink" class="ident">PacketTypeReadLink</a></code></span>
 <span class="codeline" id="line-32"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeSymlink" class="ident">PacketTypeSymlink</a></code></span>
 <span class="codeline" id="line-33"><code></code></span>
-<span class="codeline" id="line-34"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-07#section-3.3</span></code></span>
+<span class="codeline" id="line-34"><code>	<span class="comment">// https://filezilla-project.org/specs/draft-ietf-secsh-filexfer-07.txt#section-3.3</span></code></span>
 <span class="codeline" id="line-35"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Link" class="ident">PacketTypeV6Link</a></code></span>
 <span class="codeline" id="line-36"><code></code></span>
-<span class="codeline" id="line-37"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-08#section-3.3</span></code></span>
+<span class="codeline" id="line-37"><code>	<span class="comment">// https://filezilla-project.org/specs/draft-ietf-secsh-filexfer-08.txt#section-3.3</span></code></span>
 <span class="codeline" id="line-38"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Block" class="ident">PacketTypeV6Block</a></code></span>
 <span class="codeline" id="line-39"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeV6Unblock" class="ident">PacketTypeV6Unblock</a></code></span>
 <span class="codeline" id="line-40"><code>)</code></span>
 <span class="codeline" id="line-41"><code></code></span>
 <span class="codeline" id="line-42"><code><span class="comment">// Response packet types.</span></code></span>
 <span class="codeline" id="line-43"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-44"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-44"><code>	<span class="comment">// https://filezilla-project.org/specs/draft-ietf-secsh-filexfer-02.txt#section-3</span></code></span>
 <span class="codeline" id="line-45"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeStatus" class="ident">PacketTypeStatus</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">101</span>)</code></span>
 <span class="codeline" id="line-46"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeHandle" class="ident">PacketTypeHandle</a></code></span>
 <span class="codeline" id="line-47"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeData" class="ident">PacketTypeData</a></code></span>
@@ -79,7 +83,7 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-51"><code></code></span>
 <span class="codeline" id="line-52"><code><span class="comment">// Extended packet types.</span></code></span>
 <span class="codeline" id="line-53"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-54"><code>	<span class="comment">// https://tools.ietf.org/html/draft-ietf-secsh-filexfer-02#section-3</span></code></span>
+<span class="codeline" id="line-54"><code>	<span class="comment">// https://filezilla-project.org/specs/draft-ietf-secsh-filexfer-02.txt#section-3</span></code></span>
 <span class="codeline" id="line-55"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeExtended" class="ident">PacketTypeExtended</a> = <a href="#line-8" class="ident">PacketType</a>(<a href="../../../../../../../../pkg/builtin.html#name-iota" class="ident">iota</a> + <span class="lit-number">200</span>)</code></span>
 <span class="codeline" id="line-56"><code>	<a href="../../../../../../../../pkg/github.com/pkg/sftp/internal/encoding/ssh/filexfer.html#name-PacketTypeExtendedReply" class="ident">PacketTypeExtendedReply</a></code></span>
 <span class="codeline" id="line-57"><code>)</code></span>
@@ -147,12 +151,57 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-119"><code>	<span class="keyword">case</span> <a href="#line-56" class="ident">PacketTypeExtendedReply</a>:</code></span>
 <span class="codeline" id="line-120"><code>		<span class="keyword">return</span> <span class="lit-string">"SSH_FXP_EXTENDED_REPLY"</span></code></span>
 <span class="codeline" id="line-121"><code>	<span class="keyword">default</span>:</code></span>
-<span class="codeline" id="line-122"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../../../fmt/print.go.html#line-217" class="ident">Sprintf</a>(<span class="lit-string">"SSH_FXP_UNKNOWN(%d)"</span>, <label for="r0" class="ident">f</label>)</code></span>
+<span class="codeline" id="line-122"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../../../fmt/print.go.html#line-237" class="ident">Sprintf</a>(<span class="lit-string">"SSH_FXP_UNKNOWN(%d)"</span>, <label for="r0" class="ident">f</label>)</code></span>
 <span class="codeline" id="line-123"><code>	}</code></span>
 <span class="codeline" id="line-124"><code>}</code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code><span class="keyword">func</span> newPacketFromType(<label for="r3" class="ident">typ</label> <a href="#line-8" class="ident">PacketType</a>) (<a href="filexfer.go.html#line-29" class="ident">Packet</a>, <a href="../../../../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-127"><code>	<span class="keyword">switch</span> <label for="r3" class="ident">typ</label> {</code></span>
+<span class="codeline" id="line-128"><code>	<span class="keyword">case</span> <a href="#line-15" class="ident">PacketTypeOpen</a>:</code></span>
+<span class="codeline" id="line-129"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="open_packets.go.html#line-14" class="ident">OpenPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-130"><code>	<span class="keyword">case</span> <a href="#line-16" class="ident">PacketTypeClose</a>:</code></span>
+<span class="codeline" id="line-131"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-4" class="ident">ClosePacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">case</span> <a href="#line-17" class="ident">PacketTypeRead</a>:</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-38" class="ident">ReadPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-134"><code>	<span class="keyword">case</span> <a href="#line-18" class="ident">PacketTypeWrite</a>:</code></span>
+<span class="codeline" id="line-135"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-79" class="ident">WritePacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-136"><code>	<span class="keyword">case</span> <a href="#line-19" class="ident">PacketTypeLStat</a>:</code></span>
+<span class="codeline" id="line-137"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-4" class="ident">LStatPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-138"><code>	<span class="keyword">case</span> <a href="#line-20" class="ident">PacketTypeFStat</a>:</code></span>
+<span class="codeline" id="line-139"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-128" class="ident">FStatPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-140"><code>	<span class="keyword">case</span> <a href="#line-21" class="ident">PacketTypeSetstat</a>:</code></span>
+<span class="codeline" id="line-141"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-38" class="ident">SetstatPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">case</span> <a href="#line-22" class="ident">PacketTypeFSetstat</a>:</code></span>
+<span class="codeline" id="line-143"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-162" class="ident">FSetstatPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-144"><code>	<span class="keyword">case</span> <a href="#line-23" class="ident">PacketTypeOpenDir</a>:</code></span>
+<span class="codeline" id="line-145"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="open_packets.go.html#line-55" class="ident">OpenDirPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-146"><code>	<span class="keyword">case</span> <a href="#line-24" class="ident">PacketTypeReadDir</a>:</code></span>
+<span class="codeline" id="line-147"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="handle_packets.go.html#line-199" class="ident">ReadDirPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-148"><code>	<span class="keyword">case</span> <a href="#line-25" class="ident">PacketTypeRemove</a>:</code></span>
+<span class="codeline" id="line-149"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-75" class="ident">RemovePacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-150"><code>	<span class="keyword">case</span> <a href="#line-26" class="ident">PacketTypeMkdir</a>:</code></span>
+<span class="codeline" id="line-151"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-109" class="ident">MkdirPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-152"><code>	<span class="keyword">case</span> <a href="#line-27" class="ident">PacketTypeRmdir</a>:</code></span>
+<span class="codeline" id="line-153"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-146" class="ident">RmdirPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-154"><code>	<span class="keyword">case</span> <a href="#line-28" class="ident">PacketTypeRealPath</a>:</code></span>
+<span class="codeline" id="line-155"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-180" class="ident">RealPathPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-156"><code>	<span class="keyword">case</span> <a href="#line-29" class="ident">PacketTypeStat</a>:</code></span>
+<span class="codeline" id="line-157"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-214" class="ident">StatPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-158"><code>	<span class="keyword">case</span> <a href="#line-30" class="ident">PacketTypeRename</a>:</code></span>
+<span class="codeline" id="line-159"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-248" class="ident">RenamePacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-160"><code>	<span class="keyword">case</span> <a href="#line-31" class="ident">PacketTypeReadLink</a>:</code></span>
+<span class="codeline" id="line-161"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-286" class="ident">ReadLinkPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-162"><code>	<span class="keyword">case</span> <a href="#line-32" class="ident">PacketTypeSymlink</a>:</code></span>
+<span class="codeline" id="line-163"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="path_packets.go.html#line-324" class="ident">SymlinkPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-164"><code>	<span class="keyword">case</span> <a href="#line-55" class="ident">PacketTypeExtended</a>:</code></span>
+<span class="codeline" id="line-165"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-new" class="ident">new</a>(<a href="extended_packets.go.html#line-48" class="ident">ExtendedPacket</a>), <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-166"><code>	<span class="keyword">default</span>:</code></span>
+<span class="codeline" id="line-167"><code>		<span class="keyword">return</span> <a href="../../../../../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="../../../../../../../../pkg/fmt.html" class="ident i0">fmt</a>.<a href="../../../../../../../fmt/errors.go.html#line-22" class="ident">Errorf</a>(<span class="lit-string">"unexpected request packet type: %v"</span>, <label for="r3" class="ident">typ</label>)</code></span>
+<span class="codeline" id="line-168"><code>	}</code></span>
+<span class="codeline" id="line-169"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

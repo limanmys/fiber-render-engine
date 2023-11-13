@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: word.go in package github.com/rivo/uniseg</title>
-<link href="../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -71,7 +71,7 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-3"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"unicode/utf8"</span></label></code></span>
 <span class="codeline" id="line-4"><code></code></span>
 <span class="codeline" id="line-5"><code><span class="comment">// FirstWord returns the first word found in the given byte slice according to</span></code></span>
-<span class="codeline" id="line-6"><code><span class="comment">// the rules of Unicode Standard Annex #29, Word Boundaries. This function can</span></code></span>
+<span class="codeline" id="line-6"><code><span class="comment">// the rules of [Unicode Standard Annex #29, Word Boundaries]. This function can</span></code></span>
 <span class="codeline" id="line-7"><code><span class="comment">// be called continuously to extract all words from a byte slice, as illustrated</span></code></span>
 <span class="codeline" id="line-8"><code><span class="comment">// in the example below.</span></code></span>
 <span class="codeline" id="line-9"><code><span class="comment">//</span></code></span>
@@ -85,77 +85,79 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-17"><code><span class="comment">// the sub-slice of the input slice containing the identified word.</span></code></span>
 <span class="codeline" id="line-18"><code><span class="comment">//</span></code></span>
 <span class="codeline" id="line-19"><code><span class="comment">// Given an empty byte slice "b", the function returns nil values.</span></code></span>
-<span class="codeline" id="line-20"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstWord" class="ident">FirstWord</a></label>(<label for="r1" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r2" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r3" class="ident">word</label>, <label for="r4" class="ident">rest</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r5" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
-<span class="codeline" id="line-21"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
-<span class="codeline" id="line-22"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-23"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-24"><code>	}</code></span>
-<span class="codeline" id="line-25"><code></code></span>
-<span class="codeline" id="line-26"><code>	<span class="comment">// Extract the first rune.</span></code></span>
-<span class="codeline" id="line-27"><code>	<label for="r6" class="ident">r</label>, <label for="r7" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>)</code></span>
-<span class="codeline" id="line-28"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r7" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
-<span class="codeline" id="line-29"><code>		<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
-<span class="codeline" id="line-30"><code>	}</code></span>
-<span class="codeline" id="line-31"><code></code></span>
-<span class="codeline" id="line-32"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
-<span class="codeline" id="line-33"><code>	<span class="keyword">if</span> <label for="r2" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-34"><code>		<label for="r2" class="ident">state</label>, _ = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r6" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:], <span class="lit-string">""</span>)</code></span>
-<span class="codeline" id="line-35"><code>	}</code></span>
-<span class="codeline" id="line-36"><code></code></span>
-<span class="codeline" id="line-37"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
-<span class="codeline" id="line-38"><code>	<span class="keyword">var</span> <label for="r8" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
-<span class="codeline" id="line-39"><code>	<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-40"><code>		<label for="r9" class="ident">r</label>, <label for="r10" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:])</code></span>
-<span class="codeline" id="line-41"><code>		<label for="r2" class="ident">state</label>, <label for="r8" class="ident">boundary</label> = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r9" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>+<label for="r10" class="ident">l</label>:], <span class="lit-string">""</span>)</code></span>
-<span class="codeline" id="line-42"><code></code></span>
-<span class="codeline" id="line-43"><code>		<span class="keyword">if</span> <label for="r8" class="ident">boundary</label> {</code></span>
-<span class="codeline" id="line-44"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>[:<label for="r7" class="ident">length</label>], <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:], <label for="r2" class="ident">state</label></code></span>
-<span class="codeline" id="line-45"><code>		}</code></span>
-<span class="codeline" id="line-46"><code></code></span>
-<span class="codeline" id="line-47"><code>		<label for="r7" class="ident">length</label> += <label for="r10" class="ident">l</label></code></span>
-<span class="codeline" id="line-48"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r7" class="ident">length</label> {</code></span>
-<span class="codeline" id="line-49"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
-<span class="codeline" id="line-50"><code>		}</code></span>
-<span class="codeline" id="line-51"><code>	}</code></span>
-<span class="codeline" id="line-52"><code>}</code></span>
-<span class="codeline" id="line-53"><code></code></span>
-<span class="codeline" id="line-54"><code><span class="comment">// FirstWordInString is like [FirstWord] but its input and outputs are strings.</span></code></span>
-<span class="codeline" id="line-55"><code><span class="keyword">func</span> <label for="r11" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstWordInString" class="ident">FirstWordInString</a></label>(<label for="r12" class="ident">str</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r13" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r14" class="ident">word</label>, <label for="r15" class="ident">rest</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r16" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
-<span class="codeline" id="line-56"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
-<span class="codeline" id="line-57"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-58"><code>		<span class="keyword">return</span></code></span>
-<span class="codeline" id="line-59"><code>	}</code></span>
-<span class="codeline" id="line-60"><code></code></span>
-<span class="codeline" id="line-61"><code>	<span class="comment">// Extract the first rune.</span></code></span>
-<span class="codeline" id="line-62"><code>	<label for="r17" class="ident">r</label>, <label for="r18" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r12" class="ident">str</label>)</code></span>
-<span class="codeline" id="line-63"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) &lt;= <label for="r18" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
-<span class="codeline" id="line-64"><code>		<span class="keyword">return</span> <label for="r12" class="ident">str</label>, <span class="lit-string">""</span>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
-<span class="codeline" id="line-65"><code>	}</code></span>
-<span class="codeline" id="line-66"><code></code></span>
-<span class="codeline" id="line-67"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
-<span class="codeline" id="line-68"><code>	<span class="keyword">if</span> <label for="r13" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-69"><code>		<label for="r13" class="ident">state</label>, _ = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r13" class="ident">state</label>, <label for="r17" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:])</code></span>
-<span class="codeline" id="line-70"><code>	}</code></span>
-<span class="codeline" id="line-71"><code></code></span>
-<span class="codeline" id="line-72"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
-<span class="codeline" id="line-73"><code>	<span class="keyword">var</span> <label for="r19" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
-<span class="codeline" id="line-74"><code>	<span class="keyword">for</span> {</code></span>
-<span class="codeline" id="line-75"><code>		<label for="r20" class="ident">r</label>, <label for="r21" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:])</code></span>
-<span class="codeline" id="line-76"><code>		<label for="r13" class="ident">state</label>, <label for="r19" class="ident">boundary</label> = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r13" class="ident">state</label>, <label for="r20" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>+<label for="r21" class="ident">l</label>:])</code></span>
-<span class="codeline" id="line-77"><code></code></span>
-<span class="codeline" id="line-78"><code>		<span class="keyword">if</span> <label for="r19" class="ident">boundary</label> {</code></span>
-<span class="codeline" id="line-79"><code>			<span class="keyword">return</span> <label for="r12" class="ident">str</label>[:<label for="r18" class="ident">length</label>], <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:], <label for="r13" class="ident">state</label></code></span>
-<span class="codeline" id="line-80"><code>		}</code></span>
-<span class="codeline" id="line-81"><code></code></span>
-<span class="codeline" id="line-82"><code>		<label for="r18" class="ident">length</label> += <label for="r21" class="ident">l</label></code></span>
-<span class="codeline" id="line-83"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) &lt;= <label for="r18" class="ident">length</label> {</code></span>
-<span class="codeline" id="line-84"><code>			<span class="keyword">return</span> <label for="r12" class="ident">str</label>, <span class="lit-string">""</span>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
-<span class="codeline" id="line-85"><code>		}</code></span>
-<span class="codeline" id="line-86"><code>	}</code></span>
-<span class="codeline" id="line-87"><code>}</code></span>
+<span class="codeline" id="line-20"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-21"><code><span class="comment">// [Unicode Standard Annex #29, Word Boundaries]: http://unicode.org/reports/tr29/#Word_Boundaries</span></code></span>
+<span class="codeline" id="line-22"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstWord" class="ident">FirstWord</a></label>(<label for="r1" class="ident">b</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r2" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r3" class="ident">word</label>, <label for="r4" class="ident">rest</label> []<a href="../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <label for="r5" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-23"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
+<span class="codeline" id="line-24"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-25"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-26"><code>	}</code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code>	<span class="comment">// Extract the first rune.</span></code></span>
+<span class="codeline" id="line-29"><code>	<label for="r6" class="ident">r</label>, <label for="r7" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>)</code></span>
+<span class="codeline" id="line-30"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r7" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
+<span class="codeline" id="line-31"><code>		<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
+<span class="codeline" id="line-32"><code>	}</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
+<span class="codeline" id="line-35"><code>	<span class="keyword">if</span> <label for="r2" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-36"><code>		<label for="r2" class="ident">state</label>, _ = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r6" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:], <span class="lit-string">""</span>)</code></span>
+<span class="codeline" id="line-37"><code>	}</code></span>
+<span class="codeline" id="line-38"><code></code></span>
+<span class="codeline" id="line-39"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
+<span class="codeline" id="line-40"><code>	<span class="keyword">var</span> <label for="r8" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-41"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-42"><code>		<label for="r9" class="ident">r</label>, <label for="r10" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-151" class="ident">DecodeRune</a>(<label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-43"><code>		<label for="r2" class="ident">state</label>, <label for="r8" class="ident">boundary</label> = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r2" class="ident">state</label>, <label for="r9" class="ident">r</label>, <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>+<label for="r10" class="ident">l</label>:], <span class="lit-string">""</span>)</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code>		<span class="keyword">if</span> <label for="r8" class="ident">boundary</label> {</code></span>
+<span class="codeline" id="line-46"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>[:<label for="r7" class="ident">length</label>], <label for="r1" class="ident">b</label>[<label for="r7" class="ident">length</label>:], <label for="r2" class="ident">state</label></code></span>
+<span class="codeline" id="line-47"><code>		}</code></span>
+<span class="codeline" id="line-48"><code></code></span>
+<span class="codeline" id="line-49"><code>		<label for="r7" class="ident">length</label> += <label for="r10" class="ident">l</label></code></span>
+<span class="codeline" id="line-50"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">b</label>) &lt;= <label for="r7" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-51"><code>			<span class="keyword">return</span> <label for="r1" class="ident">b</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
+<span class="codeline" id="line-52"><code>		}</code></span>
+<span class="codeline" id="line-53"><code>	}</code></span>
+<span class="codeline" id="line-54"><code>}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code><span class="comment">// FirstWordInString is like [FirstWord] but its input and outputs are strings.</span></code></span>
+<span class="codeline" id="line-57"><code><span class="keyword">func</span> <label for="r11" class="ident"><a href="../../../../pkg/github.com/rivo/uniseg.html#name-FirstWordInString" class="ident">FirstWordInString</a></label>(<label for="r12" class="ident">str</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r13" class="ident">state</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) (<label for="r14" class="ident">word</label>, <label for="r15" class="ident">rest</label> <a href="../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r16" class="ident">newState</label> <a href="../../../../pkg/builtin.html#name-int" class="ident">int</a>) {</code></span>
+<span class="codeline" id="line-58"><code>	<span class="comment">// An empty byte slice returns nothing.</span></code></span>
+<span class="codeline" id="line-59"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-60"><code>		<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-61"><code>	}</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	<span class="comment">// Extract the first rune.</span></code></span>
+<span class="codeline" id="line-64"><code>	<label for="r17" class="ident">r</label>, <label for="r18" class="ident">length</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r12" class="ident">str</label>)</code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) &lt;= <label for="r18" class="ident">length</label> { <span class="comment">// If we're already past the end, there is nothing else to parse.</span></code></span>
+<span class="codeline" id="line-66"><code>		<span class="keyword">return</span> <label for="r12" class="ident">str</label>, <span class="lit-string">""</span>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
+<span class="codeline" id="line-67"><code>	}</code></span>
+<span class="codeline" id="line-68"><code></code></span>
+<span class="codeline" id="line-69"><code>	<span class="comment">// If we don't know the state, determine it now.</span></code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">if</span> <label for="r13" class="ident">state</label> &lt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-71"><code>		<label for="r13" class="ident">state</label>, _ = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r13" class="ident">state</label>, <label for="r17" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-72"><code>	}</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code>	<span class="comment">// Transition until we find a boundary.</span></code></span>
+<span class="codeline" id="line-75"><code>	<span class="keyword">var</span> <label for="r19" class="ident">boundary</label> <a href="../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">for</span> {</code></span>
+<span class="codeline" id="line-77"><code>		<label for="r20" class="ident">r</label>, <label for="r21" class="ident">l</label> := <a href="../../../../pkg/unicode/utf8.html" class="ident i0">utf8</a>.<a href="../../../unicode/utf8/utf8.go.html#line-199" class="ident">DecodeRuneInString</a>(<label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:])</code></span>
+<span class="codeline" id="line-78"><code>		<label for="r13" class="ident">state</label>, <label for="r19" class="ident">boundary</label> = <a href="wordrules.go.html#line-108" class="ident">transitionWordBreakState</a>(<label for="r13" class="ident">state</label>, <label for="r20" class="ident">r</label>, <a href="../../../../pkg/builtin.html#name-nil" class="ident">nil</a>, <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>+<label for="r21" class="ident">l</label>:])</code></span>
+<span class="codeline" id="line-79"><code></code></span>
+<span class="codeline" id="line-80"><code>		<span class="keyword">if</span> <label for="r19" class="ident">boundary</label> {</code></span>
+<span class="codeline" id="line-81"><code>			<span class="keyword">return</span> <label for="r12" class="ident">str</label>[:<label for="r18" class="ident">length</label>], <label for="r12" class="ident">str</label>[<label for="r18" class="ident">length</label>:], <label for="r13" class="ident">state</label></code></span>
+<span class="codeline" id="line-82"><code>		}</code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>		<label for="r18" class="ident">length</label> += <label for="r21" class="ident">l</label></code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">if</span> <a href="../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r12" class="ident">str</label>) &lt;= <label for="r18" class="ident">length</label> {</code></span>
+<span class="codeline" id="line-86"><code>			<span class="keyword">return</span> <label for="r12" class="ident">str</label>, <span class="lit-string">""</span>, <a href="wordrules.go.html#line-7" class="ident">wbAny</a></code></span>
+<span class="codeline" id="line-87"><code>		}</code></span>
+<span class="codeline" id="line-88"><code>	}</code></span>
+<span class="codeline" id="line-89"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

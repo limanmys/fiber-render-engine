@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: root.go in package crypto/x509</title>
-<link href="../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -17,13 +17,19 @@
 </code></pre>
 <style>input[type=radio] {display: none;}
 input[id=r0]:checked ~pre label[for=r0],
-input[id=r1]:checked ~pre label[for=r1]
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3]
 {background: #226; color: #ff8;}
-input[id=i0]:checked ~pre .i0
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// Copyright 2012 The Go Authors. All rights reserved.</span></code></span>
@@ -32,35 +38,78 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-4"><code></code></span>
 <span class="codeline" id="line-5"><code><span class="keyword">package</span> x509</code></span>
 <span class="codeline" id="line-6"><code></code></span>
-<span class="codeline" id="line-7"><code><span class="comment">// To update the embedded iOS root store, update the -version</span></code></span>
-<span class="codeline" id="line-8"><code><span class="comment">// argument to the latest security_certificates version from</span></code></span>
-<span class="codeline" id="line-9"><code><span class="comment">// https://opensource.apple.com/source/security_certificates/</span></code></span>
-<span class="codeline" id="line-10"><code><span class="comment">// and run "go generate". See https://golang.org/issue/38843.</span></code></span>
-<span class="codeline" id="line-11"><code><span class="comment">//</span></code></span>
-<span class="codeline" id="line-12"><code><span class="comment">//go:generate go run root_ios_gen.go -version 55188.120.1.0.1</span></code></span>
-<span class="codeline" id="line-13"><code></code></span>
-<span class="codeline" id="line-14"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"sync"</span></label></code></span>
-<span class="codeline" id="line-15"><code></code></span>
-<span class="codeline" id="line-16"><code><span class="keyword">var</span> (</code></span>
-<span class="codeline" id="line-17"><code>	once           <a href="../../../pkg/sync.html" class="ident i0">sync</a>.<a href="../../sync/once.go.html#line-18" class="ident">Once</a></code></span>
-<span class="codeline" id="line-18"><code>	systemRoots    *<a href="cert_pool.go.html#line-17" class="ident">CertPool</a></code></span>
-<span class="codeline" id="line-19"><code>	systemRootsErr <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
-<span class="codeline" id="line-20"><code>)</code></span>
-<span class="codeline" id="line-21"><code></code></span>
-<span class="codeline" id="line-22"><code><span class="keyword">func</span> systemRootsPool() *<a href="cert_pool.go.html#line-17" class="ident">CertPool</a> {</code></span>
-<span class="codeline" id="line-23"><code>	<a href="#line-17" class="ident">once</a>.<a href="../../sync/once.go.html#line-48" class="ident">Do</a>(<a href="#line-27" class="ident">initSystemRoots</a>)</code></span>
-<span class="codeline" id="line-24"><code>	<span class="keyword">return</span> <a href="#line-18" class="ident">systemRoots</a></code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"internal/godebug"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"sync"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">var</span> (</code></span>
+<span class="codeline" id="line-13"><code>	once           <a href="../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../sync/once.go.html#line-18" class="ident">Once</a></code></span>
+<span class="codeline" id="line-14"><code>	systemRootsMu  <a href="../../../pkg/sync.html" class="ident i1">sync</a>.<a href="../../sync/rwmutex.go.html#line-36" class="ident">RWMutex</a></code></span>
+<span class="codeline" id="line-15"><code>	systemRoots    *<a href="cert_pool.go.html#line-17" class="ident">CertPool</a></code></span>
+<span class="codeline" id="line-16"><code>	systemRootsErr <a href="../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-17"><code>	fallbacksSet   <a href="../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-18"><code>)</code></span>
+<span class="codeline" id="line-19"><code></code></span>
+<span class="codeline" id="line-20"><code><span class="keyword">func</span> systemRootsPool() *<a href="cert_pool.go.html#line-17" class="ident">CertPool</a> {</code></span>
+<span class="codeline" id="line-21"><code>	<a href="#line-13" class="ident">once</a>.<a href="../../sync/once.go.html#line-48" class="ident">Do</a>(<a href="#line-27" class="ident">initSystemRoots</a>)</code></span>
+<span class="codeline" id="line-22"><code>	<a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-64" class="ident">RLock</a>()</code></span>
+<span class="codeline" id="line-23"><code>	<span class="keyword">defer</span> <a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-111" class="ident">RUnlock</a>()</code></span>
+<span class="codeline" id="line-24"><code>	<span class="keyword">return</span> <a href="#line-15" class="ident">systemRoots</a></code></span>
 <span class="codeline" id="line-25"><code>}</code></span>
 <span class="codeline" id="line-26"><code></code></span>
 <span class="codeline" id="line-27"><code><span class="keyword">func</span> initSystemRoots() {</code></span>
-<span class="codeline" id="line-28"><code>	<a href="#line-18" class="ident">systemRoots</a>, <a href="#line-19" class="ident">systemRootsErr</a> = <a href="root_unix.go.html#line-32" class="ident">loadSystemRoots</a>()</code></span>
-<span class="codeline" id="line-29"><code>	<span class="keyword">if</span> <a href="#line-19" class="ident">systemRootsErr</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
-<span class="codeline" id="line-30"><code>		<a href="#line-18" class="ident">systemRoots</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
-<span class="codeline" id="line-31"><code>	}</code></span>
-<span class="codeline" id="line-32"><code>}</code></span>
+<span class="codeline" id="line-28"><code>	<a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-29"><code>	<span class="keyword">defer</span> <a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-30"><code>	<a href="#line-15" class="ident">systemRoots</a>, <a href="#line-16" class="ident">systemRootsErr</a> = <a href="root_unix.go.html#line-32" class="ident">loadSystemRoots</a>()</code></span>
+<span class="codeline" id="line-31"><code>	<span class="keyword">if</span> <a href="#line-16" class="ident">systemRootsErr</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-32"><code>		<a href="#line-15" class="ident">systemRoots</a> = <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-33"><code>	}</code></span>
+<span class="codeline" id="line-34"><code>}</code></span>
+<span class="codeline" id="line-35"><code></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">var</span> x509usefallbackroots = <a href="../../../pkg/internal/godebug.html" class="ident i0">godebug</a>.<a href="../../internal/godebug/godebug.go.html#line-73" class="ident">New</a>(<span class="lit-string">"x509usefallbackroots"</span>)</code></span>
+<span class="codeline" id="line-37"><code></code></span>
+<span class="codeline" id="line-38"><code><span class="comment">// SetFallbackRoots sets the roots to use during certificate verification, if no</span></code></span>
+<span class="codeline" id="line-39"><code><span class="comment">// custom roots are specified and a platform verifier or a system certificate</span></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// pool is not available (for instance in a container which does not have a root</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// certificate bundle). SetFallbackRoots will panic if roots is nil.</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-43"><code><span class="comment">// SetFallbackRoots may only be called once, if called multiple times it will</span></code></span>
+<span class="codeline" id="line-44"><code><span class="comment">// panic.</span></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-46"><code><span class="comment">// The fallback behavior can be forced on all platforms, even when there is a</span></code></span>
+<span class="codeline" id="line-47"><code><span class="comment">// system certificate pool, by setting GODEBUG=x509usefallbackroots=1 (note that</span></code></span>
+<span class="codeline" id="line-48"><code><span class="comment">// on Windows and macOS this will disable usage of the platform verification</span></code></span>
+<span class="codeline" id="line-49"><code><span class="comment">// APIs and cause the pure Go verifier to be used). Setting</span></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// x509usefallbackroots=1 without calling SetFallbackRoots has no effect.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../pkg/crypto/x509.html#name-SetFallbackRoots" class="ident">SetFallbackRoots</a></label>(<label for="r3" class="ident">roots</label> *<a href="cert_pool.go.html#line-17" class="ident">CertPool</a>) {</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">if</span> <label for="r3" class="ident">roots</label> == <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-53"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"roots must be non-nil"</span>)</code></span>
+<span class="codeline" id="line-54"><code>	}</code></span>
+<span class="codeline" id="line-55"><code></code></span>
+<span class="codeline" id="line-56"><code>	<span class="comment">// trigger initSystemRoots if it hasn't already been called before we</span></code></span>
+<span class="codeline" id="line-57"><code><span class="comment">	// take the lock</span></code></span>
+<span class="codeline" id="line-58"><code>	_ = <a href="#line-20" class="ident">systemRootsPool</a>()</code></span>
+<span class="codeline" id="line-59"><code></code></span>
+<span class="codeline" id="line-60"><code>	<a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-141" class="ident">Lock</a>()</code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">defer</span> <a href="#line-14" class="ident">systemRootsMu</a>.<a href="../../sync/rwmutex.go.html#line-198" class="ident">Unlock</a>()</code></span>
+<span class="codeline" id="line-62"><code></code></span>
+<span class="codeline" id="line-63"><code>	<span class="keyword">if</span> <a href="#line-17" class="ident">fallbacksSet</a> {</code></span>
+<span class="codeline" id="line-64"><code>		<a href="../../../pkg/builtin.html#name-panic" class="ident">panic</a>(<span class="lit-string">"SetFallbackRoots has already been called"</span>)</code></span>
+<span class="codeline" id="line-65"><code>	}</code></span>
+<span class="codeline" id="line-66"><code>	<a href="#line-17" class="ident">fallbacksSet</a> = <a href="../../../pkg/builtin.html#name-true" class="ident">true</a></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code>	<span class="keyword">if</span> <a href="#line-15" class="ident">systemRoots</a> != <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a> &amp;&amp; (<a href="#line-15" class="ident">systemRoots</a>.<a href="cert_pool.go.html#line-68" class="ident">len</a>() &gt; <span class="lit-number">0</span> || <a href="#line-15" class="ident">systemRoots</a>.<a href="cert_pool.go.html#line-35" class="ident">systemPool</a>) {</code></span>
+<span class="codeline" id="line-69"><code>		<span class="keyword">if</span> <a href="#line-36" class="ident">x509usefallbackroots</a>.<a href="../../internal/godebug/godebug.go.html#line-137" class="ident">Value</a>() != <span class="lit-string">"1"</span> {</code></span>
+<span class="codeline" id="line-70"><code>			<span class="keyword">return</span></code></span>
+<span class="codeline" id="line-71"><code>		}</code></span>
+<span class="codeline" id="line-72"><code>		<a href="#line-36" class="ident">x509usefallbackroots</a>.<a href="../../internal/godebug/godebug.go.html#line-101" class="ident">IncNonDefault</a>()</code></span>
+<span class="codeline" id="line-73"><code>	}</code></span>
+<span class="codeline" id="line-74"><code>	<a href="#line-15" class="ident">systemRoots</a>, <a href="#line-16" class="ident">systemRootsErr</a> = <label for="r3" class="ident">roots</label>, <a href="../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-75"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

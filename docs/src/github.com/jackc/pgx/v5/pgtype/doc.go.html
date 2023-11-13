@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: doc.go in package github.com/jackc/pgx/v5/pgtype</title>
-<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -76,100 +76,127 @@
 <span class="codeline" id="line-57"><code></code></span>
 <span class="codeline" id="line-58"><code><span class="comment">pgtype automatically marshals and unmarshals data from json and jsonb PostgreSQL types.</span></code></span>
 <span class="codeline" id="line-59"><code></code></span>
-<span class="codeline" id="line-60"><code><span class="comment">Array Support</span></code></span>
+<span class="codeline" id="line-60"><code><span class="comment">Extending Existing PostgreSQL Type Support</span></code></span>
 <span class="codeline" id="line-61"><code></code></span>
-<span class="codeline" id="line-62"><code><span class="comment">ArrayCodec implements support for arrays. If pgtype supports type T then it can easily support []T by registering an</span></code></span>
-<span class="codeline" id="line-63"><code><span class="comment">ArrayCodec for the appropriate PostgreSQL OID. In addition, Array[T] type can support multi-dimensional arrays.</span></code></span>
-<span class="codeline" id="line-64"><code></code></span>
-<span class="codeline" id="line-65"><code><span class="comment">Composite Support</span></code></span>
-<span class="codeline" id="line-66"><code></code></span>
-<span class="codeline" id="line-67"><code><span class="comment">CompositeCodec implements support for PostgreSQL composite types. Go structs can be scanned into if the public fields of</span></code></span>
-<span class="codeline" id="line-68"><code><span class="comment">the struct are in the exact order and type of the PostgreSQL type or by implementing CompositeIndexScanner and</span></code></span>
-<span class="codeline" id="line-69"><code><span class="comment">CompositeIndexGetter.</span></code></span>
-<span class="codeline" id="line-70"><code></code></span>
-<span class="codeline" id="line-71"><code><span class="comment">Enum Support</span></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">Generally, all Codecs will support interfaces that can be implemented to enable scanning and encoding. For example,</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">PointCodec can use any Go type that implements the PointScanner and PointValuer interfaces. So rather than use</span></code></span>
+<span class="codeline" id="line-64"><code><span class="comment">pgtype.Point and application can directly use its own point type with pgtype as long as it implements those interfaces.</span></code></span>
+<span class="codeline" id="line-65"><code></code></span>
+<span class="codeline" id="line-66"><code><span class="comment">See example_custom_type_test.go for an example of a custom type for the PostgreSQL point type.</span></code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">Sometimes pgx supports a PostgreSQL type such as numeric but the Go type is in an external package that does not have</span></code></span>
+<span class="codeline" id="line-69"><code><span class="comment">pgx support such as github.com/shopspring/decimal. These types can be registered with pgtype with custom conversion</span></code></span>
+<span class="codeline" id="line-70"><code><span class="comment">logic. See https://github.com/jackc/pgx-shopspring-decimal and https://github.com/jackc/pgx-gofrs-uuid for a example</span></code></span>
+<span class="codeline" id="line-71"><code><span class="comment">integrations.</span></code></span>
 <span class="codeline" id="line-72"><code></code></span>
-<span class="codeline" id="line-73"><code><span class="comment">PostgreSQL enums can usually be treated as text. However, EnumCodec implements support for interning strings which can</span></code></span>
-<span class="codeline" id="line-74"><code><span class="comment">reduce memory usage.</span></code></span>
-<span class="codeline" id="line-75"><code></code></span>
-<span class="codeline" id="line-76"><code><span class="comment">Array, Composite, and Enum Type Registration</span></code></span>
-<span class="codeline" id="line-77"><code></code></span>
-<span class="codeline" id="line-78"><code><span class="comment">Array, composite, and enum types can be easily registered from a pgx.Conn with the LoadType method.</span></code></span>
-<span class="codeline" id="line-79"><code></code></span>
-<span class="codeline" id="line-80"><code><span class="comment">Extending Existing Type Support</span></code></span>
+<span class="codeline" id="line-73"><code><span class="comment">New PostgreSQL Type Support</span></code></span>
+<span class="codeline" id="line-74"><code></code></span>
+<span class="codeline" id="line-75"><code><span class="comment">pgtype uses the PostgreSQL OID to determine how to encode or decode a value. pgtype supports array, composite, domain,</span></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">and enum types. However, any type created in PostgreSQL with CREATE TYPE will receive a new OID. This means that the OID</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">of each new PostgreSQL type must be registered for pgtype to handle values of that type with the correct Codec.</span></code></span>
+<span class="codeline" id="line-78"><code></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">The pgx.Conn LoadType method can return a *Type for array, composite, domain, and enum types by inspecting the database</span></code></span>
+<span class="codeline" id="line-80"><code><span class="comment">metadata. This *Type can then be registered with Map.RegisterType.</span></code></span>
 <span class="codeline" id="line-81"><code></code></span>
-<span class="codeline" id="line-82"><code><span class="comment">Generally, all Codecs will support interfaces that can be implemented to enable scanning and encoding. For example,</span></code></span>
-<span class="codeline" id="line-83"><code><span class="comment">PointCodec can use any Go type that implements the PointScanner and PointValuer interfaces. So rather than use</span></code></span>
-<span class="codeline" id="line-84"><code><span class="comment">pgtype.Point and application can directly use its own point type with pgtype as long as it implements those interfaces.</span></code></span>
-<span class="codeline" id="line-85"><code></code></span>
-<span class="codeline" id="line-86"><code><span class="comment">See example_custom_type_test.go for an example of a custom type for the PostgreSQL point type.</span></code></span>
-<span class="codeline" id="line-87"><code></code></span>
-<span class="codeline" id="line-88"><code><span class="comment">Sometimes pgx supports a PostgreSQL type such as numeric but the Go type is in an external package that does not have</span></code></span>
-<span class="codeline" id="line-89"><code><span class="comment">pgx support such as github.com/shopspring/decimal. These types can be registered with pgtype with custom conversion</span></code></span>
-<span class="codeline" id="line-90"><code><span class="comment">logic. See https://github.com/jackc/pgx-shopspring-decimal and https://github.com/jackc/pgx-gofrs-uuid for a example</span></code></span>
-<span class="codeline" id="line-91"><code><span class="comment">integrations.</span></code></span>
-<span class="codeline" id="line-92"><code></code></span>
-<span class="codeline" id="line-93"><code><span class="comment">Entirely New Type Support</span></code></span>
-<span class="codeline" id="line-94"><code></code></span>
-<span class="codeline" id="line-95"><code><span class="comment">If the PostgreSQL type is not already supported then an OID / Codec mapping can be registered with Map.RegisterType.</span></code></span>
-<span class="codeline" id="line-96"><code><span class="comment">There is no difference between a Codec defined and registered by the application and a Codec built in to pgtype. See any</span></code></span>
-<span class="codeline" id="line-97"><code><span class="comment">of the Codecs in pgtype for Codec examples and for examples of type registration.</span></code></span>
-<span class="codeline" id="line-98"><code></code></span>
-<span class="codeline" id="line-99"><code><span class="comment">Encoding Unknown Types</span></code></span>
-<span class="codeline" id="line-100"><code></code></span>
-<span class="codeline" id="line-101"><code><span class="comment">pgtype works best when the OID of the PostgreSQL type is known. But in some cases such as using the simple protocol the</span></code></span>
-<span class="codeline" id="line-102"><code><span class="comment">OID is unknown. In this case Map.RegisterDefaultPgType can be used to register an assumed OID for a particular Go type.</span></code></span>
-<span class="codeline" id="line-103"><code></code></span>
-<span class="codeline" id="line-104"><code><span class="comment">Renamed Types</span></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">For example, the following function could be called after a connection is established:</span></code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code><span class="comment">    func RegisterDataTypes(ctx context.Context, conn *pgx.Conn) error {</span></code></span>
+<span class="codeline" id="line-85"><code><span class="comment">      dataTypeNames := []string{</span></code></span>
+<span class="codeline" id="line-86"><code><span class="comment">        "foo",</span></code></span>
+<span class="codeline" id="line-87"><code><span class="comment">        "_foo",</span></code></span>
+<span class="codeline" id="line-88"><code><span class="comment">        "bar",</span></code></span>
+<span class="codeline" id="line-89"><code><span class="comment">        "_bar",</span></code></span>
+<span class="codeline" id="line-90"><code><span class="comment">      }</span></code></span>
+<span class="codeline" id="line-91"><code></code></span>
+<span class="codeline" id="line-92"><code><span class="comment">      for _, typeName := range dataTypeNames {</span></code></span>
+<span class="codeline" id="line-93"><code><span class="comment">        dataType, err := conn.LoadType(ctx, typeName)</span></code></span>
+<span class="codeline" id="line-94"><code><span class="comment">        if err != nil {</span></code></span>
+<span class="codeline" id="line-95"><code><span class="comment">          return err</span></code></span>
+<span class="codeline" id="line-96"><code><span class="comment">        }</span></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">        conn.TypeMap().RegisterType(dataType)</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">      }</span></code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">      return nil</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">    }</span></code></span>
+<span class="codeline" id="line-102"><code></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">A type cannot be registered unless all types it depends on are already registered. e.g. An array type cannot be</span></code></span>
+<span class="codeline" id="line-104"><code><span class="comment">registered until its element type is registered.</span></code></span>
 <span class="codeline" id="line-105"><code></code></span>
-<span class="codeline" id="line-106"><code><span class="comment">If pgtype does not recognize a type and that type is a renamed simple type simple (e.g. type MyInt32 int32) pgtype acts</span></code></span>
-<span class="codeline" id="line-107"><code><span class="comment">as if it is the underlying type. It currently cannot automatically detect the underlying type of renamed structs (eg.g.</span></code></span>
-<span class="codeline" id="line-108"><code><span class="comment">type MyTime time.Time).</span></code></span>
-<span class="codeline" id="line-109"><code></code></span>
-<span class="codeline" id="line-110"><code><span class="comment">Compatibility with database/sql</span></code></span>
-<span class="codeline" id="line-111"><code></code></span>
-<span class="codeline" id="line-112"><code><span class="comment">pgtype also includes support for custom types implementing the database/sql.Scanner and database/sql/driver.Valuer</span></code></span>
-<span class="codeline" id="line-113"><code><span class="comment">interfaces.</span></code></span>
+<span class="codeline" id="line-106"><code><span class="comment">ArrayCodec implements support for arrays. If pgtype supports type T then it can easily support []T by registering an</span></code></span>
+<span class="codeline" id="line-107"><code><span class="comment">ArrayCodec for the appropriate PostgreSQL OID. In addition, Array[T] type can support multi-dimensional arrays.</span></code></span>
+<span class="codeline" id="line-108"><code></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">CompositeCodec implements support for PostgreSQL composite types. Go structs can be scanned into if the public fields of</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">the struct are in the exact order and type of the PostgreSQL type or by implementing CompositeIndexScanner and</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">CompositeIndexGetter.</span></code></span>
+<span class="codeline" id="line-112"><code></code></span>
+<span class="codeline" id="line-113"><code><span class="comment">Domain types are treated as their underlying type if the underlying type and the domain type are registered.</span></code></span>
 <span class="codeline" id="line-114"><code></code></span>
-<span class="codeline" id="line-115"><code><span class="comment">Child Records</span></code></span>
-<span class="codeline" id="line-116"><code></code></span>
-<span class="codeline" id="line-117"><code><span class="comment">pgtype's support for arrays and composite records can be used to load records and their children in a single query.  See</span></code></span>
-<span class="codeline" id="line-118"><code><span class="comment">example_child_records_test.go for an example.</span></code></span>
-<span class="codeline" id="line-119"><code></code></span>
-<span class="codeline" id="line-120"><code><span class="comment">Overview of Scanning Implementation</span></code></span>
-<span class="codeline" id="line-121"><code></code></span>
-<span class="codeline" id="line-122"><code><span class="comment">The first step is to use the OID to lookup the correct Codec. If the OID is unavailable, Map will try to find the OID</span></code></span>
-<span class="codeline" id="line-123"><code><span class="comment">from previous calls of Map.RegisterDefaultPgType. The Map will call the Codec's PlanScan method to get a plan for</span></code></span>
-<span class="codeline" id="line-124"><code><span class="comment">scanning into the Go value. A Codec will support scanning into one or more Go types. Oftentime these Go types are</span></code></span>
-<span class="codeline" id="line-125"><code><span class="comment">interfaces rather than explicit types. For example, PointCodec can use any Go type that implments the PointScanner and</span></code></span>
-<span class="codeline" id="line-126"><code><span class="comment">PointValuer interfaces.</span></code></span>
+<span class="codeline" id="line-115"><code><span class="comment">PostgreSQL enums can usually be treated as text. However, EnumCodec implements support for interning strings which can</span></code></span>
+<span class="codeline" id="line-116"><code><span class="comment">reduce memory usage.</span></code></span>
+<span class="codeline" id="line-117"><code></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">While pgtype will often still work with unregistered types it is highly recommended that all types be registered due to</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">an improvement in performance and the elimination of certain edge cases.</span></code></span>
+<span class="codeline" id="line-120"><code></code></span>
+<span class="codeline" id="line-121"><code><span class="comment">If an entirely new PostgreSQL type (e.g. PostGIS types) is used then the application or a library can create a new</span></code></span>
+<span class="codeline" id="line-122"><code><span class="comment">Codec. Then the OID / Codec mapping can be registered with Map.RegisterType. There is no difference between a Codec</span></code></span>
+<span class="codeline" id="line-123"><code><span class="comment">defined and registered by the application and a Codec built in to pgtype. See any of the Codecs in pgtype for Codec</span></code></span>
+<span class="codeline" id="line-124"><code><span class="comment">examples and for examples of type registration.</span></code></span>
+<span class="codeline" id="line-125"><code></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">Encoding Unknown Types</span></code></span>
 <span class="codeline" id="line-127"><code></code></span>
-<span class="codeline" id="line-128"><code><span class="comment">If a Go value is not supported directly by a Codec then Map will try wrapping it with additional logic and try again.</span></code></span>
-<span class="codeline" id="line-129"><code><span class="comment">For example, Int8Codec does not support scanning into a renamed type (e.g. type myInt64 int64). But Map will detect that</span></code></span>
-<span class="codeline" id="line-130"><code><span class="comment">myInt64 is a renamed type and create a plan that converts the value to the underlying int64 type and then passes that to</span></code></span>
-<span class="codeline" id="line-131"><code><span class="comment">the Codec (see TryFindUnderlyingTypeScanPlan).</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">pgtype works best when the OID of the PostgreSQL type is known. But in some cases such as using the simple protocol the</span></code></span>
+<span class="codeline" id="line-129"><code><span class="comment">OID is unknown. In this case Map.RegisterDefaultPgType can be used to register an assumed OID for a particular Go type.</span></code></span>
+<span class="codeline" id="line-130"><code></code></span>
+<span class="codeline" id="line-131"><code><span class="comment">Renamed Types</span></code></span>
 <span class="codeline" id="line-132"><code></code></span>
-<span class="codeline" id="line-133"><code><span class="comment">These plan wrappers are contained in Map.TryWrapScanPlanFuncs. By default these contain shared logic to handle renamed</span></code></span>
-<span class="codeline" id="line-134"><code><span class="comment">types, pointers to pointers, slices, composite types, etc. Additional plan wrappers can be added to seamlessly integrate</span></code></span>
-<span class="codeline" id="line-135"><code><span class="comment">types that do not support pgx directly. For example, the before mentioned</span></code></span>
-<span class="codeline" id="line-136"><code><span class="comment">https://github.com/jackc/pgx-shopspring-decimal package detects decimal.Decimal values, wraps them in something</span></code></span>
-<span class="codeline" id="line-137"><code><span class="comment">implementing NumericScanner and passes that to the Codec.</span></code></span>
+<span class="codeline" id="line-133"><code><span class="comment">If pgtype does not recognize a type and that type is a renamed simple type simple (e.g. type MyInt32 int32) pgtype acts</span></code></span>
+<span class="codeline" id="line-134"><code><span class="comment">as if it is the underlying type. It currently cannot automatically detect the underlying type of renamed structs (eg.g.</span></code></span>
+<span class="codeline" id="line-135"><code><span class="comment">type MyTime time.Time).</span></code></span>
+<span class="codeline" id="line-136"><code></code></span>
+<span class="codeline" id="line-137"><code><span class="comment">Compatibility with database/sql</span></code></span>
 <span class="codeline" id="line-138"><code></code></span>
-<span class="codeline" id="line-139"><code><span class="comment">Map.Scan and Map.Encode are convenience methods that wrap Map.PlanScan and Map.PlanEncode.  Determining how to scan or</span></code></span>
-<span class="codeline" id="line-140"><code><span class="comment">encode a particular type may be a time consuming operation. Hence the planning and execution steps of a conversion are</span></code></span>
-<span class="codeline" id="line-141"><code><span class="comment">internally separated.</span></code></span>
-<span class="codeline" id="line-142"><code></code></span>
-<span class="codeline" id="line-143"><code><span class="comment">Reducing Compiled Binary Size</span></code></span>
-<span class="codeline" id="line-144"><code></code></span>
-<span class="codeline" id="line-145"><code><span class="comment">pgx.QueryExecModeExec and pgx.QueryExecModeSimpleProtocol require the default PostgreSQL type to be registered for each</span></code></span>
-<span class="codeline" id="line-146"><code><span class="comment">Go type used as a query parameter. By default pgx does this for all supported types and their array variants. If an</span></code></span>
-<span class="codeline" id="line-147"><code><span class="comment">application does not use those query execution modes or manually registers the default PostgreSQL type for the types it</span></code></span>
-<span class="codeline" id="line-148"><code><span class="comment">uses as query parameters it can use the build tag nopgxregisterdefaulttypes. This omits the default type registration</span></code></span>
-<span class="codeline" id="line-149"><code><span class="comment">and reduces the compiled binary size by ~2MB.</span></code></span>
-<span class="codeline" id="line-150"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-151"><code><span class="keyword">package</span> pgtype</code></span>
+<span class="codeline" id="line-139"><code><span class="comment">pgtype also includes support for custom types implementing the database/sql.Scanner and database/sql/driver.Valuer</span></code></span>
+<span class="codeline" id="line-140"><code><span class="comment">interfaces.</span></code></span>
+<span class="codeline" id="line-141"><code></code></span>
+<span class="codeline" id="line-142"><code><span class="comment">Child Records</span></code></span>
+<span class="codeline" id="line-143"><code></code></span>
+<span class="codeline" id="line-144"><code><span class="comment">pgtype's support for arrays and composite records can be used to load records and their children in a single query.  See</span></code></span>
+<span class="codeline" id="line-145"><code><span class="comment">example_child_records_test.go for an example.</span></code></span>
+<span class="codeline" id="line-146"><code></code></span>
+<span class="codeline" id="line-147"><code><span class="comment">Overview of Scanning Implementation</span></code></span>
+<span class="codeline" id="line-148"><code></code></span>
+<span class="codeline" id="line-149"><code><span class="comment">The first step is to use the OID to lookup the correct Codec. If the OID is unavailable, Map will try to find the OID</span></code></span>
+<span class="codeline" id="line-150"><code><span class="comment">from previous calls of Map.RegisterDefaultPgType. The Map will call the Codec's PlanScan method to get a plan for</span></code></span>
+<span class="codeline" id="line-151"><code><span class="comment">scanning into the Go value. A Codec will support scanning into one or more Go types. Oftentime these Go types are</span></code></span>
+<span class="codeline" id="line-152"><code><span class="comment">interfaces rather than explicit types. For example, PointCodec can use any Go type that implments the PointScanner and</span></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">PointValuer interfaces.</span></code></span>
+<span class="codeline" id="line-154"><code></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">If a Go value is not supported directly by a Codec then Map will try wrapping it with additional logic and try again.</span></code></span>
+<span class="codeline" id="line-156"><code><span class="comment">For example, Int8Codec does not support scanning into a renamed type (e.g. type myInt64 int64). But Map will detect that</span></code></span>
+<span class="codeline" id="line-157"><code><span class="comment">myInt64 is a renamed type and create a plan that converts the value to the underlying int64 type and then passes that to</span></code></span>
+<span class="codeline" id="line-158"><code><span class="comment">the Codec (see TryFindUnderlyingTypeScanPlan).</span></code></span>
+<span class="codeline" id="line-159"><code></code></span>
+<span class="codeline" id="line-160"><code><span class="comment">These plan wrappers are contained in Map.TryWrapScanPlanFuncs. By default these contain shared logic to handle renamed</span></code></span>
+<span class="codeline" id="line-161"><code><span class="comment">types, pointers to pointers, slices, composite types, etc. Additional plan wrappers can be added to seamlessly integrate</span></code></span>
+<span class="codeline" id="line-162"><code><span class="comment">types that do not support pgx directly. For example, the before mentioned</span></code></span>
+<span class="codeline" id="line-163"><code><span class="comment">https://github.com/jackc/pgx-shopspring-decimal package detects decimal.Decimal values, wraps them in something</span></code></span>
+<span class="codeline" id="line-164"><code><span class="comment">implementing NumericScanner and passes that to the Codec.</span></code></span>
+<span class="codeline" id="line-165"><code></code></span>
+<span class="codeline" id="line-166"><code><span class="comment">Map.Scan and Map.Encode are convenience methods that wrap Map.PlanScan and Map.PlanEncode.  Determining how to scan or</span></code></span>
+<span class="codeline" id="line-167"><code><span class="comment">encode a particular type may be a time consuming operation. Hence the planning and execution steps of a conversion are</span></code></span>
+<span class="codeline" id="line-168"><code><span class="comment">internally separated.</span></code></span>
+<span class="codeline" id="line-169"><code></code></span>
+<span class="codeline" id="line-170"><code><span class="comment">Reducing Compiled Binary Size</span></code></span>
+<span class="codeline" id="line-171"><code></code></span>
+<span class="codeline" id="line-172"><code><span class="comment">pgx.QueryExecModeExec and pgx.QueryExecModeSimpleProtocol require the default PostgreSQL type to be registered for each</span></code></span>
+<span class="codeline" id="line-173"><code><span class="comment">Go type used as a query parameter. By default pgx does this for all supported types and their array variants. If an</span></code></span>
+<span class="codeline" id="line-174"><code><span class="comment">application does not use those query execution modes or manually registers the default PostgreSQL type for the types it</span></code></span>
+<span class="codeline" id="line-175"><code><span class="comment">uses as query parameters it can use the build tag nopgxregisterdefaulttypes. This omits the default type registration</span></code></span>
+<span class="codeline" id="line-176"><code><span class="comment">and reduces the compiled binary size by ~2MB.</span></code></span>
+<span class="codeline" id="line-177"><code><span class="comment">*/</span></code></span></div><span class="codeline" id="line-178"><code><span class="keyword">package</span> pgtype</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

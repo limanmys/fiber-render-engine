@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source: token.go in package github.com/golang-jwt/jwt/v4</title>
+<link href="../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../jvs/golds-v0.6.7.js"></script>
+<body onload="onPageLoad()"><div>
+
+<pre id="header"><code><span class="title">Source File</span>
+	token.go
+
+<span class="title">Belonging Package</span>
+	<a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html">github.com/golang-jwt/jwt/v4</a>
+</code></pre>
+<style>input[type=radio] {display: none;}
+input[id=r0]:checked ~pre label[for=r0],
+input[id=r1]:checked ~pre label[for=r1],
+input[id=r2]:checked ~pre label[for=r2],
+input[id=r3]:checked ~pre label[for=r3],
+input[id=r4]:checked ~pre label[for=r4],
+input[id=r5]:checked ~pre label[for=r5],
+input[id=r6]:checked ~pre label[for=r6],
+input[id=r7]:checked ~pre label[for=r7],
+input[id=r8]:checked ~pre label[for=r8],
+input[id=r9]:checked ~pre label[for=r9],
+input[id=r10]:checked ~pre label[for=r10],
+input[id=r11]:checked ~pre label[for=r11],
+input[id=r12]:checked ~pre label[for=r12],
+input[id=r13]:checked ~pre label[for=r13],
+input[id=r14]:checked ~pre label[for=r14],
+input[id=r15]:checked ~pre label[for=r15],
+input[id=r16]:checked ~pre label[for=r16],
+input[id=r17]:checked ~pre label[for=r17],
+input[id=r18]:checked ~pre label[for=r18],
+input[id=r19]:checked ~pre label[for=r19],
+input[id=r20]:checked ~pre label[for=r20],
+input[id=r21]:checked ~pre label[for=r21],
+input[id=r22]:checked ~pre label[for=r22],
+input[id=r23]:checked ~pre label[for=r23],
+input[id=r24]:checked ~pre label[for=r24],
+input[id=r25]:checked ~pre label[for=r25],
+input[id=r26]:checked ~pre label[for=r26],
+input[id=r27]:checked ~pre label[for=r27],
+input[id=r28]:checked ~pre label[for=r28],
+input[id=r29]:checked ~pre label[for=r29],
+input[id=r30]:checked ~pre label[for=r30],
+input[id=r31]:checked ~pre label[for=r31]
+{background: #226; color: #ff8;}
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1,
+input[id=i2]:checked ~pre .i2,
+input[id=i3]:checked ~pre .i3
+{background: brown; color: #eed;}
+</style><input id="r0" type="radio" name="g"/>
+<input id="r1" type="radio" name="g"/>
+<input id="r2" type="radio" name="g"/>
+<input id="r3" type="radio" name="g"/>
+<input id="r4" type="radio" name="g"/>
+<input id="r5" type="radio" name="g"/>
+<input id="r6" type="radio" name="g"/>
+<input id="r7" type="radio" name="g"/>
+<input id="r8" type="radio" name="g"/>
+<input id="r9" type="radio" name="g"/>
+<input id="r10" type="radio" name="g"/>
+<input id="r11" type="radio" name="g"/>
+<input id="r12" type="radio" name="g"/>
+<input id="r13" type="radio" name="g"/>
+<input id="r14" type="radio" name="g"/>
+<input id="r15" type="radio" name="g"/>
+<input id="r16" type="radio" name="g"/>
+<input id="r17" type="radio" name="g"/>
+<input id="r18" type="radio" name="g"/>
+<input id="r19" type="radio" name="g"/>
+<input id="r20" type="radio" name="g"/>
+<input id="r21" type="radio" name="g"/>
+<input id="r22" type="radio" name="g"/>
+<input id="r23" type="radio" name="g"/>
+<input id="r24" type="radio" name="g"/>
+<input id="r25" type="radio" name="g"/>
+<input id="r26" type="radio" name="g"/>
+<input id="r27" type="radio" name="g"/>
+<input id="r28" type="radio" name="g"/>
+<input id="r29" type="radio" name="g"/>
+<input id="r30" type="radio" name="g"/>
+<input id="r31" type="radio" name="g"/>
+<input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
+<input id="i2" type="radio" name="i"/>
+<input id="i3" type="radio" name="i"/>
+
+<pre class="line-numbers">
+<span class="codeline" id="line-1"><code><span class="keyword">package</span> jwt</code></span>
+<span class="codeline" id="line-2"><code></code></span>
+<span class="codeline" id="line-3"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-4"><code>	<label for="i0"><span class="lit-string i0">"encoding/base64"</span></label></code></span>
+<span class="codeline" id="line-5"><code>	<label for="i1"><span class="lit-string i1">"encoding/json"</span></label></code></span>
+<span class="codeline" id="line-6"><code>	<label for="i2"><span class="lit-string i2">"strings"</span></label></code></span>
+<span class="codeline" id="line-7"><code>	<label for="i3"><span class="lit-string i3">"time"</span></label></code></span>
+<span class="codeline" id="line-8"><code>)</code></span>
+<span class="codeline" id="line-9"><code></code></span>
+<span class="codeline" id="line-10"><code><span class="comment">// DecodePaddingAllowed will switch the codec used for decoding JWTs respectively. Note that the JWS RFC7515</span></code></span>
+<span class="codeline" id="line-11"><code><span class="comment">// states that the tokens will utilize a Base64url encoding with no padding. Unfortunately, some implementations</span></code></span>
+<span class="codeline" id="line-12"><code><span class="comment">// of JWT are producing non-standard tokens, and thus require support for decoding. Note that this is a global</span></code></span>
+<span class="codeline" id="line-13"><code><span class="comment">// variable, and updating it will change the behavior on a package level, and is also NOT go-routine safe.</span></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// To use the non-recommended decoding, set this boolean to `true` prior to using this package.</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">var</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-DecodePaddingAllowed" class="ident">DecodePaddingAllowed</a> <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-16"><code></code></span>
+<span class="codeline" id="line-17"><code><span class="comment">// DecodeStrict will switch the codec used for decoding JWTs into strict mode.</span></code></span>
+<span class="codeline" id="line-18"><code><span class="comment">// In this mode, the decoder requires that trailing padding bits are zero, as described in RFC 4648 section 3.5.</span></code></span>
+<span class="codeline" id="line-19"><code><span class="comment">// Note that this is a global variable, and updating it will change the behavior on a package level, and is also NOT go-routine safe.</span></code></span>
+<span class="codeline" id="line-20"><code><span class="comment">// To use strict decoding, set this boolean to `true` prior to using this package.</span></code></span>
+<span class="codeline" id="line-21"><code><span class="keyword">var</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-DecodeStrict" class="ident">DecodeStrict</a> <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a></code></span>
+<span class="codeline" id="line-22"><code></code></span>
+<span class="codeline" id="line-23"><code><span class="comment">// TimeFunc provides the current time when parsing token to validate "exp" claim (expiration time).</span></code></span>
+<span class="codeline" id="line-24"><code><span class="comment">// You can override it to use another time value.  This is useful for testing or if your</span></code></span>
+<span class="codeline" id="line-25"><code><span class="comment">// server uses a different time zone than your tokens.</span></code></span>
+<span class="codeline" id="line-26"><code><span class="keyword">var</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-TimeFunc" class="ident">TimeFunc</a> = <a href="../../../../../pkg/time.html" class="ident i3">time</a>.<a href="../../../../time/time.go.html#line-1110" class="ident">Now</a></code></span>
+<span class="codeline" id="line-27"><code></code></span>
+<span class="codeline" id="line-28"><code><span class="comment">// Keyfunc will be used by the Parse methods as a callback function to supply</span></code></span>
+<span class="codeline" id="line-29"><code><span class="comment">// the key for verification.  The function receives the parsed,</span></code></span>
+<span class="codeline" id="line-30"><code><span class="comment">// but unverified Token.  This allows you to use properties in the</span></code></span>
+<span class="codeline" id="line-31"><code><span class="comment">// Header of the token (such as `kid`) to identify which key to use.</span></code></span>
+<span class="codeline" id="line-32"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-Keyfunc" class="ident">Keyfunc</a> <span class="keyword">func</span>(*<a href="#line-36" class="ident">Token</a>) (<span class="keyword">interface</span>{}, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>)</code></span>
+<span class="codeline" id="line-33"><code></code></span>
+<span class="codeline" id="line-34"><code><span class="comment">// Token represents a JWT Token.  Different fields will be used depending on whether you're</span></code></span>
+<span class="codeline" id="line-35"><code><span class="comment">// creating or parsing/verifying a token.</span></code></span>
+<span class="codeline" id="line-36"><code><span class="keyword">type</span> <a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-Token" class="ident">Token</a> <span class="keyword">struct</span> {</code></span>
+<span class="codeline" id="line-37"><code>	Raw       <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>                 <span class="comment">// The raw token.  Populated when you Parse a token</span></code></span>
+<span class="codeline" id="line-38"><code>	Method    <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a>          <span class="comment">// The signing method used or to be used</span></code></span>
+<span class="codeline" id="line-39"><code>	Header    <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">interface</span>{} <span class="comment">// The first segment of the token</span></code></span>
+<span class="codeline" id="line-40"><code>	Claims    <a href="claims.go.html#line-11" class="ident">Claims</a>                 <span class="comment">// The second segment of the token</span></code></span>
+<span class="codeline" id="line-41"><code>	Signature <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>                 <span class="comment">// The third segment of the token.  Populated when you Parse a token</span></code></span>
+<span class="codeline" id="line-42"><code>	Valid     <a href="../../../../../pkg/builtin.html#name-bool" class="ident">bool</a>                   <span class="comment">// Is the token valid?  Populated when you Parse/Verify a token</span></code></span>
+<span class="codeline" id="line-43"><code>}</code></span>
+<span class="codeline" id="line-44"><code></code></span>
+<span class="codeline" id="line-45"><code><span class="comment">// New creates a new Token with the specified signing method and an empty map of claims.</span></code></span>
+<span class="codeline" id="line-46"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-New" class="ident">New</a></label>(<label for="r1" class="ident">method</label> <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a>) *<a href="#line-36" class="ident">Token</a> {</code></span>
+<span class="codeline" id="line-47"><code>	<span class="keyword">return</span> <a href="#line-51" class="ident">NewWithClaims</a>(<label for="r1" class="ident">method</label>, <a href="map_claims.go.html#line-12" class="ident">MapClaims</a>{})</code></span>
+<span class="codeline" id="line-48"><code>}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code><span class="comment">// NewWithClaims creates a new Token with the specified signing method and claims.</span></code></span>
+<span class="codeline" id="line-51"><code><span class="keyword">func</span> <label for="r2" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-NewWithClaims" class="ident">NewWithClaims</a></label>(<label for="r3" class="ident">method</label> <a href="signing_method.go.html#line-11" class="ident">SigningMethod</a>, <label for="r4" class="ident">claims</label> <a href="claims.go.html#line-11" class="ident">Claims</a>) *<a href="#line-36" class="ident">Token</a> {</code></span>
+<span class="codeline" id="line-52"><code>	<span class="keyword">return</span> &amp;<a href="#line-36" class="ident">Token</a>{</code></span>
+<span class="codeline" id="line-53"><code>		<a href="#line-39" class="ident">Header</a>: <span class="keyword">map</span>[<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<span class="keyword">interface</span>{}{</code></span>
+<span class="codeline" id="line-54"><code>			<span class="lit-string">"typ"</span>: <span class="lit-string">"JWT"</span>,</code></span>
+<span class="codeline" id="line-55"><code>			<span class="lit-string">"alg"</span>: <label for="r3" class="ident">method</label>.<a href="signing_method.go.html#line-14" class="ident">Alg</a>(),</code></span>
+<span class="codeline" id="line-56"><code>		},</code></span>
+<span class="codeline" id="line-57"><code>		<a href="#line-40" class="ident">Claims</a>: <label for="r4" class="ident">claims</label>,</code></span>
+<span class="codeline" id="line-58"><code>		<a href="#line-38" class="ident">Method</a>: <label for="r3" class="ident">method</label>,</code></span>
+<span class="codeline" id="line-59"><code>	}</code></span>
+<span class="codeline" id="line-60"><code>}</code></span>
+<span class="codeline" id="line-61"><code></code></span>
+<span class="codeline" id="line-62"><code><span class="comment">// SignedString creates and returns a complete, signed JWT.</span></code></span>
+<span class="codeline" id="line-63"><code><span class="comment">// The token is signed using the SigningMethod specified in the token.</span></code></span>
+<span class="codeline" id="line-64"><code><span class="keyword">func</span> (<label for="r5" class="ident">t</label> *<a href="#line-36" class="ident">Token</a>) <label for="r6" class="ident">SignedString</label>(<label for="r7" class="ident">key</label> <span class="keyword">interface</span>{}) (<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">var</span> <label for="r8" class="ident">sig</label>, <label for="r9" class="ident">sstr</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-66"><code>	<span class="keyword">var</span> <label for="r10" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-67"><code>	<span class="keyword">if</span> <label for="r9" class="ident">sstr</label>, <label for="r10" class="ident">err</label> = <label for="r5" class="ident">t</label>.<a href="#line-80" class="ident">SigningString</a>(); <label for="r10" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-68"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <label for="r10" class="ident">err</label></code></span>
+<span class="codeline" id="line-69"><code>	}</code></span>
+<span class="codeline" id="line-70"><code>	<span class="keyword">if</span> <label for="r8" class="ident">sig</label>, <label for="r10" class="ident">err</label> = <label for="r5" class="ident">t</label>.<a href="#line-38" class="ident">Method</a>.<a href="signing_method.go.html#line-13" class="ident">Sign</a>(<label for="r9" class="ident">sstr</label>, <label for="r7" class="ident">key</label>); <label for="r10" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-71"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <label for="r10" class="ident">err</label></code></span>
+<span class="codeline" id="line-72"><code>	}</code></span>
+<span class="codeline" id="line-73"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../strings/strings.go.html#line-434" class="ident">Join</a>([]<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>{<label for="r9" class="ident">sstr</label>, <label for="r8" class="ident">sig</label>}, <span class="lit-string">"."</span>), <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-74"><code>}</code></span>
+<span class="codeline" id="line-75"><code></code></span>
+<span class="codeline" id="line-76"><code><span class="comment">// SigningString generates the signing string.  This is the</span></code></span>
+<span class="codeline" id="line-77"><code><span class="comment">// most expensive part of the whole deal.  Unless you</span></code></span>
+<span class="codeline" id="line-78"><code><span class="comment">// need this for something special, just go straight for</span></code></span>
+<span class="codeline" id="line-79"><code><span class="comment">// the SignedString.</span></code></span>
+<span class="codeline" id="line-80"><code><span class="keyword">func</span> (<label for="r11" class="ident">t</label> *<a href="#line-36" class="ident">Token</a>) <label for="r12" class="ident">SigningString</label>() (<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-81"><code>	<span class="keyword">var</span> <label for="r13" class="ident">err</label> <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a></code></span>
+<span class="codeline" id="line-82"><code>	<span class="keyword">var</span> <label for="r14" class="ident">jsonValue</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a></code></span>
+<span class="codeline" id="line-83"><code></code></span>
+<span class="codeline" id="line-84"><code>	<span class="keyword">if</span> <label for="r14" class="ident">jsonValue</label>, <label for="r13" class="ident">err</label> = <a href="../../../../../pkg/encoding/json.html" class="ident i1">json</a>.<a href="../../../../encoding/json/encode.go.html#line-158" class="ident">Marshal</a>(<label for="r11" class="ident">t</label>.<a href="#line-39" class="ident">Header</a>); <label for="r13" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-85"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <label for="r13" class="ident">err</label></code></span>
+<span class="codeline" id="line-86"><code>	}</code></span>
+<span class="codeline" id="line-87"><code>	<label for="r15" class="ident">header</label> := <a href="#line-121" class="ident">EncodeSegment</a>(<label for="r14" class="ident">jsonValue</label>)</code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>	<span class="keyword">if</span> <label for="r14" class="ident">jsonValue</label>, <label for="r13" class="ident">err</label> = <a href="../../../../../pkg/encoding/json.html" class="ident i1">json</a>.<a href="../../../../encoding/json/encode.go.html#line-158" class="ident">Marshal</a>(<label for="r11" class="ident">t</label>.<a href="#line-40" class="ident">Claims</a>); <label for="r13" class="ident">err</label> != <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a> {</code></span>
+<span class="codeline" id="line-90"><code>		<span class="keyword">return</span> <span class="lit-string">""</span>, <label for="r13" class="ident">err</label></code></span>
+<span class="codeline" id="line-91"><code>	}</code></span>
+<span class="codeline" id="line-92"><code>	<label for="r16" class="ident">claim</label> := <a href="#line-121" class="ident">EncodeSegment</a>(<label for="r14" class="ident">jsonValue</label>)</code></span>
+<span class="codeline" id="line-93"><code></code></span>
+<span class="codeline" id="line-94"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../strings/strings.go.html#line-434" class="ident">Join</a>([]<a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>{<label for="r15" class="ident">header</label>, <label for="r16" class="ident">claim</label>}, <span class="lit-string">"."</span>), <a href="../../../../../pkg/builtin.html#name-nil" class="ident">nil</a></code></span>
+<span class="codeline" id="line-95"><code>}</code></span>
+<span class="codeline" id="line-96"><code></code></span>
+<span class="codeline" id="line-97"><code><span class="comment">// Parse parses, validates, verifies the signature and returns the parsed token.</span></code></span>
+<span class="codeline" id="line-98"><code><span class="comment">// keyFunc will receive the parsed token and should return the cryptographic key</span></code></span>
+<span class="codeline" id="line-99"><code><span class="comment">// for verifying the signature.</span></code></span>
+<span class="codeline" id="line-100"><code><span class="comment">// The caller is strongly encouraged to set the WithValidMethods option to</span></code></span>
+<span class="codeline" id="line-101"><code><span class="comment">// validate the 'alg' claim in the token matches the expected algorithm.</span></code></span>
+<span class="codeline" id="line-102"><code><span class="comment">// For more details about the importance of validating the 'alg' claim,</span></code></span>
+<span class="codeline" id="line-103"><code><span class="comment">// see https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/</span></code></span>
+<span class="codeline" id="line-104"><code><span class="keyword">func</span> <label for="r17" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-Parse" class="ident">Parse</a></label>(<label for="r18" class="ident">tokenString</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r19" class="ident">keyFunc</label> <a href="#line-32" class="ident">Keyfunc</a>, <label for="r20" class="ident">options</label> ...<a href="parser_option.go.html#line-6" class="ident">ParserOption</a>) (*<a href="#line-36" class="ident">Token</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-105"><code>	<span class="keyword">return</span> <a href="parser.go.html#line-28" class="ident">NewParser</a>(<label for="r20" class="ident">options</label>...).<a href="parser.go.html#line-41" class="ident">Parse</a>(<label for="r18" class="ident">tokenString</label>, <label for="r19" class="ident">keyFunc</label>)</code></span>
+<span class="codeline" id="line-106"><code>}</code></span>
+<span class="codeline" id="line-107"><code></code></span>
+<span class="codeline" id="line-108"><code><span class="comment">// ParseWithClaims is a shortcut for NewParser().ParseWithClaims().</span></code></span>
+<span class="codeline" id="line-109"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-110"><code><span class="comment">// Note: If you provide a custom claim implementation that embeds one of the standard claims (such as RegisteredClaims),</span></code></span>
+<span class="codeline" id="line-111"><code><span class="comment">// make sure that a) you either embed a non-pointer version of the claims or b) if you are using a pointer, allocate the</span></code></span>
+<span class="codeline" id="line-112"><code><span class="comment">// proper memory for it before passing in the overall claims, otherwise you might run into a panic.</span></code></span>
+<span class="codeline" id="line-113"><code><span class="keyword">func</span> <label for="r21" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-ParseWithClaims" class="ident">ParseWithClaims</a></label>(<label for="r22" class="ident">tokenString</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>, <label for="r23" class="ident">claims</label> <a href="claims.go.html#line-11" class="ident">Claims</a>, <label for="r24" class="ident">keyFunc</label> <a href="#line-32" class="ident">Keyfunc</a>, <label for="r25" class="ident">options</label> ...<a href="parser_option.go.html#line-6" class="ident">ParserOption</a>) (*<a href="#line-36" class="ident">Token</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-114"><code>	<span class="keyword">return</span> <a href="parser.go.html#line-28" class="ident">NewParser</a>(<label for="r25" class="ident">options</label>...).<a href="parser.go.html#line-52" class="ident">ParseWithClaims</a>(<label for="r22" class="ident">tokenString</label>, <label for="r23" class="ident">claims</label>, <label for="r24" class="ident">keyFunc</label>)</code></span>
+<span class="codeline" id="line-115"><code>}</code></span>
+<span class="codeline" id="line-116"><code></code></span>
+<span class="codeline" id="line-117"><code><span class="comment">// EncodeSegment encodes a JWT specific base64url encoding with padding stripped</span></code></span>
+<span class="codeline" id="line-118"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-119"><code><span class="comment">// Deprecated: In a future release, we will demote this function to a non-exported function, since it</span></code></span>
+<span class="codeline" id="line-120"><code><span class="comment">// should only be used internally</span></code></span>
+<span class="codeline" id="line-121"><code><span class="keyword">func</span> <label for="r26" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-EncodeSegment" class="ident">EncodeSegment</a></label>(<label for="r27" class="ident">seg</label> []<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>) <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-122"><code>	<span class="keyword">return</span> <a href="../../../../../pkg/encoding/base64.html" class="ident i0">base64</a>.<a href="../../../../encoding/base64/base64.go.html#line-131" class="ident">RawURLEncoding</a>.<a href="../../../../encoding/base64/base64.go.html#line-195" class="ident">EncodeToString</a>(<label for="r27" class="ident">seg</label>)</code></span>
+<span class="codeline" id="line-123"><code>}</code></span>
+<span class="codeline" id="line-124"><code></code></span>
+<span class="codeline" id="line-125"><code><span class="comment">// DecodeSegment decodes a JWT specific base64url encoding with padding stripped</span></code></span>
+<span class="codeline" id="line-126"><code><span class="comment">//</span></code></span>
+<span class="codeline" id="line-127"><code><span class="comment">// Deprecated: In a future release, we will demote this function to a non-exported function, since it</span></code></span>
+<span class="codeline" id="line-128"><code><span class="comment">// should only be used internally</span></code></span>
+<span class="codeline" id="line-129"><code><span class="keyword">func</span> <label for="r28" class="ident"><a href="../../../../../pkg/github.com/golang-jwt/jwt/v4.html#name-DecodeSegment" class="ident">DecodeSegment</a></label>(<label for="r29" class="ident">seg</label> <a href="../../../../../pkg/builtin.html#name-string" class="ident">string</a>) ([]<a href="../../../../../pkg/builtin.html#name-byte" class="ident">byte</a>, <a href="../../../../../pkg/builtin.html#name-error" class="ident">error</a>) {</code></span>
+<span class="codeline" id="line-130"><code>	<label for="r30" class="ident">encoding</label> := <a href="../../../../../pkg/encoding/base64.html" class="ident i0">base64</a>.<a href="../../../../encoding/base64/base64.go.html#line-131" class="ident">RawURLEncoding</a></code></span>
+<span class="codeline" id="line-131"><code></code></span>
+<span class="codeline" id="line-132"><code>	<span class="keyword">if</span> <a href="#line-15" class="ident">DecodePaddingAllowed</a> {</code></span>
+<span class="codeline" id="line-133"><code>		<span class="keyword">if</span> <label for="r31" class="ident">l</label> := <a href="../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r29" class="ident">seg</label>) % <span class="lit-number">4</span>; <label for="r31" class="ident">l</label> &gt; <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-134"><code>			<label for="r29" class="ident">seg</label> += <a href="../../../../../pkg/strings.html" class="ident i2">strings</a>.<a href="../../../../strings/strings.go.html#line-542" class="ident">Repeat</a>(<span class="lit-string">"="</span>, <span class="lit-number">4</span>-<label for="r31" class="ident">l</label>)</code></span>
+<span class="codeline" id="line-135"><code>		}</code></span>
+<span class="codeline" id="line-136"><code>		<label for="r30" class="ident">encoding</label> = <a href="../../../../../pkg/encoding/base64.html" class="ident i0">base64</a>.<a href="../../../../encoding/base64/base64.go.html#line-121" class="ident">URLEncoding</a></code></span>
+<span class="codeline" id="line-137"><code>	}</code></span>
+<span class="codeline" id="line-138"><code></code></span>
+<span class="codeline" id="line-139"><code>	<span class="keyword">if</span> <a href="#line-21" class="ident">DecodeStrict</a> {</code></span>
+<span class="codeline" id="line-140"><code>		<label for="r30" class="ident">encoding</label> = <label for="r30" class="ident">encoding</label>.<a href="../../../../encoding/base64/base64.go.html#line-110" class="ident">Strict</a>()</code></span>
+<span class="codeline" id="line-141"><code>	}</code></span>
+<span class="codeline" id="line-142"><code>	<span class="keyword">return</span> <label for="r30" class="ident">encoding</label>.<a href="../../../../encoding/base64/base64.go.html#line-399" class="ident">DecodeString</a>(<label for="r29" class="ident">seg</label>)</code></span>
+<span class="codeline" id="line-143"><code>}</code></span>
+</pre><pre id="footer">
+<table><tr><td><img src="../../../../../png/go101-twitter.png"></td>
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
+<b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
+PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
+Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>

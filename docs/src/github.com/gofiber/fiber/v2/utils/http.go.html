@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Source: http.go in package github.com/gofiber/fiber/v2/utils</title>
-<link href="../../../../../../css/light-v0.5.7.css" rel="stylesheet">
-<script src="../../../../../../jvs/golds-v0.5.7.js"></script>
+<link href="../../../../../../css/auto-v0.6.7.css" rel="stylesheet">
+<script src="../../../../../../jvs/golds-v0.6.7.js"></script>
 <body onload="onPageLoad()"><div>
 
 <pre id="header"><code><span class="title">Source File</span>
@@ -28,7 +28,8 @@ input[id=r8]:checked ~pre label[for=r8],
 input[id=r9]:checked ~pre label[for=r9],
 input[id=r10]:checked ~pre label[for=r10]
 {background: #226; color: #ff8;}
-input[id=i0]:checked ~pre .i0
+input[id=i0]:checked ~pre .i0,
+input[id=i1]:checked ~pre .i1
 {background: brown; color: #eed;}
 </style><input id="r0" type="radio" name="g"/>
 <input id="r1" type="radio" name="g"/>
@@ -42,6 +43,7 @@ input[id=i0]:checked ~pre .i0
 <input id="r9" type="radio" name="g"/>
 <input id="r10" type="radio" name="g"/>
 <input id="i0" type="radio" name="i"/>
+<input id="i1" type="radio" name="i"/>
 
 <pre class="line-numbers">
 <span class="codeline" id="line-1"><code><span class="comment">// ⚡️ Fiber is an Express inspired web framework written in Go with ☕️</span></code></span>
@@ -50,257 +52,270 @@ input[id=i0]:checked ~pre .i0
 <span class="codeline" id="line-4"><code></code></span>
 <span class="codeline" id="line-5"><code><span class="keyword">package</span> utils</code></span>
 <span class="codeline" id="line-6"><code></code></span>
-<span class="codeline" id="line-7"><code><span class="keyword">import</span> <label for="i0"><span class="lit-string i0">"strings"</span></label></code></span>
-<span class="codeline" id="line-8"><code></code></span>
-<span class="codeline" id="line-9"><code><span class="keyword">const</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-MIMEOctetStream" class="ident">MIMEOctetStream</a> = <span class="lit-string">"application/octet-stream"</span></code></span>
-<span class="codeline" id="line-10"><code></code></span>
-<span class="codeline" id="line-11"><code><span class="comment">// GetMIME returns the content-type of a file extension</span></code></span>
-<span class="codeline" id="line-12"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-GetMIME" class="ident">GetMIME</a></label>(<label for="r1" class="ident">extension</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) (<label for="r2" class="ident">mime</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) {</code></span>
-<span class="codeline" id="line-13"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">extension</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-14"><code>		<span class="keyword">return</span> <label for="r2" class="ident">mime</label></code></span>
-<span class="codeline" id="line-15"><code>	}</code></span>
-<span class="codeline" id="line-16"><code>	<span class="keyword">if</span> <label for="r1" class="ident">extension</label>[<span class="lit-number">0</span>] == <span class="lit-number">'.'</span> {</code></span>
-<span class="codeline" id="line-17"><code>		<label for="r2" class="ident">mime</label> = <a href="#line-143" class="ident">mimeExtensions</a>[<label for="r1" class="ident">extension</label>[<span class="lit-number">1</span>:]]</code></span>
-<span class="codeline" id="line-18"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-19"><code>		<label for="r2" class="ident">mime</label> = <a href="#line-143" class="ident">mimeExtensions</a>[<label for="r1" class="ident">extension</label>]</code></span>
-<span class="codeline" id="line-20"><code>	}</code></span>
-<span class="codeline" id="line-21"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">mime</label>) == <span class="lit-number">0</span> {</code></span>
-<span class="codeline" id="line-22"><code>		<span class="keyword">return</span> <a href="#line-9" class="ident">MIMEOctetStream</a></code></span>
-<span class="codeline" id="line-23"><code>	}</code></span>
-<span class="codeline" id="line-24"><code>	<span class="keyword">return</span> <label for="r2" class="ident">mime</label></code></span>
-<span class="codeline" id="line-25"><code>}</code></span>
-<span class="codeline" id="line-26"><code></code></span>
-<span class="codeline" id="line-27"><code><span class="comment">// ParseVendorSpecificContentType check if content type is vendor specific and</span></code></span>
-<span class="codeline" id="line-28"><code><span class="comment">// if it is parsable to any known types. If its not vendor specific then returns</span></code></span>
-<span class="codeline" id="line-29"><code><span class="comment">// the original content type.</span></code></span>
-<span class="codeline" id="line-30"><code><span class="keyword">func</span> <label for="r3" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-ParseVendorSpecificContentType" class="ident">ParseVendorSpecificContentType</a></label>(<label for="r4" class="ident">cType</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
-<span class="codeline" id="line-31"><code>	<label for="r5" class="ident">plusIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i0">strings</a>.<a href="../../../../../strings/strings.go.html#line-1103" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">"+"</span>)</code></span>
+<span class="codeline" id="line-7"><code><span class="keyword">import</span> (</code></span>
+<span class="codeline" id="line-8"><code>	<label for="i0"><span class="lit-string i0">"mime"</span></label></code></span>
+<span class="codeline" id="line-9"><code>	<label for="i1"><span class="lit-string i1">"strings"</span></label></code></span>
+<span class="codeline" id="line-10"><code>)</code></span>
+<span class="codeline" id="line-11"><code></code></span>
+<span class="codeline" id="line-12"><code><span class="keyword">const</span> <a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-MIMEOctetStream" class="ident">MIMEOctetStream</a> = <span class="lit-string">"application/octet-stream"</span></code></span>
+<span class="codeline" id="line-13"><code></code></span>
+<span class="codeline" id="line-14"><code><span class="comment">// GetMIME returns the content-type of a file extension</span></code></span>
+<span class="codeline" id="line-15"><code><span class="keyword">func</span> <label for="r0" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-GetMIME" class="ident">GetMIME</a></label>(<label for="r1" class="ident">extension</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-16"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r1" class="ident">extension</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-17"><code>		<span class="keyword">return</span> <span class="lit-string">""</span></code></span>
+<span class="codeline" id="line-18"><code>	}</code></span>
+<span class="codeline" id="line-19"><code>	<span class="keyword">var</span> <label for="r2" class="ident">foundMime</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-20"><code>	<span class="keyword">if</span> <label for="r1" class="ident">extension</label>[<span class="lit-number">0</span>] == <span class="lit-number">'.'</span> {</code></span>
+<span class="codeline" id="line-21"><code>		<label for="r2" class="ident">foundMime</label> = <a href="#line-156" class="ident">mimeExtensions</a>[<label for="r1" class="ident">extension</label>[<span class="lit-number">1</span>:]]</code></span>
+<span class="codeline" id="line-22"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-23"><code>		<label for="r2" class="ident">foundMime</label> = <a href="#line-156" class="ident">mimeExtensions</a>[<label for="r1" class="ident">extension</label>]</code></span>
+<span class="codeline" id="line-24"><code>	}</code></span>
+<span class="codeline" id="line-25"><code></code></span>
+<span class="codeline" id="line-26"><code>	<span class="keyword">if</span> <a href="../../../../../../pkg/builtin.html#name-len" class="ident">len</a>(<label for="r2" class="ident">foundMime</label>) == <span class="lit-number">0</span> {</code></span>
+<span class="codeline" id="line-27"><code>		<span class="keyword">if</span> <label for="r1" class="ident">extension</label>[<span class="lit-number">0</span>] != <span class="lit-number">'.'</span> {</code></span>
+<span class="codeline" id="line-28"><code>			<label for="r2" class="ident">foundMime</label> = <a href="../../../../../../pkg/mime.html" class="ident i0">mime</a>.<a href="../../../../../mime/type.go.html#line-111" class="ident">TypeByExtension</a>(<span class="lit-string">"."</span> + <label for="r1" class="ident">extension</label>)</code></span>
+<span class="codeline" id="line-29"><code>		} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-30"><code>			<label for="r2" class="ident">foundMime</label> = <a href="../../../../../../pkg/mime.html" class="ident i0">mime</a>.<a href="../../../../../mime/type.go.html#line-111" class="ident">TypeByExtension</a>(<label for="r1" class="ident">extension</label>)</code></span>
+<span class="codeline" id="line-31"><code>		}</code></span>
 <span class="codeline" id="line-32"><code></code></span>
-<span class="codeline" id="line-33"><code>	<span class="keyword">if</span> <label for="r5" class="ident">plusIndex</label> == -<span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-34"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label></code></span>
-<span class="codeline" id="line-35"><code>	}</code></span>
-<span class="codeline" id="line-36"><code></code></span>
-<span class="codeline" id="line-37"><code>	<span class="keyword">var</span> <label for="r6" class="ident">parsableType</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
-<span class="codeline" id="line-38"><code>	<span class="keyword">if</span> <label for="r7" class="ident">semiColonIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i0">strings</a>.<a href="../../../../../strings/strings.go.html#line-1103" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">";"</span>); <label for="r7" class="ident">semiColonIndex</label> == -<span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-39"><code>		<label for="r6" class="ident">parsableType</label> = <label for="r4" class="ident">cType</label>[<label for="r5" class="ident">plusIndex</label>+<span class="lit-number">1</span>:]</code></span>
-<span class="codeline" id="line-40"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r5" class="ident">plusIndex</label> &lt; <label for="r7" class="ident">semiColonIndex</label> {</code></span>
-<span class="codeline" id="line-41"><code>		<label for="r6" class="ident">parsableType</label> = <label for="r4" class="ident">cType</label>[<label for="r5" class="ident">plusIndex</label>+<span class="lit-number">1</span> : <label for="r7" class="ident">semiColonIndex</label>]</code></span>
-<span class="codeline" id="line-42"><code>	} <span class="keyword">else</span> {</code></span>
-<span class="codeline" id="line-43"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label>[:<label for="r7" class="ident">semiColonIndex</label>]</code></span>
-<span class="codeline" id="line-44"><code>	}</code></span>
+<span class="codeline" id="line-33"><code>		<span class="keyword">if</span> <label for="r2" class="ident">foundMime</label> == <span class="lit-string">""</span> {</code></span>
+<span class="codeline" id="line-34"><code>			<span class="keyword">return</span> <a href="#line-12" class="ident">MIMEOctetStream</a></code></span>
+<span class="codeline" id="line-35"><code>		}</code></span>
+<span class="codeline" id="line-36"><code>	}</code></span>
+<span class="codeline" id="line-37"><code>	<span class="keyword">return</span> <label for="r2" class="ident">foundMime</label></code></span>
+<span class="codeline" id="line-38"><code>}</code></span>
+<span class="codeline" id="line-39"><code></code></span>
+<span class="codeline" id="line-40"><code><span class="comment">// ParseVendorSpecificContentType check if content type is vendor specific and</span></code></span>
+<span class="codeline" id="line-41"><code><span class="comment">// if it is parsable to any known types. If its not vendor specific then returns</span></code></span>
+<span class="codeline" id="line-42"><code><span class="comment">// the original content type.</span></code></span>
+<span class="codeline" id="line-43"><code><span class="keyword">func</span> <label for="r3" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-ParseVendorSpecificContentType" class="ident">ParseVendorSpecificContentType</a></label>(<label for="r4" class="ident">cType</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-44"><code>	<label for="r5" class="ident">plusIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i1">strings</a>.<a href="../../../../../strings/strings.go.html#line-1194" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">"+"</span>)</code></span>
 <span class="codeline" id="line-45"><code></code></span>
-<span class="codeline" id="line-46"><code>	<label for="r8" class="ident">slashIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i0">strings</a>.<a href="../../../../../strings/strings.go.html#line-1103" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">"/"</span>)</code></span>
-<span class="codeline" id="line-47"><code></code></span>
-<span class="codeline" id="line-48"><code>	<span class="keyword">if</span> <label for="r8" class="ident">slashIndex</label> == -<span class="lit-number">1</span> {</code></span>
-<span class="codeline" id="line-49"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label></code></span>
-<span class="codeline" id="line-50"><code>	}</code></span>
-<span class="codeline" id="line-51"><code></code></span>
-<span class="codeline" id="line-52"><code>	<span class="keyword">return</span> <label for="r4" class="ident">cType</label>[<span class="lit-number">0</span>:<label for="r8" class="ident">slashIndex</label>+<span class="lit-number">1</span>] + <label for="r6" class="ident">parsableType</label></code></span>
-<span class="codeline" id="line-53"><code>}</code></span>
-<span class="codeline" id="line-54"><code></code></span>
-<span class="codeline" id="line-55"><code><span class="comment">// limits for HTTP statuscodes</span></code></span>
-<span class="codeline" id="line-56"><code><span class="keyword">const</span> (</code></span>
-<span class="codeline" id="line-57"><code>	statusMessageMin = <span class="lit-number">100</span></code></span>
-<span class="codeline" id="line-58"><code>	statusMessageMax = <span class="lit-number">511</span></code></span>
-<span class="codeline" id="line-59"><code>)</code></span>
+<span class="codeline" id="line-46"><code>	<span class="keyword">if</span> <label for="r5" class="ident">plusIndex</label> == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-47"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label></code></span>
+<span class="codeline" id="line-48"><code>	}</code></span>
+<span class="codeline" id="line-49"><code></code></span>
+<span class="codeline" id="line-50"><code>	<span class="keyword">var</span> <label for="r6" class="ident">parsableType</label> <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a></code></span>
+<span class="codeline" id="line-51"><code>	<span class="keyword">if</span> <label for="r7" class="ident">semiColonIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i1">strings</a>.<a href="../../../../../strings/strings.go.html#line-1194" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">";"</span>); <label for="r7" class="ident">semiColonIndex</label> == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-52"><code>		<label for="r6" class="ident">parsableType</label> = <label for="r4" class="ident">cType</label>[<label for="r5" class="ident">plusIndex</label>+<span class="lit-number">1</span>:]</code></span>
+<span class="codeline" id="line-53"><code>	} <span class="keyword">else</span> <span class="keyword">if</span> <label for="r5" class="ident">plusIndex</label> &lt; <label for="r7" class="ident">semiColonIndex</label> {</code></span>
+<span class="codeline" id="line-54"><code>		<label for="r6" class="ident">parsableType</label> = <label for="r4" class="ident">cType</label>[<label for="r5" class="ident">plusIndex</label>+<span class="lit-number">1</span> : <label for="r7" class="ident">semiColonIndex</label>]</code></span>
+<span class="codeline" id="line-55"><code>	} <span class="keyword">else</span> {</code></span>
+<span class="codeline" id="line-56"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label>[:<label for="r7" class="ident">semiColonIndex</label>]</code></span>
+<span class="codeline" id="line-57"><code>	}</code></span>
+<span class="codeline" id="line-58"><code></code></span>
+<span class="codeline" id="line-59"><code>	<label for="r8" class="ident">slashIndex</label> := <a href="../../../../../../pkg/strings.html" class="ident i1">strings</a>.<a href="../../../../../strings/strings.go.html#line-1194" class="ident">Index</a>(<label for="r4" class="ident">cType</label>, <span class="lit-string">"/"</span>)</code></span>
 <span class="codeline" id="line-60"><code></code></span>
-<span class="codeline" id="line-61"><code><span class="comment">// StatusMessage returns the correct message for the provided HTTP statuscode</span></code></span>
-<span class="codeline" id="line-62"><code><span class="keyword">func</span> <label for="r9" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-StatusMessage" class="ident">StatusMessage</a></label>(<label for="r10" class="ident">status</label> <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
-<span class="codeline" id="line-63"><code>	<span class="keyword">if</span> <label for="r10" class="ident">status</label> &lt; <a href="#line-57" class="ident">statusMessageMin</a> || <label for="r10" class="ident">status</label> &gt; <a href="#line-58" class="ident">statusMessageMax</a> {</code></span>
-<span class="codeline" id="line-64"><code>		<span class="keyword">return</span> <span class="lit-string">""</span></code></span>
-<span class="codeline" id="line-65"><code>	}</code></span>
-<span class="codeline" id="line-66"><code>	<span class="keyword">return</span> <a href="#line-70" class="ident">statusMessage</a>[<label for="r10" class="ident">status</label>]</code></span>
-<span class="codeline" id="line-67"><code>}</code></span>
-<span class="codeline" id="line-68"><code></code></span>
-<span class="codeline" id="line-69"><code><span class="comment">// NOTE: Keep this in sync with the status code list</span></code></span>
-<span class="codeline" id="line-70"><code><span class="keyword">var</span> statusMessage = []<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
-<span class="codeline" id="line-71"><code>	<span class="lit-number">100</span>: <span class="lit-string">"Continue"</span>,            <span class="comment">// StatusContinue</span></code></span>
-<span class="codeline" id="line-72"><code>	<span class="lit-number">101</span>: <span class="lit-string">"Switching Protocols"</span>, <span class="comment">// StatusSwitchingProtocols</span></code></span>
-<span class="codeline" id="line-73"><code>	<span class="lit-number">102</span>: <span class="lit-string">"Processing"</span>,          <span class="comment">// StatusProcessing</span></code></span>
-<span class="codeline" id="line-74"><code>	<span class="lit-number">103</span>: <span class="lit-string">"Early Hints"</span>,         <span class="comment">// StatusEarlyHints</span></code></span>
-<span class="codeline" id="line-75"><code></code></span>
-<span class="codeline" id="line-76"><code>	<span class="lit-number">200</span>: <span class="lit-string">"OK"</span>,                            <span class="comment">// StatusOK</span></code></span>
-<span class="codeline" id="line-77"><code>	<span class="lit-number">201</span>: <span class="lit-string">"Created"</span>,                       <span class="comment">// StatusCreated</span></code></span>
-<span class="codeline" id="line-78"><code>	<span class="lit-number">202</span>: <span class="lit-string">"Accepted"</span>,                      <span class="comment">// StatusAccepted</span></code></span>
-<span class="codeline" id="line-79"><code>	<span class="lit-number">203</span>: <span class="lit-string">"Non-Authoritative Information"</span>, <span class="comment">// StatusNonAuthoritativeInformation</span></code></span>
-<span class="codeline" id="line-80"><code>	<span class="lit-number">204</span>: <span class="lit-string">"No Content"</span>,                    <span class="comment">// StatusNoContent</span></code></span>
-<span class="codeline" id="line-81"><code>	<span class="lit-number">205</span>: <span class="lit-string">"Reset Content"</span>,                 <span class="comment">// StatusResetContent</span></code></span>
-<span class="codeline" id="line-82"><code>	<span class="lit-number">206</span>: <span class="lit-string">"Partial Content"</span>,               <span class="comment">// StatusPartialContent</span></code></span>
-<span class="codeline" id="line-83"><code>	<span class="lit-number">207</span>: <span class="lit-string">"Multi-Status"</span>,                  <span class="comment">// StatusMultiStatus</span></code></span>
-<span class="codeline" id="line-84"><code>	<span class="lit-number">208</span>: <span class="lit-string">"Already Reported"</span>,              <span class="comment">// StatusAlreadyReported</span></code></span>
-<span class="codeline" id="line-85"><code>	<span class="lit-number">226</span>: <span class="lit-string">"IM Used"</span>,                       <span class="comment">// StatusIMUsed</span></code></span>
-<span class="codeline" id="line-86"><code></code></span>
-<span class="codeline" id="line-87"><code>	<span class="lit-number">300</span>: <span class="lit-string">"Multiple Choices"</span>,   <span class="comment">// StatusMultipleChoices</span></code></span>
-<span class="codeline" id="line-88"><code>	<span class="lit-number">301</span>: <span class="lit-string">"Moved Permanently"</span>,  <span class="comment">// StatusMovedPermanently</span></code></span>
-<span class="codeline" id="line-89"><code>	<span class="lit-number">302</span>: <span class="lit-string">"Found"</span>,              <span class="comment">// StatusFound</span></code></span>
-<span class="codeline" id="line-90"><code>	<span class="lit-number">303</span>: <span class="lit-string">"See Other"</span>,          <span class="comment">// StatusSeeOther</span></code></span>
-<span class="codeline" id="line-91"><code>	<span class="lit-number">304</span>: <span class="lit-string">"Not Modified"</span>,       <span class="comment">// StatusNotModified</span></code></span>
-<span class="codeline" id="line-92"><code>	<span class="lit-number">305</span>: <span class="lit-string">"Use Proxy"</span>,          <span class="comment">// StatusUseProxy</span></code></span>
-<span class="codeline" id="line-93"><code>	<span class="lit-number">306</span>: <span class="lit-string">"Switch Proxy"</span>,       <span class="comment">// StatusSwitchProxy</span></code></span>
-<span class="codeline" id="line-94"><code>	<span class="lit-number">307</span>: <span class="lit-string">"Temporary Redirect"</span>, <span class="comment">// StatusTemporaryRedirect</span></code></span>
-<span class="codeline" id="line-95"><code>	<span class="lit-number">308</span>: <span class="lit-string">"Permanent Redirect"</span>, <span class="comment">// StatusPermanentRedirect</span></code></span>
-<span class="codeline" id="line-96"><code></code></span>
-<span class="codeline" id="line-97"><code>	<span class="lit-number">400</span>: <span class="lit-string">"Bad Request"</span>,                     <span class="comment">// StatusBadRequest</span></code></span>
-<span class="codeline" id="line-98"><code>	<span class="lit-number">401</span>: <span class="lit-string">"Unauthorized"</span>,                    <span class="comment">// StatusUnauthorized</span></code></span>
-<span class="codeline" id="line-99"><code>	<span class="lit-number">402</span>: <span class="lit-string">"Payment Required"</span>,                <span class="comment">// StatusPaymentRequired</span></code></span>
-<span class="codeline" id="line-100"><code>	<span class="lit-number">403</span>: <span class="lit-string">"Forbidden"</span>,                       <span class="comment">// StatusForbidden</span></code></span>
-<span class="codeline" id="line-101"><code>	<span class="lit-number">404</span>: <span class="lit-string">"Not Found"</span>,                       <span class="comment">// StatusNotFound</span></code></span>
-<span class="codeline" id="line-102"><code>	<span class="lit-number">405</span>: <span class="lit-string">"Method Not Allowed"</span>,              <span class="comment">// StatusMethodNotAllowed</span></code></span>
-<span class="codeline" id="line-103"><code>	<span class="lit-number">406</span>: <span class="lit-string">"Not Acceptable"</span>,                  <span class="comment">// StatusNotAcceptable</span></code></span>
-<span class="codeline" id="line-104"><code>	<span class="lit-number">407</span>: <span class="lit-string">"Proxy Authentication Required"</span>,   <span class="comment">// StatusProxyAuthRequired</span></code></span>
-<span class="codeline" id="line-105"><code>	<span class="lit-number">408</span>: <span class="lit-string">"Request Timeout"</span>,                 <span class="comment">// StatusRequestTimeout</span></code></span>
-<span class="codeline" id="line-106"><code>	<span class="lit-number">409</span>: <span class="lit-string">"Conflict"</span>,                        <span class="comment">// StatusConflict</span></code></span>
-<span class="codeline" id="line-107"><code>	<span class="lit-number">410</span>: <span class="lit-string">"Gone"</span>,                            <span class="comment">// StatusGone</span></code></span>
-<span class="codeline" id="line-108"><code>	<span class="lit-number">411</span>: <span class="lit-string">"Length Required"</span>,                 <span class="comment">// StatusLengthRequired</span></code></span>
-<span class="codeline" id="line-109"><code>	<span class="lit-number">412</span>: <span class="lit-string">"Precondition Failed"</span>,             <span class="comment">// StatusPreconditionFailed</span></code></span>
-<span class="codeline" id="line-110"><code>	<span class="lit-number">413</span>: <span class="lit-string">"Request Entity Too Large"</span>,        <span class="comment">// StatusRequestEntityTooLarge</span></code></span>
-<span class="codeline" id="line-111"><code>	<span class="lit-number">414</span>: <span class="lit-string">"Request URI Too Long"</span>,            <span class="comment">// StatusRequestURITooLong</span></code></span>
-<span class="codeline" id="line-112"><code>	<span class="lit-number">415</span>: <span class="lit-string">"Unsupported Media Type"</span>,          <span class="comment">// StatusUnsupportedMediaType</span></code></span>
-<span class="codeline" id="line-113"><code>	<span class="lit-number">416</span>: <span class="lit-string">"Requested Range Not Satisfiable"</span>, <span class="comment">// StatusRequestedRangeNotSatisfiable</span></code></span>
-<span class="codeline" id="line-114"><code>	<span class="lit-number">417</span>: <span class="lit-string">"Expectation Failed"</span>,              <span class="comment">// StatusExpectationFailed</span></code></span>
-<span class="codeline" id="line-115"><code>	<span class="lit-number">418</span>: <span class="lit-string">"I'm a teapot"</span>,                    <span class="comment">// StatusTeapot</span></code></span>
-<span class="codeline" id="line-116"><code>	<span class="lit-number">421</span>: <span class="lit-string">"Misdirected Request"</span>,             <span class="comment">// StatusMisdirectedRequest</span></code></span>
-<span class="codeline" id="line-117"><code>	<span class="lit-number">422</span>: <span class="lit-string">"Unprocessable Entity"</span>,            <span class="comment">// StatusUnprocessableEntity</span></code></span>
-<span class="codeline" id="line-118"><code>	<span class="lit-number">423</span>: <span class="lit-string">"Locked"</span>,                          <span class="comment">// StatusLocked</span></code></span>
-<span class="codeline" id="line-119"><code>	<span class="lit-number">424</span>: <span class="lit-string">"Failed Dependency"</span>,               <span class="comment">// StatusFailedDependency</span></code></span>
-<span class="codeline" id="line-120"><code>	<span class="lit-number">425</span>: <span class="lit-string">"Too Early"</span>,                       <span class="comment">// StatusTooEarly</span></code></span>
-<span class="codeline" id="line-121"><code>	<span class="lit-number">426</span>: <span class="lit-string">"Upgrade Required"</span>,                <span class="comment">// StatusUpgradeRequired</span></code></span>
-<span class="codeline" id="line-122"><code>	<span class="lit-number">428</span>: <span class="lit-string">"Precondition Required"</span>,           <span class="comment">// StatusPreconditionRequired</span></code></span>
-<span class="codeline" id="line-123"><code>	<span class="lit-number">429</span>: <span class="lit-string">"Too Many Requests"</span>,               <span class="comment">// StatusTooManyRequests</span></code></span>
-<span class="codeline" id="line-124"><code>	<span class="lit-number">431</span>: <span class="lit-string">"Request Header Fields Too Large"</span>, <span class="comment">// StatusRequestHeaderFieldsTooLarge</span></code></span>
-<span class="codeline" id="line-125"><code>	<span class="lit-number">451</span>: <span class="lit-string">"Unavailable For Legal Reasons"</span>,   <span class="comment">// StatusUnavailableForLegalReasons</span></code></span>
-<span class="codeline" id="line-126"><code></code></span>
-<span class="codeline" id="line-127"><code>	<span class="lit-number">500</span>: <span class="lit-string">"Internal Server Error"</span>,           <span class="comment">// StatusInternalServerError</span></code></span>
-<span class="codeline" id="line-128"><code>	<span class="lit-number">501</span>: <span class="lit-string">"Not Implemented"</span>,                 <span class="comment">// StatusNotImplemented</span></code></span>
-<span class="codeline" id="line-129"><code>	<span class="lit-number">502</span>: <span class="lit-string">"Bad Gateway"</span>,                     <span class="comment">// StatusBadGateway</span></code></span>
-<span class="codeline" id="line-130"><code>	<span class="lit-number">503</span>: <span class="lit-string">"Service Unavailable"</span>,             <span class="comment">// StatusServiceUnavailable</span></code></span>
-<span class="codeline" id="line-131"><code>	<span class="lit-number">504</span>: <span class="lit-string">"Gateway Timeout"</span>,                 <span class="comment">// StatusGatewayTimeout</span></code></span>
-<span class="codeline" id="line-132"><code>	<span class="lit-number">505</span>: <span class="lit-string">"HTTP Version Not Supported"</span>,      <span class="comment">// StatusHTTPVersionNotSupported</span></code></span>
-<span class="codeline" id="line-133"><code>	<span class="lit-number">506</span>: <span class="lit-string">"Variant Also Negotiates"</span>,         <span class="comment">// StatusVariantAlsoNegotiates</span></code></span>
-<span class="codeline" id="line-134"><code>	<span class="lit-number">507</span>: <span class="lit-string">"Insufficient Storage"</span>,            <span class="comment">// StatusInsufficientStorage</span></code></span>
-<span class="codeline" id="line-135"><code>	<span class="lit-number">508</span>: <span class="lit-string">"Loop Detected"</span>,                   <span class="comment">// StatusLoopDetected</span></code></span>
-<span class="codeline" id="line-136"><code>	<span class="lit-number">510</span>: <span class="lit-string">"Not Extended"</span>,                    <span class="comment">// StatusNotExtended</span></code></span>
-<span class="codeline" id="line-137"><code>	<span class="lit-number">511</span>: <span class="lit-string">"Network Authentication Required"</span>, <span class="comment">// StatusNetworkAuthenticationRequired</span></code></span>
-<span class="codeline" id="line-138"><code>}</code></span>
+<span class="codeline" id="line-61"><code>	<span class="keyword">if</span> <label for="r8" class="ident">slashIndex</label> == -<span class="lit-number">1</span> {</code></span>
+<span class="codeline" id="line-62"><code>		<span class="keyword">return</span> <label for="r4" class="ident">cType</label></code></span>
+<span class="codeline" id="line-63"><code>	}</code></span>
+<span class="codeline" id="line-64"><code></code></span>
+<span class="codeline" id="line-65"><code>	<span class="keyword">return</span> <label for="r4" class="ident">cType</label>[<span class="lit-number">0</span>:<label for="r8" class="ident">slashIndex</label>+<span class="lit-number">1</span>] + <label for="r6" class="ident">parsableType</label></code></span>
+<span class="codeline" id="line-66"><code>}</code></span>
+<span class="codeline" id="line-67"><code></code></span>
+<span class="codeline" id="line-68"><code><span class="comment">// limits for HTTP statuscodes</span></code></span>
+<span class="codeline" id="line-69"><code><span class="keyword">const</span> (</code></span>
+<span class="codeline" id="line-70"><code>	statusMessageMin = <span class="lit-number">100</span></code></span>
+<span class="codeline" id="line-71"><code>	statusMessageMax = <span class="lit-number">511</span></code></span>
+<span class="codeline" id="line-72"><code>)</code></span>
+<span class="codeline" id="line-73"><code></code></span>
+<span class="codeline" id="line-74"><code><span class="comment">// StatusMessage returns the correct message for the provided HTTP statuscode</span></code></span>
+<span class="codeline" id="line-75"><code><span class="keyword">func</span> <label for="r9" class="ident"><a href="../../../../../../pkg/github.com/gofiber/fiber/v2/utils.html#name-StatusMessage" class="ident">StatusMessage</a></label>(<label for="r10" class="ident">status</label> <a href="../../../../../../pkg/builtin.html#name-int" class="ident">int</a>) <a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a> {</code></span>
+<span class="codeline" id="line-76"><code>	<span class="keyword">if</span> <label for="r10" class="ident">status</label> &lt; <a href="#line-70" class="ident">statusMessageMin</a> || <label for="r10" class="ident">status</label> &gt; <a href="#line-71" class="ident">statusMessageMax</a> {</code></span>
+<span class="codeline" id="line-77"><code>		<span class="keyword">return</span> <span class="lit-string">""</span></code></span>
+<span class="codeline" id="line-78"><code>	}</code></span>
+<span class="codeline" id="line-79"><code>	<span class="keyword">return</span> <a href="#line-83" class="ident">statusMessage</a>[<label for="r10" class="ident">status</label>]</code></span>
+<span class="codeline" id="line-80"><code>}</code></span>
+<span class="codeline" id="line-81"><code></code></span>
+<span class="codeline" id="line-82"><code><span class="comment">// NOTE: Keep this in sync with the status code list</span></code></span>
+<span class="codeline" id="line-83"><code><span class="keyword">var</span> statusMessage = []<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
+<span class="codeline" id="line-84"><code>	<span class="lit-number">100</span>: <span class="lit-string">"Continue"</span>,            <span class="comment">// StatusContinue</span></code></span>
+<span class="codeline" id="line-85"><code>	<span class="lit-number">101</span>: <span class="lit-string">"Switching Protocols"</span>, <span class="comment">// StatusSwitchingProtocols</span></code></span>
+<span class="codeline" id="line-86"><code>	<span class="lit-number">102</span>: <span class="lit-string">"Processing"</span>,          <span class="comment">// StatusProcessing</span></code></span>
+<span class="codeline" id="line-87"><code>	<span class="lit-number">103</span>: <span class="lit-string">"Early Hints"</span>,         <span class="comment">// StatusEarlyHints</span></code></span>
+<span class="codeline" id="line-88"><code></code></span>
+<span class="codeline" id="line-89"><code>	<span class="lit-number">200</span>: <span class="lit-string">"OK"</span>,                            <span class="comment">// StatusOK</span></code></span>
+<span class="codeline" id="line-90"><code>	<span class="lit-number">201</span>: <span class="lit-string">"Created"</span>,                       <span class="comment">// StatusCreated</span></code></span>
+<span class="codeline" id="line-91"><code>	<span class="lit-number">202</span>: <span class="lit-string">"Accepted"</span>,                      <span class="comment">// StatusAccepted</span></code></span>
+<span class="codeline" id="line-92"><code>	<span class="lit-number">203</span>: <span class="lit-string">"Non-Authoritative Information"</span>, <span class="comment">// StatusNonAuthoritativeInformation</span></code></span>
+<span class="codeline" id="line-93"><code>	<span class="lit-number">204</span>: <span class="lit-string">"No Content"</span>,                    <span class="comment">// StatusNoContent</span></code></span>
+<span class="codeline" id="line-94"><code>	<span class="lit-number">205</span>: <span class="lit-string">"Reset Content"</span>,                 <span class="comment">// StatusResetContent</span></code></span>
+<span class="codeline" id="line-95"><code>	<span class="lit-number">206</span>: <span class="lit-string">"Partial Content"</span>,               <span class="comment">// StatusPartialContent</span></code></span>
+<span class="codeline" id="line-96"><code>	<span class="lit-number">207</span>: <span class="lit-string">"Multi-Status"</span>,                  <span class="comment">// StatusMultiStatus</span></code></span>
+<span class="codeline" id="line-97"><code>	<span class="lit-number">208</span>: <span class="lit-string">"Already Reported"</span>,              <span class="comment">// StatusAlreadyReported</span></code></span>
+<span class="codeline" id="line-98"><code>	<span class="lit-number">226</span>: <span class="lit-string">"IM Used"</span>,                       <span class="comment">// StatusIMUsed</span></code></span>
+<span class="codeline" id="line-99"><code></code></span>
+<span class="codeline" id="line-100"><code>	<span class="lit-number">300</span>: <span class="lit-string">"Multiple Choices"</span>,   <span class="comment">// StatusMultipleChoices</span></code></span>
+<span class="codeline" id="line-101"><code>	<span class="lit-number">301</span>: <span class="lit-string">"Moved Permanently"</span>,  <span class="comment">// StatusMovedPermanently</span></code></span>
+<span class="codeline" id="line-102"><code>	<span class="lit-number">302</span>: <span class="lit-string">"Found"</span>,              <span class="comment">// StatusFound</span></code></span>
+<span class="codeline" id="line-103"><code>	<span class="lit-number">303</span>: <span class="lit-string">"See Other"</span>,          <span class="comment">// StatusSeeOther</span></code></span>
+<span class="codeline" id="line-104"><code>	<span class="lit-number">304</span>: <span class="lit-string">"Not Modified"</span>,       <span class="comment">// StatusNotModified</span></code></span>
+<span class="codeline" id="line-105"><code>	<span class="lit-number">305</span>: <span class="lit-string">"Use Proxy"</span>,          <span class="comment">// StatusUseProxy</span></code></span>
+<span class="codeline" id="line-106"><code>	<span class="lit-number">306</span>: <span class="lit-string">"Switch Proxy"</span>,       <span class="comment">// StatusSwitchProxy</span></code></span>
+<span class="codeline" id="line-107"><code>	<span class="lit-number">307</span>: <span class="lit-string">"Temporary Redirect"</span>, <span class="comment">// StatusTemporaryRedirect</span></code></span>
+<span class="codeline" id="line-108"><code>	<span class="lit-number">308</span>: <span class="lit-string">"Permanent Redirect"</span>, <span class="comment">// StatusPermanentRedirect</span></code></span>
+<span class="codeline" id="line-109"><code></code></span>
+<span class="codeline" id="line-110"><code>	<span class="lit-number">400</span>: <span class="lit-string">"Bad Request"</span>,                     <span class="comment">// StatusBadRequest</span></code></span>
+<span class="codeline" id="line-111"><code>	<span class="lit-number">401</span>: <span class="lit-string">"Unauthorized"</span>,                    <span class="comment">// StatusUnauthorized</span></code></span>
+<span class="codeline" id="line-112"><code>	<span class="lit-number">402</span>: <span class="lit-string">"Payment Required"</span>,                <span class="comment">// StatusPaymentRequired</span></code></span>
+<span class="codeline" id="line-113"><code>	<span class="lit-number">403</span>: <span class="lit-string">"Forbidden"</span>,                       <span class="comment">// StatusForbidden</span></code></span>
+<span class="codeline" id="line-114"><code>	<span class="lit-number">404</span>: <span class="lit-string">"Not Found"</span>,                       <span class="comment">// StatusNotFound</span></code></span>
+<span class="codeline" id="line-115"><code>	<span class="lit-number">405</span>: <span class="lit-string">"Method Not Allowed"</span>,              <span class="comment">// StatusMethodNotAllowed</span></code></span>
+<span class="codeline" id="line-116"><code>	<span class="lit-number">406</span>: <span class="lit-string">"Not Acceptable"</span>,                  <span class="comment">// StatusNotAcceptable</span></code></span>
+<span class="codeline" id="line-117"><code>	<span class="lit-number">407</span>: <span class="lit-string">"Proxy Authentication Required"</span>,   <span class="comment">// StatusProxyAuthRequired</span></code></span>
+<span class="codeline" id="line-118"><code>	<span class="lit-number">408</span>: <span class="lit-string">"Request Timeout"</span>,                 <span class="comment">// StatusRequestTimeout</span></code></span>
+<span class="codeline" id="line-119"><code>	<span class="lit-number">409</span>: <span class="lit-string">"Conflict"</span>,                        <span class="comment">// StatusConflict</span></code></span>
+<span class="codeline" id="line-120"><code>	<span class="lit-number">410</span>: <span class="lit-string">"Gone"</span>,                            <span class="comment">// StatusGone</span></code></span>
+<span class="codeline" id="line-121"><code>	<span class="lit-number">411</span>: <span class="lit-string">"Length Required"</span>,                 <span class="comment">// StatusLengthRequired</span></code></span>
+<span class="codeline" id="line-122"><code>	<span class="lit-number">412</span>: <span class="lit-string">"Precondition Failed"</span>,             <span class="comment">// StatusPreconditionFailed</span></code></span>
+<span class="codeline" id="line-123"><code>	<span class="lit-number">413</span>: <span class="lit-string">"Request Entity Too Large"</span>,        <span class="comment">// StatusRequestEntityTooLarge</span></code></span>
+<span class="codeline" id="line-124"><code>	<span class="lit-number">414</span>: <span class="lit-string">"Request URI Too Long"</span>,            <span class="comment">// StatusRequestURITooLong</span></code></span>
+<span class="codeline" id="line-125"><code>	<span class="lit-number">415</span>: <span class="lit-string">"Unsupported Media Type"</span>,          <span class="comment">// StatusUnsupportedMediaType</span></code></span>
+<span class="codeline" id="line-126"><code>	<span class="lit-number">416</span>: <span class="lit-string">"Requested Range Not Satisfiable"</span>, <span class="comment">// StatusRequestedRangeNotSatisfiable</span></code></span>
+<span class="codeline" id="line-127"><code>	<span class="lit-number">417</span>: <span class="lit-string">"Expectation Failed"</span>,              <span class="comment">// StatusExpectationFailed</span></code></span>
+<span class="codeline" id="line-128"><code>	<span class="lit-number">418</span>: <span class="lit-string">"I'm a teapot"</span>,                    <span class="comment">// StatusTeapot</span></code></span>
+<span class="codeline" id="line-129"><code>	<span class="lit-number">421</span>: <span class="lit-string">"Misdirected Request"</span>,             <span class="comment">// StatusMisdirectedRequest</span></code></span>
+<span class="codeline" id="line-130"><code>	<span class="lit-number">422</span>: <span class="lit-string">"Unprocessable Entity"</span>,            <span class="comment">// StatusUnprocessableEntity</span></code></span>
+<span class="codeline" id="line-131"><code>	<span class="lit-number">423</span>: <span class="lit-string">"Locked"</span>,                          <span class="comment">// StatusLocked</span></code></span>
+<span class="codeline" id="line-132"><code>	<span class="lit-number">424</span>: <span class="lit-string">"Failed Dependency"</span>,               <span class="comment">// StatusFailedDependency</span></code></span>
+<span class="codeline" id="line-133"><code>	<span class="lit-number">425</span>: <span class="lit-string">"Too Early"</span>,                       <span class="comment">// StatusTooEarly</span></code></span>
+<span class="codeline" id="line-134"><code>	<span class="lit-number">426</span>: <span class="lit-string">"Upgrade Required"</span>,                <span class="comment">// StatusUpgradeRequired</span></code></span>
+<span class="codeline" id="line-135"><code>	<span class="lit-number">428</span>: <span class="lit-string">"Precondition Required"</span>,           <span class="comment">// StatusPreconditionRequired</span></code></span>
+<span class="codeline" id="line-136"><code>	<span class="lit-number">429</span>: <span class="lit-string">"Too Many Requests"</span>,               <span class="comment">// StatusTooManyRequests</span></code></span>
+<span class="codeline" id="line-137"><code>	<span class="lit-number">431</span>: <span class="lit-string">"Request Header Fields Too Large"</span>, <span class="comment">// StatusRequestHeaderFieldsTooLarge</span></code></span>
+<span class="codeline" id="line-138"><code>	<span class="lit-number">451</span>: <span class="lit-string">"Unavailable For Legal Reasons"</span>,   <span class="comment">// StatusUnavailableForLegalReasons</span></code></span>
 <span class="codeline" id="line-139"><code></code></span>
-<span class="codeline" id="line-140"><code><span class="comment">// MIME types were copied from https://github.com/nginx/nginx/blob/67d2a9541826ecd5db97d604f23460210fd3e517/conf/mime.types with the following updates:</span></code></span>
-<span class="codeline" id="line-141"><code><span class="comment">// - Use "application/xml" instead of "text/xml" as recommended per https://datatracker.ietf.org/doc/html/rfc7303#section-4.1</span></code></span>
-<span class="codeline" id="line-142"><code><span class="comment">// - Use "text/javascript" instead of "application/javascript" as recommended per https://www.rfc-editor.org/rfc/rfc9239#name-text-javascript</span></code></span>
-<span class="codeline" id="line-143"><code><span class="keyword">var</span> mimeExtensions = <span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
-<span class="codeline" id="line-144"><code>	<span class="lit-string">"html"</span>:    <span class="lit-string">"text/html"</span>,</code></span>
-<span class="codeline" id="line-145"><code>	<span class="lit-string">"htm"</span>:     <span class="lit-string">"text/html"</span>,</code></span>
-<span class="codeline" id="line-146"><code>	<span class="lit-string">"shtml"</span>:   <span class="lit-string">"text/html"</span>,</code></span>
-<span class="codeline" id="line-147"><code>	<span class="lit-string">"css"</span>:     <span class="lit-string">"text/css"</span>,</code></span>
-<span class="codeline" id="line-148"><code>	<span class="lit-string">"xml"</span>:     <span class="lit-string">"application/xml"</span>,</code></span>
-<span class="codeline" id="line-149"><code>	<span class="lit-string">"gif"</span>:     <span class="lit-string">"image/gif"</span>,</code></span>
-<span class="codeline" id="line-150"><code>	<span class="lit-string">"jpeg"</span>:    <span class="lit-string">"image/jpeg"</span>,</code></span>
-<span class="codeline" id="line-151"><code>	<span class="lit-string">"jpg"</span>:     <span class="lit-string">"image/jpeg"</span>,</code></span>
-<span class="codeline" id="line-152"><code>	<span class="lit-string">"js"</span>:      <span class="lit-string">"text/javascript"</span>,</code></span>
-<span class="codeline" id="line-153"><code>	<span class="lit-string">"atom"</span>:    <span class="lit-string">"application/atom+xml"</span>,</code></span>
-<span class="codeline" id="line-154"><code>	<span class="lit-string">"rss"</span>:     <span class="lit-string">"application/rss+xml"</span>,</code></span>
-<span class="codeline" id="line-155"><code>	<span class="lit-string">"mml"</span>:     <span class="lit-string">"text/mathml"</span>,</code></span>
-<span class="codeline" id="line-156"><code>	<span class="lit-string">"txt"</span>:     <span class="lit-string">"text/plain"</span>,</code></span>
-<span class="codeline" id="line-157"><code>	<span class="lit-string">"jad"</span>:     <span class="lit-string">"text/vnd.sun.j2me.app-descriptor"</span>,</code></span>
-<span class="codeline" id="line-158"><code>	<span class="lit-string">"wml"</span>:     <span class="lit-string">"text/vnd.wap.wml"</span>,</code></span>
-<span class="codeline" id="line-159"><code>	<span class="lit-string">"htc"</span>:     <span class="lit-string">"text/x-component"</span>,</code></span>
-<span class="codeline" id="line-160"><code>	<span class="lit-string">"avif"</span>:    <span class="lit-string">"image/avif"</span>,</code></span>
-<span class="codeline" id="line-161"><code>	<span class="lit-string">"png"</span>:     <span class="lit-string">"image/png"</span>,</code></span>
-<span class="codeline" id="line-162"><code>	<span class="lit-string">"svg"</span>:     <span class="lit-string">"image/svg+xml"</span>,</code></span>
-<span class="codeline" id="line-163"><code>	<span class="lit-string">"svgz"</span>:    <span class="lit-string">"image/svg+xml"</span>,</code></span>
-<span class="codeline" id="line-164"><code>	<span class="lit-string">"tif"</span>:     <span class="lit-string">"image/tiff"</span>,</code></span>
-<span class="codeline" id="line-165"><code>	<span class="lit-string">"tiff"</span>:    <span class="lit-string">"image/tiff"</span>,</code></span>
-<span class="codeline" id="line-166"><code>	<span class="lit-string">"wbmp"</span>:    <span class="lit-string">"image/vnd.wap.wbmp"</span>,</code></span>
-<span class="codeline" id="line-167"><code>	<span class="lit-string">"webp"</span>:    <span class="lit-string">"image/webp"</span>,</code></span>
-<span class="codeline" id="line-168"><code>	<span class="lit-string">"ico"</span>:     <span class="lit-string">"image/x-icon"</span>,</code></span>
-<span class="codeline" id="line-169"><code>	<span class="lit-string">"jng"</span>:     <span class="lit-string">"image/x-jng"</span>,</code></span>
-<span class="codeline" id="line-170"><code>	<span class="lit-string">"bmp"</span>:     <span class="lit-string">"image/x-ms-bmp"</span>,</code></span>
-<span class="codeline" id="line-171"><code>	<span class="lit-string">"woff"</span>:    <span class="lit-string">"font/woff"</span>,</code></span>
-<span class="codeline" id="line-172"><code>	<span class="lit-string">"woff2"</span>:   <span class="lit-string">"font/woff2"</span>,</code></span>
-<span class="codeline" id="line-173"><code>	<span class="lit-string">"jar"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
-<span class="codeline" id="line-174"><code>	<span class="lit-string">"war"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
-<span class="codeline" id="line-175"><code>	<span class="lit-string">"ear"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
-<span class="codeline" id="line-176"><code>	<span class="lit-string">"json"</span>:    <span class="lit-string">"application/json"</span>,</code></span>
-<span class="codeline" id="line-177"><code>	<span class="lit-string">"hqx"</span>:     <span class="lit-string">"application/mac-binhex40"</span>,</code></span>
-<span class="codeline" id="line-178"><code>	<span class="lit-string">"doc"</span>:     <span class="lit-string">"application/msword"</span>,</code></span>
-<span class="codeline" id="line-179"><code>	<span class="lit-string">"pdf"</span>:     <span class="lit-string">"application/pdf"</span>,</code></span>
-<span class="codeline" id="line-180"><code>	<span class="lit-string">"ps"</span>:      <span class="lit-string">"application/postscript"</span>,</code></span>
-<span class="codeline" id="line-181"><code>	<span class="lit-string">"eps"</span>:     <span class="lit-string">"application/postscript"</span>,</code></span>
-<span class="codeline" id="line-182"><code>	<span class="lit-string">"ai"</span>:      <span class="lit-string">"application/postscript"</span>,</code></span>
-<span class="codeline" id="line-183"><code>	<span class="lit-string">"rtf"</span>:     <span class="lit-string">"application/rtf"</span>,</code></span>
-<span class="codeline" id="line-184"><code>	<span class="lit-string">"m3u8"</span>:    <span class="lit-string">"application/vnd.apple.mpegurl"</span>,</code></span>
-<span class="codeline" id="line-185"><code>	<span class="lit-string">"kml"</span>:     <span class="lit-string">"application/vnd.google-earth.kml+xml"</span>,</code></span>
-<span class="codeline" id="line-186"><code>	<span class="lit-string">"kmz"</span>:     <span class="lit-string">"application/vnd.google-earth.kmz"</span>,</code></span>
-<span class="codeline" id="line-187"><code>	<span class="lit-string">"xls"</span>:     <span class="lit-string">"application/vnd.ms-excel"</span>,</code></span>
-<span class="codeline" id="line-188"><code>	<span class="lit-string">"eot"</span>:     <span class="lit-string">"application/vnd.ms-fontobject"</span>,</code></span>
-<span class="codeline" id="line-189"><code>	<span class="lit-string">"ppt"</span>:     <span class="lit-string">"application/vnd.ms-powerpoint"</span>,</code></span>
-<span class="codeline" id="line-190"><code>	<span class="lit-string">"odg"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.graphics"</span>,</code></span>
-<span class="codeline" id="line-191"><code>	<span class="lit-string">"odp"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.presentation"</span>,</code></span>
-<span class="codeline" id="line-192"><code>	<span class="lit-string">"ods"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.spreadsheet"</span>,</code></span>
-<span class="codeline" id="line-193"><code>	<span class="lit-string">"odt"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.text"</span>,</code></span>
-<span class="codeline" id="line-194"><code>	<span class="lit-string">"pptx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.presentationml.presentation"</span>,</code></span>
-<span class="codeline" id="line-195"><code>	<span class="lit-string">"xlsx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</span>,</code></span>
-<span class="codeline" id="line-196"><code>	<span class="lit-string">"docx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</span>,</code></span>
-<span class="codeline" id="line-197"><code>	<span class="lit-string">"wmlc"</span>:    <span class="lit-string">"application/vnd.wap.wmlc"</span>,</code></span>
-<span class="codeline" id="line-198"><code>	<span class="lit-string">"wasm"</span>:    <span class="lit-string">"application/wasm"</span>,</code></span>
-<span class="codeline" id="line-199"><code>	<span class="lit-string">"7z"</span>:      <span class="lit-string">"application/x-7z-compressed"</span>,</code></span>
-<span class="codeline" id="line-200"><code>	<span class="lit-string">"cco"</span>:     <span class="lit-string">"application/x-cocoa"</span>,</code></span>
-<span class="codeline" id="line-201"><code>	<span class="lit-string">"jardiff"</span>: <span class="lit-string">"application/x-java-archive-diff"</span>,</code></span>
-<span class="codeline" id="line-202"><code>	<span class="lit-string">"jnlp"</span>:    <span class="lit-string">"application/x-java-jnlp-file"</span>,</code></span>
-<span class="codeline" id="line-203"><code>	<span class="lit-string">"run"</span>:     <span class="lit-string">"application/x-makeself"</span>,</code></span>
-<span class="codeline" id="line-204"><code>	<span class="lit-string">"pl"</span>:      <span class="lit-string">"application/x-perl"</span>,</code></span>
-<span class="codeline" id="line-205"><code>	<span class="lit-string">"pm"</span>:      <span class="lit-string">"application/x-perl"</span>,</code></span>
-<span class="codeline" id="line-206"><code>	<span class="lit-string">"prc"</span>:     <span class="lit-string">"application/x-pilot"</span>,</code></span>
-<span class="codeline" id="line-207"><code>	<span class="lit-string">"pdb"</span>:     <span class="lit-string">"application/x-pilot"</span>,</code></span>
-<span class="codeline" id="line-208"><code>	<span class="lit-string">"rar"</span>:     <span class="lit-string">"application/x-rar-compressed"</span>,</code></span>
-<span class="codeline" id="line-209"><code>	<span class="lit-string">"rpm"</span>:     <span class="lit-string">"application/x-redhat-package-manager"</span>,</code></span>
-<span class="codeline" id="line-210"><code>	<span class="lit-string">"sea"</span>:     <span class="lit-string">"application/x-sea"</span>,</code></span>
-<span class="codeline" id="line-211"><code>	<span class="lit-string">"swf"</span>:     <span class="lit-string">"application/x-shockwave-flash"</span>,</code></span>
-<span class="codeline" id="line-212"><code>	<span class="lit-string">"sit"</span>:     <span class="lit-string">"application/x-stuffit"</span>,</code></span>
-<span class="codeline" id="line-213"><code>	<span class="lit-string">"tcl"</span>:     <span class="lit-string">"application/x-tcl"</span>,</code></span>
-<span class="codeline" id="line-214"><code>	<span class="lit-string">"tk"</span>:      <span class="lit-string">"application/x-tcl"</span>,</code></span>
-<span class="codeline" id="line-215"><code>	<span class="lit-string">"der"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
-<span class="codeline" id="line-216"><code>	<span class="lit-string">"pem"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
-<span class="codeline" id="line-217"><code>	<span class="lit-string">"crt"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
-<span class="codeline" id="line-218"><code>	<span class="lit-string">"xpi"</span>:     <span class="lit-string">"application/x-xpinstall"</span>,</code></span>
-<span class="codeline" id="line-219"><code>	<span class="lit-string">"xhtml"</span>:   <span class="lit-string">"application/xhtml+xml"</span>,</code></span>
-<span class="codeline" id="line-220"><code>	<span class="lit-string">"xspf"</span>:    <span class="lit-string">"application/xspf+xml"</span>,</code></span>
-<span class="codeline" id="line-221"><code>	<span class="lit-string">"zip"</span>:     <span class="lit-string">"application/zip"</span>,</code></span>
-<span class="codeline" id="line-222"><code>	<span class="lit-string">"bin"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-223"><code>	<span class="lit-string">"exe"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-224"><code>	<span class="lit-string">"dll"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-225"><code>	<span class="lit-string">"deb"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-226"><code>	<span class="lit-string">"dmg"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-227"><code>	<span class="lit-string">"iso"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-228"><code>	<span class="lit-string">"img"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-229"><code>	<span class="lit-string">"msi"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-230"><code>	<span class="lit-string">"msp"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-231"><code>	<span class="lit-string">"msm"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
-<span class="codeline" id="line-232"><code>	<span class="lit-string">"mid"</span>:     <span class="lit-string">"audio/midi"</span>,</code></span>
-<span class="codeline" id="line-233"><code>	<span class="lit-string">"midi"</span>:    <span class="lit-string">"audio/midi"</span>,</code></span>
-<span class="codeline" id="line-234"><code>	<span class="lit-string">"kar"</span>:     <span class="lit-string">"audio/midi"</span>,</code></span>
-<span class="codeline" id="line-235"><code>	<span class="lit-string">"mp3"</span>:     <span class="lit-string">"audio/mpeg"</span>,</code></span>
-<span class="codeline" id="line-236"><code>	<span class="lit-string">"ogg"</span>:     <span class="lit-string">"audio/ogg"</span>,</code></span>
-<span class="codeline" id="line-237"><code>	<span class="lit-string">"m4a"</span>:     <span class="lit-string">"audio/x-m4a"</span>,</code></span>
-<span class="codeline" id="line-238"><code>	<span class="lit-string">"ra"</span>:      <span class="lit-string">"audio/x-realaudio"</span>,</code></span>
-<span class="codeline" id="line-239"><code>	<span class="lit-string">"3gpp"</span>:    <span class="lit-string">"video/3gpp"</span>,</code></span>
-<span class="codeline" id="line-240"><code>	<span class="lit-string">"3gp"</span>:     <span class="lit-string">"video/3gpp"</span>,</code></span>
-<span class="codeline" id="line-241"><code>	<span class="lit-string">"ts"</span>:      <span class="lit-string">"video/mp2t"</span>,</code></span>
-<span class="codeline" id="line-242"><code>	<span class="lit-string">"mp4"</span>:     <span class="lit-string">"video/mp4"</span>,</code></span>
-<span class="codeline" id="line-243"><code>	<span class="lit-string">"mpeg"</span>:    <span class="lit-string">"video/mpeg"</span>,</code></span>
-<span class="codeline" id="line-244"><code>	<span class="lit-string">"mpg"</span>:     <span class="lit-string">"video/mpeg"</span>,</code></span>
-<span class="codeline" id="line-245"><code>	<span class="lit-string">"mov"</span>:     <span class="lit-string">"video/quicktime"</span>,</code></span>
-<span class="codeline" id="line-246"><code>	<span class="lit-string">"webm"</span>:    <span class="lit-string">"video/webm"</span>,</code></span>
-<span class="codeline" id="line-247"><code>	<span class="lit-string">"flv"</span>:     <span class="lit-string">"video/x-flv"</span>,</code></span>
-<span class="codeline" id="line-248"><code>	<span class="lit-string">"m4v"</span>:     <span class="lit-string">"video/x-m4v"</span>,</code></span>
-<span class="codeline" id="line-249"><code>	<span class="lit-string">"mng"</span>:     <span class="lit-string">"video/x-mng"</span>,</code></span>
-<span class="codeline" id="line-250"><code>	<span class="lit-string">"asx"</span>:     <span class="lit-string">"video/x-ms-asf"</span>,</code></span>
-<span class="codeline" id="line-251"><code>	<span class="lit-string">"asf"</span>:     <span class="lit-string">"video/x-ms-asf"</span>,</code></span>
-<span class="codeline" id="line-252"><code>	<span class="lit-string">"wmv"</span>:     <span class="lit-string">"video/x-ms-wmv"</span>,</code></span>
-<span class="codeline" id="line-253"><code>	<span class="lit-string">"avi"</span>:     <span class="lit-string">"video/x-msvideo"</span>,</code></span>
-<span class="codeline" id="line-254"><code>}</code></span>
+<span class="codeline" id="line-140"><code>	<span class="lit-number">500</span>: <span class="lit-string">"Internal Server Error"</span>,           <span class="comment">// StatusInternalServerError</span></code></span>
+<span class="codeline" id="line-141"><code>	<span class="lit-number">501</span>: <span class="lit-string">"Not Implemented"</span>,                 <span class="comment">// StatusNotImplemented</span></code></span>
+<span class="codeline" id="line-142"><code>	<span class="lit-number">502</span>: <span class="lit-string">"Bad Gateway"</span>,                     <span class="comment">// StatusBadGateway</span></code></span>
+<span class="codeline" id="line-143"><code>	<span class="lit-number">503</span>: <span class="lit-string">"Service Unavailable"</span>,             <span class="comment">// StatusServiceUnavailable</span></code></span>
+<span class="codeline" id="line-144"><code>	<span class="lit-number">504</span>: <span class="lit-string">"Gateway Timeout"</span>,                 <span class="comment">// StatusGatewayTimeout</span></code></span>
+<span class="codeline" id="line-145"><code>	<span class="lit-number">505</span>: <span class="lit-string">"HTTP Version Not Supported"</span>,      <span class="comment">// StatusHTTPVersionNotSupported</span></code></span>
+<span class="codeline" id="line-146"><code>	<span class="lit-number">506</span>: <span class="lit-string">"Variant Also Negotiates"</span>,         <span class="comment">// StatusVariantAlsoNegotiates</span></code></span>
+<span class="codeline" id="line-147"><code>	<span class="lit-number">507</span>: <span class="lit-string">"Insufficient Storage"</span>,            <span class="comment">// StatusInsufficientStorage</span></code></span>
+<span class="codeline" id="line-148"><code>	<span class="lit-number">508</span>: <span class="lit-string">"Loop Detected"</span>,                   <span class="comment">// StatusLoopDetected</span></code></span>
+<span class="codeline" id="line-149"><code>	<span class="lit-number">510</span>: <span class="lit-string">"Not Extended"</span>,                    <span class="comment">// StatusNotExtended</span></code></span>
+<span class="codeline" id="line-150"><code>	<span class="lit-number">511</span>: <span class="lit-string">"Network Authentication Required"</span>, <span class="comment">// StatusNetworkAuthenticationRequired</span></code></span>
+<span class="codeline" id="line-151"><code>}</code></span>
+<span class="codeline" id="line-152"><code></code></span>
+<span class="codeline" id="line-153"><code><span class="comment">// MIME types were copied from https://github.com/nginx/nginx/blob/67d2a9541826ecd5db97d604f23460210fd3e517/conf/mime.types with the following updates:</span></code></span>
+<span class="codeline" id="line-154"><code><span class="comment">// - Use "application/xml" instead of "text/xml" as recommended per https://datatracker.ietf.org/doc/html/rfc7303#section-4.1</span></code></span>
+<span class="codeline" id="line-155"><code><span class="comment">// - Use "text/javascript" instead of "application/javascript" as recommended per https://www.rfc-editor.org/rfc/rfc9239#name-text-javascript</span></code></span>
+<span class="codeline" id="line-156"><code><span class="keyword">var</span> mimeExtensions = <span class="keyword">map</span>[<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>]<a href="../../../../../../pkg/builtin.html#name-string" class="ident">string</a>{</code></span>
+<span class="codeline" id="line-157"><code>	<span class="lit-string">"html"</span>:    <span class="lit-string">"text/html"</span>,</code></span>
+<span class="codeline" id="line-158"><code>	<span class="lit-string">"htm"</span>:     <span class="lit-string">"text/html"</span>,</code></span>
+<span class="codeline" id="line-159"><code>	<span class="lit-string">"shtml"</span>:   <span class="lit-string">"text/html"</span>,</code></span>
+<span class="codeline" id="line-160"><code>	<span class="lit-string">"css"</span>:     <span class="lit-string">"text/css"</span>,</code></span>
+<span class="codeline" id="line-161"><code>	<span class="lit-string">"xml"</span>:     <span class="lit-string">"application/xml"</span>,</code></span>
+<span class="codeline" id="line-162"><code>	<span class="lit-string">"gif"</span>:     <span class="lit-string">"image/gif"</span>,</code></span>
+<span class="codeline" id="line-163"><code>	<span class="lit-string">"jpeg"</span>:    <span class="lit-string">"image/jpeg"</span>,</code></span>
+<span class="codeline" id="line-164"><code>	<span class="lit-string">"jpg"</span>:     <span class="lit-string">"image/jpeg"</span>,</code></span>
+<span class="codeline" id="line-165"><code>	<span class="lit-string">"js"</span>:      <span class="lit-string">"text/javascript"</span>,</code></span>
+<span class="codeline" id="line-166"><code>	<span class="lit-string">"atom"</span>:    <span class="lit-string">"application/atom+xml"</span>,</code></span>
+<span class="codeline" id="line-167"><code>	<span class="lit-string">"rss"</span>:     <span class="lit-string">"application/rss+xml"</span>,</code></span>
+<span class="codeline" id="line-168"><code>	<span class="lit-string">"mml"</span>:     <span class="lit-string">"text/mathml"</span>,</code></span>
+<span class="codeline" id="line-169"><code>	<span class="lit-string">"txt"</span>:     <span class="lit-string">"text/plain"</span>,</code></span>
+<span class="codeline" id="line-170"><code>	<span class="lit-string">"jad"</span>:     <span class="lit-string">"text/vnd.sun.j2me.app-descriptor"</span>,</code></span>
+<span class="codeline" id="line-171"><code>	<span class="lit-string">"wml"</span>:     <span class="lit-string">"text/vnd.wap.wml"</span>,</code></span>
+<span class="codeline" id="line-172"><code>	<span class="lit-string">"htc"</span>:     <span class="lit-string">"text/x-component"</span>,</code></span>
+<span class="codeline" id="line-173"><code>	<span class="lit-string">"avif"</span>:    <span class="lit-string">"image/avif"</span>,</code></span>
+<span class="codeline" id="line-174"><code>	<span class="lit-string">"png"</span>:     <span class="lit-string">"image/png"</span>,</code></span>
+<span class="codeline" id="line-175"><code>	<span class="lit-string">"svg"</span>:     <span class="lit-string">"image/svg+xml"</span>,</code></span>
+<span class="codeline" id="line-176"><code>	<span class="lit-string">"svgz"</span>:    <span class="lit-string">"image/svg+xml"</span>,</code></span>
+<span class="codeline" id="line-177"><code>	<span class="lit-string">"tif"</span>:     <span class="lit-string">"image/tiff"</span>,</code></span>
+<span class="codeline" id="line-178"><code>	<span class="lit-string">"tiff"</span>:    <span class="lit-string">"image/tiff"</span>,</code></span>
+<span class="codeline" id="line-179"><code>	<span class="lit-string">"wbmp"</span>:    <span class="lit-string">"image/vnd.wap.wbmp"</span>,</code></span>
+<span class="codeline" id="line-180"><code>	<span class="lit-string">"webp"</span>:    <span class="lit-string">"image/webp"</span>,</code></span>
+<span class="codeline" id="line-181"><code>	<span class="lit-string">"ico"</span>:     <span class="lit-string">"image/x-icon"</span>,</code></span>
+<span class="codeline" id="line-182"><code>	<span class="lit-string">"jng"</span>:     <span class="lit-string">"image/x-jng"</span>,</code></span>
+<span class="codeline" id="line-183"><code>	<span class="lit-string">"bmp"</span>:     <span class="lit-string">"image/x-ms-bmp"</span>,</code></span>
+<span class="codeline" id="line-184"><code>	<span class="lit-string">"woff"</span>:    <span class="lit-string">"font/woff"</span>,</code></span>
+<span class="codeline" id="line-185"><code>	<span class="lit-string">"woff2"</span>:   <span class="lit-string">"font/woff2"</span>,</code></span>
+<span class="codeline" id="line-186"><code>	<span class="lit-string">"jar"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
+<span class="codeline" id="line-187"><code>	<span class="lit-string">"war"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
+<span class="codeline" id="line-188"><code>	<span class="lit-string">"ear"</span>:     <span class="lit-string">"application/java-archive"</span>,</code></span>
+<span class="codeline" id="line-189"><code>	<span class="lit-string">"json"</span>:    <span class="lit-string">"application/json"</span>,</code></span>
+<span class="codeline" id="line-190"><code>	<span class="lit-string">"hqx"</span>:     <span class="lit-string">"application/mac-binhex40"</span>,</code></span>
+<span class="codeline" id="line-191"><code>	<span class="lit-string">"doc"</span>:     <span class="lit-string">"application/msword"</span>,</code></span>
+<span class="codeline" id="line-192"><code>	<span class="lit-string">"pdf"</span>:     <span class="lit-string">"application/pdf"</span>,</code></span>
+<span class="codeline" id="line-193"><code>	<span class="lit-string">"ps"</span>:      <span class="lit-string">"application/postscript"</span>,</code></span>
+<span class="codeline" id="line-194"><code>	<span class="lit-string">"eps"</span>:     <span class="lit-string">"application/postscript"</span>,</code></span>
+<span class="codeline" id="line-195"><code>	<span class="lit-string">"ai"</span>:      <span class="lit-string">"application/postscript"</span>,</code></span>
+<span class="codeline" id="line-196"><code>	<span class="lit-string">"rtf"</span>:     <span class="lit-string">"application/rtf"</span>,</code></span>
+<span class="codeline" id="line-197"><code>	<span class="lit-string">"m3u8"</span>:    <span class="lit-string">"application/vnd.apple.mpegurl"</span>,</code></span>
+<span class="codeline" id="line-198"><code>	<span class="lit-string">"kml"</span>:     <span class="lit-string">"application/vnd.google-earth.kml+xml"</span>,</code></span>
+<span class="codeline" id="line-199"><code>	<span class="lit-string">"kmz"</span>:     <span class="lit-string">"application/vnd.google-earth.kmz"</span>,</code></span>
+<span class="codeline" id="line-200"><code>	<span class="lit-string">"xls"</span>:     <span class="lit-string">"application/vnd.ms-excel"</span>,</code></span>
+<span class="codeline" id="line-201"><code>	<span class="lit-string">"eot"</span>:     <span class="lit-string">"application/vnd.ms-fontobject"</span>,</code></span>
+<span class="codeline" id="line-202"><code>	<span class="lit-string">"ppt"</span>:     <span class="lit-string">"application/vnd.ms-powerpoint"</span>,</code></span>
+<span class="codeline" id="line-203"><code>	<span class="lit-string">"odg"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.graphics"</span>,</code></span>
+<span class="codeline" id="line-204"><code>	<span class="lit-string">"odp"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.presentation"</span>,</code></span>
+<span class="codeline" id="line-205"><code>	<span class="lit-string">"ods"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.spreadsheet"</span>,</code></span>
+<span class="codeline" id="line-206"><code>	<span class="lit-string">"odt"</span>:     <span class="lit-string">"application/vnd.oasis.opendocument.text"</span>,</code></span>
+<span class="codeline" id="line-207"><code>	<span class="lit-string">"pptx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.presentationml.presentation"</span>,</code></span>
+<span class="codeline" id="line-208"><code>	<span class="lit-string">"xlsx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</span>,</code></span>
+<span class="codeline" id="line-209"><code>	<span class="lit-string">"docx"</span>:    <span class="lit-string">"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</span>,</code></span>
+<span class="codeline" id="line-210"><code>	<span class="lit-string">"wmlc"</span>:    <span class="lit-string">"application/vnd.wap.wmlc"</span>,</code></span>
+<span class="codeline" id="line-211"><code>	<span class="lit-string">"wasm"</span>:    <span class="lit-string">"application/wasm"</span>,</code></span>
+<span class="codeline" id="line-212"><code>	<span class="lit-string">"7z"</span>:      <span class="lit-string">"application/x-7z-compressed"</span>,</code></span>
+<span class="codeline" id="line-213"><code>	<span class="lit-string">"cco"</span>:     <span class="lit-string">"application/x-cocoa"</span>,</code></span>
+<span class="codeline" id="line-214"><code>	<span class="lit-string">"jardiff"</span>: <span class="lit-string">"application/x-java-archive-diff"</span>,</code></span>
+<span class="codeline" id="line-215"><code>	<span class="lit-string">"jnlp"</span>:    <span class="lit-string">"application/x-java-jnlp-file"</span>,</code></span>
+<span class="codeline" id="line-216"><code>	<span class="lit-string">"run"</span>:     <span class="lit-string">"application/x-makeself"</span>,</code></span>
+<span class="codeline" id="line-217"><code>	<span class="lit-string">"pl"</span>:      <span class="lit-string">"application/x-perl"</span>,</code></span>
+<span class="codeline" id="line-218"><code>	<span class="lit-string">"pm"</span>:      <span class="lit-string">"application/x-perl"</span>,</code></span>
+<span class="codeline" id="line-219"><code>	<span class="lit-string">"prc"</span>:     <span class="lit-string">"application/x-pilot"</span>,</code></span>
+<span class="codeline" id="line-220"><code>	<span class="lit-string">"pdb"</span>:     <span class="lit-string">"application/x-pilot"</span>,</code></span>
+<span class="codeline" id="line-221"><code>	<span class="lit-string">"rar"</span>:     <span class="lit-string">"application/x-rar-compressed"</span>,</code></span>
+<span class="codeline" id="line-222"><code>	<span class="lit-string">"rpm"</span>:     <span class="lit-string">"application/x-redhat-package-manager"</span>,</code></span>
+<span class="codeline" id="line-223"><code>	<span class="lit-string">"sea"</span>:     <span class="lit-string">"application/x-sea"</span>,</code></span>
+<span class="codeline" id="line-224"><code>	<span class="lit-string">"swf"</span>:     <span class="lit-string">"application/x-shockwave-flash"</span>,</code></span>
+<span class="codeline" id="line-225"><code>	<span class="lit-string">"sit"</span>:     <span class="lit-string">"application/x-stuffit"</span>,</code></span>
+<span class="codeline" id="line-226"><code>	<span class="lit-string">"tcl"</span>:     <span class="lit-string">"application/x-tcl"</span>,</code></span>
+<span class="codeline" id="line-227"><code>	<span class="lit-string">"tk"</span>:      <span class="lit-string">"application/x-tcl"</span>,</code></span>
+<span class="codeline" id="line-228"><code>	<span class="lit-string">"der"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
+<span class="codeline" id="line-229"><code>	<span class="lit-string">"pem"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
+<span class="codeline" id="line-230"><code>	<span class="lit-string">"crt"</span>:     <span class="lit-string">"application/x-x509-ca-cert"</span>,</code></span>
+<span class="codeline" id="line-231"><code>	<span class="lit-string">"xpi"</span>:     <span class="lit-string">"application/x-xpinstall"</span>,</code></span>
+<span class="codeline" id="line-232"><code>	<span class="lit-string">"xhtml"</span>:   <span class="lit-string">"application/xhtml+xml"</span>,</code></span>
+<span class="codeline" id="line-233"><code>	<span class="lit-string">"xspf"</span>:    <span class="lit-string">"application/xspf+xml"</span>,</code></span>
+<span class="codeline" id="line-234"><code>	<span class="lit-string">"zip"</span>:     <span class="lit-string">"application/zip"</span>,</code></span>
+<span class="codeline" id="line-235"><code>	<span class="lit-string">"bin"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-236"><code>	<span class="lit-string">"exe"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-237"><code>	<span class="lit-string">"dll"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-238"><code>	<span class="lit-string">"deb"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-239"><code>	<span class="lit-string">"dmg"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-240"><code>	<span class="lit-string">"iso"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-241"><code>	<span class="lit-string">"img"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-242"><code>	<span class="lit-string">"msi"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-243"><code>	<span class="lit-string">"msp"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-244"><code>	<span class="lit-string">"msm"</span>:     <span class="lit-string">"application/octet-stream"</span>,</code></span>
+<span class="codeline" id="line-245"><code>	<span class="lit-string">"mid"</span>:     <span class="lit-string">"audio/midi"</span>,</code></span>
+<span class="codeline" id="line-246"><code>	<span class="lit-string">"midi"</span>:    <span class="lit-string">"audio/midi"</span>,</code></span>
+<span class="codeline" id="line-247"><code>	<span class="lit-string">"kar"</span>:     <span class="lit-string">"audio/midi"</span>,</code></span>
+<span class="codeline" id="line-248"><code>	<span class="lit-string">"mp3"</span>:     <span class="lit-string">"audio/mpeg"</span>,</code></span>
+<span class="codeline" id="line-249"><code>	<span class="lit-string">"ogg"</span>:     <span class="lit-string">"audio/ogg"</span>,</code></span>
+<span class="codeline" id="line-250"><code>	<span class="lit-string">"m4a"</span>:     <span class="lit-string">"audio/x-m4a"</span>,</code></span>
+<span class="codeline" id="line-251"><code>	<span class="lit-string">"ra"</span>:      <span class="lit-string">"audio/x-realaudio"</span>,</code></span>
+<span class="codeline" id="line-252"><code>	<span class="lit-string">"3gpp"</span>:    <span class="lit-string">"video/3gpp"</span>,</code></span>
+<span class="codeline" id="line-253"><code>	<span class="lit-string">"3gp"</span>:     <span class="lit-string">"video/3gpp"</span>,</code></span>
+<span class="codeline" id="line-254"><code>	<span class="lit-string">"ts"</span>:      <span class="lit-string">"video/mp2t"</span>,</code></span>
+<span class="codeline" id="line-255"><code>	<span class="lit-string">"mp4"</span>:     <span class="lit-string">"video/mp4"</span>,</code></span>
+<span class="codeline" id="line-256"><code>	<span class="lit-string">"mpeg"</span>:    <span class="lit-string">"video/mpeg"</span>,</code></span>
+<span class="codeline" id="line-257"><code>	<span class="lit-string">"mpg"</span>:     <span class="lit-string">"video/mpeg"</span>,</code></span>
+<span class="codeline" id="line-258"><code>	<span class="lit-string">"mov"</span>:     <span class="lit-string">"video/quicktime"</span>,</code></span>
+<span class="codeline" id="line-259"><code>	<span class="lit-string">"webm"</span>:    <span class="lit-string">"video/webm"</span>,</code></span>
+<span class="codeline" id="line-260"><code>	<span class="lit-string">"flv"</span>:     <span class="lit-string">"video/x-flv"</span>,</code></span>
+<span class="codeline" id="line-261"><code>	<span class="lit-string">"m4v"</span>:     <span class="lit-string">"video/x-m4v"</span>,</code></span>
+<span class="codeline" id="line-262"><code>	<span class="lit-string">"mng"</span>:     <span class="lit-string">"video/x-mng"</span>,</code></span>
+<span class="codeline" id="line-263"><code>	<span class="lit-string">"asx"</span>:     <span class="lit-string">"video/x-ms-asf"</span>,</code></span>
+<span class="codeline" id="line-264"><code>	<span class="lit-string">"asf"</span>:     <span class="lit-string">"video/x-ms-asf"</span>,</code></span>
+<span class="codeline" id="line-265"><code>	<span class="lit-string">"wmv"</span>:     <span class="lit-string">"video/x-ms-wmv"</span>,</code></span>
+<span class="codeline" id="line-266"><code>	<span class="lit-string">"avi"</span>:     <span class="lit-string">"video/x-msvideo"</span>,</code></span>
+<span class="codeline" id="line-267"><code>}</code></span>
 </pre><pre id="footer">
 <table><tr><td><img src="../../../../../../png/go101-twitter.png"></td>
-<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.5.7</i>. (GOOS=linux GOARCH=amd64)
+<td>The pages are generated with <a href="https://go101.org/apps-and-libs/golds.html"><b>Golds</b></a> <i>v0.6.7</i>. (GOOS=linux GOARCH=amd64)
 <b>Golds</b> is a <a href="https://go101.org">Go 101</a> project developed by <a href="https://tapirgames.com">Tapir Liu</a>.
 PR and bug reports are welcome and can be submitted to <a href="https://github.com/go101/golds">the issue list</a>.
 Please follow <a href="https://twitter.com/go100and1">@Go100and1</a> (reachable from the left QR code) to get the latest news of <b>Golds</b>.</td></tr></table></pre>
