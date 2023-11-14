@@ -2,6 +2,7 @@ package cron_jobs
 
 import (
 	b64 "encoding/base64"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,10 +17,11 @@ import (
 )
 
 // RegisterAndRun registers and runs new cron job
-func RegisterAndRun(cj *models.CronJob) error {
-	_, err := constants.GLOBAL_SCHEDULER.Tag(cj.ID.String()).Every(1).Week().Weekday(time.Weekday(cj.Day)).At(cj.Time).Do(func() {
+func RegisterAndRun(cj models.CronJob) error {
+	if _, err := constants.GLOBAL_SCHEDULER.Tag(cj.ID.String()).Every(1).Week().Weekday(time.Weekday(cj.Day)).At(cj.Time).Do(func() {
 		// Update cronjob as processing
 		cj.UpdateAsProcessing()
+
 		// Get extension
 		extension, err := liman.GetExtension(&models.Extension{
 			ID: cj.ExtensionID.String(),
@@ -92,15 +94,33 @@ func RegisterAndRun(cj *models.CronJob) error {
 			return
 		}
 
+		// Run command
 		output := linux.Execute(command)
-		cj.UpdateAsDone(output)
-	})
-	if err != nil {
+		// If returns liman json
+		if helpers.LimanJSON(output) {
+			// Unmarshal response
+			var response = make(map[string]interface{})
+			if err := json.Unmarshal([]byte(output), &response); err != nil {
+				// Update job as failed
+				cj.UpdateAsFailed(err.Error())
+			}
+			// Check is liman returns unsuccess
+			if response["status"].(int) != 200 {
+				// Set as failed
+				cj.UpdateAsFailed(response["message"].(string))
+			} else {
+				// Set as done
+				cj.UpdateAsDone(response["message"].(string))
+			}
+		} else {
+			// Set as done
+			cj.UpdateAsDone(output)
+		}
+	}); err != nil {
 		return err
 	}
 
 	constants.GLOBAL_SCHEDULER.StartAsync()
-
 	return nil
 }
 
@@ -122,7 +142,7 @@ func InitCronJobs() error {
 	}
 
 	for _, cronjob := range cronjobs {
-		if err := RegisterAndRun(cronjob); err != nil {
+		if err := RegisterAndRun(*cronjob); err != nil {
 			cronjob.UpdateAsFailed(err.Error())
 		}
 	}

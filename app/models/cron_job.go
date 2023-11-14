@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/limanmys/render-engine/internal/database"
+	"github.com/limanmys/render-engine/pkg/logger"
 )
 
 type CronJob struct {
@@ -42,24 +43,31 @@ func NewCronJob() *CronJob {
 }
 
 func (cj *CronJob) UpdateAsProcessing() {
-	cj.Status = StatusProcessing
-	cj.Message = "Cronjob processing."
-	cj.Output = "-"
-
-	database.Connection().Model(cj).Save(cj)
+	if err := database.Connection().Model(&CronJob{}).Where("id = ?", cj.ID).Updates(&CronJob{
+		Status:  StatusProcessing,
+		Message: "Cronjob processing",
+		Output:  "-",
+	}).Error; err != nil {
+		logger.Sugar().Errorw("error when saving job, %s", err.Error())
+	}
 }
 
-func (cj *CronJob) UpdateAsFailed(message string) {
-	cj.Status = StatusFailed
-	cj.Message = message
-
-	database.Connection().Model(cj).Save(cj)
+func (cj *CronJob) UpdateAsFailed(output string) {
+	if err := database.Connection().Model(&CronJob{}).Where("id = ?", cj.ID).Updates(&CronJob{
+		Status:  StatusFailed,
+		Message: "Cronjob failed.",
+		Output:  output,
+	}).Error; err != nil {
+		logger.Sugar().Errorw("error when saving job, %s", err.Error())
+	}
 }
 
 func (cj *CronJob) UpdateAsDone(output string) {
-	cj.Status = StatusDone
-	cj.Output = output
-	cj.Message = "CronJob completed successfully. Waiting for next run."
-
-	database.Connection().Model(cj).Save(cj)
+	if err := database.Connection().Model(&CronJob{}).Where("id = ?", cj.ID).Updates(&CronJob{
+		Status:  StatusDone,
+		Message: "Cronjob completed successfully. Waiting for next run.",
+		Output:  output,
+	}).Error; err != nil {
+		logger.Sugar().Errorw("error when saving job, %s", err.Error())
+	}
 }

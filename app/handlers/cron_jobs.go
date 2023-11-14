@@ -50,7 +50,7 @@ func CreateCronJob(c *fiber.Ctx) error {
 	}
 
 	// Register and run cronjob
-	if err := cron_jobs.RegisterAndRun(&payload); err != nil {
+	if err := cron_jobs.RegisterAndRun(payload); err != nil {
 		return err
 	}
 
