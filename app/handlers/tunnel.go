@@ -8,7 +8,7 @@ import (
 
 // OpenTunnel opens ssh tunnel on unix sockets or ports
 func OpenTunnel(c *fiber.Ctx) error {
-	params := []string{"remote_host", "remote_port", "username", "password"}
+	params := []string{"remote_host", "remote_port"}
 
 	for _, param := range params {
 		if len(c.FormValue(param)) < 1 {
@@ -21,13 +21,26 @@ func OpenTunnel(c *fiber.Ctx) error {
 		sshPort = "22"
 	}
 
-	port := bridge.CreateTunnel(
+	if len(c.FormValue("username")) < 1 {
+		port, err := bridge.CreateTunnelInternalKey(c)
+		if err != nil {
+			return logger.FiberError(fiber.StatusInternalServerError, err.Error())
+		}
+
+		return c.JSON(port)
+	}
+
+	port, err := bridge.CreateTunnel(
 		c.FormValue("remote_host"),
 		c.FormValue("remote_port"),
 		c.FormValue("username"),
 		c.FormValue("password"),
 		sshPort,
+		"ssh",
 	)
+	if err != nil {
+		return logger.FiberError(fiber.StatusInternalServerError, err.Error())
+	}
 
 	return c.JSON(port)
 }

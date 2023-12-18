@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -11,6 +12,9 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
+	"github.com/gofiber/fiber/v2"
+	"github.com/limanmys/render-engine/app/models"
+	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/pkg/logger"
 	"github.com/phayes/freeport"
 	"golang.org/x/crypto/ssh"
@@ -301,8 +305,30 @@ func (t *Tunnel) String() string {
 	return fmt.Sprintf("%s@%s | %s %s %s", t.user, t.hostAddr, left, mode, right)
 }
 
+func CreateTunnelInternalKey(c *fiber.Ctx) (int, error) {
+	credentials, err := liman.GetCredentials(&models.User{
+		ID: c.Locals("user_id").(string),
+	}, &models.Server{
+		ID: c.FormValue("server_id"),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	port, err := CreateTunnel(
+		c.FormValue("remote_host"),
+		c.FormValue("remote_port"),
+		credentials.Username,
+		credentials.Key,
+		credentials.Port,
+		credentials.Type,
+	)
+
+	return port, err
+}
+
 // CreateTunnel starts a new tunnel instance and sets it into TunnelPool
-func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) int {
+func CreateTunnel(remoteHost, remotePort, username, password, sshPort, connType string) (int, error) {
 	// Creating a tunnel cannot exceed 25 seconds
 	ch := make(chan int)
 	time.AfterFunc(25*time.Second, func() {
@@ -315,7 +341,7 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 	// Check if existing tunnel started, if not wait until starts (max: 25sec)
 	if err == nil {
 		if t.password != password {
-			return 0
+			return 0, errors.New("password mismatch")
 		}
 
 	startedLoop:
@@ -336,14 +362,14 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 		}
 
 		t.LastConnection = time.Now()
-		return t.Port
+		return t.Port, nil
 	}
 
 	// This part from now creates a new tunnel
 	port, err := freeport.GetFreePort()
 	if err != nil {
 		logger.Sugar().Errorw(err.Error())
-		return 0
+		return 0, errors.New("couldnt find a free port")
 	}
 
 	dial := net.JoinHostPort("127.0.0.1", remotePort)
@@ -355,8 +381,8 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+
 	sshTunnel := &Tunnel{
-		auth:     []ssh.AuthMethod{ssh.RetryableAuthMethod(ssh.Password(password), 3)},
 		hostKeys: ssh.InsecureIgnoreHostKey(),
 		user:     username,
 		mode:     '>',
@@ -374,6 +400,23 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort string) in
 		Started:        false,
 		ctx:            ctx,
 		cancel:         cancel,
+	}
+
+	if connType == "ssh" {
+		sshTunnel.auth = []ssh.AuthMethod{
+			ssh.RetryableAuthMethod(ssh.Password(password), 3),
+		}
+	}
+
+	if connType == "ssh_certificate" {
+		key, err := ssh.ParsePrivateKey([]byte(password))
+		if err != nil {
+			return 0, errors.New("an error occured while parsing ssh key")
+		}
+
+		sshTunnel.auth = []ssh.AuthMethod{
+			ssh.RetryableAuthMethod(ssh.PublicKeys(key), 3),
+		}
 	}
 
 	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
@@ -398,8 +441,8 @@ loop:
 
 	if !sshTunnel.Started {
 		cancel()
-		return 0
+		return 0, errors.New("cannot start tunnel")
 	}
 
-	return sshTunnel.Port
+	return sshTunnel.Port, nil
 }
