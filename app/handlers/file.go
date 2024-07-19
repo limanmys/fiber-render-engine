@@ -134,11 +134,6 @@ func DownloadFile(c *fiber.Ctx) error {
 
 	formValues := helpers.GetFormData(c)
 
-	token := c.FormValue("token")
-	if len(c.FormValue("liman-token")) > 0 {
-		token = c.FormValue("liman-token")
-	}
-
 	_, err = sandbox.GenerateCommand(
 		extension,
 		credentials,
@@ -148,7 +143,7 @@ func DownloadFile(c *fiber.Ctx) error {
 			Extension:      c.FormValue("extension_id"),
 			Server:         c.FormValue("server_id"),
 			RequestData:    formValues,
-			Token:          token,
+			Token:          c.Locals("token").(string),
 			BaseURL:        c.FormValue("lmnbaseurl", c.Get("origin")),
 			Locale:         c.FormValue("locale", helpers.Env("APP_LANG", "tr")),
 			LogID:          c.Locals("log_id").(string),

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/helmet/v2"
 	"github.com/limanmys/render-engine/app/middleware/app_logger"
@@ -42,6 +43,10 @@ func CreateServer() {
 	app.Use(auth.New())
 	app.Use(permission.New())
 	app.Use(app_logger.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowCredentials: true,
+	}))
 
 	// Mount routes
 	routes.Install(app)
