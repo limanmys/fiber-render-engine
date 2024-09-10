@@ -30,6 +30,15 @@ func GetPermissions(user *models.User, extFilter string) ([]string, map[string]s
 		variables = helpers.MergeStringMaps(variables, variable)
 	}
 
+	if user.AuthType == "keycloak" {
+		token := &models.Oauth2Token{}
+		database.Connection().First(&token, "user_id = ?", user.ID)
+
+		if token.UserID != "" {
+			permissions = append(permissions, token.Permissions...)
+		}
+	}
+
 	return permissions, variables, nil
 }
 

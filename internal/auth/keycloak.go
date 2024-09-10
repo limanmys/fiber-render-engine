@@ -47,19 +47,17 @@ func RefreshTokenIfNecessary(user_id string) error {
 		keycloak.Ctx = context.Background()
 	}
 
-	rptResult, err := keycloak.Client.RetrospectToken(
+	result, _, err := keycloak.Client.DecodeAccessToken(
 		keycloak.Ctx,
-		token.RefreshToken,
-		helpers.Env("KEYCLOAK_CLIENT_ID", ""),
-		helpers.Env("KEYCLOAK_CLIENT_SECRET", ""),
+		token.AccessToken,
 		helpers.Env("KEYCLOAK_REALM", ""),
 	)
 
 	if err != nil {
-		return errors.New("an error occured while retrospecting token")
+		return errors.New("an error occured while validating token")
 	}
 
-	if !*rptResult.Active {
+	if !result.Valid {
 		err := RefreshToken(token)
 		if err != nil {
 			return err
