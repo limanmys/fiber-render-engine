@@ -21,33 +21,27 @@ import (
 )
 
 type Tunnel struct {
-	auth     []ssh.AuthMethod
-	hostKeys ssh.HostKeyCallback
-	mode     byte // '>' for forward, '<' for reverse
-	user     string
-	hostAddr string
-	bindAddr string
-	dialAddr string
-	dialType string
-	password string
-
-	SshClient *ssh.Client
-
-	log logger.Zapper
-
-	ctx    context.Context
-	cancel context.CancelFunc
-
-	errHandler func()
-
-	Port           int
+	auth        []ssh.AuthMethod
+	hostKeys    ssh.HostKeyCallback
+	mode        byte // '>' for forward, '<' for reverse
+	user        string
+	hostAddr    string
+	bindAddr    string
+	dialAddr    string
+	dialType    string
+	password    string
+	SshClient   *ssh.Client
+	log         logger.Zapper
+	ctx         context.Context
+	cancel      context.CancelFunc
+	errHandler  func()
+	Port        int
 	LastConnection time.Time
-	Started        bool
-
+	Started     bool
 	sync.Mutex
 }
 
-// Start starts binding to remote end and return error if exists any
+// Start initiates the tunnel binding process
 func (t *Tunnel) Start() {
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -55,7 +49,7 @@ func (t *Tunnel) Start() {
 	wg.Wait()
 }
 
-// Stop collapses tunnel
+// Stop terminates the tunnel and closes connections
 func (t *Tunnel) Stop() {
 	t.Started = false
 	t.log.Infow("collapsed tunnel", "details", t)
@@ -65,246 +59,119 @@ func (t *Tunnel) Stop() {
 	t.cancel()
 }
 
-// bindTunnel Binds tunnel with our tunnel object
+// bindTunnel establishes the SSH tunnel
 func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
-	waitDial := sync.WaitGroup{}
-	waitDial.Add(1)
-	defer waitDial.Done()
+	defer wg.Done()
+	defer t.Stop()
 
 	for {
-		var once sync.Once // Only print errors once per session
-		func() {
-			var cl *ssh.Client
-			var err error
-
-			// Attempt to dial the remote SSH server.
-			err = retry.Do(
-				func() error {
-					cl, err = ssh.Dial("tcp", t.hostAddr, &ssh.ClientConfig{
-						User:            t.user,
-						Auth:            t.auth,
-						HostKeyCallback: t.hostKeys,
-						Timeout:         5 * time.Second,
-					})
-					if err != nil {
-						if strings.Contains(err.Error(), "unable to authenticate") {
-							t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
-							t.Stop()
-							return retry.Unrecoverable(err)
-						}
-						return err
-					}
-					return nil
-				},
-				retry.Attempts(20),
-				retry.Delay(1*time.Second),
-			)
-
-			if err != nil {
-				once.Do(func() {
-					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
-					t.Stop()
-					t.errHandler()
-				})
-				return
-			}
-			defer cl.Close()
-
-			waitDial.Add(1)
-			t.SshClient = cl
-
-			// Attempt to bind to the inbound socket.
-			var ln net.Listener
-			switch t.mode {
-			case '>':
-				ln, err = net.Listen("tcp", t.bindAddr)
-			case '<':
-				ln, err = cl.Listen("tcp", t.bindAddr)
-			}
-			if err != nil {
-				once.Do(func() {
-					t.log.Errorw("bind error", "details", fmt.Sprintf("%v, %v", t, err))
-					t.Stop()
-					t.errHandler()
-				})
-				return
-			}
-
-			// The socket is binded. Make sure we close it eventually.
-			bindCtx, cancel := context.WithCancel(ctx)
-			defer cancel()
-			go func() {
-				cl.Wait()
-				cancel()
-			}()
-			go func() {
-				<-bindCtx.Done()
-				ln.Close()
-			}()
-
-			// Dial once to make sure the connection is established.
-			var cn2 net.Conn
-			t.Started = false
-			err = retry.Do(
-				func() error {
-					switch t.mode {
-					case '>':
-						cn2, err = cl.Dial(t.dialType, t.dialAddr)
-					case '<':
-						cn2, err = net.Dial(t.dialType, t.dialAddr)
-					}
-
-					if err != nil {
-						if strings.Contains(err.Error(), "open failed") {
-							return retry.Unrecoverable(err)
-						}
-						return err
-					}
-					cn2.Close()
-					return nil
-				},
-				retry.Attempts(2),
-				retry.Delay(1*time.Second),
-			)
-
-			if err != nil {
-				once.Do(func() {
-					t.Started = false
-					t.Port = 0
-					t.Stop()
-					t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
-					t.errHandler()
-				})
-				return
-			}
-			// Dial ends
-
-			t.Started = true
-			t.log.Infow("binded tunnel", "details", t)
-			wg.Done()
-
-			defer t.log.Infow("collapsed tunnel", "details", t)
-			defer t.errHandler()
-
-			// Accept all incoming connections.
-			for {
-				cn1, err := ln.Accept()
-				if err != nil {
-					once.Do(func() {
-						t.log.Errorw("accept error", "details", fmt.Sprintf("%v, %v", t, err))
-						t.Stop()
-						t.errHandler()
-					})
-					return
-				}
-				waitDial.Add(1)
-
-				// The inbound connection is established. Make sure we close it eventually.
-				go t.dialTunnel(bindCtx, &waitDial, cl, cn1)
-			}
-		}()
-
-		select {
-		case <-ctx.Done():
+		var once sync.Once
+		cl, err := t.dialSSH()
+		if err != nil {
+			once.Do(func() {
+				t.log.Errorw("SSH dial error", "details", fmt.Sprintf("%v, %v", t, err))
+				t.errHandler()
+			})
 			return
-		case <-time.After(30 * time.Second):
-			fmt.Printf("(%v) retrying...\n", t)
+		}
+		defer cl.Close()
+
+		ln, err := t.bindSocket(cl)
+		if err != nil {
+			once.Do(func() {
+				t.log.Errorw("Bind error", "details", fmt.Sprintf("%v, %v", t, err))
+				t.errHandler()
+			})
+			return
+		}
+		defer ln.Close()
+
+		t.Started = true
+		wg.Done()
+		t.log.Infow("Tunnel bound", "details", t)
+
+		// Handle incoming connections
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				once.Do(func() {
+					t.log.Errorw("Accept error", "details", fmt.Sprintf("%v, %v", t, err))
+					t.errHandler()
+				})
+				return
+			}
+			go t.dialTunnel(ctx, cl, conn)
 		}
 	}
 }
 
-// dialTunnel dials connection and waits until context get cancelled
-func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh.Client, cn1 net.Conn) {
-	defer wg.Done()
+// dialSSH attempts to create an SSH connection
+func (t *Tunnel) dialSSH() (*ssh.Client, error) {
+	var cl *ssh.Client
+	err := retry.Do(
+		func() error {
+			var err error
+			cl, err = ssh.Dial("tcp", t.hostAddr, &ssh.ClientConfig{
+				User:            t.user,
+				Auth:            t.auth,
+				HostKeyCallback: t.hostKeys,
+				Timeout:         5 * time.Second,
+			})
+			if err != nil && strings.Contains(err.Error(), "unable to authenticate") {
+				return retry.Unrecoverable(err)
+			}
+			return err
+		},
+		retry.Attempts(20),
+		retry.Delay(1*time.Second),
+	)
+	return cl, err
+}
 
-	// The inbound connection is established. Make sure we close it eventually.
-	connCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	go func() {
-		<-connCtx.Done()
-		cn1.Close()
-	}()
+// bindSocket binds the local or remote listener based on the mode
+func (t *Tunnel) bindSocket(cl *ssh.Client) (net.Listener, error) {
+	switch t.mode {
+	case '>':
+		return net.Listen("tcp", t.bindAddr)
+	case '<':
+		return cl.Listen("tcp", t.bindAddr)
+	default:
+		return nil, errors.New("invalid mode")
+	}
+}
 
-	// Establish the outbound connection.
-	var once sync.Once
-	var cn2 net.Conn
+// dialTunnel handles the connection from local to remote via SSH tunnel
+func (t *Tunnel) dialTunnel(ctx context.Context, client *ssh.Client, conn net.Conn) {
+	defer conn.Close()
+
+	var remoteConn net.Conn
 	var err error
-
 	err = retry.Do(
 		func() error {
 			switch t.mode {
 			case '>':
-				cn2, err = client.Dial(t.dialType, t.dialAddr)
+				remoteConn, err = client.Dial(t.dialType, t.dialAddr)
 			case '<':
-				cn2, err = net.Dial(t.dialType, t.dialAddr)
+				remoteConn, err = net.Dial(t.dialType, t.dialAddr)
 			}
-
-			if err != nil {
-				if strings.Contains(err.Error(), "open failed") {
-					return retry.Unrecoverable(err)
-				}
-				return err
-			}
-			return nil
+			return err
 		},
 		retry.Attempts(2),
 		retry.Delay(1*time.Second),
 	)
 	if err != nil {
-		once.Do(func() {
-			t.Stop()
-			t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
-			t.errHandler()
-		})
+		t.log.Errorw("Connection error", "details", fmt.Sprintf("%v, %v", t, err))
+		t.errHandler()
 		return
 	}
+	defer remoteConn.Close()
 
-	go func() {
-		<-connCtx.Done()
-		cn2.Close()
-	}()
-
-	// Copy bytes from one connection to the other until one side closes.
-	var waitDial sync.WaitGroup
-	waitDial.Add(2)
-	go func() {
-		defer waitDial.Done()
-		defer cancel()
-		if _, err := io.Copy(cn1, cn2); err != nil {
-			once.Do(func() {
-				t.Stop()
-				t.errHandler()
-				t.log.Errorw("connection error", "details", fmt.Sprintf("%v, %v", t, err))
-			})
-		}
-	}()
-	go func() {
-		defer waitDial.Done()
-		defer cancel()
-		if _, err := io.Copy(cn2, cn1); err != nil {
-			once.Do(func() {
-				t.Stop()
-				t.errHandler()
-				t.log.Errorw("connection error", "details", fmt.Sprintf("%v, %v", t, err))
-			})
-		}
-	}()
-	waitDial.Wait()
+	// Copy data between local and remote connections
+	go io.Copy(conn, remoteConn)
+	go io.Copy(remoteConn, conn)
 }
 
-// String returns readable format of tunnel struct
-func (t *Tunnel) String() string {
-	var left, right string
-	mode := "<?>"
-	switch t.mode {
-	case '>':
-		left, mode, right = t.bindAddr, "->", t.dialAddr
-	case '<':
-		left, mode, right = t.dialAddr, "<-", t.bindAddr
-	}
-	return fmt.Sprintf("%s@%s | %s %s %s", t.user, t.hostAddr, left, mode, right)
-}
-
+// CreateTunnelInternalKey initiates a tunnel based on request data
 func CreateTunnelInternalKey(c *fiber.Ctx) (int, error) {
 	credentials, err := liman.GetCredentials(&models.User{
 		ID: c.Locals("user_id").(string),
@@ -323,126 +190,67 @@ func CreateTunnelInternalKey(c *fiber.Ctx) (int, error) {
 		credentials.Port,
 		credentials.Type,
 	)
-
 	return port, err
 }
 
-// CreateTunnel starts a new tunnel instance and sets it into TunnelPool
+// CreateTunnel sets up a new SSH tunnel instance
 func CreateTunnel(remoteHost, remotePort, username, password, sshPort, connType string) (int, error) {
-	// Creating a tunnel cannot exceed 25 seconds
-	ch := make(chan int)
-	time.AfterFunc(25*time.Second, func() {
-		ch <- 1
-	})
+	ch := make(chan struct{})
+	defer close(ch)
+	time.AfterFunc(25*time.Second, func() { ch <- struct{}{} })
 
-	// Check if a tunnel exists with this remoteHost, remotePort and username
 	t, err := Tunnels.Get(remoteHost, remotePort, username)
-
-	// Check if existing tunnel started, if not wait until starts (max: 25sec)
-	if err == nil {
-		if t.password != password {
-			return 0, errors.New("password mismatch")
+	if err == nil && t.password == password {
+		select {
+		case <-ch:
+			return 0, errors.New("tunnel setup timeout")
+		case <-t.ctx.Done():
+			t.LastConnection = time.Now()
+			return t.Port, nil
 		}
-
-	startedLoop:
-		for {
-			if t.Started {
-				break
-			}
-
-			select {
-			case <-ch:
-				break startedLoop
-			case <-t.ctx.Done():
-				break startedLoop
-			default:
-				time.Sleep(10 * time.Millisecond)
-				continue
-			}
-		}
-
-		t.LastConnection = time.Now()
-		return t.Port, nil
 	}
 
-	// This part from now creates a new tunnel
 	port, err := freeport.GetFreePort()
 	if err != nil {
-		logger.Sugar().Errorw(err.Error())
-		return 0, errors.New("couldnt find a free port")
+		return 0, errors.New("failed to find a free port")
 	}
 
-	dial := net.JoinHostPort("127.0.0.1", remotePort)
-	dialType := "tcp"
-
+	dialAddr := net.JoinHostPort("127.0.0.1", remotePort)
 	if _, err := strconv.Atoi(remotePort); err != nil {
-		dial = remotePort
-		dialType = "unix"
+		dialAddr = remotePort
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-
 	sshTunnel := &Tunnel{
 		hostKeys: ssh.InsecureIgnoreHostKey(),
 		user:     username,
 		mode:     '>',
 		hostAddr: net.JoinHostPort(remoteHost, sshPort),
-		dialAddr: dial,
-		dialType: dialType,
-		bindAddr: net.JoinHostPort("127.0.0.1", fmt.Sprintf("%d", port)),
+		dialAddr: dialAddr,
+		dialType: "tcp",
+		bindAddr: net.JoinHostPort("127.0.0.1", strconv.Itoa(port)),
 		log:      logger.Sugar(),
+		password: password,
+		Port:     port,
+		ctx:      ctx,
+		cancel:   cancel,
 		errHandler: func() {
 			Tunnels.Delete(remoteHost + ":" + remotePort + ":" + username)
 		},
-		password:       password,
-		Port:           port,
-		LastConnection: time.Now(),
-		Started:        false,
-		ctx:            ctx,
-		cancel:         cancel,
 	}
 
 	if connType == "ssh" {
-		sshTunnel.auth = []ssh.AuthMethod{
-			ssh.RetryableAuthMethod(ssh.Password(password), 3),
-		}
-	}
-
-	if connType == "ssh_certificate" {
-		key, err := ssh.ParsePrivateKey([]byte(password))
-		if err != nil {
-			return 0, errors.New("an error occured while parsing ssh key")
-		}
-
-		sshTunnel.auth = []ssh.AuthMethod{
-			ssh.RetryableAuthMethod(ssh.PublicKeys(key), 3),
-		}
+		sshTunnel.auth = []ssh.AuthMethod{ssh.Password(password)}
 	}
 
 	Tunnels.Set(remoteHost, remotePort, username, sshTunnel)
 	go sshTunnel.Start()
 
-loop:
-	for {
-		if sshTunnel.Started {
-			break
-		}
-
-		select {
-		case <-ch:
-			break loop
-		case <-sshTunnel.ctx.Done():
-			break loop
-		default:
-			time.Sleep(10 * time.Millisecond)
-			continue
-		}
-	}
-
-	if !sshTunnel.Started {
+	select {
+	case <-ch:
 		cancel()
-		return 0, errors.New("cannot start tunnel")
+		return 0, errors.New("tunnel setup timeout")
+	case <-sshTunnel.ctx.Done():
+		return sshTunnel.Port, nil
 	}
-
-	return sshTunnel.Port, nil
 }
