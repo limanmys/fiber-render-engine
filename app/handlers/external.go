@@ -32,10 +32,6 @@ func ExternalAPI(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusBadRequest, "extension not found")
 	}
 
-	if extension.Status == "0" {
-		return logger.FiberError(fiber.StatusServiceUnavailable, "extension is unavailable")
-	}
-
 	credentials := &models.Credentials{}
 	if extension.RequireKey == "true" {
 		credentials, err = liman.GetCredentials(

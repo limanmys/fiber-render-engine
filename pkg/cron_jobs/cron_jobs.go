@@ -31,12 +31,6 @@ func RegisterAndRun(cj models.CronJob) error {
 			cj.UpdateAsFailed(err.Error())
 			return
 		}
-		// Check extension status
-		if extension.Status == "0" {
-			// Update job as failed
-			cj.UpdateAsFailed("extension is unavailable")
-			return
-		}
 
 		// Get credentials
 		credentials := &models.Credentials{}
