@@ -102,7 +102,17 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 				continue
 			}
 
-			varPerms[item.Key] = item.Value
+			if existing, ok := varPerms[item.Key]; ok {
+				if existingSlice, ok := existing.([]string); ok {
+					existingSlice = append(existingSlice, item.Value)
+					varPerms[item.Key] = existingSlice
+				} else {
+					// If it's not a slice, convert it to a slice
+					varPerms[item.Key] = []string{existing.(string), item.Value}
+				}
+			} else {
+				varPerms[item.Key] = item.Value
+			}
 		}
 	}
 
