@@ -33,12 +33,6 @@ func (c CreateReport) Process() error {
 		c.Queue.UpdateError(err.Error())
 		return err
 	}
-	// Check extension status
-	if extension.Status == "0" {
-		// Update job as failed
-		c.Queue.UpdateError("extension is unavailable")
-		return err
-	}
 
 	// Get credentials
 	credentials := &models.Credentials{}

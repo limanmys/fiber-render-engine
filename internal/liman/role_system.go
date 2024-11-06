@@ -1,6 +1,7 @@
 package liman
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,14 +12,14 @@ import (
 )
 
 // GetPermissions Gets user and extensions permissons and variables
-func GetPermissions(user *models.User, extFilter string) ([]string, map[string]string, error) {
+func GetPermissions(user *models.User, extFilter string) ([]string, map[string]interface{}, error) {
 	roles, err := getRoleMaps(user)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	permissions := []string{}
-	variables := make(map[string]string)
+	variables := make(map[string]interface{})
 	for _, role := range roles {
 		permission, variable, err := getPermissionsFromMorph(role, strings.ToLower(extFilter))
 		if err != nil {
@@ -27,7 +28,7 @@ func GetPermissions(user *models.User, extFilter string) ([]string, map[string]s
 
 		permissions = append(permissions, permission...)
 
-		variables = helpers.MergeStringMaps(variables, variable)
+		variables = helpers.MergeInterfaceMaps(variables, variable)
 	}
 
 	if user.AuthType == "keycloak" {
@@ -63,7 +64,7 @@ func GetObjectPermissions(user *models.User) ([]string, error) {
 }
 
 // getPermissionsFromMorph Searches db for morph relationships and returns permissions
-func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[string]string, error) {
+func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[string]interface{}, error) {
 	permission := []*models.Permission{}
 
 	err := database.Connection().Find(&permission, "morph_id = ?", morphID).Error
@@ -72,7 +73,7 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 	}
 
 	funcPerms := []string{}
-	varPerms := make(map[string]string)
+	varPerms := make(map[string]interface{})
 
 	for _, item := range permission {
 		if item.Type == "function" {
@@ -86,7 +87,32 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 		}
 
 		if item.Type == "variable" {
-			varPerms[item.Key] = item.Value
+			if item.Extra == "multiselect" || item.Extra == "array" {
+				var value []interface{}
+				json.Unmarshal([]byte(item.Value), &value)
+				varPerms[item.Key] = value
+				continue
+			}
+
+			// Check if item is a json object
+			if item.Extra == "json" {
+				var value interface{}
+				json.Unmarshal([]byte(item.Value), &value)
+				varPerms[item.Key] = value
+				continue
+			}
+
+			if existing, ok := varPerms[item.Key]; ok {
+				if existingSlice, ok := existing.([]string); ok {
+					existingSlice = append(existingSlice, item.Value)
+					varPerms[item.Key] = existingSlice
+				} else {
+					// If it's not a slice, convert it to a slice
+					varPerms[item.Key] = []string{existing.(string), item.Value}
+				}
+			} else {
+				varPerms[item.Key] = item.Value
+			}
 		}
 	}
 
