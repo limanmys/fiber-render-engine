@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.24.2
 
 require (
+	al.essio.dev/pkg/shellescape v1.6.0
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-resty/resty/v2 v2.16.5
@@ -56,7 +57,6 @@ require (
 
 require (
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
-	github.com/alessio/shellescape v1.4.2
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/dariubs/gorm-jsonb v0.1.5
@@ -77,3 +77,5 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/text v0.24.0
 )
+
+replace github.com/alessio/shellescape => al.essio.dev/pkg/shellescape v1.6.0
