@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/limanmys/render-engine/app/models"
@@ -53,8 +54,17 @@ func RefreshTokenIfNecessary(user_id string) error {
 		helpers.Env("KEYCLOAK_REALM", ""),
 	)
 
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "expired") {
 		return errors.New("an error occured while validating token")
+	}
+
+	if err != nil && strings.Contains(err.Error(), "expired") {
+		err := RefreshToken(token)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	if !result.Valid {
