@@ -25,10 +25,11 @@ func initialize() *gorm.DB {
 	switch helpers.Env("DB_CONNECTION", "pgsql") {
 	case "pgsql":
 		return initializePostgres()
-	case "mysql":
-		return initializeMysql()
+	//case "mysql":
+	//	return initializeMysql()
 	default:
-		logger.Sugar().Fatalln("You must specify a database driver. Choices are 'postgres' or 'mysql'")
+		//logger.Sugar().Fatalln("You must specify a database driver. Choices are 'postgres' or 'mysql'")
+		logger.Sugar().Fatalln("You must specify a database driver. Choices are 'pgsql'")
 		return nil
 	}
 }
