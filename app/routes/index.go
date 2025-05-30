@@ -55,4 +55,10 @@ func Install(app *fiber.App) {
 	app.Post("/cronjobs", handlers.CreateCronJob)
 	app.Get("/cronjobs", handlers.IndexCronJobs)
 	app.Delete("/cronjobs/:id", handlers.DeleteCronJob)
+
+	// kubernetes
+	kubernetesGroup := app.Group("/kubernetes")
+	kubernetesGroup.Post("/namespaces", handlers.GetNamespaces)
+	kubernetesGroup.Post("/deployments", handlers.GetDeployments)
+	kubernetesGroup.Post("/deploymentDetails", handlers.GetDeploymentDetails)
 }
