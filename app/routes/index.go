@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 	"github.com/limanmys/render-engine/app/handlers"
+	"github.com/limanmys/render-engine/app/middleware/local_access"
 )
 
 // Install initializes all routes of application
@@ -58,6 +59,7 @@ func Install(app *fiber.App) {
 
 	// kubernetes
 	kubernetesGroup := app.Group("/kubernetes")
+	kubernetesGroup.Use(local_access.New())
 	kubernetesGroup.Post("/namespaces", handlers.GetNamespaces)
 	kubernetesGroup.Post("/deployments", handlers.GetDeployments)
 	kubernetesGroup.Post("/deploymentDetails", handlers.GetDeploymentDetails)
