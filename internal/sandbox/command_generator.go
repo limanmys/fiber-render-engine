@@ -105,7 +105,22 @@ func GenerateCommand(extension *models.Extension, credentials *models.Credential
 		if err != nil {
 			return "", err
 		}
+		
 		extensionData["keycloak_auth"] = token.AccessToken
+	}
+
+	if user.AuthType == "oidc" {
+		token, err := auth.GetOauth2Token(user.ID)
+		if err != nil {
+			return "", err
+		}
+
+		tokenData, err := json.Marshal(token)
+	    if err != nil {
+	        return "", err
+	    }
+		
+		extensionData["oauth2_token"] = string(tokenData)
 	}
 
 	secureKey, err := os.ReadFile(constants.KEYS_PATH + "/" + extension.ID)
