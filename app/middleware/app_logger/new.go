@@ -51,6 +51,11 @@ func New() fiber.Handler {
 			user_id = c.Locals("user_id").(string)
 		}
 
+		oidc_sub := ""
+		if c.Locals("oidc_sub") != nil {
+			oidc_sub = c.Locals("oidc_sub").(string)
+		}
+
 		logger.Sugar().WithOptions(
 			zap.WithCaller(false),
 		).Infow(
@@ -58,6 +63,7 @@ func New() fiber.Handler {
 			"lmn_level", "request",
 			"log_id", c.Locals("log_id").(string),
 			"user_id", user_id,
+			"oidc_sub", oidc_sub,
 			"route", c.Path(),
 			"ip_address", c.IPs(),
 			"request_details", formData,

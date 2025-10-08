@@ -91,6 +91,7 @@ func jwtValidation(c *fiber.Ctx, code string) error {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.Locals("user_id", claims["sub"])
+		c.Locals("oidc_sub", claims["oidc_sub"])
 		c.Locals("token", code)
 		return c.Next()
 	} else {

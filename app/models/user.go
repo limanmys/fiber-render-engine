@@ -15,6 +15,7 @@ type User struct {
 	ForceChange   bool   `json:"-" pg:"forceChange"`
 	ObjectGUID    string `json:"objectguid" pg:"objectguid"`
 	AuthType      string `json:"auth_type"`
+	OidcSub       string `json:"oidc_sub"`
 }
 
 func (User) TableName() string {
