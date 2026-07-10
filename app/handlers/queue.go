@@ -77,13 +77,6 @@ func (h *QueueHandler) Create(c *fiber.Ctx) error {
 	// Start processing by type
 	var processor process_queue.ProcessQueue
 	switch queue.Type {
-	case models.OperationInstall:
-		processor = &process_queue.InstallPackage{
-			Queue:  queue,
-			DB:     h.db,
-			UserID: c.Locals("user_id").(string),
-		}
-		go processor.Process()
 	case models.OperationReport:
 		processor = &process_queue.CreateReport{
 			Queue: queue,

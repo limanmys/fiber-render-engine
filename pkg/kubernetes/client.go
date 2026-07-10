@@ -65,6 +65,14 @@ func createClientFromBase64Config(kubeconfigBase64 string) (*Client, error) {
 		return nil, fmt.Errorf("failed to parse kubeconfig: %v", err)
 	}
 
+	// Security: reject kubeconfigs that declare exec credential plugins.
+	// The exec field allows running arbitrary commands on the host to obtain
+	// credentials. Since kubeconfigs are user-supplied here, honoring exec
+	// would permit remote command execution as the render engine user (root).
+	if err := validateNoExecPlugins(config); err != nil {
+		return nil, err
+	}
+
 	// Build config directly from the loaded config
 	restConfig, err := buildConfigFromAPIConfig(config)
 	if err != nil {
@@ -85,6 +93,22 @@ func createClientFromBase64Config(kubeconfigBase64 string) (*Client, error) {
 
 func buildConfigFromAPIConfig(config *api.Config) (*rest.Config, error) {
 	return clientcmd.NewDefaultClientConfig(*config, &clientcmd.ConfigOverrides{}).ClientConfig()
+}
+
+// validateNoExecPlugins ensures that no auth info in the kubeconfig relies on
+// an exec credential plugin, which would execute arbitrary commands on the
+// host when the client establishes a connection. This is unsafe for
+// user-supplied kubeconfigs, so any such declaration is rejected outright.
+func validateNoExecPlugins(config *api.Config) error {
+	for name, authInfo := range config.AuthInfos {
+		if authInfo == nil {
+			continue
+		}
+		if authInfo.Exec != nil {
+			return fmt.Errorf("kubeconfig auth info %q uses an exec credential plugin, which is not permitted for security reasons", name)
+		}
+	}
+	return nil
 }
 
 // ClearCache clears the client cache (useful for testing or memory management)
