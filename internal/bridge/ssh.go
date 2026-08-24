@@ -1,12 +1,10 @@
 package bridge
 
 import (
-	"net"
 	"strings"
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/limanmys/render-engine/pkg/helpers"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -17,21 +15,16 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 5,
-	}
-
-	ipAddress, err := helpers.ResolveIP(host)
-	if err != nil {
-		return nil, err
+		Timeout: time.Second * 5,
 	}
 
 	var conn *ssh.Client
+	var err error
 	err = retry.Do(
 		func() error {
-			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			conn, err = dialSsh(host, port, config)
 			if err != nil {
-				if strings.Contains(err.Error(), "unable to authenticate") {
+				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)
 				}
 				return err
@@ -61,21 +54,15 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 5,
-	}
-
-	ipAddress, err := helpers.ResolveIP(host)
-	if err != nil {
-		return nil, err
+		Timeout: time.Second * 5,
 	}
 
 	var conn *ssh.Client
 	err = retry.Do(
 		func() error {
-			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			conn, err = dialSsh(host, port, config)
 			if err != nil {
-				if strings.Contains(err.Error(), "unable to authenticate") {
+				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)
 				}
 				return err
@@ -85,6 +72,10 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
+
+	if err != nil {
+		return nil, err
+	}
 
 	return conn, nil
 }
@@ -96,21 +87,16 @@ func VerifySSH(username, password, host, port string) bool {
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 5,
-	}
-
-	ipAddress, err := helpers.ResolveIP(host)
-	if err != nil {
-		return false
+		Timeout: time.Second * 5,
 	}
 
 	var conn *ssh.Client
+	var err error
 	err = retry.Do(
 		func() error {
-			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			conn, err = dialSsh(host, port, config)
 			if err != nil {
-				if strings.Contains(err.Error(), "unable to authenticate") {
+				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)
 				}
 				return err
@@ -120,6 +106,10 @@ func VerifySSH(username, password, host, port string) bool {
 		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
+
+	if err != nil || conn == nil {
+		return false
+	}
 
 	defer conn.Close()
 	return true
@@ -137,21 +127,15 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 		Auth: []ssh.AuthMethod{
 			ssh.PublicKeys(key),
 		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         time.Second * 5,
-	}
-
-	ipAddress, err := helpers.ResolveIP(host)
-	if err != nil {
-		return false
+		Timeout: time.Second * 5,
 	}
 
 	var conn *ssh.Client
 	err = retry.Do(
 		func() error {
-			conn, err = ssh.Dial("tcp", net.JoinHostPort(ipAddress, port), config)
+			conn, err = dialSsh(host, port, config)
 			if err != nil {
-				if strings.Contains(err.Error(), "unable to authenticate") {
+				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)
 				}
 				return err
@@ -161,7 +145,7 @@ func VerifySSHCertificate(username, certificate, host, port string) bool {
 		retry.Attempts(5),
 		retry.Delay(1*time.Second),
 	)
-	if err != nil {
+	if err != nil || conn == nil {
 		return false
 	}
 

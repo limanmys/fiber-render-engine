@@ -22,9 +22,10 @@ import (
 
 type Tunnel struct {
 	auth     []ssh.AuthMethod
-	hostKeys ssh.HostKeyCallback
 	mode     byte // '>' for forward, '<' for reverse
 	user     string
+	sshHost  string
+	sshPort  string
 	hostAddr string
 	bindAddr string
 	dialAddr string
@@ -67,6 +68,9 @@ func (t *Tunnel) Stop() {
 
 // bindTunnel Binds tunnel with our tunnel object
 func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
+	startSignal := sync.Once{}
+	defer startSignal.Do(wg.Done)
+
 	waitDial := sync.WaitGroup{}
 	waitDial.Add(1)
 	defer waitDial.Done()
@@ -80,14 +84,13 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 			// Attempt to dial the remote SSH server.
 			err = retry.Do(
 				func() error {
-					cl, err = ssh.Dial("tcp", t.hostAddr, &ssh.ClientConfig{
-						User:            t.user,
-						Auth:            t.auth,
-						HostKeyCallback: t.hostKeys,
-						Timeout:         5 * time.Second,
+					cl, err = dialSsh(t.sshHost, t.sshPort, &ssh.ClientConfig{
+						User:    t.user,
+						Auth:    t.auth,
+						Timeout: 5 * time.Second,
 					})
 					if err != nil {
-						if strings.Contains(err.Error(), "unable to authenticate") {
+						if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 							t.log.Errorw("ssh dial error", "details", fmt.Sprintf("%v, %v", t, err))
 							t.Stop()
 							return retry.Unrecoverable(err)
@@ -181,7 +184,7 @@ func (t *Tunnel) bindTunnel(ctx context.Context, wg *sync.WaitGroup) {
 
 			t.Started = true
 			t.log.Infow("binded tunnel", "details", t)
-			wg.Done()
+			startSignal.Do(wg.Done)
 
 			defer t.log.Infow("collapsed tunnel", "details", t)
 			defer t.errHandler()
@@ -383,8 +386,9 @@ func CreateTunnel(remoteHost, remotePort, username, password, sshPort, connType 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	sshTunnel := &Tunnel{
-		hostKeys: ssh.InsecureIgnoreHostKey(),
 		user:     username,
+		sshHost:  remoteHost,
+		sshPort:  sshPort,
 		mode:     '>',
 		hostAddr: net.JoinHostPort(remoteHost, sshPort),
 		dialAddr: dial,

@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"errors"
 	"strings"
 
@@ -23,6 +24,13 @@ var (
 	keycloak Keycloak
 )
 
+func newKeycloakHTTPClient(rootCAs *x509.CertPool) *resty.Client {
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{RootCAs: rootCAs})
+
+	return client
+}
+
 func GetOauth2Token(user_id string) (*models.Oauth2Token, error) {
 	token := &models.Oauth2Token{}
 	err := database.Connection().First(&token, "user_id = ?", user_id).Error
@@ -40,10 +48,7 @@ func RefreshTokenIfNecessary(user_id string) error {
 
 	if keycloak.Client == nil {
 		keycloak.Client = gocloak.NewClient(helpers.Env("KEYCLOAK_BASE_URL", ""))
-
-		client := resty.New()
-		client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-		keycloak.Client.SetRestyClient(client)
+		keycloak.Client.SetRestyClient(newKeycloakHTTPClient(nil))
 
 		keycloak.Ctx = context.Background()
 	}
