@@ -99,6 +99,61 @@ func newHostKeyCallback(host string, port int, loader hostKeyLoader) ssh.HostKey
 	}
 }
 
+func trustedHostKeyAlgorithms(trustedKeys []models.SshHostKey) ([]string, error) {
+	algorithms := []string{}
+	seen := map[string]struct{}{}
+	add := func(algorithm string) {
+		if _, exists := seen[algorithm]; exists {
+			return
+		}
+
+		seen[algorithm] = struct{}{}
+		algorithms = append(algorithms, algorithm)
+	}
+
+	for _, trusted := range trustedKeys {
+		parsed, _, _, _, err := ssh.ParseAuthorizedKey([]byte(trusted.PublicKey))
+		if err != nil {
+			return nil, fmt.Errorf("trusted ssh host key is invalid: %w", err)
+		}
+
+		switch parsed.Type() {
+		case ssh.KeyAlgoRSA:
+			add(ssh.KeyAlgoRSASHA256)
+			add(ssh.KeyAlgoRSASHA512)
+			add(ssh.KeyAlgoRSA)
+		case ssh.CertAlgoRSAv01:
+			add(ssh.CertAlgoRSASHA256v01)
+			add(ssh.CertAlgoRSASHA512v01)
+			add(ssh.CertAlgoRSAv01)
+		default:
+			add(parsed.Type())
+		}
+	}
+
+	return algorithms, nil
+}
+
+func intersectHostKeyAlgorithms(trusted, configured []string) []string {
+	if configured == nil {
+		return trusted
+	}
+
+	allowed := make(map[string]struct{}, len(trusted))
+	for _, algorithm := range trusted {
+		allowed[algorithm] = struct{}{}
+	}
+
+	intersection := []string{}
+	for _, algorithm := range configured {
+		if _, ok := allowed[algorithm]; ok {
+			intersection = append(intersection, algorithm)
+		}
+	}
+
+	return intersection
+}
+
 func dialSsh(host, port string, config *ssh.ClientConfig) (*ssh.Client, error) {
 	return dialSshWithHostKeyLoader(host, port, config, liman.GetTrustedSshHostKeys)
 }
@@ -108,15 +163,36 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 	if err != nil {
 		return nil, err
 	}
-	config.HostKeyCallback = newHostKeyCallback(host, parsedPort, loader)
 
 	normalizedHost := normalizeSshHost(host)
+	trustedKeys, err := loader(normalizedHost, parsedPort)
+	if err != nil {
+		return nil, fmt.Errorf("cannot load trusted ssh host keys: %w", err)
+	}
+
+	clientConfig := *config
+	if len(trustedKeys) > 0 {
+		trustedAlgorithms, algorithmErr := trustedHostKeyAlgorithms(trustedKeys)
+		if algorithmErr != nil {
+			return nil, algorithmErr
+		}
+
+		clientConfig.HostKeyAlgorithms = intersectHostKeyAlgorithms(
+			trustedAlgorithms,
+			config.HostKeyAlgorithms,
+		)
+	}
+
+	clientConfig.HostKeyCallback = newHostKeyCallback(host, parsedPort, func(string, int) ([]models.SshHostKey, error) {
+		return trustedKeys, nil
+	})
+
 	resolvedIP, err := helpers.ResolveIP(normalizedHost)
 	if err != nil {
 		return nil, err
 	}
 
-	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(resolvedIP, port), config.Timeout)
+	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(resolvedIP, port), clientConfig.Timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +200,7 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 	clientConnection, channels, requests, err := ssh.NewClientConn(
 		rawConnection,
 		net.JoinHostPort(normalizedHost, port),
-		config,
+		&clientConfig,
 	)
 	if err != nil {
 		rawConnection.Close()

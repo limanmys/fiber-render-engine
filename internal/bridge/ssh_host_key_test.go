@@ -1,8 +1,11 @@
 package bridge
 
 import (
+	"crypto/ecdsa"
 	"crypto/ed25519"
+	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/rsa"
 	"errors"
 	"net"
 	"strconv"
@@ -17,6 +20,36 @@ import (
 func testSigner(t *testing.T) ssh.Signer {
 	t.Helper()
 	_, privateKey, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	signer, err := ssh.NewSignerFromKey(privateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return signer
+}
+
+func testECDSASigner(t *testing.T) ssh.Signer {
+	t.Helper()
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	signer, err := ssh.NewSignerFromKey(privateKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return signer
+}
+
+func testRSASigner(t *testing.T) ssh.Signer {
+	t.Helper()
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,6 +123,40 @@ func TestHostKeyCallbackFailsClosedOnStoreErrorsAndMalformedKeys(t *testing.T) {
 	})
 	if err := callback("ignored", nil, presented.PublicKey()); err == nil {
 		t.Fatal("malformed trusted key must fail closed")
+	}
+}
+
+func TestTrustedHostKeyAlgorithmsExpandRSAAndPreserveCallerRestrictions(t *testing.T) {
+	ed25519Signer := testSigner(t)
+	ecdsaSigner := testECDSASigner(t)
+	rsaSigner := testRSASigner(t)
+
+	algorithms, err := trustedHostKeyAlgorithms([]models.SshHostKey{
+		trustedKey(ed25519Signer.PublicKey()),
+		trustedKey(ecdsaSigner.PublicKey()),
+		trustedKey(rsaSigner.PublicKey()),
+		trustedKey(ed25519Signer.PublicKey()),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{
+		ssh.KeyAlgoED25519,
+		ssh.KeyAlgoECDSA256,
+		ssh.KeyAlgoRSASHA256,
+		ssh.KeyAlgoRSASHA512,
+		ssh.KeyAlgoRSA,
+	}
+	if strings.Join(algorithms, ",") != strings.Join(want, ",") {
+		t.Fatalf("algorithms = %v, want %v", algorithms, want)
+	}
+
+	configured := []string{ssh.KeyAlgoRSASHA512, ssh.KeyAlgoED25519, "unsupported"}
+	intersection := intersectHostKeyAlgorithms(algorithms, configured)
+	wantIntersection := []string{ssh.KeyAlgoRSASHA512, ssh.KeyAlgoED25519}
+	if strings.Join(intersection, ",") != strings.Join(wantIntersection, ",") {
+		t.Fatalf("intersection = %v, want %v", intersection, wantIntersection)
 	}
 }
 
@@ -180,4 +247,86 @@ func TestDialSshAuthenticatesOnlyAfterHostKeyApproval(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDialSshNegotiatesTheApprovedHostKeyAlgorithm(t *testing.T) {
+	ecdsaSigner := testECDSASigner(t)
+	ed25519Signer := testSigner(t)
+
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+
+	serverConfig := &ssh.ServerConfig{
+		PasswordCallback: func(_ ssh.ConnMetadata, password []byte) (*ssh.Permissions, error) {
+			if string(password) != "secret" {
+				return nil, errors.New("invalid password")
+			}
+			return nil, nil
+		},
+	}
+	serverConfig.AddHostKey(ecdsaSigner)
+	serverConfig.AddHostKey(ed25519Signer)
+
+	serverDone := make(chan struct{})
+	go func() {
+		defer close(serverDone)
+		for range 2 {
+			connection, acceptErr := listener.Accept()
+			if acceptErr != nil {
+				return
+			}
+			serverConnection, _, _, _ := ssh.NewServerConn(connection, serverConfig)
+			if serverConnection != nil {
+				serverConnection.Close()
+			}
+			connection.Close()
+		}
+	}()
+
+	port := strconv.Itoa(listener.Addr().(*net.TCPAddr).Port)
+	clientConfig := func() *ssh.ClientConfig {
+		return &ssh.ClientConfig{
+			User: "test",
+			Auth: []ssh.AuthMethod{ssh.Password("secret")},
+		}
+	}
+
+	client, err := dialSshWithHostKeyLoader(
+		"127.0.0.1",
+		port,
+		clientConfig(),
+		func(string, int) ([]models.SshHostKey, error) { return nil, nil },
+	)
+	if client != nil {
+		client.Close()
+	}
+	var hostKeyErr *HostKeyError
+	if !errors.As(err, &hostKeyErr) {
+		t.Fatalf("expected untrusted default algorithm to fail, got %v", err)
+	}
+	if hostKeyErr.Fingerprint != ssh.FingerprintSHA256(ecdsaSigner.PublicKey()) {
+		t.Fatalf("default negotiation did not select ECDSA: %s", hostKeyErr.Fingerprint)
+	}
+
+	var loaderCalls atomic.Int32
+	client, err = dialSshWithHostKeyLoader(
+		"127.0.0.1",
+		port,
+		clientConfig(),
+		func(string, int) ([]models.SshHostKey, error) {
+			loaderCalls.Add(1)
+			return []models.SshHostKey{trustedKey(ed25519Signer.PublicKey())}, nil
+		},
+	)
+	if err != nil {
+		t.Fatalf("approved ED25519 key was not negotiated: %v", err)
+	}
+	client.Close()
+	if loaderCalls.Load() != 1 {
+		t.Fatalf("trusted key loader called %d times, want 1", loaderCalls.Load())
+	}
+	<-serverDone
 }
