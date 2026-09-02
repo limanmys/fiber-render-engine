@@ -24,6 +24,15 @@ func NewQueueHandler() *QueueHandler {
 	}
 }
 
+func bindQueueUser(data map[string]interface{}, authenticatedUserID string) error {
+	if suppliedUserID, ok := data["user_id"].(string); ok && suppliedUserID != "" && suppliedUserID != authenticatedUserID {
+		return errors.New("queue user does not match authenticated user")
+	}
+
+	data["user_id"] = authenticatedUserID
+	return nil
+}
+
 // Create creates new queue
 func (h *QueueHandler) Create(c *fiber.Ctx) error {
 	var formData map[string]string
@@ -46,6 +55,13 @@ func (h *QueueHandler) Create(c *fiber.Ctx) error {
 				"payload":      formData["payload"],
 			},
 		}
+	}
+
+	if queue.Data == nil {
+		queue.Data = make(map[string]interface{})
+	}
+	if err := bindQueueUser(queue.Data, c.Locals("user_id").(string)); err != nil {
+		return logger.FiberError(fiber.StatusForbidden, err.Error())
 	}
 
 	if queue.Data["server_id"] == nil {
@@ -96,7 +112,7 @@ func (h *QueueHandler) Index(c *fiber.Ctx) error {
 		return errors.New("invalid extension id")
 	}
 
-	user_id, err := uuid.Parse(c.FormValue("user_id"))
+	user_id, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return errors.New("invalid user id")
 	}
@@ -135,7 +151,7 @@ func (h *QueueHandler) Delete(c *fiber.Ctx) error {
 		return errors.New("invalid extension id")
 	}
 
-	user_id, err := uuid.Parse(c.FormValue("user_id"))
+	user_id, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return errors.New("invalid user id")
 	}

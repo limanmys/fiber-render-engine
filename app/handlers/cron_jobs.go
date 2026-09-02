@@ -23,7 +23,7 @@ func CreateCronJob(c *fiber.Ctx) error {
 		return errors.New("invalid extension id")
 	}
 
-	user_id, err := uuid.Parse(c.FormValue("user_id"))
+	user_id, err := uuid.Parse(c.Locals("user_id").(string))
 	if err != nil {
 		return errors.New("invalid user id")
 	}
@@ -43,6 +43,7 @@ func CreateCronJob(c *fiber.Ctx) error {
 	payload.ExtensionID = &extension_id
 	payload.ServerID = &server_id
 	payload.UserID = &user_id
+	payload.IdentityVerified = true
 
 	// Create cronjob rule on db
 	if err := database.Connection().Model(&models.CronJob{}).Create(&payload).Error; err != nil {
@@ -61,8 +62,10 @@ func CreateCronJob(c *fiber.Ctx) error {
 func IndexCronJobs(c *fiber.Ctx) error {
 	// Set empty variable for later use
 	var cronjobs []*models.CronJob
-	// Get all cronjobs
-	if err := database.Connection().Model(&models.CronJob{}).Find(&cronjobs).Error; err != nil {
+	// Get only the authenticated user's cronjobs.
+	if err := database.Connection().Model(&models.CronJob{}).
+		Where("user_id = ?", c.Locals("user_id").(string)).
+		Find(&cronjobs).Error; err != nil {
 		return err
 	}
 
@@ -77,14 +80,24 @@ func DeleteCronJob(c *fiber.Ctx) error {
 		return err
 	}
 
-	// Remove cronjob from global scheduler
-	if err := cron_jobs.Delete(&uid_); err != nil {
+	var cronjob models.CronJob
+	if err := database.Connection().
+		Where("id = ? AND user_id = ?", uid_, c.Locals("user_id").(string)).
+		First(&cronjob).Error; err != nil {
 		return err
+	}
+
+	// Unverified legacy jobs are quarantined and were never registered.
+	if cronjob.IdentityVerified {
+		if err := cron_jobs.Delete(&uid_); err != nil {
+			return err
+		}
 	}
 
 	// If cronjob successfully remove by scheduler, remove it from storage
 	if err := database.Connection().Model(&models.CronJob{}).
-		Where("id = ?", uid_).Delete(&models.CronJob{}).Error; err != nil {
+		Where("id = ? AND user_id = ?", uid_, c.Locals("user_id").(string)).
+		Delete(&models.CronJob{}).Error; err != nil {
 		return err
 	}
 

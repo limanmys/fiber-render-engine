@@ -12,6 +12,7 @@ type ServerKey struct {
 	Data      string `json:"data"`
 	ServerID  string `json:"server_id"`
 	UserID    string `json:"user_id"`
+	Shared    bool   `json:"shared"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
 }

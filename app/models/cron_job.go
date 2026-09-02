@@ -26,6 +26,8 @@ type CronJob struct {
 	Message string `json:"message"` // Last run message
 	Status  Status `json:"status"`  // Last run status
 	Output  string `json:"output"`  // Last run output
+
+	IdentityVerified bool `json:"identity_verified"`
 }
 
 func (CronJob) TableName() string {

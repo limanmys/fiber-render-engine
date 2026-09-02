@@ -2,32 +2,73 @@ package liman
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/database"
 	"github.com/limanmys/render-engine/pkg/logger"
+	"gorm.io/gorm"
 )
+
+type serverKeyRepository interface {
+	FindUserKey(userID, serverID string) (*models.ServerKey, error)
+	FindSharedKey(serverID string) (*models.ServerKey, error)
+}
+
+type gormServerKeyRepository struct {
+	db *gorm.DB
+}
+
+func (r gormServerKeyRepository) FindUserKey(userID, serverID string) (*models.ServerKey, error) {
+	serverKey := &models.ServerKey{}
+	err := r.db.Where("user_id = ? AND server_id = ?", userID, serverID).
+		Order("updated_at DESC").
+		Order("id ASC").
+		First(serverKey).Error
+
+	return serverKey, err
+}
+
+func (r gormServerKeyRepository) FindSharedKey(serverID string) (*models.ServerKey, error) {
+	serverKey := &models.ServerKey{}
+	err := r.db.Where("server_id = ? AND shared = ?", serverID, true).
+		Order("updated_at DESC").
+		Order("id ASC").
+		First(serverKey).Error
+
+	return serverKey, err
+}
+
+func resolveServerKey(repository serverKeyRepository, userID, serverID string) (*models.ServerKey, error) {
+	serverKey, err := repository.FindUserKey(userID, serverID)
+	if err == nil {
+		return serverKey, nil
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+
+	return repository.FindSharedKey(serverID)
+}
 
 // GetCredentials Searches db and returns credentials of server
 func GetCredentials(user *models.User, server *models.Server) (*models.Credentials, error) {
-	serverKey := &models.ServerKey{}
-
-	database.Connection().First(&serverKey, "user_id = ? AND server_id = ?", user.ID, server.ID)
-
-	encryptedKey := &models.KeyData{}
-	encrypterUser := user.ID
-
-	if serverKey.Data == "" {
-		database.Connection().First(&server, "id = ?", server.ID)
-
-		if server.SharedKey == 1 {
-			database.Connection().First(&serverKey, "server_id = ?", server.ID)
-			encrypterUser = serverKey.UserID
+	serverKey, err := resolveServerKey(
+		gormServerKeyRepository{db: database.Connection()},
+		user.ID,
+		server.ID,
+	)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, logger.FiberError(fiber.StatusNotFound, "server key not found")
 		}
+
+		return nil, err
 	}
 
-	err := json.Unmarshal(
+	encryptedKey := &models.KeyData{}
+	err = json.Unmarshal(
 		[]byte(serverKey.Data),
 		encryptedKey,
 	)
@@ -35,7 +76,7 @@ func GetCredentials(user *models.User, server *models.Server) (*models.Credentia
 		return nil, err
 	}
 
-	credentials := encryptedKey.DecryptData(&models.User{ID: encrypterUser}, server)
+	credentials := encryptedKey.DecryptData(&models.User{ID: serverKey.UserID}, server)
 	credentials.Type = serverKey.Type
 
 	if len(credentials.Username) < 1 {

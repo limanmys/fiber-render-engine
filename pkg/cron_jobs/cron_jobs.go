@@ -131,7 +131,7 @@ func Delete(id *uuid.UUID) error {
 // InitCronJobs inits all cronjobs
 func InitCronJobs() error {
 	var cronjobs []*models.CronJob
-	if err := database.Connection().Find(&cronjobs).Error; err != nil {
+	if err := database.Connection().Where("identity_verified = ?", true).Find(&cronjobs).Error; err != nil {
 		return err
 	}
 
