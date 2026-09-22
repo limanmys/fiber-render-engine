@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
@@ -69,7 +70,13 @@ func ExternalAPI(c *fiber.Ctx) error {
 		return err
 	}
 
-	output := linux.Execute(command)
+	output, executionErr := linux.Execute(command)
+	if executionErr != nil {
+		logger.Sugar().Warnw("extension execution failed", "error", executionErr)
+		if strings.TrimSpace(output) == "" {
+			return logger.FiberError(fiber.StatusInternalServerError, "extension execution failed")
+		}
+	}
 	if helpers.IsJSON(output) {
 		type LimanMessage struct {
 			Message any `json:"message"`

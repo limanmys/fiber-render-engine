@@ -225,6 +225,8 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 	defer cancel()
 	go func() {
 		<-connCtx.Done()
+		// net.Conn explicitly permits concurrent method calls. Closing here is
+		// intentional: it unblocks either in-flight io.Copy when the tunnel ends.
 		cn1.Close()
 	}()
 
@@ -264,6 +266,8 @@ func (t *Tunnel) dialTunnel(ctx context.Context, wg *sync.WaitGroup, client *ssh
 
 	go func() {
 		<-connCtx.Done()
+		// See the cn1 closer above. Concurrent Close is part of net.Conn's
+		// cancellation contract and does not race with the copy goroutines.
 		cn2.Close()
 	}()
 

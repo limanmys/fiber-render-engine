@@ -89,22 +89,32 @@ func RegisterAndRun(cj models.CronJob) error {
 		}
 
 		// Run command
-		output := linux.Execute(command)
+		output, executionErr := linux.Execute(command)
+		if executionErr != nil && !helpers.LimanJSON(output) {
+			cj.UpdateAsFailed(executionErr.Error())
+			return
+		}
 		// If returns liman json
 		if helpers.LimanJSON(output) {
 			// Unmarshal response
-			var response = make(map[string]interface{})
+			var response struct {
+				Message string `json:"message"`
+				Status  int    `json:"status"`
+			}
 			if err := json.Unmarshal([]byte(output), &response); err != nil {
 				// Update job as failed
 				cj.UpdateAsFailed(err.Error())
+				return
 			}
 			// Check is liman returns unsuccess
-			if response["status"].(int) != 200 {
+			if response.Status != 200 {
 				// Set as failed
-				cj.UpdateAsFailed(response["message"].(string))
+				cj.UpdateAsFailed(response.Message)
+			} else if executionErr != nil {
+				cj.UpdateAsFailed(executionErr.Error())
 			} else {
 				// Set as done
-				cj.UpdateAsDone(response["message"].(string))
+				cj.UpdateAsDone(response.Message)
 			}
 		} else {
 			// Set as done

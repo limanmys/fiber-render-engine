@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/limanmys/render-engine/pkg/helpers"
@@ -30,12 +31,18 @@ func initializePostgres() *gorm.DB {
 		logger.Sugar().Fatalln("Cannot connect to Liman database!")
 	}
 
-	db, _ := connection.DB()
-
-	err = db.Ping()
+	db, err := postgresSQLDB(connection)
 	if err != nil {
+		logger.Sugar().Fatalln("Cannot initialize Liman database connection!")
+	}
+
+	if err := db.Ping(); err != nil {
 		logger.Sugar().Fatalln("Cannot connect to Liman database!")
 	}
 
 	return connection
+}
+
+func postgresSQLDB(connection *gorm.DB) (*sql.DB, error) {
+	return connection.DB()
 }

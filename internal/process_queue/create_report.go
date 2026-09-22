@@ -97,7 +97,11 @@ func (c CreateReport) Process() error {
 	}
 
 	var response limanResponse
-	output := linux.Execute(command)
+	output, executionErr := linux.Execute(command)
+	if executionErr != nil && strings.TrimSpace(output) == "" {
+		c.Queue.UpdateError(executionErr.Error())
+		return executionErr
+	}
 
 	if err := json.Unmarshal([]byte(output), &response); err != nil {
 		// Update job as failed
@@ -108,6 +112,9 @@ func (c CreateReport) Process() error {
 	if response.Status != 200 {
 		// Update job as failed
 		c.Queue.UpdateError(response.Message)
+	} else if executionErr != nil {
+		c.Queue.UpdateError(executionErr.Error())
+		return executionErr
 	} else {
 		// Update job as done
 		c.Queue.UpdateAsDone(strings.TrimSpace(strings.ReplaceAll(response.Message, "\"", "")))

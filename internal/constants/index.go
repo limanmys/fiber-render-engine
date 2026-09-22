@@ -1,7 +1,9 @@
 package constants
 
 import (
+	"log"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/go-co-op/gocron"
 )
@@ -20,7 +22,16 @@ const (
 )
 
 var (
-	location, _ = time.LoadLocation("Europe/Istanbul")
+	location = loadIstanbulLocation()
 
 	GLOBAL_SCHEDULER = gocron.NewScheduler(location)
 )
+
+func loadIstanbulLocation() *time.Location {
+	location, err := time.LoadLocation("Europe/Istanbul")
+	if err != nil {
+		log.Fatalf("Cannot load scheduler timezone: %v", err)
+	}
+
+	return location
+}

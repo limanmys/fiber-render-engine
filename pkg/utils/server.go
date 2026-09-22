@@ -54,7 +54,9 @@ func CreateServer() {
 		if strings.Contains(err.Error(), "listen tcp4 :2806: bind: address already in use") {
 			logger.Sugar().Infow("restarting app to freeup port")
 
-			linux.Execute("fuser -k 2806/tcp")
+			if _, err := linux.Execute("fuser -k 2806/tcp"); err != nil {
+				logger.Sugar().Warnw("cannot terminate process using render engine port", "error", err)
+			}
 			time.Sleep(time.Second)
 
 			err := helpers.RestartSelf()

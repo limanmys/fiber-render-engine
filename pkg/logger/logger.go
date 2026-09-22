@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"log"
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,14 +18,14 @@ Init Logger
 
 Creates log file if does not exist and configures Zap logger
 */
-func InitLogger() {
+func InitLogger() error {
 	// TODO: Implement lumberjack log roller
 	// https://gist.github.com/rnyrnyrny/a6dc926ae11951b753ecd66c00695397
 
 	cfg := zap.NewProductionConfig()
 	debugMode, err := strconv.ParseBool(helpers.Env("APP_DEBUG", "false"))
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("invalid APP_DEBUG value: %w", err)
 	}
 	cfg.DisableStacktrace = debugMode
 	cfg.OutputPaths = []string{
@@ -35,8 +35,10 @@ func InitLogger() {
 
 	logger, err = cfg.Build()
 	if err != nil {
-		log.Fatalf("can't initialize zap logger: %v", err)
+		return fmt.Errorf("cannot initialize zap logger: %w", err)
 	}
+
+	return nil
 }
 
 type Zapper interface {

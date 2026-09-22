@@ -20,17 +20,22 @@ Initialization point of application
 */
 func main() {
 	// This application needs to run as root
-	id := linux.Execute("id -u")
+	id, err := linux.Execute("id -u")
+	if err != nil {
+		log.Fatalf("Cannot determine current user: %v", err)
+	}
 	if strings.Trim(id, "\n") != "0" {
 		log.Fatalln("You need to run the service as root")
 	}
 
 	// Initialization of logger
-	logger.InitLogger()
+	if err := logger.InitLogger(); err != nil {
+		log.Fatalf("Cannot initialize logger: %v", err)
+	}
 	defer logger.Logger().Sync()
 
 	// Read environment file
-	err := godotenv.Load(constants.CORE_PATH + "/.env")
+	err = godotenv.Load(constants.CORE_PATH + "/.env")
 	if err != nil {
 		logger.Sugar().Fatalln("Cannot read Liman environment file")
 	}

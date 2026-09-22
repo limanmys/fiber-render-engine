@@ -59,7 +59,11 @@ func BackgroundJob(c *fiber.Ctx) error {
 		return err
 	}
 
-	go linux.Execute(command)
+	go func() {
+		if _, err := linux.Execute(command); err != nil {
+			logger.Sugar().Errorw("background job execution failed", "error", err)
+		}
+	}()
 
 	return c.Type("json").SendString(`{
 		"status":  200,

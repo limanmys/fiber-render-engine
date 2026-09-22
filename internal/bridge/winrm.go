@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -10,7 +11,10 @@ import (
 
 // InitWinRm creates a new WinRM client and returns it
 func InitWinRm(username, password, host, port string, secure bool) (*winrm.Client, error) {
-	winrmPort, _ := strconv.Atoi(port)
+	winrmPort, err := parseWinRMPort(port)
+	if err != nil {
+		return nil, err
+	}
 	endpoint := winrm.NewEndpoint(host, winrmPort, secure, true, nil, nil, nil, 0)
 
 	params := winrm.DefaultParameters
@@ -28,7 +32,10 @@ func InitWinRm(username, password, host, port string, secure bool) (*winrm.Clien
 
 // VerifyWinRm checks if WinRM authentication is valid to remote end
 func VerifyWinRm(username, password, host, port string, secure bool) bool {
-	winrmPort, _ := strconv.Atoi(port)
+	winrmPort, err := parseWinRMPort(port)
+	if err != nil {
+		return false
+	}
 	endpoint := winrm.NewEndpoint(host, winrmPort, secure, true, nil, nil, nil, 0)
 
 	params := winrm.DefaultParameters
@@ -41,6 +48,21 @@ func VerifyWinRm(username, password, host, port string, secure bool) bool {
 		return false
 	}
 
-	stdout, _, _, _ := client.RunWithContextWithString(context.TODO(), "hostname", "")
+	stdout, _, exitCode, err := client.RunWithContextWithString(context.TODO(), "hostname", "")
+	if err != nil || exitCode != 0 {
+		return false
+	}
 	return strings.TrimSpace(stdout) != ""
+}
+
+func parseWinRMPort(port string) (int, error) {
+	winrmPort, err := strconv.Atoi(port)
+	if err != nil {
+		return 0, fmt.Errorf("invalid WinRM port: %w", err)
+	}
+	if winrmPort < 1 || winrmPort > 65535 {
+		return 0, fmt.Errorf("invalid WinRM port: %d is outside the TCP port range", winrmPort)
+	}
+
+	return winrmPort, nil
 }
