@@ -4,6 +4,9 @@ on:
   push:
     branches: [master]
 
+env:
+  VERSION: "1.2"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,7 +28,7 @@ jobs:
           
     - name: Create Zip
       run: |
-        zip -r /tmp/liman_render-${{ github.run_number }}.zip liman_render
+        zip -r /tmp/liman_render-${{ env.VERSION }}-${{ github.run_number }}.zip liman_render
         
     - name: Release
       id: create_release
@@ -33,7 +36,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
       with:
-          files: /tmp/liman_render-${{ github.run_number }}.zip
-          name: "Release ${{ github.run_number }}"
-          tag_name: "release.${{ github.run_number }}"
+          files: /tmp/liman_render-${{ env.VERSION }}-${{ github.run_number }}.zip
+          name: "Release ${{ env.VERSION }}-${{ github.run_number }}"
+          tag_name: "release.${{ env.VERSION }}-${{ github.run_number }}"
           
