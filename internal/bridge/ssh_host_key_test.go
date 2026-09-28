@@ -12,10 +12,59 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/limanmys/render-engine/app/models"
 	"golang.org/x/crypto/ssh"
 )
+
+func TestDialSshBoundsAStalledHandshake(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	accepted := make(chan net.Conn, 1)
+	go func() {
+		conn, err := listener.Accept()
+		if err == nil {
+			accepted <- conn
+		}
+	}()
+	port := strconv.Itoa(listener.Addr().(*net.TCPAddr).Port)
+	started := time.Now()
+	client, err := dialSshWithHostKeyLoader("127.0.0.1", port, &ssh.ClientConfig{User: "test", Timeout: 100 * time.Millisecond}, func(string, int) ([]models.SshHostKey, error) { return nil, nil })
+	if client != nil {
+		client.Close()
+		t.Fatal("stalled server must not establish an SSH session")
+	}
+	if err == nil || SSHDiagnosticCode(err) != "SSH_CONNECTION_TIMEOUT" {
+		t.Fatalf("expected a classified timeout, got %v", err)
+	}
+	if time.Since(started) > 2*time.Second {
+		t.Fatal("SSH handshake exceeded its deadline")
+	}
+	select {
+	case conn := <-accepted:
+		defer conn.Close()
+		if err := conn.SetReadDeadline(time.Now().Add(time.Second)); err != nil {
+			t.Fatal(err)
+		}
+		buffer := make([]byte, 256)
+		for {
+			_, readErr := conn.Read(buffer)
+			if readErr != nil {
+				var netErr net.Error
+				if errors.As(readErr, &netErr) && netErr.Timeout() {
+					t.Fatal("failed SSH connection was left open")
+				}
+				break
+			}
+		}
+	case <-time.After(time.Second):
+		t.Fatal("SSH connection was not accepted")
+	}
+}
 
 func testSigner(t *testing.T) ssh.Signer {
 	t.Helper()

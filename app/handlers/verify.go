@@ -15,6 +15,14 @@ func Verify(c *fiber.Ctx) error {
 			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
 		}
 	}
+	// Opt-in diagnostics preserve the historical ok/nok response for old callers.
+	if c.FormValue("detailed_errors") == "1" && (c.FormValue("key_type") == "ssh" || c.FormValue("key_type") == "ssh_certificate") {
+		code := bridge.VerifySSHDetailed(c.FormValue("username"), c.FormValue("password"), c.FormValue("ip_address"), c.FormValue("port"), c.FormValue("key_type"))
+		if code == "" {
+			return c.SendString("ok")
+		}
+		return c.Status(201).JSON(fiber.Map{"code": code})
+	}
 
 	flag := bridge.VerifyAuth(
 		c.FormValue("username"),

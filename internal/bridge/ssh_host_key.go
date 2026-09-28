@@ -7,10 +7,10 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/liman"
-	"github.com/limanmys/render-engine/pkg/helpers"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -187,14 +187,19 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 		return trustedKeys, nil
 	})
 
-	resolvedIP, err := helpers.ResolveIP(normalizedHost)
+	// DialTimeout also bounds DNS resolution; the shared resolver retries DNS
+	// without a deadline and could outlive the caller's request.
+	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(normalizedHost, port), clientConfig.Timeout)
 	if err != nil {
 		return nil, err
 	}
-
-	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(resolvedIP, port), clientConfig.Timeout)
-	if err != nil {
-		return nil, err
+	// DialTimeout covers TCP only. Bound banner exchange, key exchange and
+	// authentication too, then remove the deadline for the long-lived session.
+	if clientConfig.Timeout > 0 {
+		if err := rawConnection.SetDeadline(time.Now().Add(clientConfig.Timeout)); err != nil {
+			rawConnection.Close()
+			return nil, err
+		}
 	}
 
 	clientConnection, channels, requests, err := ssh.NewClientConn(
@@ -204,6 +209,12 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 	)
 	if err != nil {
 		rawConnection.Close()
+		return nil, err
+	}
+	// A peer can close immediately after successful authentication. Preserve
+	// that successful handshake result; the SSH transport already handles EOF.
+	if err := rawConnection.SetDeadline(time.Time{}); err != nil && !errors.Is(err, net.ErrClosed) {
+		clientConnection.Close()
 		return nil, err
 	}
 

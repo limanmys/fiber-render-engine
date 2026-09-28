@@ -8,6 +8,27 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// VerifySSHDetailed makes one bounded attempt so diagnostics reach the browser
+// before its request timeout. A successful handshake does not run commands.
+func VerifySSHDetailed(username, secret, host, port, keyType string) string {
+	config := &ssh.ClientConfig{User: username, Timeout: 5 * time.Second}
+	if keyType == "ssh_certificate" {
+		key, err := ssh.ParsePrivateKey([]byte(secret))
+		if err != nil {
+			return "SSH_PRIVATE_KEY_INVALID"
+		}
+		config.Auth = []ssh.AuthMethod{ssh.PublicKeys(key)}
+	} else {
+		config.Auth = []ssh.AuthMethod{ssh.Password(secret)}
+	}
+	conn, err := dialSsh(host, port, config)
+	if err != nil {
+		return SSHDiagnosticCode(err)
+	}
+	conn.Close()
+	return ""
+}
+
 // InitShellWithPassword creates a SSH shell with password
 func InitShellWithPassword(username, password, host, port string) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
