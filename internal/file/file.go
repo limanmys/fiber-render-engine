@@ -1,7 +1,7 @@
 package file
 
 import (
-	"path/filepath"
+	"io"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
@@ -10,7 +10,7 @@ import (
 	"github.com/limanmys/render-engine/pkg/logger"
 )
 
-func PutFileHandler(user_id, server_id, remote_path, local_path string) (string, error) {
+func PutFileHandler(user_id, server_id, remote_path string, localFile io.Reader) (string, error) {
 	server, err := liman.GetServer(&models.Server{ID: server_id})
 	if err != nil {
 		return "", err
@@ -34,14 +34,12 @@ func PutFileHandler(user_id, server_id, remote_path, local_path string) (string,
 		return "", logger.FiberError(fiber.StatusServiceUnavailable, "cannot establish file connection")
 	}
 
-	remotePath := ""
-	if server.Os == "linux" {
-		remotePath = "/tmp/" + filepath.Base(remote_path)
-	} else {
-		remotePath = session.WindowsPath + remote_path
+	remotePath, err := RemotePath(server.Os, session.WindowsPath, remote_path)
+	if err != nil {
+		return "", err
 	}
 
-	err = session.Put(local_path, remotePath)
+	err = session.Put(localFile, remotePath)
 	if err != nil {
 		return "", err
 	}

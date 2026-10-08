@@ -44,13 +44,13 @@ func GetPermissions(user *models.User, extFilter string) ([]string, map[string]i
 }
 
 // GetObjectPermissions Returns object permissions of user
-func GetObjectPermissions(user *models.User) ([]string, error) {
+func GetObjectPermissions(user *models.User) ([]models.Permission, error) {
 	roles, err := getRoleMaps(user)
 	if err != nil {
 		return nil, err
 	}
 
-	permissions := []string{}
+	permissions := []models.Permission{}
 	for _, role := range roles {
 		permission, err := getObjectPermissionsFromMorph(role)
 		if err != nil {
@@ -120,20 +120,28 @@ func getPermissionsFromMorph(morphID string, extFilter string) ([]string, map[st
 }
 
 // getObjectPermissionsFromMorph Searches db for morph relationships and returns object permissions
-func getObjectPermissionsFromMorph(morphID string) ([]string, error) {
-	permissions := []*models.Permission{}
+func getObjectPermissionsFromMorph(morphID string) ([]models.Permission, error) {
+	permissions := []models.Permission{}
 
-	err := database.Connection().Find(&permissions, "morph_id = ? AND NOT type = 'function'", morphID).Error
+	err := database.Connection().Find(&permissions, "morph_id = ? AND type IN ? AND key = ? AND extra IS NULL", morphID, []string{"server", "extension"}, "id").Error
 	if err != nil {
 		return nil, err
 	}
 
-	results := []string{}
-	for _, permission := range permissions {
-		results = append(results, permission.Value)
-	}
+	return permissions, nil
+}
 
-	return results, nil
+// HasObjectPermission keeps object types distinct, matching core's permission contract.
+func HasObjectPermission(permissions []models.Permission, objectType, id string) bool {
+	if id == "" {
+		return false
+	}
+	for _, permission := range permissions {
+		if permission.Type == objectType && permission.Key == "id" && permission.Value == id && permission.Extra == "" {
+			return true
+		}
+	}
+	return false
 }
 
 // getRoleMaps Retrieves role mapping for users

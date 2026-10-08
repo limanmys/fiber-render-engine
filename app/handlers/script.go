@@ -2,10 +2,12 @@ package handlers
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/limanmys/render-engine/app/models"
 	"github.com/limanmys/render-engine/internal/bridge"
+	"github.com/limanmys/render-engine/internal/file"
 	"github.com/limanmys/render-engine/internal/liman"
 	"github.com/limanmys/render-engine/pkg/logger"
 )
@@ -19,6 +21,15 @@ func ScriptRunner(c *fiber.Ctx) error {
 			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
 		}
 	}
+
+	if c.FormValue("root") != "yes" && c.FormValue("root") != "no" {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid root option")
+	}
+	localFile, err := openExtensionFile(c, "scripts", false)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
 
 	server, err := liman.GetServer(&models.Server{ID: c.FormValue("server_id")})
 	if err != nil {
@@ -43,29 +54,43 @@ func ScriptRunner(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusServiceUnavailable, "cannot establish file connection")
 	}
 
-	remotePath := ""
+	name := filepath.Base(c.FormValue("local_path"))
+	if server.Os != "linux" {
+		name = c.FormValue("remote_path", name)
+		if !strings.HasSuffix(strings.ToLower(name), ".ps1") {
+			name += ".ps1"
+		}
+	}
+	remotePath, err := file.RemotePath(server.Os, session.WindowsPath, name)
+	if err != nil {
+		return err
+	}
+	executionPath := remotePath
+	if server.Os != "linux" {
+		executionPath = session.WindowsLetter + ":\\" + remotePath
+	}
+	command, err := file.ScriptCommand(executionPath, c.FormValue("parameters"), server.Os != "linux")
+	if err != nil {
+		return err
+	}
 	if server.Os == "linux" {
-		remotePath = "/tmp/" + filepath.Base(c.FormValue("local_path"))
-		_, err := session.Run("rm " + remotePath)
+		stagedPath, cleanup, err := session.StageLinuxScript(localFile, filepath.Base(remotePath))
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+		command, err = file.ScriptCommand(stagedPath, c.FormValue("parameters"), false)
 		if err != nil {
 			return err
 		}
 	} else {
-		remotePath = session.WindowsPath + c.FormValue("remote_path") + ".ps1"
-	}
-
-	err = session.Put(c.FormValue("local_path"), remotePath)
-	if err != nil {
-		return err
+		if err := session.Put(localFile, remotePath); err != nil {
+			return err
+		}
 	}
 
 	output := ""
 	if server.Os == "linux" {
-		_, err := session.Run("chmod +x " + remotePath)
-		if err != nil {
-			return err
-		}
-
 		if c.FormValue("root") == "yes" {
 			credentials, err := liman.GetCredentials(&models.User{ID: c.Locals("user_id").(string)}, server)
 			if err != nil {
@@ -73,18 +98,18 @@ func ScriptRunner(c *fiber.Ctx) error {
 			}
 
 			if credentials.Type == "ssh" {
-				remotePath = `sudo -p "liman-pass-sudo" ` + remotePath
+				command = `sudo -p "liman-pass-sudo" ` + command
 			} else {
-				remotePath = "sudo " + remotePath
+				command = "sudo " + command
 			}
 		}
 
-		output, err = session.Run(remotePath + " " + c.FormValue("parameters"))
+		output, err = session.Run(command)
 		if err != nil {
 			return logger.FiberError(fiber.StatusInternalServerError, "cannot run linux script")
 		}
 	} else {
-		output, err = session.Run(session.WindowsLetter + ":\\" + remotePath + " " + c.FormValue("parameters"))
+		output, err = session.Run(command)
 		if err != nil {
 			return logger.FiberError(fiber.StatusInternalServerError, "cannot run windows script")
 		}

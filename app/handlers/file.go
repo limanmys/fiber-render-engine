@@ -24,11 +24,17 @@ func PutFile(c *fiber.Ctx) error {
 		}
 	}
 
-	_, err := file.PutFileHandler(
+	localFile, err := openExtensionFile(c, "", false)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
+
+	_, err = file.PutFileHandler(
 		c.Locals("user_id").(string),
 		c.FormValue("server_id"),
 		c.FormValue("remote_path"),
-		c.FormValue("local_path"),
+		localFile,
 	)
 	if err != nil {
 		return err
@@ -49,6 +55,12 @@ func GetFile(c *fiber.Ctx) error {
 			return logger.FiberError(fiber.StatusBadRequest, param+" parameter is missing")
 		}
 	}
+
+	localFile, err := openExtensionFile(c, "uploads", true)
+	if err != nil {
+		return err
+	}
+	defer localFile.Close()
 
 	server, err := liman.GetServer(&models.Server{ID: c.FormValue("server_id")})
 	if err != nil {
@@ -73,14 +85,12 @@ func GetFile(c *fiber.Ctx) error {
 		return logger.FiberError(fiber.StatusServiceUnavailable, "cannot establish file connection")
 	}
 
-	remotePath := ""
-	if server.Os == "linux" {
-		remotePath = "/tmp/" + filepath.Base(c.FormValue("remote_path"))
-	} else {
-		remotePath = session.WindowsPath + c.FormValue("remote_path")
+	remotePath, err := file.RemotePath(server.Os, session.WindowsPath, c.FormValue("remote_path"))
+	if err != nil {
+		return err
 	}
 
-	err = session.Get(c.FormValue("local_path"), remotePath)
+	err = session.Get(localFile, remotePath)
 	if err != nil {
 		return err
 	}

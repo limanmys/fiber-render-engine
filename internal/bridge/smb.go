@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io"
 	"net"
-	"os"
 	"time"
 
 	"github.com/hirochachacha/go-smb2"
@@ -33,7 +32,7 @@ func OpenSmbConnection(host, username, password string) (*smb2.Session, error) {
 }
 
 // SmbPutFile uploads file from local path to remote path
-func (s *Session) SmbPutFile(localPath, remotePath, remoteDisk string) error {
+func (s *Session) SmbPutFile(localFile io.Reader, remotePath, remoteDisk string) error {
 	if s.SMB == nil {
 		return errors.New("smb connection does not exist")
 	}
@@ -50,13 +49,7 @@ func (s *Session) SmbPutFile(localPath, remotePath, remoteDisk string) error {
 	}
 	defer f.Close()
 
-	srcFile, err := os.Open(localPath)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	_, err = io.Copy(f, srcFile)
+	_, err = io.Copy(f, localFile)
 	if err != nil {
 		return err
 	}
@@ -65,7 +58,7 @@ func (s *Session) SmbPutFile(localPath, remotePath, remoteDisk string) error {
 }
 
 // SmbGetFile downloads file from remote path to local path
-func (s *Session) SmbGetFile(localPath, remotePath, remoteDisk string) error {
+func (s *Session) SmbGetFile(localFile io.Writer, remotePath, remoteDisk string) error {
 	if s.SMB == nil {
 		return errors.New("smb connection does not exist")
 	}
@@ -82,21 +75,7 @@ func (s *Session) SmbGetFile(localPath, remotePath, remoteDisk string) error {
 	}
 	defer f.Close()
 
-	_, err = os.Stat(localPath)
-	if os.IsNotExist(err) {
-		_, err = os.Create(localPath)
-		if err != nil {
-			return err
-		}
-	}
-
-	srcFile, err := os.OpenFile(localPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	_, err = io.Copy(srcFile, f)
+	_, err = io.Copy(localFile, f)
 	if err != nil {
 		return err
 	}

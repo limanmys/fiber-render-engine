@@ -2,12 +2,13 @@ package bridge
 
 import (
 	"errors"
+	"io"
 )
 
 // Put sends file to a remote path
-func (s *Session) Put(localPath, remotePath string) error {
+func (s *Session) Put(localFile io.Reader, remotePath string) error {
 	if s.SMB != nil {
-		err := s.SmbPutFile(localPath, remotePath, s.WindowsLetter)
+		err := s.SmbPutFile(localFile, remotePath, s.WindowsLetter)
 		if err != nil {
 			return err
 		}
@@ -16,7 +17,7 @@ func (s *Session) Put(localPath, remotePath string) error {
 	}
 
 	if s.SFTP != nil {
-		err := s.SftpPutFile(localPath, remotePath)
+		err := s.SftpPutFile(localFile, remotePath)
 		if err != nil {
 			return err
 		}
@@ -28,9 +29,9 @@ func (s *Session) Put(localPath, remotePath string) error {
 }
 
 // Get downloads file to local path
-func (s *Session) Get(localPath, remotePath string) error {
+func (s *Session) Get(localFile io.Writer, remotePath string) error {
 	if s.SMB != nil {
-		err := s.SmbGetFile(localPath, remotePath, s.WindowsLetter)
+		err := s.SmbGetFile(localFile, remotePath, s.WindowsLetter)
 		if err != nil {
 			return err
 		}
@@ -39,7 +40,7 @@ func (s *Session) Get(localPath, remotePath string) error {
 	}
 
 	if s.SFTP != nil {
-		err := s.SftpGetFile(localPath, remotePath)
+		err := s.SftpGetFile(localFile, remotePath)
 		if err != nil {
 			return err
 		}

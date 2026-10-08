@@ -3,7 +3,6 @@ package bridge
 import (
 	"errors"
 	"io"
-	"os"
 	"path/filepath"
 
 	"github.com/limanmys/render-engine/pkg/logger"
@@ -22,7 +21,7 @@ func OpenSFTPConnection(conn *ssh.Client) *sftp.Client {
 }
 
 // SftpPutFile uploads file on remote path
-func (s *Session) SftpPutFile(localPath, remotePath string) error {
+func (s *Session) SftpPutFile(localFile io.Reader, remotePath string) error {
 	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)
 	} else {
@@ -44,13 +43,7 @@ func (s *Session) SftpPutFile(localPath, remotePath string) error {
 	}
 	defer f.Close()
 
-	srcFile, err := os.Open(localPath)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	_, err = io.Copy(f, srcFile)
+	_, err = io.Copy(f, localFile)
 	if err != nil {
 		return err
 	}
@@ -59,7 +52,7 @@ func (s *Session) SftpPutFile(localPath, remotePath string) error {
 }
 
 // SftpGetFile downloads file from remote path
-func (s *Session) SftpGetFile(localPath, remotePath string) error {
+func (s *Session) SftpGetFile(localFile io.Writer, remotePath string) error {
 	if s.SSH != nil {
 		s.SFTP = OpenSFTPConnection(s.SSH)
 	} else {
@@ -81,21 +74,7 @@ func (s *Session) SftpGetFile(localPath, remotePath string) error {
 	}
 	defer f.Close()
 
-	_, err = os.Stat(localPath)
-	if os.IsNotExist(err) {
-		_, err = os.Create(localPath)
-		if err != nil {
-			return err
-		}
-	}
-
-	srcFile, err := os.OpenFile(localPath, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
-	if err != nil {
-		return err
-	}
-	defer srcFile.Close()
-
-	_, err = io.Copy(srcFile, f)
+	_, err = io.Copy(localFile, f)
 	if err != nil {
 		return err
 	}
