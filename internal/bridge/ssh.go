@@ -31,6 +31,12 @@ func VerifySSHDetailed(username, secret, host, port, keyType string) string {
 
 // InitShellWithPassword creates a SSH shell with password
 func InitShellWithPassword(username, password, host, port string) (*ssh.Client, error) {
+	return initShellWithPassword(username, password, host, port, dialSsh)
+}
+
+type sshDialer func(string, string, *ssh.ClientConfig) (*ssh.Client, error)
+
+func initShellWithPassword(username, password, host, port string, dial sshDialer) (*ssh.Client, error) {
 	config := &ssh.ClientConfig{
 		User: username,
 		Auth: []ssh.AuthMethod{
@@ -43,7 +49,7 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 	var err error
 	err = retry.Do(
 		func() error {
-			conn, err = dialSsh(host, port, config)
+			conn, err = dial(host, port, config)
 			if err != nil {
 				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)
@@ -65,6 +71,10 @@ func InitShellWithPassword(username, password, host, port string) (*ssh.Client, 
 
 // InitShellWithCert creates a SSH shell with certificate
 func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, error) {
+	return initShellWithCert(username, certificate, host, port, dialSsh)
+}
+
+func initShellWithCert(username, certificate, host, port string, dial sshDialer) (*ssh.Client, error) {
 	key, err := ssh.ParsePrivateKey([]byte(certificate))
 	if err != nil {
 		return nil, err
@@ -81,7 +91,7 @@ func InitShellWithCert(username, certificate, host, port string) (*ssh.Client, e
 	var conn *ssh.Client
 	err = retry.Do(
 		func() error {
-			conn, err = dialSsh(host, port, config)
+			conn, err = dial(host, port, config)
 			if err != nil {
 				if strings.Contains(err.Error(), "unable to authenticate") || IsHostKeyError(err) {
 					return retry.Unrecoverable(err)

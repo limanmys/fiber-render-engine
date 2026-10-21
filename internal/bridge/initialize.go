@@ -87,13 +87,13 @@ func (s *Session) CreateRaw(connectionType, username, password, host, port strin
 	s.LastConnection = time.Now()
 
 	if connectionType == "ssh" {
-		conn, err := InitShellWithPassword(s.Username, s.password, s.IpAddr, s.Port)
+		conn, err := initShellWithPassword(s.Username, s.password, s.IpAddr, s.Port, dialRawSsh)
 		if err != nil {
 			return false
 		}
 		s.SSH = conn
 	} else if connectionType == "ssh_certificate" {
-		conn, err := InitShellWithCert(s.Username, s.password, s.IpAddr, s.Port)
+		conn, err := initShellWithCert(s.Username, s.password, s.IpAddr, s.Port, dialRawSsh)
 		if err != nil {
 			return false
 		}

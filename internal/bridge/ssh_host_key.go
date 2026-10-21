@@ -187,16 +187,21 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 		return trustedKeys, nil
 	})
 
+	return dialSshWithConfig(normalizedHost, port, &clientConfig)
+}
+
+// dialSshWithConfig shares bounded transport setup across host-key policies.
+func dialSshWithConfig(host, port string, config *ssh.ClientConfig) (*ssh.Client, error) {
 	// DialTimeout also bounds DNS resolution; the shared resolver retries DNS
 	// without a deadline and could outlive the caller's request.
-	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(normalizedHost, port), clientConfig.Timeout)
+	rawConnection, err := net.DialTimeout("tcp", net.JoinHostPort(host, port), config.Timeout)
 	if err != nil {
 		return nil, err
 	}
 	// DialTimeout covers TCP only. Bound banner exchange, key exchange and
 	// authentication too, then remove the deadline for the long-lived session.
-	if clientConfig.Timeout > 0 {
-		if err := rawConnection.SetDeadline(time.Now().Add(clientConfig.Timeout)); err != nil {
+	if config.Timeout > 0 {
+		if err := rawConnection.SetDeadline(time.Now().Add(config.Timeout)); err != nil {
 			rawConnection.Close()
 			return nil, err
 		}
@@ -204,8 +209,8 @@ func dialSshWithHostKeyLoader(host, port string, config *ssh.ClientConfig, loade
 
 	clientConnection, channels, requests, err := ssh.NewClientConn(
 		rawConnection,
-		net.JoinHostPort(normalizedHost, port),
-		&clientConfig,
+		net.JoinHostPort(host, port),
+		config,
 	)
 	if err != nil {
 		rawConnection.Close()
